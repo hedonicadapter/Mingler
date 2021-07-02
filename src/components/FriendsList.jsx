@@ -11,13 +11,18 @@ import { db, field } from '../config/firebase';
 import Marky from './Marky';
 
 const container = css({});
+const accordionItemTitle = css({ height: 60, paddingTop: 20 });
 const accordionItem = css({
-  height: 85,
-  borderBottom: '3px solid',
-  borderBottomColor: colors.darkOpacity,
+  borderBottom: '3px solid transparent',
+  transition: 'borderBottom .25s ease',
+  '&:hover': {
+    borderBottomColor: colors.darkOpacity,
+  },
 });
 const accordionItemBody = css({
+  paddingTop: 20,
   backgroundColor: 'white',
+  height: 100,
 });
 const flipper = css({
   height: '100%',
@@ -169,7 +174,7 @@ export default function FriendsList() {
               <AccordionItem
                 easing="ease-out"
                 title={
-                  <div>
+                  <div className={accordionItemTitle()}>
                     <FriendCardHeader
                       key={friend.key}
                       name={friend.Name}

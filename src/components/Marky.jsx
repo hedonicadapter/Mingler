@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { css, styled } from '@stitches/react';
 import Marquee from 'react-fast-marquee';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
+import { motion } from 'framer-motion';
 
 import colors from '../config/colors';
 

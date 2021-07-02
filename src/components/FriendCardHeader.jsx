@@ -12,19 +12,15 @@ const container = css({
   display: 'flex',
   height: '20px',
   paddingLeft: 40,
-  paddingTop: 8,
-  paddingBottom: 30,
+  // paddingBottom: 30,
   // marginTop: 10,
   // borderTop: '1.5px solid',
   // borderTopColor: colors.darkmodeBlack,
 });
-const fillerDiv = css({
-  height: 20,
-  backgroundColor: 'white',
-});
 
 const nameAndActivityContainer = css({
   flexDirection: 'column',
+  width: '80%',
 });
 const text = css({
   paddingLeft: '10px',
@@ -90,7 +86,6 @@ export default function FriendCardHeader(props) {
           <Marky {...props.mainActivity} />
         </div>
       </div>
-      {/* <div className={fillerDiv()}></div> */}
     </React.Fragment>
   );
 }

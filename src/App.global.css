@@ -13,6 +13,7 @@ body {
   overflow-x: hidden;
   margin: auto;
   pointer-events: none;
+  cursor: default;
 }
 
 .clickable {
@@ -47,4 +48,18 @@ a {
 /* a:hover {
   opacity: 1;
   text-decoration: none;
+} */
+
+/* .bottomHoverBorder {
+  background-color: black;
+  height: 20;
+  -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+}
+.bottomHoverBorder:hover {
+  opacity: 1;
 } */
