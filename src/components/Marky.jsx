@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Marquee from 'react-fast-marquee';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
@@ -39,8 +39,20 @@ const activityIconStyle = css({
 });
 
 export default function Marky({ WindowTitle, TabTitle, TabURL }) {
+  const marqueeRef = useRef();
+
   const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState();
+  const [marqueeWidth, setMarqueeWidth] = useState(0);
+
+  useEffect(() => {
+    marqueeRef.current
+      ? setMarqueeWidth(
+          // Width of overflowing text
+          marqueeRef.current.scrollWidth - marqueeRef.current.offsetWidth
+        )
+      : setMarqueeWidth(0);
+  }, [marqueeRef.current]);
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
@@ -67,39 +79,83 @@ export default function Marky({ WindowTitle, TabTitle, TabURL }) {
       <ActivityIcon />
       {(WindowTitle?.length > 35 && playMarquee) ||
       (TabTitle?.length > 35 && playMarquee) ? (
-        <Marquee play={playMarquee} gradientWidth={25} speed={25}>
-          <div
-            onMouseEnter={() => {
-              setPlayMarquee(true);
-            }}
-            onMouseLeave={() => {
-              setPlayMarquee(false);
+        // <Marquee play={playMarquee} gradientWidth={25} speed={25}>
+        //   <div
+        //     onMouseEnter={() => {
+        //       setPlayMarquee(true);
+        //     }}
+        //     onMouseLeave={() => {
+        //       setPlayMarquee(false);
+        //     }}
+        //   >
+        //     {TabURL ? (
+        //       <React.Fragment>
+        //         <a onClick={() => handleLinkClick(TabURL)}>
+        //           {WindowTitle || TabTitle}
+        //         </a>
+        //       </React.Fragment>
+        //     ) : (
+        //       WindowTitle || TabTitle
+        //     )}
+        //     <span>&nbsp;&nbsp;</span>
+        //   </div>
+        // </Marquee>
+        <div className={activityText()}>
+          <motion.div
+            whileHover={{
+              x: [0, -marqueeWidth],
+              transition: {
+                x: {
+                  repeat: Infinity,
+                  repeatType: 'loop',
+                  duration: 5,
+                  ease: 'easeIn',
+                },
+              },
             }}
           >
-            {TabURL ? (
-              <React.Fragment>
-                <a onClick={() => handleLinkClick(TabURL)}>
-                  {WindowTitle || TabTitle}
-                </a>
-              </React.Fragment>
-            ) : (
-              WindowTitle || TabTitle
-            )}
-            <span>&nbsp;&nbsp;</span>
-          </div>
-        </Marquee>
-      ) : (
-        <div
-          className={activityText()}
-          onMouseEnter={() => {
-            setPlayMarquee(true);
-          }}
-          onMouseLeave={() => {
-            setPlayMarquee(false);
-          }}
-        >
-          {WindowTitle || TabTitle}
+            {WindowTitle || TabTitle}
+          </motion.div>
         </div>
+      ) : (
+        <div ref={marqueeRef} className={activityText()}>
+          <motion.div
+            whileHover={{
+              x: [0, -marqueeWidth],
+              transition: {
+                x: {
+                  repeat: Infinity,
+                  repeatType: 'mirror',
+                  repeatDelay: 0.75,
+                  duration:
+                    marqueeWidth > 40
+                      ? 1
+                      : marqueeWidth > 30
+                      ? 2
+                      : marqueeWidth > 20
+                      ? 3
+                      : marqueeWidth > 10
+                      ? 4
+                      : 0,
+                  ease: 'anticipate',
+                },
+              },
+            }}
+          >
+            {WindowTitle || TabTitle}
+          </motion.div>
+        </div>
+        // <div
+        //   className={activityText()}
+        //   onMouseEnter={() => {
+        //     setPlayMarquee(true);
+        //   }}
+        //   onMouseLeave={() => {
+        //     setPlayMarquee(false);
+        //   }}
+        // >
+        //   {WindowTitle || TabTitle}
+        // </div>
       )}
     </MarkyDiv>
   );

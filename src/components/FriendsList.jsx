@@ -3,6 +3,7 @@ import { css } from '@stitches/react';
 import { Accordion, AccordionItem } from 'react-sanfona';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import '../App.global.css';
+import { motion } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
 import FriendCardHeader from './FriendCardHeader';
@@ -11,13 +12,17 @@ import { db, field } from '../config/firebase';
 import Marky from './Marky';
 
 const container = css({});
-const accordionItemTitle = css({ height: 60, paddingTop: 20 });
+const accordionItemTitle = css({
+  height: 60,
+  paddingTop: 20,
+  borderBottom: 'none',
+});
 const accordionItem = css({
-  borderBottom: '3px solid transparent',
-  transition: 'borderBottom .25s ease',
-  '&:hover': {
-    borderBottomColor: colors.darkOpacity,
-  },
+  // borderBottom: '3px solid transparent',
+  // transition: 'borderBottom .25s ease',
+  // '&:hover': {
+  //   borderBottomColor: colors.darkOpacity,
+  // },
 });
 const accordionItemBody = css({
   paddingTop: 20,
@@ -30,6 +35,9 @@ const flipper = css({
 const findButton = css({
   backgroundColor: 'white',
   padding: 10,
+});
+const border = css({
+  borderBottom: '3px solid transparent',
 });
 
 export default function FriendsList() {
@@ -172,15 +180,20 @@ export default function FriendsList() {
           {!findFriendsVisible &&
             filteredFriends.map((friend) => (
               <AccordionItem
-                easing="ease-out"
+                easing="ease-in"
                 title={
-                  <div className={accordionItemTitle()}>
+                  <motion.div
+                    // whileHover={{
+                    //   borderBottom: '3px solid rgba(0,0,0,1)',
+                    // }}
+                    className={accordionItemTitle()}
+                  >
                     <FriendCardHeader
                       key={friend.key}
                       name={friend.Name}
                       mainActivity={friend.Activity[0]}
                     />
-                  </div>
+                  </motion.div>
                 }
                 className={accordionItem()}
                 bodyClassName={accordionItemBody()}
