@@ -15,12 +15,6 @@ const subContainer = css({ flexDirection: 'row', display: 'flex' });
 export default function UserStatus() {
   const { currentUser } = useAuth();
 
-  const [activeWindowTitle, setactiveWindowTitle] = useState();
-  const [activeTabTitle, setActiveTabTitle] = useState();
-  const [activeTabURL, setActiveTabURL] = useState();
-  const [playTabMarquee, setPlayTabMarquee] = useState(false);
-  const [playWindowMarquee, setPlayWindowMarquee] = useState(false);
-
   let process;
   let currentListener;
 
@@ -41,8 +35,6 @@ export default function UserStatus() {
 
       // Second comparison doesn't work for some reason
       if (activeWindow !== 'Sharehub' && activeWindow !== 'Task Switching') {
-        setactiveWindowTitle(activeWindow);
-
         db.collection('Users')
           .doc(currentUser.uid)
           .collection('Activity')
@@ -56,23 +48,6 @@ export default function UserStatus() {
     });
   };
 
-  const activeTabListener = () => {
-    currentListener = db
-      .collection('Users')
-      .doc(currentUser.uid)
-      .collection('Activity')
-      .doc('ChromiumTab')
-      .onSnapshot(
-        (doc) => {
-          setActiveTabTitle(doc.data().TabTitle);
-          setActiveTabURL(doc.data().TabURL);
-        },
-        (error) => {
-          console.log('Listener error: ', error);
-        }
-      );
-  };
-
   const exitListeners = () => {
     process.kill();
     currentListener();
@@ -80,81 +55,80 @@ export default function UserStatus() {
 
   useEffect(() => {
     activeWindowListener();
-    activeTabListener();
 
     // return exitListeners();
   }, []);
 
-  return (
-    <div className={header()}>
-      <div className={subContainer()}>
-        <BiPlanet />
-        {playTabMarquee ? (
-          <Marquee
-            className="tabLink"
-            play={playTabMarquee}
-            gradientWidth={25}
-            speed={25}
-          >
-            <div
-              onMouseEnter={() => {
-                setPlayTabMarquee(true);
-              }}
-              onMouseLeave={() => {
-                setPlayTabMarquee(false);
-              }}
-            >
-              <a onClick={() => handleLinkClick(activeTabURL)}>
-                {activeTabTitle}
-              </a>
-              <span>&nbsp;&nbsp;</span>
-            </div>
-          </Marquee>
-        ) : (
-          <div
-            className={'activityText'}
-            onMouseEnter={() => {
-              setPlayTabMarquee(true);
-            }}
-            onMouseLeave={() => {
-              setPlayTabMarquee(false);
-            }}
-          >
-            <a onClick={() => handleLinkClick(activeTabURL)}>
-              {activeTabTitle}
-            </a>
-            <span>&nbsp;&nbsp;</span>
-          </div>
-        )}
-      </div>
-      {playWindowMarquee ? (
-        <Marquee play={playWindowMarquee} gradientWidth={25} speed={25}>
-          <div
-            onMouseEnter={() => {
-              setPlayWindowMarquee(true);
-            }}
-            onMouseLeave={() => {
-              setPlayWindowMarquee(false);
-            }}
-          >
-            {activeWindowTitle}
-            <span>&nbsp;&nbsp;</span>
-          </div>
-        </Marquee>
-      ) : (
-        <div
-          className={'activityText'}
-          onMouseEnter={() => {
-            setPlayWindowMarquee(true);
-          }}
-          onMouseLeave={() => {
-            setPlayWindowMarquee(false);
-          }}
-        >
-          {activeWindowTitle}
-          <span>&nbsp;&nbsp;</span>
-        </div>
-      )}
-    </div>
-  );
+  // return (
+  //   <div className={header()}>
+  //     <div className={subContainer()}>
+  //       <BiPlanet />
+  //       {playTabMarquee ? (
+  //         <Marquee
+  //           className="tabLink"
+  //           play={playTabMarquee}
+  //           gradientWidth={25}
+  //           speed={25}
+  //         >
+  //           <div
+  //             onMouseEnter={() => {
+  //               setPlayTabMarquee(true);
+  //             }}
+  //             onMouseLeave={() => {
+  //               setPlayTabMarquee(false);
+  //             }}
+  //           >
+  //             <a onClick={() => handleLinkClick(activeTabURL)}>
+  //               {activeTabTitle}
+  //             </a>
+  //             <span>&nbsp;&nbsp;</span>
+  //           </div>
+  //         </Marquee>
+  //       ) : (
+  //         <div
+  //           className={'activityText'}
+  //           onMouseEnter={() => {
+  //             setPlayTabMarquee(true);
+  //           }}
+  //           onMouseLeave={() => {
+  //             setPlayTabMarquee(false);
+  //           }}
+  //         >
+  //           <a onClick={() => handleLinkClick(activeTabURL)}>
+  //             {activeTabTitle}
+  //           </a>
+  //           <span>&nbsp;&nbsp;</span>
+  //         </div>
+  //       )}
+  //     </div>
+  //     {playWindowMarquee ? (
+  //       <Marquee play={playWindowMarquee} gradientWidth={25} speed={25}>
+  //         <div
+  //           onMouseEnter={() => {
+  //             setPlayWindowMarquee(true);
+  //           }}
+  //           onMouseLeave={() => {
+  //             setPlayWindowMarquee(false);
+  //           }}
+  //         >
+  //           {activeWindowTitle}
+  //           <span>&nbsp;&nbsp;</span>
+  //         </div>
+  //       </Marquee>
+  //     ) : (
+  //       <div
+  //         className={'activityText'}
+  //         onMouseEnter={() => {
+  //           setPlayWindowMarquee(true);
+  //         }}
+  //         onMouseLeave={() => {
+  //           setPlayWindowMarquee(false);
+  //         }}
+  //       >
+  //         {activeWindowTitle}
+  //         <span>&nbsp;&nbsp;</span>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
 }

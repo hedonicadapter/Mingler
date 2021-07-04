@@ -29,6 +29,7 @@ const MarkyDiv = styled('div', {
   },
 });
 const activityText = css({
+  width: '90%',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -77,86 +78,40 @@ export default function Marky({ WindowTitle, TabTitle, TabURL }) {
   return (
     <MarkyDiv markyType={markyType}>
       <ActivityIcon />
-      {(WindowTitle?.length > 35 && playMarquee) ||
-      (TabTitle?.length > 35 && playMarquee) ? (
-        // <Marquee play={playMarquee} gradientWidth={25} speed={25}>
-        //   <div
-        //     onMouseEnter={() => {
-        //       setPlayMarquee(true);
-        //     }}
-        //     onMouseLeave={() => {
-        //       setPlayMarquee(false);
-        //     }}
-        //   >
-        //     {TabURL ? (
-        //       <React.Fragment>
-        //         <a onClick={() => handleLinkClick(TabURL)}>
-        //           {WindowTitle || TabTitle}
-        //         </a>
-        //       </React.Fragment>
-        //     ) : (
-        //       WindowTitle || TabTitle
-        //     )}
-        //     <span>&nbsp;&nbsp;</span>
-        //   </div>
-        // </Marquee>
-        <div className={activityText()}>
-          <motion.div
-            whileHover={{
-              x: [0, -marqueeWidth],
-              transition: {
-                x: {
-                  repeat: Infinity,
-                  repeatType: 'loop',
-                  duration: 5,
-                  ease: 'easeIn',
-                },
+
+      <div ref={marqueeRef} className={activityText()}>
+        <motion.div
+          whileHover={{
+            x: [0, -marqueeWidth],
+            transition: {
+              x: {
+                repeat: Infinity,
+                repeatType: 'mirror',
+                repeatDelay: 0.75,
+                duration:
+                  marqueeWidth > 40
+                    ? 1
+                    : marqueeWidth > 30
+                    ? 2
+                    : marqueeWidth > 20
+                    ? 3
+                    : marqueeWidth > 10
+                    ? 4
+                    : 0,
+                ease: 'anticipate',
               },
-            }}
-          >
-            {WindowTitle || TabTitle}
-          </motion.div>
-        </div>
-      ) : (
-        <div ref={marqueeRef} className={activityText()}>
-          <motion.div
-            whileHover={{
-              x: [0, -marqueeWidth],
-              transition: {
-                x: {
-                  repeat: Infinity,
-                  repeatType: 'mirror',
-                  repeatDelay: 0.75,
-                  duration:
-                    marqueeWidth > 40
-                      ? 1
-                      : marqueeWidth > 30
-                      ? 2
-                      : marqueeWidth > 20
-                      ? 3
-                      : marqueeWidth > 10
-                      ? 4
-                      : 0,
-                  ease: 'anticipate',
-                },
-              },
-            }}
-          >
-            {WindowTitle || TabTitle}
-          </motion.div>
-        </div>
-        // <div
-        //   className={activityText()}
-        //   onMouseEnter={() => {
-        //     setPlayMarquee(true);
-        //   }}
-        //   onMouseLeave={() => {
-        //     setPlayMarquee(false);
-        //   }}
-        // >
-        //   {WindowTitle || TabTitle}
-        // </div>
-      )}
+            },
+          }}
+        >
+          {TabURL ? (
+            <a onClick={() => handleLinkClick(TabURL)}>
+              {WindowTitle || TabTitle}
+            </a>
+          ) : (
+            WindowTitle || TabTitle
+          )}
+        </motion.div>
+      </div>
     </MarkyDiv>
   );
 }

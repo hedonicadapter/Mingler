@@ -59,8 +59,8 @@ const MainPane = styled('div', {
 
 export default function Widget() {
   //clickthrough everything except className='clickable' (pointer-events: 'auto')
-  // const setIgnoreMouseEvents = require('electron').remote.getCurrentWindow()
-  //   .setIgnoreMouseEvents;
+  // const setIgnoreMouseEvents =
+  //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
   // addEventListener('pointerover', function mousePolicy(event) {
   //   mousePolicy._canClick =
   //     event.target === document.documentElement

@@ -2,114 +2,114 @@ import React, { useEffect, useState } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
 import { GoPrimitiveDot } from 'react-icons/go';
-import { BiPlanet } from 'react-icons/bi';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import colors from '../config/colors';
 import UserStatus from './UserStatus';
+import CardHeader from './CardHeader';
+import CardBody from './CardBody';
 
-const container = css({
-  height: '118px',
-  backgroundColor: 'white',
-  flexDirection: 'row',
-  display: 'flex',
-});
-
-const avatar = css({
-  marginTop: 18,
-  marginLeft: 15,
+const header = css({
+  borderBottom: '3px solid rgba(0,0,0,0)',
+  paddingBottom: 20,
 });
 
 const text = css({});
 
-const nameAndActivityContainer = css({
-  marginTop: 26,
-  flexDirection: 'column',
-  paddingLeft: '22px',
-});
-
-const StyledInput = styled('input', {
-  width: '54vw',
-  backgroundColor: 'transparent',
-
-  color: colors.darkmodeBlack,
-
-  border: 'none',
-  outline: 'none',
-  paddingBottom: '4px',
-
-  fontSize: '1.6em',
-  fontWeight: 'initial',
-
-  variants: {
-    focus: {
-      focus: {
-        backgroundColor: colors.darkmodeDisabledBlack,
-        borderRadius: 1,
-      },
-      blur: {
-        backgroundColor: 'transparent',
-      },
-      enter: {
-        backgroundColor: colors.darkmodePressed,
-      },
-      leave: {
-        backgroundColor: 'transparent',
-      },
-    },
-  },
-});
-
 export default function WidgetHeader() {
   const { currentUser, setName } = useAuth();
   const [userName, setUserName] = useState(currentUser?.displayName);
-  const [inputFocus, setInputFocus] = useState();
-  const [inputHover, setInputHover] = useState();
-  const [inputStyle, setInputStyle] = useState();
-  const [focused, setFocused] = useState();
+  const [userData, setUserData] = useState({ Name: userName, Activity: [] });
+  const [expanded, setExpanded] = useState(false);
+
+  UserStatus();
+
+  db.collection('Users')
+    .doc(currentUser.uid)
+    .get()
+    .then((doc) => {
+      let activityRef = doc.ref.collection('Activity');
+
+      activityRef.doc('ActiveWindow').onSnapshot((querySnapshot) => {
+        activityRef
+          .orderBy('Date', 'desc')
+          .get()
+          .then((snapshot) => {
+            let dbUserData = userData;
+
+            // Clear Activity object
+            dbUserData.Activity.length = 0;
+
+            snapshot.forEach((doc) => {
+              dbUserData.Activity.push(doc.data());
+
+              setUserData(dbUserData);
+            });
+          });
+      });
+
+      activityRef.doc('ChromiumTab').onSnapshot((querySnapshot) => {
+        activityRef
+          .orderBy('Date', 'desc')
+          .get()
+          .then((snapshot) => {
+            let dbUserData = userData;
+
+            dbUserData.Activity.length = 0;
+
+            snapshot.forEach((doc) => {
+              dbUserData.Activity.push(doc.data());
+
+              setUserData(dbUserData);
+            });
+          });
+      });
+    });
+
+  const toggleExpansion = () => {
+    setExpanded(!expanded);
+  };
 
   const handleNameChange = (evt) => {
     setUserName(evt.target.value);
     setName(evt.target.value);
   };
 
-  const setFocus = () => {
-    setInputStyle('focus');
-    setFocused(true);
-  };
-  const setBlur = () => {
-    setInputStyle('blur');
-    setFocused(false);
-  };
-  const setEnter = () => {
-    !focused ? setInputStyle('enter') : null;
-  };
-  const setLeave = () => {
-    !focused ? setInputStyle('leave') : null;
-  };
-
   return (
-    <React.Fragment>
-      <div className={container()}>
-        <Avatar round className={avatar()} name={userName} size="62" />
-        <div className={nameAndActivityContainer()}>
-          <StyledInput
-            onFocus={setFocus}
-            onBlur={setBlur}
-            onChange={handleNameChange}
-            onMouseEnter={setEnter}
-            onMouseLeave={setLeave}
-            // onMouseLeave={inputHoverToggle}
-            focus={inputStyle}
-            className={text()}
-            value={userName}
-            type="text"
-            spellCheck={false}
-          />
-          <UserStatus />
-        </div>
-      </div>
-    </React.Fragment>
+    <>
+      <motion.header
+        whileHover={{
+          borderBottom: '3px solid rgba(0,0,0,0.3)',
+        }}
+        initial={false}
+        onClick={() => toggleExpansion()}
+        className={header()}
+      >
+        <CardHeader
+          currentUser
+          handleNameChange={handleNameChange}
+          name={userName}
+          mainActivity={userData.Activity[0]}
+        />
+      </motion.header>
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.section
+            initial="collapsed"
+            animate="open"
+            exit="collapsed"
+            variants={{
+              open: { height: 'auto' },
+              collapsed: { height: 0 },
+            }}
+            transition={{ duration: 0.8, ease: [0.04, 0.62, 0.23, 0.98] }}
+          >
+            <CardBody activity={userData.Activity} />
+          </motion.section>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
