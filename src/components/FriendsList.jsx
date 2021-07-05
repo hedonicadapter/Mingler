@@ -54,44 +54,26 @@ export default function FriendsList() {
   };
 
   const setActivityListeners = (friend) => {
-    const windowListener = friend.ActiveWindowRef.onSnapshot(
-      (querySnapshot) => {
-        friend.ActivityRef.orderBy('Date', 'desc')
-          .get()
-          .then((snapshot) => {
-            let friendsCopy = friends;
+    const activityListener = friend.ActivityRef.orderBy(
+      'Date',
+      'desc'
+    ).onSnapshot((querySnapshot) => {
+      let friendsCopy = friends;
 
-            friendsCopy[friend.key].Activity.length = 0;
+      friendsCopy[friend.key].Activity.length = 0;
 
-            snapshot.forEach((doc) => {
-              friendsCopy[friend.key].Activity.push(doc.data());
+      querySnapshot.forEach((doc) => {
+        friendsCopy[friend.key].Activity.push(doc.data());
 
-              setFriends(friendsCopy);
-            });
-          });
-      }
-    );
-    const tabListener = friend.ActiveTabRef.onSnapshot((querySnapshot) => {
-      friend.ActivityRef.orderBy('Date', 'desc')
-        .get()
-        .then((snapshot) => {
-          let friendsCopy = friends;
-
-          friendsCopy[friend.key].Activity.length = 0;
-
-          snapshot.forEach((doc) => {
-            friendsCopy[friend.key].Activity.push(doc.data());
-
-            setFriends(friendsCopy);
-          });
-        });
+        setFriends(friendsCopy);
+      });
     });
 
     setSnapshotUnsubscribers((oldArray) => [
       ...oldArray,
       {
         UserID: friend.UserID,
-        Listeners: [windowListener, tabListener],
+        Listeners: [activityListener],
       },
     ]);
   };
@@ -136,6 +118,10 @@ export default function FriendsList() {
 
   let ranOnce = false;
   useEffect(() => {
+    // let friendsCopy = friends;
+    // let object = getObjectByProp(friendsCopy, 'UserID', 'NlNWnfhPeBROm2btJfuMiJXw8S23');
+    // object.status = 'Online';
+
     if (!ranOnce) {
       friends.forEach((friend) => {
         setActivityListeners(friend);

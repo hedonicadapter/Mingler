@@ -38,6 +38,9 @@ const activityText = css({
 const activityIconStyle = css({
   paddingRight: 8,
 });
+const marquee = css({
+  zIndex: 8,
+});
 
 export default function Marky({ WindowTitle, TabTitle, TabURL }) {
   const marqueeRef = useRef();
@@ -81,6 +84,7 @@ export default function Marky({ WindowTitle, TabTitle, TabURL }) {
 
       <div ref={marqueeRef} className={activityText()}>
         <motion.div
+          className={marquee()}
           whileHover={{
             x: [0, -marqueeWidth],
             transition: {

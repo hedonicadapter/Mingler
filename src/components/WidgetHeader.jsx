@@ -101,10 +101,10 @@ export default function WidgetHeader() {
             animate="open"
             exit="collapsed"
             variants={{
-              open: { height: 'auto' },
-              collapsed: { height: 0 },
+              open: { height: 'auto', color: 'rgba(0,0,0,1)' },
+              collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
             }}
-            transition={{ duration: 0.8, ease: [0.04, 0.62, 0.23, 0.98] }}
+            transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
             <CardBody activity={userData.Activity} />
           </motion.section>
