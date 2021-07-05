@@ -8,6 +8,7 @@ import AccordionItem from './AccordionItem';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { db, field } from '../config/firebase';
+import { getObjectByProp } from '../helpers/arrayTools';
 
 const container = css({});
 
@@ -102,8 +103,6 @@ export default function FriendsList() {
                 UserID: doc.id,
                 Name: doc.data().Name,
                 ActivityRef: activityRef,
-                ActiveWindowRef: activityRef.doc('ActiveWindow'),
-                ActiveTabRef: activityRef.doc('ChromiumTab'),
                 Activity: [],
               });
 
@@ -118,14 +117,22 @@ export default function FriendsList() {
 
   let ranOnce = false;
   useEffect(() => {
-    // let friendsCopy = friends;
-    // let object = getObjectByProp(friendsCopy, 'UserID', 'NlNWnfhPeBROm2btJfuMiJXw8S23');
-    // object.status = 'Online';
-
     if (!ranOnce) {
-      friends.forEach((friend) => {
-        setActivityListeners(friend);
-      });
+      db.collection('Users')
+        .doc(currentUser.uid)
+        .collection('OnlineFriends')
+        .onSnapshot((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            let friendsCopy = friends;
+            let object = getObjectByProp(friendsCopy, 'UserID', doc.id);
+            object && (object.status = 'Online');
+            setFriends(friendsCopy);
+          });
+          friends.forEach((friend) => {
+            friend.status === 'Online' && setActivityListeners(friend);
+          });
+        });
+
       ranOnce = true;
     }
   }, [friends]);

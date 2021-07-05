@@ -14,6 +14,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   function setName(newName) {
+    db.collection('Users').doc(currentUser?.uid).update({ name: newName });
     currentUser
       ?.updateProfile({
         displayName: newName,

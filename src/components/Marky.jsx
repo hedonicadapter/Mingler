@@ -4,7 +4,10 @@ import Marquee from 'react-fast-marquee';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
 import { motion } from 'framer-motion';
 
+import { useAuth } from '../contexts/AuthContext';
+
 import colors from '../config/colors';
+import { db } from '../config/firebase';
 
 const shell = require('electron').shell;
 
@@ -42,8 +45,13 @@ const marquee = css({
   zIndex: 8,
 });
 
-export default function Marky({ WindowTitle, TabTitle, TabURL }) {
+export default function Marky(
+  { WindowTitle, TabTitle, TabURL, YouTubeURL },
+  props
+) {
   const marqueeRef = useRef();
+
+  const { currentUser } = useAuth();
 
   const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState();
@@ -65,6 +73,21 @@ export default function Marky({ WindowTitle, TabTitle, TabURL }) {
 
   const handleLinkClick = (url) => {
     shell.openExternal(url);
+  };
+
+  const handleYouTubeClick = (url) => {
+    console.log(props.userID);
+    // db.collection('Users')
+    //   .doc(UserID)
+    //   .collection('YouTubeTimeRequests')
+    //   .doc(currentUser.uid)
+    //   .set(new Object())
+    //   .then(() => {
+    //     console.log('YouTube time successfully written!');
+    //   })
+    //   .catch((error) => {
+    //     console.error('Error writing YouTube time: ', error);
+    //   });
   };
 
   const ActivityIcon = () => {
@@ -111,6 +134,8 @@ export default function Marky({ WindowTitle, TabTitle, TabURL }) {
             <a onClick={() => handleLinkClick(TabURL)}>
               {WindowTitle || TabTitle}
             </a>
+          ) : YouTubeURL ? (
+            <div onClick={() => handleYouTubeClick(YouTubeURL)}>yt video</div>
           ) : (
             WindowTitle || TabTitle
           )}

@@ -45,7 +45,7 @@ export default function AccordionItem({ friend }) {
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <CardBody activity={friend.Activity} />
+            <CardBody activity={friend.Activity} userID={friend.UserID} />
           </motion.section>
         )}
       </AnimatePresence>
