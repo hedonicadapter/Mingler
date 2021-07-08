@@ -44,17 +44,27 @@ const activityIconStyle = css({
 const marquee = css({
   zIndex: 8,
 });
+const highZIndex = css({
+  zIndex: 15,
+});
 
-export default function Marky(
-  { WindowTitle, TabTitle, TabURL, YouTubeURL },
-  props
-) {
+export default function Marky({
+  WindowTitle,
+  TabTitle,
+  TabURL,
+  YouTubeURL,
+  YouTubeTitle,
+  userID,
+  setMarkyToReplaceWithYouTubeVideo,
+  markyToReplaceWithYouTubeVideo,
+  marKey, // used to set the marky to be replaced with youtube player
+}) {
   const marqueeRef = useRef();
 
   const { currentUser } = useAuth();
 
   const [playMarquee, setPlayMarquee] = useState(false);
-  const [markyType, setMarkyType] = useState();
+  const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState(0);
 
   useEffect(() => {
@@ -76,18 +86,21 @@ export default function Marky(
   };
 
   const handleYouTubeClick = (url) => {
-    console.log(props.userID);
-    // db.collection('Users')
-    //   .doc(UserID)
-    //   .collection('YouTubeTimeRequests')
-    //   .doc(currentUser.uid)
-    //   .set(new Object())
-    //   .then(() => {
-    //     console.log('YouTube time successfully written!');
-    //   })
-    //   .catch((error) => {
-    //     console.error('Error writing YouTube time: ', error);
-    //   });
+    setMarkyToReplaceWithYouTubeVideo(
+      markyToReplaceWithYouTubeVideo == null ? marKey : null
+    );
+    if (userID) {
+      db.collection('Users')
+        .doc(userID)
+        .collection('YouTubeTimeRequests')
+        .add(new Object())
+        .then(() => {
+          console.log('YouTube time successfully written!');
+        })
+        .catch((error) => {
+          console.error('Error writing YouTube time: ', error);
+        });
+    }
   };
 
   const ActivityIcon = () => {
@@ -131,11 +144,18 @@ export default function Marky(
           }}
         >
           {TabURL ? (
-            <a onClick={() => handleLinkClick(TabURL)}>
+            <a className={highZIndex()} onClick={() => handleLinkClick(TabURL)}>
               {WindowTitle || TabTitle}
             </a>
           ) : YouTubeURL ? (
-            <div onClick={() => handleYouTubeClick(YouTubeURL)}>yt video</div>
+            <div
+              className={highZIndex()}
+              onClick={() => {
+                handleYouTubeClick(YouTubeURL);
+              }}
+            >
+              yt video
+            </div>
           ) : (
             WindowTitle || TabTitle
           )}

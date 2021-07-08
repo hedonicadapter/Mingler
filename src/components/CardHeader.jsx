@@ -147,7 +147,10 @@ export default function CardHeader(props) {
         <div className={statusIndicatorContainer()}>
           <div className={statusIndicatorAndBackground()}></div>
         </div>
-        <Marky {...props.mainActivity} />
+        <Marky
+          {...props.mainActivity}
+          toggleYouTubeVideo={props.toggleYouTubeVideo}
+        />
       </div>
     </div>
   );

@@ -31,6 +31,8 @@ export default function AccordionItem({ friend }) {
           key={friend.key}
           name={friend.Name}
           mainActivity={friend.Activity[0]}
+          userID={friend.UserID}
+          toggleExpansion={toggleExpansion}
         />
       </motion.header>
       <AnimatePresence initial={false}>
