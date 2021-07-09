@@ -10,7 +10,7 @@ import colors from '../config/colors';
 import Marky from './Marky';
 
 const flipper = css({
-  backgroundColor: 'white',
+  backgroundColor: colors.depressedWhite,
   marginTop: -20, // the Flipper component has some inherent top margin
   marginLeft: -25,
   paddingBottom: 1,
@@ -18,11 +18,6 @@ const flipper = css({
 const playerContainer = css({
   position: 'relative',
   paddingTop: '56.25%' /* Player ratio: 100 / (1280 / 720) */,
-});
-const player = css({
-  position: 'absolute',
-  top: 0,
-  left: 0,
 });
 
 export default function CardBody({ activity, userID, toggleExpansion }) {
@@ -38,7 +33,7 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
       item.YouTubeURL && setURL(item.YouTubeURL);
       item.YouTubeTime && setYtTime(item.YouTubeTime);
     });
-    console.log(URL);
+    console.log(markyToReplaceWithYouTubeVideo);
   }, [markyToReplaceWithYouTubeVideo]);
 
   useEffect(() => {
@@ -46,7 +41,7 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
   }, [playerRef.current]);
 
   const handleClosePlayer = () => {
-    setMarkyToReplaceWithYouTubeVideo(null);
+    // setMarkyToReplaceWithYouTubeVideo(null);
   };
 
   return (
@@ -70,11 +65,15 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
                 />
               </Flipped>
             ) : (
-              <div className={playerContainer()} onClick={handleClosePlayer()}>
+              <div className={playerContainer()}>
                 <ReactPlayer
+                  onClick={handleClosePlayer()}
                   ref={playerRef}
-                  className={player()}
-                  width="80%"
+                  // Using my regular css component crashes the widget
+                  // when out of view
+                  style={{ position: 'absolute', top: 0, left: 0 }}
+                  width="95%"
+                  height="100%"
                   controls
                   url={URL}
                 />

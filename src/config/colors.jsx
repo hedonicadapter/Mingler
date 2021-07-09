@@ -1,4 +1,6 @@
 export default {
+  classyWhite: '#fdf5f1',
+  depressedWhite: '#f1ebe8',
   samGreen: '#64F58D',
   samRed: '#DB5461',
   samBlack: '#373E40',

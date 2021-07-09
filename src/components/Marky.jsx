@@ -86,9 +86,6 @@ export default function Marky({
   };
 
   const handleYouTubeClick = (url) => {
-    setMarkyToReplaceWithYouTubeVideo(
-      markyToReplaceWithYouTubeVideo == null ? marKey : null
-    );
     if (userID) {
       db.collection('Users')
         .doc(userID)
@@ -96,6 +93,9 @@ export default function Marky({
         .add(new Object())
         .then(() => {
           console.log('YouTube time successfully written!');
+          setMarkyToReplaceWithYouTubeVideo(
+            markyToReplaceWithYouTubeVideo ? null : marKey
+          );
         })
         .catch((error) => {
           console.error('Error writing YouTube time: ', error);

@@ -92,6 +92,7 @@ export default function WidgetHeader() {
           handleNameChange={handleNameChange}
           name={userName}
           mainActivity={userData.Activity[0]}
+          expanded={expanded}
         />
       </motion.header>
       <AnimatePresence initial={false}>

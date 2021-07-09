@@ -34,16 +34,26 @@ const statusIndicatorContainer = css({
   position: 'absolute',
 });
 
-const statusIndicatorAndBackground = css({
+const StatusIndicatorAndBackground = styled('div', {
   position: 'absolute',
   top: '0px',
   left: '-80px',
   width: '12px',
   height: '12px',
   borderRadius: '50%',
-  boxShadow: '0 0 0 9999px rgba(255, 255, 255, 1)',
   clipPath: 'inset(-520% -4000% -350% -580%)',
   zIndex: -1,
+
+  variants: {
+    expanded: {
+      true: {
+        boxShadow: '0 0 0 9999px rgba(241,235,232,255)', // colors.depressedWhite
+      },
+      false: {
+        boxShadow: '0 0 0 9999px rgba(253,245,241,255)', // colors.classyWhite
+      },
+    },
+  },
 });
 
 const StyledInput = styled('input', {
@@ -145,7 +155,7 @@ export default function CardHeader(props) {
           />
         )}
         <div className={statusIndicatorContainer()}>
-          <div className={statusIndicatorAndBackground()}></div>
+          <StatusIndicatorAndBackground expanded={props.expanded} />
         </div>
         <Marky
           {...props.mainActivity}
