@@ -7,8 +7,10 @@ import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 
 const header = css({
-  borderBottom: '3px solid rgba(0,0,0,0)',
+  zIndex: 5,
   paddingBottom: 20,
+  // borderBottom: '3px solid rgba(0,0,0,0)',
+  backgroundColor: 'rgba(0,0,0,0)',
 });
 
 export default function AccordionItem({ friend }) {
@@ -21,8 +23,10 @@ export default function AccordionItem({ friend }) {
     <>
       <motion.header
         whileHover={{
-          borderBottom: '3px solid rgba(0,0,0,0.3)',
+          backgroundColor: expanded ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.075)',
+          // borderBottom: '3px solid rgba(0,0,0,0.3)',
         }}
+        transition={{ duration: 0.15 }}
         initial={false}
         onClick={() => toggleExpansion()}
         className={header()}

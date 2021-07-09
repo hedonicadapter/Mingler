@@ -20,6 +20,7 @@ const buttonVariants = {
 };
 
 const MarkyDiv = styled('div', {
+  zIndex: 50,
   padding: 6,
   flexDirection: 'row',
   display: 'flex',
@@ -67,9 +68,6 @@ const closeIconStyle = css({
   paddingRight: 2,
   color: colors.darkmodeDisabledText,
 });
-const marquee = css({
-  zIndex: 8,
-});
 const highZIndex = css({
   zIndex: 15,
 });
@@ -100,13 +98,13 @@ export default function Marky({
           marqueeRef.current.scrollWidth - marqueeRef.current.offsetWidth
         )
       : setMarqueeWidth(0);
-  }, [marqueeRef.current]);
+  }, [marqueeRef.current, WindowTitle, TabTitle, YouTubeTitle]);
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
       (TabTitle && setMarkyType('Tab')) ||
       (YouTubeURL && setMarkyType('YouTubeVideo'));
-  }, []);
+  }, [WindowTitle, TabTitle, YouTubeURL]);
 
   const handleLinkClick = (url) => {
     shell.openExternal(url);
@@ -158,7 +156,6 @@ export default function Marky({
 
       <div ref={marqueeRef} className={activityText()}>
         <motion.div
-          className={marquee()}
           whileHover={{
             x: [0, -marqueeWidth],
             transition: {

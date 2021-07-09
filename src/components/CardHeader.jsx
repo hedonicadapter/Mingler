@@ -24,7 +24,7 @@ const nameAndActivityContainer = css({
   width: '80%',
 });
 const text = css({
-  paddingLeft: '10px',
+  paddingLeft: '7px',
   color: colors.darkmodeBlack,
   fontSize: '1.4em',
 });
@@ -34,6 +34,10 @@ const avatar = css({});
 const statusIndicatorContainer = css({
   position: 'absolute',
   // marginTop: -25,
+});
+
+const nameAndActivityPadding = css({
+  paddingLeft: 6,
 });
 
 const StatusIndicatorAndBackground = styled('div', {
@@ -95,8 +99,8 @@ export default function CardHeader(props) {
   const [refresh, setRefresh] = useState(true);
   const [overflown, setOverflown] = useState();
   const [refVisible, setRefVisible] = useState(false);
-  const [focused, setFocused] = useState();
-  const [inputStyle, setInputStyle] = useState();
+  const [focused, setFocused] = useState(null);
+  const [inputStyle, setInputStyle] = useState(null);
 
   function checkOverflow(el) {
     if (el === undefined || el === null) return false;
@@ -139,30 +143,34 @@ export default function CardHeader(props) {
     <div className={container()}>
       <Avatar round className={avatar()} name={props.name} size="58" />
       <div className={nameAndActivityContainer()}>
-        {!props.currentUser ? (
-          <div className={text()}>{props.name}</div>
-        ) : (
-          <StyledInput
-            onFocus={setFocus}
-            onBlur={setBlur}
-            onChange={props.handleNameChange}
-            onMouseEnter={setEnter}
-            onMouseLeave={setLeave}
-            // onMouseLeave={inputHoverToggle}
-            focus={inputStyle}
-            className={text()}
-            value={props.name}
-            type="text"
-            spellCheck={false}
-          />
-        )}
+        <div className={nameAndActivityPadding()}>
+          {!props.currentUser ? (
+            <div className={text()}>{props.name}</div>
+          ) : (
+            <StyledInput
+              onFocus={setFocus}
+              onBlur={setBlur}
+              onChange={props.handleNameChange}
+              onMouseEnter={setEnter}
+              onMouseLeave={setLeave}
+              // onMouseLeave={inputHoverToggle}
+              focus={inputStyle}
+              className={text()}
+              value={props.name}
+              type="text"
+              spellCheck={false}
+            />
+          )}
+        </div>
         <div className={statusIndicatorContainer()}>
           <StatusIndicatorAndBackground expanded={props.expanded} />
         </div>
-        <Marky
-          {...props.mainActivity}
-          toggleYouTubeVideo={props.toggleYouTubeVideo}
-        />
+        <div className={nameAndActivityPadding()}>
+          <Marky
+            {...props.mainActivity}
+            toggleYouTubeVideo={props.toggleYouTubeVideo}
+          />
+        </div>
       </div>
     </div>
   );

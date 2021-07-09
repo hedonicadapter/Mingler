@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { css, styled } from '@stitches/react';
-import Avatar from 'react-avatar';
-import { GoPrimitiveDot } from 'react-icons/go';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -12,8 +10,10 @@ import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 
 const header = css({
-  borderBottom: '3px solid rgba(0,0,0,0)',
+  zIndex: 5,
   paddingBottom: 20,
+  // borderBottom: '3px solid rgba(0,0,0,0)',
+  backgroundColor: 'rgba(0,0,0,0)',
 });
 
 const text = css({});
@@ -81,8 +81,10 @@ export default function WidgetHeader() {
     <>
       <motion.header
         whileHover={{
-          borderBottom: '3px solid rgba(0,0,0,0.3)',
+          backgroundColor: expanded ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.075)',
+          // borderBottom: '3px solid rgba(0,0,0,0.3)',
         }}
+        transition={{ duration: 0.15 }}
         initial={false}
         onClick={() => toggleExpansion()}
         className={header()}
