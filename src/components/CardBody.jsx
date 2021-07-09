@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
 import Marquee from 'react-fast-marquee';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import ReactPlayer from 'react-player/youtube';
 
@@ -27,6 +27,7 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
   const [ytTime, setYtTime] = useState(null);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
+  const [youTubeVideoVisible, setYouTubeVideoVisible] = useState(false);
 
   useEffect(() => {
     activity.forEach((item) => {
@@ -65,19 +66,51 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
                 />
               </Flipped>
             ) : (
-              <div className={playerContainer()}>
-                <ReactPlayer
-                  onClick={handleClosePlayer()}
-                  ref={playerRef}
-                  // Using my regular css component crashes the widget
-                  // when out of view
-                  style={{ position: 'absolute', top: 0, left: 0 }}
-                  width="95%"
-                  height="100%"
-                  controls
-                  url={URL}
-                />
-              </div>
+              <AnimatePresence initial={false}>
+                {markyToReplaceWithYouTubeVideo && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{
+                        duration: 0.15,
+                        ease: [0.04, 0.62, 0.23, 0.98],
+                      }}
+                      className={playerContainer()}
+                    >
+                      <ReactPlayer
+                        // onReady={() =>
+                        //   setYouTubeVideoVisible(!youTubeVideoVisible)
+                        // }
+                        onClick={handleClosePlayer()}
+                        ref={playerRef}
+                        // Using my regular css component crashes the widget
+                        // when out of view
+                        style={{ position: 'absolute', top: 0, left: 0 }}
+                        width="95%"
+                        height="90%"
+                        controls
+                        url={URL}
+                      />
+                    </motion.div>
+                    <Flipped key={index} flipId={'yo'}>
+                      <Marky
+                        {...activity}
+                        userID={userID}
+                        toggleExpansion={toggleExpansion}
+                        setMarkyToReplaceWithYouTubeVideo={
+                          setMarkyToReplaceWithYouTubeVideo
+                        }
+                        markyToReplaceWithYouTubeVideo={
+                          markyToReplaceWithYouTubeVideo
+                        }
+                        marKey={index}
+                      />
+                    </Flipped>
+                  </>
+                )}
+              </AnimatePresence>
             )
           )}
         </ul>

@@ -11,8 +11,9 @@ const container = css({
   backgroundColor: 'transparent',
   flexDirection: 'row',
   display: 'flex',
-  paddingLeft: 40,
+  paddingLeft: 50,
   paddingTop: 30,
+  paddingBottom: 13,
   // marginTop: 10,
   // borderTop: '1.5px solid',
   // borderTopColor: colors.darkmodeBlack,
@@ -32,16 +33,17 @@ const avatar = css({});
 
 const statusIndicatorContainer = css({
   position: 'absolute',
+  // marginTop: -25,
 });
 
 const StatusIndicatorAndBackground = styled('div', {
   position: 'absolute',
-  top: '0px',
-  left: '-80px',
-  width: '12px',
-  height: '12px',
+  top: -4,
+  left: '-82px',
+  width: '16px',
+  height: '16px',
   borderRadius: '50%',
-  clipPath: 'inset(-520% -4000% -350% -580%)',
+  clipPath: 'inset(-340% -4000% -350% -580%)',
   zIndex: -1,
 
   variants: {

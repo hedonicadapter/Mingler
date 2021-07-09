@@ -17,7 +17,9 @@ export default function WidgetFooter(props) {
   return (
     <div className={container()}>
       <div className={button()}>
-        <button onClick={props.toggleSettingsPane}>settings</button>
+        <button onClick={() => console.log('toggled settings')}>
+          settings
+        </button>
       </div>
     </div>
   );

@@ -5,7 +5,6 @@ import {
   CSSTransition,
   Transition,
 } from 'react-transition-group';
-import { PythonShell } from 'python-shell';
 import * as electron from 'electron';
 
 import './Widget.css';
@@ -22,10 +21,11 @@ const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
 
 const MainPane = styled('div', {
-  // position: 'relative',
+  marginTop: -10,
+  float: 'right',
   overflow: 'hidden',
-  transition: '0.2s width, transform 300ms ease, opacity 150ms ease-out',
-  width: window.innerWidth * 0.8,
+  transition: 'transform 300ms ease, opacity 150ms ease-in',
+  width: window.innerWidth * 0.92,
   willChange: 'transform',
 
   variants: {
@@ -39,19 +39,6 @@ const MainPane = styled('div', {
         pointerEvents: 'none',
         transform: 'translateX(120%)',
         opacity: 0,
-      },
-    },
-    settingsVisible: {
-      true: {
-        float: 'none',
-        // right: 50,
-        width: window.innerWidth * 0.4,
-      },
-      false: {
-        float: 'right',
-        right: 0,
-        // right: -50,
-        width: window.innerWidth * 0.8,
       },
     },
   },
@@ -80,13 +67,8 @@ export default function Widget() {
     setVisible(false);
   });
 
-  const [settingsVisible, setSettingsVisible] = useState(false);
-  const toggleSettingsPane = () => {
-    setSettingsVisible(!settingsVisible);
-  };
-
   return (
-    <MainPane visible={visible} settingsVisible={settingsVisible}>
+    <MainPane visible={visible}>
       {/* <Transition timeout={275} in={visible} appear>
         {(state) => (
           <div style={{ ...defaultStyle, ...transitionStyles[state] }}>
@@ -111,7 +93,7 @@ export default function Widget() {
       </Transition> */}
       <WidgetHeader />
       <FriendsList />
-      <WidgetFooter toggleSettingsPane={toggleSettingsPane} />
+      <WidgetFooter />
     </MainPane>
   );
 }

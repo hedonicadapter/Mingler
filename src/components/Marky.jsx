@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Marquee from 'react-fast-marquee';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
+import { RiArrowDropUpLine } from 'react-icons/ri';
+import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
@@ -10,6 +12,12 @@ import colors from '../config/colors';
 import { db } from '../config/firebase';
 
 const shell = require('electron').shell;
+
+const buttonVariants = {
+  hover: {
+    rotate: 90,
+  },
+};
 
 const MarkyDiv = styled('div', {
   padding: 6,
@@ -28,6 +36,12 @@ const MarkyDiv = styled('div', {
           cursor: 'pointer',
         },
       },
+      YouTubeVideo: {
+        '&:hover': {
+          color: colors.pastelRed,
+          cursor: 'pointer',
+        },
+      },
     },
   },
 });
@@ -36,10 +50,22 @@ const activityText = css({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  color: colors.darkmodeBlack,
+});
+const closeText = css({
+  fontWeight: '700',
+  fontSize: '0.8em',
+  color: colors.darkmodeDisabledText,
 });
 const activityIconStyle = css({
+  width: 20,
+  height: 20,
   paddingRight: 8,
+});
+const closeIconStyle = css({
+  width: 20,
+  height: 20,
+  paddingRight: 2,
+  color: colors.darkmodeDisabledText,
 });
 const marquee = css({
   zIndex: 8,
@@ -78,7 +104,8 @@ export default function Marky({
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
-      (TabTitle && setMarkyType('Tab'));
+      (TabTitle && setMarkyType('Tab')) ||
+      (YouTubeURL && setMarkyType('YouTubeVideo'));
   }, []);
 
   const handleLinkClick = (url) => {
@@ -104,13 +131,24 @@ export default function Marky({
   };
 
   const ActivityIcon = () => {
+    if (WindowTitle) {
+      return <BiWindows className={activityIconStyle()} />;
+    }
+
     if (TabTitle || TabURL) {
       return <BiPlanet className={activityIconStyle()} />;
     }
 
-    if (WindowTitle) {
-      return <BiWindows className={activityIconStyle()} />;
+    if (YouTubeTitle || YouTubeURL) {
+      return markyToReplaceWithYouTubeVideo ? (
+        <motion.div variants={buttonVariants} whileHover="hover">
+          <RiArrowDropUpLine className={closeIconStyle()} />
+        </motion.div>
+      ) : (
+        <CgYoutube className={activityIconStyle()} />
+      );
     }
+
     return null;
   };
 
@@ -145,7 +183,7 @@ export default function Marky({
         >
           {TabURL ? (
             <a className={highZIndex()} onClick={() => handleLinkClick(TabURL)}>
-              {WindowTitle || TabTitle}
+              {TabTitle}
             </a>
           ) : YouTubeURL ? (
             <div
@@ -154,10 +192,14 @@ export default function Marky({
                 handleYouTubeClick(YouTubeURL);
               }}
             >
-              yt video
+              {markyToReplaceWithYouTubeVideo ? (
+                <span className={closeText()}>close</span>
+              ) : (
+                YouTubeTitle
+              )}
             </div>
           ) : (
-            WindowTitle || TabTitle
+            WindowTitle || TabTitle || YouTubeTitle
           )}
         </motion.div>
       </div>
