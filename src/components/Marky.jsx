@@ -179,22 +179,19 @@ export default function Marky({
           }}
         >
           {TabURL ? (
-            <a className={highZIndex()} onClick={() => handleLinkClick(TabURL)}>
-              {TabTitle}
-            </a>
+            <a onClick={() => handleLinkClick(TabURL)}>{TabTitle}</a>
           ) : YouTubeURL ? (
-            <div
-              className={highZIndex()}
-              onClick={() => {
-                handleYouTubeClick(YouTubeURL);
-              }}
-            >
-              {markyToReplaceWithYouTubeVideo ? (
-                <span className={closeText()}>close</span>
-              ) : (
-                YouTubeTitle
-              )}
-            </div>
+            markyToReplaceWithYouTubeVideo ? (
+              <a className={closeText()}>close</a>
+            ) : (
+              <a
+                onClick={() => {
+                  handleYouTubeClick(YouTubeURL);
+                }}
+              >
+                {YouTubeTitle}
+              </a>
+            )
           ) : (
             WindowTitle || TabTitle || YouTubeTitle
           )}

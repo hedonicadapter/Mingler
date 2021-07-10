@@ -109,7 +109,7 @@ export default function WidgetHeader() {
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <CardBody activity={userData.Activity} />
+            <CardBody fromHeader activity={userData.Activity} />
           </motion.section>
         )}
       </AnimatePresence>

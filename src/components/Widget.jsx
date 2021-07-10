@@ -60,10 +60,13 @@ export default function Widget() {
   const toggleMainPane = () => {
     setVisible(!visible);
   };
-  ipc.once('globalshortcut', (evt, args) => {
+
+  ipc.removeAllListeners();
+
+  ipc.on('globalShortcut', (evt, args) => {
     toggleMainPane();
   });
-  ipc.once('hideWidget', (evt, args) => {
+  ipc.on('hideWidget', (evt, args) => {
     setVisible(false);
   });
 

@@ -177,7 +177,7 @@ let showing = false;
 
 const toggleWidget = () => {
   if (showing) {
-    mainWindow?.webContents.send('globalshortcut');
+    mainWindow?.webContents.send('globalShortcut');
     mainWindow?.focus();
 
     showing = !showing;

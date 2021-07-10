@@ -47,7 +47,7 @@ const StatusIndicatorAndBackground = styled('div', {
   width: '16px',
   height: '16px',
   borderRadius: '50%',
-  clipPath: 'inset(-340% -4000% -350% -580%)',
+  clipPath: 'inset(-325% -4000% -350% -580%)',
   zIndex: -1,
 
   variants: {
