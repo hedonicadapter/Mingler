@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
-import Marquee from 'react-fast-marquee';
 import { motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
+import { spotifyPopUp } from './SpotifyPopUp';
 
 const container = css({
   backgroundColor: 'transparent',
@@ -94,7 +94,14 @@ const StyledInput = styled('input', {
   },
 });
 
-export default function CardHeader(props) {
+export default function CardHeader({
+  name,
+  handleNameChange,
+  expanded,
+  mainActivity,
+  setMarkyToReplaceWithYouTubeVideo,
+  markyToReplaceWithYouTubeVideo,
+}) {
   const el = useRef(undefined);
   const [refresh, setRefresh] = useState(true);
   const [overflown, setOverflown] = useState();
@@ -139,36 +146,42 @@ export default function CardHeader(props) {
     !focused ? setInputStyle('leave') : null;
   };
 
+  const handleConnectToSpotify = () => {
+    console.log('spotify pop up');
+    spotifyPopUp();
+  };
+
   return (
     <div className={container()}>
-      <Avatar round className={avatar()} name={props.name} size="58" />
+      <Avatar round className={avatar()} name={name} size="58" />
       <div className={nameAndActivityContainer()}>
         <div className={nameAndActivityPadding()}>
-          {!props.currentUser ? (
-            <div className={text()}>{props.name}</div>
-          ) : (
-            <StyledInput
+          <div className={text()}>{name}</div>
+          {/* <StyledInput
               onFocus={setFocus}
               onBlur={setBlur}
-              onChange={props.handleNameChange}
+              onChange={handleNameChange}
               onMouseEnter={setEnter}
               onMouseLeave={setLeave}
               // onMouseLeave={inputHoverToggle}
               focus={inputStyle}
               className={text()}
-              value={props.name}
+              value={name}
               type="text"
               spellCheck={false}
-            />
-          )}
+            /> */}
         </div>
         <div className={statusIndicatorContainer()}>
-          <StatusIndicatorAndBackground expanded={props.expanded} />
+          <StatusIndicatorAndBackground expanded={expanded} />
         </div>
         <div className={nameAndActivityPadding()}>
           <Marky
-            {...props.mainActivity}
-            toggleYouTubeVideo={props.toggleYouTubeVideo}
+            {...mainActivity}
+            setMarkyToReplaceWithYouTubeVideo={
+              setMarkyToReplaceWithYouTubeVideo
+            }
+            markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+            marKey={1}
           />
         </div>
       </div>

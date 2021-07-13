@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
-import Marquee from 'react-fast-marquee';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import ReactPlayer from 'react-player/youtube';
@@ -21,15 +20,26 @@ const playerContainer = css({
   marginLeft: 0,
   marginRight: 14,
 });
+const closeText = css({
+  textAlign: 'right',
+  fontWeight: '700',
+  fontSize: '0.9em',
+  color: colors.darkmodeDisabledText,
+  marginRight: 8,
+  paddingBottom: 4,
+  marginBottom: 0,
+});
 
-export default function CardBody({ activity, userID, toggleExpansion }) {
+export default function CardBody({
+  activity,
+  userID,
+  markyToReplaceWithYouTubeVideo,
+  setMarkyToReplaceWithYouTubeVideo,
+}) {
   const playerRef = useRef();
 
   const [URL, setURL] = useState(null);
   const [ytTime, setYtTime] = useState(null);
-  const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
-    useState(null);
-  const [youTubeVideoVisible, setYouTubeVideoVisible] = useState(false);
 
   useEffect(() => {
     activity.forEach((item) => {
@@ -57,7 +67,6 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
                 <Marky
                   {...activity}
                   userID={userID}
-                  toggleExpansion={toggleExpansion}
                   setMarkyToReplaceWithYouTubeVideo={
                     setMarkyToReplaceWithYouTubeVideo
                   }
@@ -88,20 +97,42 @@ export default function CardBody({ activity, userID, toggleExpansion }) {
                           // }
                           onClick={handleClosePlayer()}
                           ref={playerRef}
-                          // Using my regular css component crashes the widget
+                          // Using my regular css library crashes the widget
                           // when out of view
-                          style={{ position: 'absolute', top: 0, left: 0 }}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                          }}
                           width="100%"
                           height="90%"
                           controls
                           url={URL}
                         />
+
+                        <div
+                          style={{
+                            borderBottom: '2px solid black',
+                            marginLeft: 12,
+                            marginRight: 12,
+                            margin: '0 auto',
+                            paddingTop: 5,
+                          }}
+                        >
+                          <h1
+                            className={closeText()}
+                            onClick={() =>
+                              setMarkyToReplaceWithYouTubeVideo(null)
+                            }
+                          >
+                            close
+                          </h1>
+                        </div>
                       </motion.div>
                       <Flipped key={index} flipId={'yo'}>
                         <Marky
                           {...activity}
                           userID={userID}
-                          toggleExpansion={toggleExpansion}
                           setMarkyToReplaceWithYouTubeVideo={
                             setMarkyToReplaceWithYouTubeVideo
                           }

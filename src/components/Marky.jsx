@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { css, styled } from '@stitches/react';
-import Marquee from 'react-fast-marquee';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
 import { RiArrowDropUpLine } from 'react-icons/ri';
 import { CgYoutube } from 'react-icons/cg';
@@ -10,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 import colors from '../config/colors';
 import { db } from '../config/firebase';
+import spotifyPopUp from './SpotifyPopUp';
 
 const shell = require('electron').shell;
 
@@ -53,8 +53,9 @@ const activityText = css({
   textOverflow: 'ellipsis',
 });
 const closeText = css({
+  float: 'right',
   fontWeight: '700',
-  fontSize: '0.8em',
+  fontSize: '0.9em',
   color: colors.darkmodeDisabledText,
 });
 const activityIconStyle = css({
@@ -63,9 +64,10 @@ const activityIconStyle = css({
   paddingRight: 8,
 });
 const closeIconStyle = css({
+  float: 'right',
   width: 20,
   height: 20,
-  paddingRight: 2,
+  paddingRight: 0,
   color: colors.darkmodeDisabledText,
 });
 const highZIndex = css({
@@ -79,9 +81,11 @@ export default function Marky({
   YouTubeURL,
   YouTubeTitle,
   userID,
+
+  // used to set the marky to be replaced with youtube player
   setMarkyToReplaceWithYouTubeVideo,
   markyToReplaceWithYouTubeVideo,
-  marKey, // used to set the marky to be replaced with youtube player
+  marKey,
 }) {
   const marqueeRef = useRef();
 
@@ -90,6 +94,23 @@ export default function Marky({
   const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState(0);
+
+  useEffect(() => {
+    // marKey of this specific Marky changes when the
+    // user changes activity. If:
+    // 1. this Marky has setMarkyToReplaceWithYouTubeVideo as a function
+    // 2. the marKey isn't the one in the header (0)
+    // 3. markyToReplaceWithYouTubeVideo isn't null (meaning the user hasn't clicked a video activity)
+    // 4. the marKey is already correctly set
+    if (
+      setMarkyToReplaceWithYouTubeVideo &&
+      marKey != 0 &&
+      markyToReplaceWithYouTubeVideo != null &&
+      markyToReplaceWithYouTubeVideo != marKey
+    ) {
+      setMarkyToReplaceWithYouTubeVideo(marKey);
+    }
+  }, [marKey]);
 
   useEffect(() => {
     marqueeRef.current
@@ -106,25 +127,29 @@ export default function Marky({
       (YouTubeURL && setMarkyType('YouTubeVideo'));
   }, [WindowTitle, TabTitle, YouTubeURL]);
 
-  const handleLinkClick = (url) => {
-    shell.openExternal(url);
-  };
-
-  const handleYouTubeClick = (url) => {
-    if (userID) {
-      db.collection('Users')
-        .doc(userID)
-        .collection('YouTubeTimeRequests')
-        .add(new Object())
-        .then(() => {
-          console.log('YouTube time successfully written!');
-          setMarkyToReplaceWithYouTubeVideo(
-            markyToReplaceWithYouTubeVideo ? null : marKey
-          );
-        })
-        .catch((error) => {
-          console.error('Error writing YouTube time: ', error);
-        });
+  const handleClick = () => {
+    spotifyPopUp();
+    console.log('clicked');
+    if (WindowTitle) {
+      return;
+    } else if (YouTubeURL) {
+      setMarkyToReplaceWithYouTubeVideo(
+        markyToReplaceWithYouTubeVideo ? null : marKey
+      );
+      if (userID) {
+        db.collection('Users')
+          .doc(userID)
+          .collection('YouTubeTimeRequests')
+          .add(new Object())
+          .then(() => {
+            console.log('YouTube time successfully written!');
+          })
+          .catch((error) => {
+            console.error('Error writing YouTube time: ', error);
+          });
+      }
+    } else if (TabURL) {
+      shell.openExternal(TabURL);
     }
   };
 
@@ -151,7 +176,7 @@ export default function Marky({
   };
 
   return (
-    <MarkyDiv markyType={markyType}>
+    <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
 
       <div ref={marqueeRef} className={activityText()}>
@@ -179,21 +204,11 @@ export default function Marky({
           }}
         >
           {TabURL ? (
-            <a onClick={() => handleLinkClick(TabURL)}>{TabTitle}</a>
+            <a>{TabTitle}</a>
           ) : YouTubeURL ? (
-            markyToReplaceWithYouTubeVideo ? (
-              <a className={closeText()}>close</a>
-            ) : (
-              <a
-                onClick={() => {
-                  handleYouTubeClick(YouTubeURL);
-                }}
-              >
-                {YouTubeTitle}
-              </a>
-            )
+            markyToReplaceWithYouTubeVideo == null && YouTubeTitle
           ) : (
-            WindowTitle || TabTitle || YouTubeTitle
+            WindowTitle
           )}
         </motion.div>
       </div>

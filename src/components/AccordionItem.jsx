@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
@@ -15,6 +15,8 @@ const header = css({
 
 export default function AccordionItem({ friend }) {
   const [expanded, setExpanded] = useState(false);
+  const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
+    useState(null);
 
   const toggleExpansion = () => {
     setExpanded(!expanded);
@@ -36,8 +38,9 @@ export default function AccordionItem({ friend }) {
           name={friend.Name}
           mainActivity={friend.Activity[0]}
           userID={friend.UserID}
-          toggleExpansion={toggleExpansion}
           expanded={expanded}
+          markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+          setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
         />
       </motion.header>
       <AnimatePresence initial={false}>
@@ -52,7 +55,14 @@ export default function AccordionItem({ friend }) {
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <CardBody activity={friend.Activity} userID={friend.UserID} />
+            <CardBody
+              activity={friend.Activity}
+              userID={friend.UserID}
+              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+              setMarkyToReplaceWithYouTubeVideo={
+                setMarkyToReplaceWithYouTubeVideo
+              }
+            />
           </motion.section>
         )}
       </AnimatePresence>

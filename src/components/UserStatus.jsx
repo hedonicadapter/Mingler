@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { css } from '@stitches/react';
-import '../App.global.css';
-import Marquee from 'react-fast-marquee';
-import { BiPlanet } from 'react-icons/bi';
 
 import { useAuth } from '../contexts/AuthContext';
 
 import { db } from '../config/firebase';
-import colors from '../config/colors';
 
-const header = css({ flexDirection: 'column' });
-const subContainer = css({ flexDirection: 'row', display: 'flex' });
-
+// Starts the script (../scripts/ActiveWindowListener.py) that listens for the user's
+// foreground window and returns it here.
+//
+// The youtube and chromium listeners are handled by the dedicated chromium extension.
 export default function UserStatus() {
   const { currentUser } = useAuth();
 
@@ -48,87 +44,25 @@ export default function UserStatus() {
     });
   };
 
+  const activeSongListener = () => {
+    // spotifyApi.getMyCurrentPlayingTrack().then(
+    //   function (data) {
+    //     console.log('Now playing: ' + data.body.item.name);
+    //   },
+    //   function (err) {
+    //     console.log('Something went wrong!', err);
+    //   }
+    // );
+  };
+
   const exitListeners = () => {
     process.kill();
-    currentListener();
+    currentListener(); // for firestore onSnapshot listeners
   };
 
   useEffect(() => {
     activeWindowListener();
-
+    activeSongListener();
     // return exitListeners();
   }, []);
-
-  // return (
-  //   <div className={header()}>
-  //     <div className={subContainer()}>
-  //       <BiPlanet />
-  //       {playTabMarquee ? (
-  //         <Marquee
-  //           className="tabLink"
-  //           play={playTabMarquee}
-  //           gradientWidth={25}
-  //           speed={25}
-  //         >
-  //           <div
-  //             onMouseEnter={() => {
-  //               setPlayTabMarquee(true);
-  //             }}
-  //             onMouseLeave={() => {
-  //               setPlayTabMarquee(false);
-  //             }}
-  //           >
-  //             <a onClick={() => handleLinkClick(activeTabURL)}>
-  //               {activeTabTitle}
-  //             </a>
-  //             <span>&nbsp;&nbsp;</span>
-  //           </div>
-  //         </Marquee>
-  //       ) : (
-  //         <div
-  //           className={'activityText'}
-  //           onMouseEnter={() => {
-  //             setPlayTabMarquee(true);
-  //           }}
-  //           onMouseLeave={() => {
-  //             setPlayTabMarquee(false);
-  //           }}
-  //         >
-  //           <a onClick={() => handleLinkClick(activeTabURL)}>
-  //             {activeTabTitle}
-  //           </a>
-  //           <span>&nbsp;&nbsp;</span>
-  //         </div>
-  //       )}
-  //     </div>
-  //     {playWindowMarquee ? (
-  //       <Marquee play={playWindowMarquee} gradientWidth={25} speed={25}>
-  //         <div
-  //           onMouseEnter={() => {
-  //             setPlayWindowMarquee(true);
-  //           }}
-  //           onMouseLeave={() => {
-  //             setPlayWindowMarquee(false);
-  //           }}
-  //         >
-  //           {activeWindowTitle}
-  //           <span>&nbsp;&nbsp;</span>
-  //         </div>
-  //       </Marquee>
-  //     ) : (
-  //       <div
-  //         className={'activityText'}
-  //         onMouseEnter={() => {
-  //           setPlayWindowMarquee(true);
-  //         }}
-  //         onMouseLeave={() => {
-  //           setPlayWindowMarquee(false);
-  //         }}
-  //       >
-  //         {activeWindowTitle}
-  //         <span>&nbsp;&nbsp;</span>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
 }
