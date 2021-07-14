@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 import colors from '../config/colors';
 import { db } from '../config/firebase';
-import spotifyPopUp from './SpotifyPopUp';
+import SpotifyPopUp from './SpotifyPopUp';
 
 const shell = require('electron').shell;
 
@@ -128,7 +128,7 @@ export default function Marky({
   }, [WindowTitle, TabTitle, YouTubeURL]);
 
   const handleClick = () => {
-    spotifyPopUp();
+    SpotifyPopUp();
     console.log('clicked');
     if (WindowTitle) {
       return;

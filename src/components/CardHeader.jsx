@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
-import { spotifyPopUp } from './SpotifyPopUp';
+import { SpotifyPopUp } from './SpotifyPopUp';
 
 const container = css({
   backgroundColor: 'transparent',
@@ -148,7 +148,7 @@ export default function CardHeader({
 
   const handleConnectToSpotify = () => {
     console.log('spotify pop up');
-    spotifyPopUp();
+    SpotifyPopUp();
   };
 
   return (
