@@ -52,12 +52,13 @@ export default function SpotifyPopUp() {
         win.webContents
           .executeJavaScript('window.location.hash')
           .then((result) => {
-            const { access_token, expires_in, token_type } =
+            const { access_token, expires_in, refresh_token, code } =
               getReturnedAuthParams(result);
 
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('expires_in', expires_in);
-            localStorage.setItem('token_type', token_type);
+            localStorage.setItem('refresh_token', refresh_token);
+            localStorage.setItem('code', code);
 
             win.close();
           });

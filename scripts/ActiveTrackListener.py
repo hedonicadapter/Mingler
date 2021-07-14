@@ -15,12 +15,12 @@ def get_current_track(access_token):
     )
     json_response = response.json();
 
-    track_id = json_response['item']['id']
-    track_name = json_response['item']['name']
-    link =json_response['item']['external_urls']['spotify']
+    track_id = json_response["item"]["id"]
+    track_name = json_response["item"]["name"]
+    link = json_response["item"]["external_urls"]["spotify"]
     
-    artists = json_response['item']['artists']
-    artists_names = ', '.join([artist['name'] for artist in artists])
+    artists = json_response["item"]["artists"]
+    artists_names = ', '.join([artist["name"] for artist in artists])
     
 
     current_track_info = {
@@ -40,14 +40,15 @@ def main():
 
             current_track_info = get_current_track(SPOTIFY_ACCESS_TOKEN)
             
-            if previous_track_id is None or current_track_info['id'] != previous_track_id:
+            if previous_track_id != current_track_info["id"]:
                 print(current_track_info)
                 sys.stdout.flush()
 
-                previous_track_id = current_track_info['id']
+                previous_track_id = current_track_info["id"]
             
             Timer(1.0, get_track_info).start()
     
     get_track_info()
 
-main()
+if __name__ == "__main__":
+    main()
