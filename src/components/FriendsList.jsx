@@ -153,11 +153,11 @@ export default function FriendsList() {
           Find '{searchValue}'
         </div>
       )}
-      <input
+      {/* <input
         type="text"
         value={searchValue || ''}
         onChange={handleSearchInput}
-      />
+      /> */}
     </div>
   );
 }

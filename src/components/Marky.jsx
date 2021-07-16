@@ -59,8 +59,8 @@ const closeText = css({
   color: colors.darkmodeDisabledText,
 });
 const activityIconStyle = css({
-  width: 20,
-  height: 20,
+  width: 16,
+  height: 16,
   paddingRight: 8,
 });
 const closeIconStyle = css({
@@ -85,6 +85,8 @@ export default function Marky({
   YouTubeURL,
   YouTubeTitle,
   userID,
+
+  expanded,
 
   // used to set the marky to be replaced with youtube player
   setMarkyToReplaceWithYouTubeVideo,

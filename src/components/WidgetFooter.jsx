@@ -16,11 +16,11 @@ const button = css({
 export default function WidgetFooter(props) {
   return (
     <div className={container()}>
-      <div className={button()}>
+      {/* <div className={button()}>
         <button onClick={() => console.log('toggled settings')}>
           settings
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

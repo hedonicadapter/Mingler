@@ -10,9 +10,9 @@ import Marky from './Marky';
 
 const flipper = css({
   backgroundColor: colors.depressedWhite,
-  marginTop: -20, // the Flipper component has some inherent top margin
+  marginTop: -16, // the Flipper component has some inherent top margin
   marginLeft: -25,
-  paddingBottom: 1,
+  // paddingBottom: 1,
 });
 const playerContainer = css({
   position: 'relative',
@@ -35,6 +35,7 @@ export default function CardBody({
   userID,
   markyToReplaceWithYouTubeVideo,
   setMarkyToReplaceWithYouTubeVideo,
+  expanded,
 }) {
   const playerRef = useRef();
 
@@ -74,6 +75,7 @@ export default function CardBody({
                     markyToReplaceWithYouTubeVideo
                   }
                   marKey={index}
+                  expanded={expanded}
                 />
               </Flipped>
             ) : (
@@ -140,6 +142,7 @@ export default function CardBody({
                             markyToReplaceWithYouTubeVideo
                           }
                           marKey={index}
+                          expanded={expanded}
                         />
                       </Flipped>
                     </>
