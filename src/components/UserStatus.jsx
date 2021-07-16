@@ -5,6 +5,7 @@ const execFile = require('child_process').execFile;
 import { useAuth } from '../contexts/AuthContext';
 
 import { db } from '../config/firebase';
+import { getAccessToken, refreshAccessToken } from '../config/spotify';
 
 // Starts the script (../scripts/ActiveWindowListener.py) that listens for the user's
 // foreground window and returns it here.
@@ -47,21 +48,14 @@ export default function UserStatus() {
     let process;
 
     const access_token = localStorage.getItem('access_token');
-    const expires_in = localStorage.getItem('expires_in');
-    const refresh_token = localStorage.getItem('refresh_token');
-
-    if ((access_token, expires_in)) {
+    console.log(access_token);
+    if (access_token) {
       var exePath = path.resolve(
         __dirname,
         '../scripts/ActiveTrackListener.py'
       );
 
-      process = execFile('python', [
-        exePath,
-        access_token,
-        expires_in,
-        refresh_token,
-      ]);
+      process = execFile('python', [exePath, access_token]);
 
       process.stdout.on('data', function (data) {
         console.log(data);
@@ -97,28 +91,7 @@ export default function UserStatus() {
   };
 
   const refreshToken = () => {
-    const axios = require('axios');
-    const refreshTokenApiEndpoint = 'https://accounts.spotify.com/api/token';
-    const redirectUri = 'http://localhost:1212';
-    const access_token = localStorage.getItem('access_token');
-    const code = localStorage.getItem('code');
-
-    axios
-      .post(refreshTokenApiEndpoint, access_token, {
-        headers: {
-          Authorization: 'Bearer ' + access_token,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: redirectUri,
-      })
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error.toJSON());
-      });
+    // refreshAccessToken();
   };
 
   const exitListeners = () => {

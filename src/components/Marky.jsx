@@ -74,6 +74,10 @@ const highZIndex = css({
   zIndex: 15,
 });
 
+// prop: isFromHeader ?
+// if true: use prop setExpanded to toggle the card body
+//          and set the video at position [0]
+
 export default function Marky({
   WindowTitle,
   TabTitle,
@@ -128,8 +132,7 @@ export default function Marky({
   }, [WindowTitle, TabTitle, YouTubeURL]);
 
   const handleClick = () => {
-    SpotifyPopUp();
-    console.log('clicked');
+    // SpotifyPopUp();
     if (WindowTitle) {
       return;
     } else if (YouTubeURL) {

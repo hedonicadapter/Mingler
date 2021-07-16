@@ -5,12 +5,11 @@ import { css } from '@stitches/react';
 
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
+import colors from '../config/colors';
 
 const header = css({
   zIndex: 5,
   paddingBottom: 20,
-  // borderBottom: '3px solid rgba(0,0,0,0)',
-  backgroundColor: 'rgba(0,0,0,0)',
 });
 
 export default function AccordionItem({ friend }) {
@@ -24,12 +23,15 @@ export default function AccordionItem({ friend }) {
   return (
     <>
       <motion.header
+        style={{
+          backgroundColor: expanded
+            ? 'rgba(241,235,232,1)'
+            : 'rgba(253,245,241, 1)',
+        }}
         whileHover={{
-          backgroundColor: expanded ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.075)',
-          // borderBottom: '3px solid rgba(0,0,0,0.3)',
+          backgroundColor: 'rgba(241,235,232,1)',
         }}
         transition={{ duration: 0.15 }}
-        initial={false}
         onClick={() => toggleExpansion()}
         className={header()}
       >

@@ -62,7 +62,7 @@ export default function CardBody({
       <Flipper className={flipper()}>
         <ul>
           {activity.map((activity, index) =>
-            markyToReplaceWithYouTubeVideo != index && index != 0 ? (
+            markyToReplaceWithYouTubeVideo != index ? (
               <Flipped key={index} flipId={'yo'}>
                 <Marky
                   {...activity}

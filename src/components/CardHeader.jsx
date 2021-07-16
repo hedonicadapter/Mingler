@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
@@ -40,7 +40,7 @@ const nameAndActivityPadding = css({
   paddingLeft: 6,
 });
 
-const StatusIndicatorAndBackground = styled('div', {
+const OfflineIndicatorAndBackground = styled('div', {
   position: 'absolute',
   top: -4,
   left: '-82px',
@@ -49,17 +49,7 @@ const StatusIndicatorAndBackground = styled('div', {
   borderRadius: '50%',
   clipPath: 'inset(-325% -4000% -350% -580%)',
   zIndex: -1,
-
-  variants: {
-    expanded: {
-      true: {
-        boxShadow: '0 0 0 9999px rgba(241,235,232,255)', // colors.depressedWhite
-      },
-      false: {
-        boxShadow: '0 0 0 9999px rgba(253,245,241,255)', // colors.classyWhite
-      },
-    },
-  },
+  boxShadow: '0 0 0 9999px rgba(253,245,241,255)', // colors.classyWhite
 });
 
 const StyledInput = styled('input', {
@@ -152,10 +142,35 @@ export default function CardHeader({
   };
 
   return (
-    <div className={container()}>
-      <Avatar round className={avatar()} name={name} size="58" />
+    <motion.div className={container()}>
+      <motion.div
+        animate={{
+          scale: expanded ? 0.6 : 1,
+          originX: expanded ? -0.6 : 0,
+          originY: expanded ? -0.3 : 0,
+        }}
+      >
+        <span
+          style={{
+            height: '16px',
+            width: '16px',
+            backgroundColor: '#bbb',
+            borderRadius: '50%',
+            display: 'inline-block',
+            position: 'absolute',
+          }}
+        ></span>
+        <Avatar round className={avatar()} name={name} size="58" />
+      </motion.div>
       <div className={nameAndActivityContainer()}>
-        <div className={nameAndActivityPadding()}>
+        <motion.div
+          animate={{
+            scale: expanded ? 0.8 : 1,
+            originX: expanded ? -0.6 : 0,
+            originY: expanded ? -0.3 : 0,
+          }}
+          className={nameAndActivityPadding()}
+        >
           <div className={text()}>{name}</div>
           {/* <StyledInput
               onFocus={setFocus}
@@ -170,21 +185,33 @@ export default function CardHeader({
               type="text"
               spellCheck={false}
             /> */}
-        </div>
+        </motion.div>
         <div className={statusIndicatorContainer()}>
-          <StatusIndicatorAndBackground expanded={expanded} />
+          {/* {user.offline && <OfflineIndicatorAndBackground />} */}
         </div>
         <div className={nameAndActivityPadding()}>
-          <Marky
-            {...mainActivity}
-            setMarkyToReplaceWithYouTubeVideo={
-              setMarkyToReplaceWithYouTubeVideo
-            }
-            markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-            marKey={1}
-          />
+          <AnimatePresence>
+            {!expanded && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Marky
+                  {...mainActivity}
+                  setMarkyToReplaceWithYouTubeVideo={
+                    setMarkyToReplaceWithYouTubeVideo
+                  }
+                  markyToReplaceWithYouTubeVideo={
+                    markyToReplaceWithYouTubeVideo
+                  }
+                  marKey={1}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
