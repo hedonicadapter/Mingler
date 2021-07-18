@@ -46,15 +46,15 @@ const MainPane = styled('div', {
 
 export default function Widget() {
   // clickthrough everything except className='clickable' (pointer-events: 'auto')
-  const setIgnoreMouseEvents =
-    require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
-  addEventListener('pointerover', function mousePolicy(event) {
-    mousePolicy._canClick =
-      event.target === document.documentElement
-        ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
-        : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
-  });
-  setIgnoreMouseEvents(true, { forward: true });
+  // const setIgnoreMouseEvents =
+  //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
+  // addEventListener('pointerover', function mousePolicy(event) {
+  //   mousePolicy._canClick =
+  //     event.target === document.documentElement
+  //       ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
+  //       : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
+  // });
+  // setIgnoreMouseEvents(true, { forward: true });
 
   const [visible, setVisible] = useState(true);
   const toggleMainPane = () => {

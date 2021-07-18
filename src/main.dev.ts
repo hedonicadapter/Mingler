@@ -90,7 +90,7 @@ const createWindow = async () => {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
-      devTools: false,
+      devTools: true,
     },
   });
 

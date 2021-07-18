@@ -115,15 +115,7 @@ class WindowChangeEventListener(object):
 
 class WindowObserver(IWindowChangeObserver):
     def notify(self, win_title):
-        # import win32gui
-        # w=win32gui
-        
-        # print(w.GetWindowText (w.GetForegroundWindow()))
-        # from win32gui import GetWindowText, GetForegroundWindow
-        # print GetWindowText(GetForegroundWindow())
-
         print(win_title)
-        # send to node
         sys.stdout.flush()
 
 def run():

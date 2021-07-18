@@ -64,6 +64,7 @@ export default function FriendsList() {
       friendsCopy[friend.key].Activity.length = 0;
 
       querySnapshot.forEach((doc) => {
+        console.log(doc);
         friendsCopy[friend.key].Activity.push(doc.data());
 
         setFriends(friendsCopy);
