@@ -1,7 +1,8 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
-import { auth, db, functions, rdb } from '../config/firebase';
 import http from 'http';
+import { app, anonCredentials } from '../config/realmDB';
+import { assert } from 'console';
 
 const AuthContext = React.createContext();
 
@@ -10,31 +11,28 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState();
+  const [currentUser, setCurrentUser] = useState(realm.currentUser);
   const [loading, setLoading] = useState(true);
 
-  function setName(newName) {
-    db.collection('Users').doc(currentUser?.uid).update({ name: newName });
-    currentUser
-      ?.updateProfile({
-        displayName: newName,
-      })
-      .then(function () {
-        console.log('name set');
-      })
-      .catch(function (error) {
-        console.log('Error while setting name: ', error);
-      });
+  function setName(newName) {}
+
+  async function anonymousLogin() {
+    try {
+      const user = await app.logIn(anonCredentials);
+
+      assert(user.id === app.currentUser.id);
+      return user;
+    } catch (e) {
+      console.log('Anonymous login failed: ', e);
+    }
   }
 
-  function anonymousLogin() {
-    auth
-      .signInAnonymously()
-      .then(function () {})
-      .catch(function (error) {
-        console.log(error.code);
-        console.log(error.message);
-      });
+  function login() {
+    anonymousLogin().then((user) => {
+      console.log('Signed in anonymously.');
+
+      setCurrentUser(user);
+    });
 
     auth.onAuthStateChanged((user) => {
       const userRef = db.collection('Users').doc(user.uid);
@@ -87,7 +85,7 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    anonymousLogin();
+    login();
   }, []);
 
   useEffect(() => {

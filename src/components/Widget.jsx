@@ -13,8 +13,6 @@ import colors from '../config/colors';
 import WidgetHeader from './WidgetHeader';
 import FriendsList from './FriendsList';
 import SettingsPane from './SettingsPane';
-import { auth, db } from '../config/firebase';
-import { useAuth } from '../contexts/AuthContext';
 import WidgetFooter from './WidgetFooter';
 
 const ipc = electron.ipcRenderer;

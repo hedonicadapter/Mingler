@@ -12,7 +12,6 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
 import {
-  app,
   BrowserWindow,
   shell,
   globalShortcut,
@@ -22,8 +21,9 @@ import {
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import mainWindowCreator from '../mainWindow.js';
-import { db } from './config/firebase';
+// import mainWindowCreator from '../mainWindow.js';
+
+import { app } from './config/realmDB';
 
 var Positioner = require('electron-positioner');
 
@@ -116,30 +116,32 @@ const createWindow = async () => {
 
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
-    mainWindow.on('close', function (e) {
+    mainWindow.on('close', async function (e) {
       e.preventDefault();
 
-      const usersRef = db.collection('Users');
+      await app?.currentUser?.logOut();
+
+      // const usersRef = db.collection('Users');
 
       // Delete current user from their friends' OnlineFriend collections
-      usersRef
-        .doc(data)
-        .get()
-        .then((doc) => {
-          doc.data().Friends.forEach((friend) => {
-            usersRef
-              .doc(friend)
-              .collection('OnlineFriends')
-              .doc(data)
-              .delete()
-              .then(() => {
-                mainWindow.destroy();
-              })
-              .catch((error) => {
-                console.error('Error removing document: ', error);
-              });
-          });
-        });
+      // usersRef
+      //   .doc(data)
+      //   .get()
+      //   .then((doc) => {
+      //     doc.data().Friends.forEach((friend) => {
+      //       usersRef
+      //         .doc(friend)
+      //         .collection('OnlineFriends')
+      //         .doc(data)
+      //         .delete()
+      //         .then(() => {
+      //           mainWindow.destroy();
+      //         })
+      //         .catch((error) => {
+      //           console.error('Error removing document: ', error);
+      //         });
+      //     });
+      //   });
     });
   });
 
