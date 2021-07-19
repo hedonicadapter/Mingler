@@ -1,43 +1,53 @@
-// Get current user's ID
+import axios from 'axios';
+import { app } from './realmDB';
+
+const http = axios.create({
+  baseURL:
+    'https://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
+  headers: {
+    'Content-type': 'application/json',
+  },
+});
+
+class DAO {
+  async logOut() {
+    await app?.currentUser?.logOut();
+  }
+
+  getFriends() {
+    console.log(JSON.stringify(app?.currentUser?.id));
+    // UserID retrieval happens server-side
+    return http.get(`/getFriends`);
+  }
+
+  find(query, by = 'name', page = 0) {
+    return http.get(`restaurants?${by}=${query}&page=${page}`);
+  }
+
+  createReview(data) {
+    return http.post('/review-new', data);
+  }
+
+  updateReview(data) {
+    return http.put('/review-edit', data);
+  }
+
+  deleteReview(id, userId) {
+    return http.delete(`/review-delete?id=${id}`, {
+      data: { user_id: userId },
+    });
+  }
+
+  getCuisines(id) {
+    return http.get(`/cuisines`);
+  }
+}
+
+export default new DAO();
 
 // Get friends' IDs of current user by current user's ID
-exports = async function (payload, response) {
-  const { current_user_id = BSON.ObjectId('') } = payload.query;
-
-  const userCollection = context.services
-    .get('mongodb-atlas')
-    .db('ShareHub')
-    .collection('users');
-
-  const current_user_friends = await userCollection.find(
-    { _id: current_user_id },
-    { friends: 1 }
-  );
-
-  const query = { _id: { $in: current_user_friends } };
-
-  const friend_ids = await userCollection.find(query);
-
-  console.log(friend_ids);
-  return friend_ids;
-};
 
 // Get activities of each friend by their IDs ordered by date
-exports = async function (payload, response) {
-  const {} = payload.query;
-
-  const collection = context.services
-    .get('mongodb-atlas')
-    .db('Sharehub')
-    .collection('users');
-
-  const query = { _id: { $in: [collection.friends] } };
-
-  const friend_ids = await api.users.find(query);
-
-  return friend_ids;
-};
-
 // Set name of current user
 
 // Set active window

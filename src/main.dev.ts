@@ -12,6 +12,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
 import {
+  app,
   BrowserWindow,
   shell,
   globalShortcut,
@@ -23,7 +24,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 // import mainWindowCreator from '../mainWindow.js';
 
-import { app } from './config/realmDB';
+import dao from './config/dao';
 
 var Positioner = require('electron-positioner');
 
@@ -119,7 +120,12 @@ const createWindow = async () => {
     mainWindow.on('close', async function (e) {
       e.preventDefault();
 
-      await app?.currentUser?.logOut();
+      server?.close(() => {
+        dao.logOut().then(() => {
+          mainWindow.destroy();
+          return;
+        });
+      });
 
       // const usersRef = db.collection('Users');
 
@@ -174,6 +180,35 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+ipcMain.on('sendUserIDToChromiumExtension', (evt, data) => {
+  sendUserIDToChromiumExtension(data);
+});
+
+var http = require('http');
+let server;
+
+const sendUserIDToChromiumExtension = (userID) => {
+  server?.close();
+  const PORT = process.env.PORT || 8080;
+
+  try {
+    server = http
+      .createServer(function (request, response) {
+        response.writeHeader(200, {
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'text/html',
+        });
+        response.write(userID, () => {
+          console.log('Writing string Data...');
+        });
+        response.end();
+      })
+      .listen(PORT);
+  } catch (exception) {
+    console.log('Creating server exception: ', exception);
+  }
+};
 
 let showing = false;
 

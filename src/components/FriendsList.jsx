@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { db, field } from '../config/firebase';
 import { getObjectByProp } from '../helpers/arrayTools';
+import DAO from '../config/dao';
 
 const container = css({});
 
@@ -81,39 +82,46 @@ export default function FriendsList() {
   };
 
   useEffect(() => {
+    DAO.getFriends()
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
     // Maybe getting friends should be done in authcontext
     // Get current user
-    db.collection('Users')
-      .doc(currentUser.uid)
-      .get()
-      .then((doc) => {
-        let dbFriends = [];
-        let index = 0; // For keys used in render
+    // db.collection('Users')
+    //   .doc(currentUser.uid)
+    //   .get()
+    //   .then((doc) => {
+    //     let dbFriends = [];
+    //     let index = 0; // For keys used in render
 
-        const friendsRef = db
-          .collection('Users')
-          // Filter document IDs in Users by current users friends
-          .where(field.FieldPath.documentId(), 'in', doc.data().Friends)
-          .get()
-          .then((querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-              let activityRef = doc.ref.collection('Activity');
+    //     const friendsRef = db
+    //       .collection('Users')
+    //       // Filter document IDs in Users by current users friends
+    //       .where(field.FieldPath.documentId(), 'in', doc.data().Friends)
+    //       .get()
+    //       .then((querySnapshot) => {
+    //         querySnapshot.forEach((doc) => {
+    //           let activityRef = doc.ref.collection('Activity');
 
-              dbFriends.push({
-                key: index,
-                UserID: doc.id,
-                Name: doc.data().Name,
-                ActivityRef: activityRef,
-                Activity: [],
-              });
+    //           dbFriends.push({
+    //             key: index,
+    //             UserID: doc.id,
+    //             Name: doc.data().Name,
+    //             ActivityRef: activityRef,
+    //             Activity: [],
+    //           });
 
-              index++;
-            });
+    //           index++;
+    //         });
 
-            setFriends(dbFriends);
-            setFilteredFriends(dbFriends);
-          });
-      });
+    //         setFriends(dbFriends);
+    //         setFilteredFriends(dbFriends);
+    //       });
+    //   });
   }, []);
 
   let ranOnce = false;
