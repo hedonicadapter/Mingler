@@ -27,6 +27,9 @@ import MenuBuilder from './menu';
 import dao from './config/dao';
 
 var Positioner = require('electron-positioner');
+const Store = require('electron-store');
+
+Store.initRenderer();
 
 export default class AppUpdater {
   constructor() {

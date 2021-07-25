@@ -14,6 +14,10 @@ class DAO {
     await app?.currentUser?.logOut();
   }
 
+  findUserByEmail(email) {
+    return http.post('/findUser', { email: email });
+  }
+
   getFriends() {
     console.log(JSON.stringify(app?.currentUser?.id));
     // UserID retrieval happens server-side

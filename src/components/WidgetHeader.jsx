@@ -26,47 +26,47 @@ export default function WidgetHeader() {
 
   UserStatus();
 
-  db.collection('Users')
-    .doc(currentUser.uid)
-    .get()
-    .then((doc) => {
-      let activityRef = doc.ref.collection('Activity');
+  // db.collection('Users')
+  //   .doc(currentUser.uid)
+  //   .get()
+  //   .then((doc) => {
+  //     let activityRef = doc.ref.collection('Activity');
 
-      activityRef.doc('ActiveWindow').onSnapshot((querySnapshot) => {
-        activityRef
-          .orderBy('Date', 'desc')
-          .get()
-          .then((snapshot) => {
-            let dbUserData = userData;
+  //     activityRef.doc('ActiveWindow').onSnapshot((querySnapshot) => {
+  //       activityRef
+  //         .orderBy('Date', 'desc')
+  //         .get()
+  //         .then((snapshot) => {
+  //           let dbUserData = userData;
 
-            // Clear Activity object
-            dbUserData.Activity.length = 0;
+  //           // Clear Activity object
+  //           dbUserData.Activity.length = 0;
 
-            snapshot.forEach((doc) => {
-              dbUserData.Activity.push(doc.data());
+  //           snapshot.forEach((doc) => {
+  //             dbUserData.Activity.push(doc.data());
 
-              setUserData(dbUserData);
-            });
-          });
-      });
+  //             setUserData(dbUserData);
+  //           });
+  //         });
+  //     });
 
-      activityRef.doc('ChromiumTab').onSnapshot((querySnapshot) => {
-        activityRef
-          .orderBy('Date', 'desc')
-          .get()
-          .then((snapshot) => {
-            let dbUserData = userData;
+  //     activityRef.doc('ChromiumTab').onSnapshot((querySnapshot) => {
+  //       activityRef
+  //         .orderBy('Date', 'desc')
+  //         .get()
+  //         .then((snapshot) => {
+  //           let dbUserData = userData;
 
-            dbUserData.Activity.length = 0;
+  //           dbUserData.Activity.length = 0;
 
-            snapshot.forEach((doc) => {
-              dbUserData.Activity.push(doc.data());
+  //           snapshot.forEach((doc) => {
+  //             dbUserData.Activity.push(doc.data());
 
-              setUserData(dbUserData);
-            });
-          });
-      });
-    });
+  //             setUserData(dbUserData);
+  //           });
+  //         });
+  //     });
+  //   });
 
   const toggleExpansion = () => {
     setExpanded(!expanded);

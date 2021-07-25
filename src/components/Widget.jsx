@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { css, styled } from '@stitches/react';
-import {
-  TransitionGroup,
-  CSSTransition,
-  Transition,
-} from 'react-transition-group';
+
 import * as electron from 'electron';
 
 import './Widget.css';
@@ -14,12 +10,14 @@ import WidgetHeader from './WidgetHeader';
 import FriendsList from './FriendsList';
 import SettingsPane from './SettingsPane';
 import WidgetFooter from './WidgetFooter';
+import WelcomePane from './WelcomePane';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
 
 const MainPane = styled('div', {
-  marginTop: -10,
+  // marginTop: -10,
   float: 'right',
   overflow: 'hidden',
   transition: 'transform 300ms ease, opacity 150ms ease-in',
@@ -70,31 +68,12 @@ export default function Widget() {
 
   return (
     <MainPane visible={visible}>
-      {/* <Transition timeout={275} in={visible} appear>
-        {(state) => (
-          <div style={{ ...defaultStyle, ...transitionStyles[state] }}>
-            <AutoResponsive {...getAutoResponsiveProps()}>
-              {paneList.map((i) => {
-                return (
-                  <div key={i} className="item" style={styleList[i]}>
-                    {i}
-                    {i == 1 && (
-                      <div>
-                        <WidgetHeader />
-                        <FriendsList />
-                        <WidgetFooter toggleSettingsPane={toggleSettingsPane} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </AutoResponsive>
-          </div>
-        )}
-      </Transition> */}
-      <WidgetHeader />
-      <FriendsList />
-      <WidgetFooter />
+      <AuthProvider>
+        <WelcomePane />
+        {/* <WidgetHeader />
+        <FriendsList />
+        <WidgetFooter /> */}
+      </AuthProvider>
     </MainPane>
   );
 }

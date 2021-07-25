@@ -63,3 +63,10 @@ a {
 .bottomHoverBorder:hover {
   opacity: 1;
 } */
+
+h1,
+h2 {
+  padding: 0;
+  margin: 0px;
+  line-height: 100%;
+}

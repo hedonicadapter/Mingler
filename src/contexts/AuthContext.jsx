@@ -1,8 +1,16 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
 // import http from 'http';
-import { app, anonCredentials } from '../config/realmDB';
 import { assert } from 'console';
+
+import { app, anonCredentials } from '../config/realmDB';
+import WelcomePane from '../components/WelcomePane';
+import DAO from '../config/DAO';
+
+const nameGenerator = require('positive-name-generator');
+const Store = require('electron-store');
+
+const store = new Store();
 
 const AuthContext = React.createContext();
 
@@ -18,10 +26,6 @@ export function AuthProvider({ children }) {
     currentUser ? setLoading(false) : setLoading(true);
   }, [currentUser]);
 
-  useEffect(() => {
-    console.log(loading);
-  }, [loading]);
-
   const refreshCustomUserData = async () => {
     await app.currentUser.refreshCustomData();
   };
@@ -30,22 +34,41 @@ export function AuthProvider({ children }) {
     refreshCustomUserData();
   }
 
+  const nameNewAccount = async (newName) => {
+    const appendedName = nameGenerator().replace(/ /g, '');
+    const placeholderAdress = '@example.com';
+    const email = newName + appendedName + placeholderAdress;
+
+    DAO.findUserByEmail(email).then((result) => {
+      console.log(result);
+    });
+
+    // const user = await app.emailPasswordAuth.registerUser(
+    //   'eheh.jasper@example.com',
+    //   'passw0rd'
+    // );
+  };
+
   async function anonymousLogin() {
     try {
-      const user = await app.logIn(anonCredentials);
+      console.log(user);
 
-      assert(user.id === app.currentUser.id);
+      // assert(user.id === app.currentUser.id);
       return user;
     } catch (e) {
       console.log('Anonymous login failed: ', e);
+      const user = await app.logIn(anonCredentials);
+
+      return user;
     }
   }
 
   function login() {
     anonymousLogin().then((user) => {
-      console.log('Signed in anonymously.');
+      store.set('returningAnonUserID', user.id);
 
-      setCurrentUser(user);
+      // console.log(user);
+      setCurrentUser(user.id);
     });
 
     // auth.onAuthStateChanged((user) => {
@@ -95,7 +118,9 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     setName,
+    nameNewAccount,
   };
+
   return (
     <AuthContext.Provider value={value}>
       {!loading && children}
