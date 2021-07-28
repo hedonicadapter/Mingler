@@ -11,7 +11,22 @@ import { db, field } from '../config/firebase';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
 
-const container = css({});
+const container = css({ backgroundColor: colors.classyWhite });
+
+const searchInputStyle = css({
+  WebkitAppearance: 'none',
+  outline: 'none',
+  border: 'none',
+  backgroundColor: 'transparent',
+
+  fontSize: '1.0em',
+  fontWeight: 600,
+
+  width: '100%',
+  padding: 15,
+  paddingLeft: 30,
+  paddingRight: 30,
+});
 
 const findButton = css({
   backgroundColor: 'white',
@@ -152,7 +167,7 @@ export default function FriendsList() {
         !findFriendsVisible &&
         filteredFriends.map((friend) => <AccordionItem friend={friend} />)
       ) : (
-        <div>
+        <div className={container()}>
           <h1>you have no friends Sadge</h1>
         </div>
       )}
@@ -162,11 +177,13 @@ export default function FriendsList() {
           Find '{searchValue}'
         </div>
       )}
-      {/* <input
+      <input
+        placeholder="Find friends..."
         type="text"
         value={searchValue || ''}
         onChange={handleSearchInput}
-      /> */}
+        className={searchInputStyle()}
+      />
     </div>
   );
 }

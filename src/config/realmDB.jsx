@@ -18,7 +18,7 @@ const app = new Realm.App(config);
 
 const anonCredentials = Realm.Credentials.emailPassword(
   'eheh.jasper@example.com',
-  'passw0rd'
+  '§!´DontBruteforceMe'
 );
 // const anonCredentials = Realm.Credentials.function({
 //   username: 'anonamoose',

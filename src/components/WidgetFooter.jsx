@@ -4,10 +4,12 @@ import { css, styled } from '@stitches/react';
 import colors from '../config/colors';
 
 const container = css({
-  backgroundColor: 'white',
-  position: 'fixed',
-  bottom: 0,
-  right: 0,
+  backgroundColor: colors.classyWhite,
+  height: '100%',
+  display: 'flex',
+  alignItems: 'flex-end',
+  justifyContent: 'center',
+  flexDirection: 'column',
 });
 const button = css({
   alignSelf: 'flex-end',
@@ -16,11 +18,11 @@ const button = css({
 export default function WidgetFooter(props) {
   return (
     <div className={container()}>
-      {/* <div className={button()}>
+      <div className={button()}>
         <button onClick={() => console.log('toggled settings')}>
           settings
         </button>
-      </div> */}
+      </div>
     </div>
   );
 }

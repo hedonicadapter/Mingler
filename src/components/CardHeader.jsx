@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
+import MenuButton from './MenuButton';
 
 const container = css({
   backgroundColor: 'transparent',
@@ -120,6 +121,7 @@ export default function CardHeader({
 
   return (
     <motion.div className={container()}>
+      <MenuButton />
       <motion.span
         style={{
           left: 13,

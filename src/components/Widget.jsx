@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { css, styled } from '@stitches/react';
+import FullHeight from 'react-full-height';
 
 import * as electron from 'electron';
 
@@ -12,6 +13,7 @@ import SettingsPane from './SettingsPane';
 import WidgetFooter from './WidgetFooter';
 import WelcomePane from './WelcomePane';
 import { AuthProvider } from '../contexts/AuthContext';
+import { motion } from 'framer-motion';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
@@ -23,6 +25,7 @@ const MainPane = styled('div', {
   transition: 'transform 300ms ease, opacity 150ms ease-in',
   width: window.innerWidth * 0.92,
   willChange: 'transform',
+  height: window.innerHeight,
 
   variants: {
     visible: {
@@ -69,10 +72,23 @@ export default function Widget() {
   return (
     <MainPane visible={visible}>
       <AuthProvider>
-        <WelcomePane />
-        {/* <WidgetHeader />
-        <FriendsList />
-        <WidgetFooter /> */}
+        <motion.div
+          initial={{
+            x: '120%',
+            opacity: 0,
+          }}
+          animate={{
+            x: '0%',
+            opacity: 1,
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          <WidgetHeader />
+          <FriendsList />
+          <FullHeight>
+            <WidgetFooter />
+          </FullHeight>
+        </motion.div>
       </AuthProvider>
     </MainPane>
   );

@@ -15,7 +15,7 @@ class DAO {
   }
 
   findUserByEmail(email) {
-    return http.post('/findUser', { email: email });
+    return http.get(`/findUser?email=${email}`);
   }
 
   getFriends() {
