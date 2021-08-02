@@ -2,12 +2,18 @@ import axios from 'axios';
 import { app } from './realmDB';
 
 const http = axios.create({
-  baseURL:
-    'https://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
+  baseURL: '/api/auth/',
   headers: {
     'Content-type': 'application/json',
   },
 });
+// const http = axios.create({
+//   baseURL:
+//     'https://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
+//   headers: {
+//     'Content-type': 'application/json',
+//   },
+// });
 
 class DAO {
   async logOut() {
