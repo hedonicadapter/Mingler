@@ -1,15 +1,21 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const User = require('../models/User');
-// const GuestUser = require('../models/GuestUser');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
 
 exports.register = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, clientFingerprint } = req.body;
 
   try {
-    const user = await User.create({ username, email, password });
+    const user = await User.create({
+      username,
+      email,
+      password,
+      clientFingerprint,
+      guest: false,
+    });
 
     sendToken(user, 201, res);
   } catch (e) {
@@ -18,13 +24,18 @@ exports.register = async (req, res, next) => {
 };
 
 exports.registerGuest = async (req, res, next) => {
-  const { username } = req.body;
+  const { username, clientFingerprint } = req.body;
 
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(process.env.ANONYMOUS_PASSWORD, salt);
 
   try {
-    const user = await User.create({ username, password, guest: true });
+    const user = await User.create({
+      username,
+      password,
+      clientFingerprint,
+      guest: true,
+    });
 
     sendToken(user, 201, res);
   } catch (e) {
@@ -34,7 +45,7 @@ exports.registerGuest = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, clientFingerPrint } = req.body;
 
   if (!email || !password) {
     return next(new ErrorResponse('We need an email and a password.', 400));
@@ -44,14 +55,45 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
-      return next(new ErrorResponse('Invalid credentials1.', 404));
+      return next(new ErrorResponse('Invalid credentials.', 404));
     }
 
     const isMatch = await user.matchPasswords(password);
 
     if (!isMatch) {
-      return next(new ErrorResponse('Invalid credentials2.', 401));
+      return next(new ErrorResponse('Invalid credentials.', 401));
     }
+
+    user.clientFingerprint = clientFingerprint;
+    await user.save();
+
+    sendToken(user, 200, res);
+
+    return;
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.loginGuest = async (req, res, next) => {
+  const { guestID, clientFingerprint } = req.body;
+
+  if (!clientFingerprint) {
+    return next(new ErrorResponse("We didn't receive an ID.", 400));
+  }
+
+  try {
+    const user = await User.findOne({
+      _id: mongoose.Types.ObjectId(guestID),
+      clientFingerPrint,
+    });
+
+    if (!user) {
+      return next(new ErrorResponse('Something went wrong.', 404));
+    }
+
+    user.clientFingerprint = clientFingerprint;
+    await user.save();
 
     sendToken(user, 200, res);
 
@@ -131,5 +173,9 @@ exports.resetPassword = async (req, res, next) => {
 
 const sendToken = (user, statusCode, res) => {
   const token = user.getSignedToken();
-  res.status(statusCode).json({ success: true, token });
+  if (user.guest) {
+    res.status(statusCode).json({ success: true, token, guestID: user._id });
+  } else {
+    res.status(statusCode).json({ success: true, token });
+  }
 };

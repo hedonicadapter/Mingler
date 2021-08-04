@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 // import http from 'http';
 import { assert } from 'console';
 import * as Realm from 'realm-web';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import { app, anonCredentials } from '../config/realmDB';
 import WelcomePane from '../components/WelcomePane';
@@ -15,6 +16,18 @@ const Store = require('electron-store');
 const store = new Store();
 
 const AuthContext = React.createContext();
+
+// ============ Client fingerprint ============
+// Used to authenticate guest users
+const fpPromise = FingerprintJS.load();
+
+(async () => {
+  const fp = await fpPromise;
+  const result = await fp.get();
+
+  window.localStorage.setItem('clientFingerprint', result.visitorId);
+})();
+// ============ Client fingerprint ============
 
 let generateNameRetryLimit = 0;
 
