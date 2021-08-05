@@ -10,6 +10,10 @@ import WelcomePane from '../components/WelcomePane';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
+const {
+  setMostRecentUser,
+  getMostRecentUser,
+} = require('../helpers/localStorageManager');
 const nameGenerator = require('positive-name-generator');
 const Store = require('electron-store');
 
@@ -61,48 +65,33 @@ export function AuthProvider({ children }) {
     return name + appendedName + placeholderAdress;
   };
 
-  const nameNewAccount = async (name) => {
-    const email = generatePlaceholderEmail(name);
+  const registerGuest = async (username, clientFingerprint) => {
+    return await DAO.registerGuest(username, clientFingerprint)
+      .then((result) => {
+        const userID = result.data.guestID;
 
-    return await DAO.findUserByEmail(email).then((result) => {
-      if (!result.data) {
-        registerByEmail(email)
-          .then(() => {
-            store.set('anonymousEmail', email);
+        window.localStorage.setItem('guestID', userID);
 
-            console.log('Registration: ', email);
-          })
-          .catch((e) => {
-            console.log('Registration failed');
-          });
-        return { registered: true };
-      }
-      return { registered: false };
+        //set fingerprint
+        return { success: true };
+      })
+      .catch((e) => {
+        return { error: e.response.data.error };
+      });
+  };
+
+  const loginGuest = async () => {
+    const guestID = window.localStorage.getItem('guestID');
+    const fingerprint = window.localStorage.getItem('clientFingerprint');
+
+    return await DAO.loginGuest(guestID, fingerprint).then((result) => {
+      setMostRecentUser(guestID, null, fingerprint, true);
+      setCurrentUser(result.data.guestID);
     });
   };
 
-  const registerByEmail = async (email) => {
-    await app.emailPasswordAuth.registerUser(email, '§!´DontBruteforceMe');
-  };
-
-  async function anonymousLogin(email = store.get('anonymousEmail')) {
-    try {
-      const anoncred = Realm.Credentials.emailPassword(
-        email,
-        '§!´DontBruteforceMe'
-      );
-
-      const user = await app.logIn(anoncred);
-
-      assert(user.id === app.currentUser.id);
-      setCurrentUser(user);
-      return user;
-    } catch (e) {
-      console.log('Anonymous login failed: ', e);
-    }
-  }
-
   const logout = async () => {
+    // store.get(recently signed out) -> show sign in form with user credentials if remembered
     const logoutDB = async () => {
       await app.currentUser.logOut();
     };
@@ -110,11 +99,6 @@ export function AuthProvider({ children }) {
     logoutDB().then(() => {
       setCurrentUser(null);
     });
-
-    // auth.onAuthStateChanged((user) => {
-    //   const userRef = db.collection('Users').doc(user.uid);
-    //   const usersRef = db.collection('Users');
-
     //   // Add current user to each of their friends' OnlineFriends collection
     //   userRef.get().then((doc) => {
     //     doc.data().Friends.forEach((friend) => {
@@ -125,15 +109,6 @@ export function AuthProvider({ children }) {
     //         .set(new Object());
     //     });
     //   });
-
-    //   userRef.set({ Name: user.displayName, Guest: true }, { merge: true });
-
-    //   setCurrentUser(user);
-    //   ipcRenderer.send('currentUserID', user.uid);
-    //   setLoading(false);
-    // });
-
-    // return unsubscribe();
   };
 
   var http = require('http');
@@ -147,7 +122,13 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    anonymousLogin();
+    const recentUser = getMostRecentUser();
+
+    if (recentUser) {
+      if (recentUser.guest) loginGuest();
+      else if (!recentUser.guest)
+        console.log('log in with recent non guest user');
+    } else console.log('show sign in or sign up screen');
   }, []);
 
   useEffect(() => {
@@ -159,9 +140,9 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     setName,
-    nameNewAccount,
-    anonymousLogin,
     logout,
+    registerGuest,
+    loginGuest,
   };
 
   return (

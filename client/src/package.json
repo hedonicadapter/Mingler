@@ -2,7 +2,6 @@
   "name": "electron-react-boilerplate",
   "productName": "electron-react-boilerplate",
   "version": "2.3.0",
-  "proxy": "http://localhost:8080",
   "description": "ShareHub",
   "main": "./main.prod.js",
   "author": {

@@ -1,15 +1,15 @@
 import axios from 'axios';
 import { app } from './realmDB';
 
-const http = axios.create({
-  baseURL: '/api/auth/',
+const auth = axios.create({
+  baseURL: 'http://localhost:8080/api/auth/',
   headers: {
     'Content-type': 'application/json',
   },
 });
-// const http = axios.create({
+// const auth = axios.create({
 //   baseURL:
-//     'https://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
+//     'auths://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
 //   headers: {
 //     'Content-type': 'application/json',
 //   },
@@ -20,36 +20,47 @@ class DAO {
     await app?.currentUser?.logOut();
   }
 
+  registerGuest(username, clientFingerprint) {
+    const data = { username, clientFingerprint };
+
+    return auth.post('/registerGuest', data);
+  }
+
+  loginGuest(guestID, clientFingerprint) {
+    const data = { guestID, clientFingerprint };
+
+    return auth.post('/loginGuest', data);
+  }
+
   findUserByEmail(email) {
-    return http.get(`/findUser?email=${email}`);
+    return auth.get(`/findUser?email=${email}`);
   }
 
   getFriends() {
-    console.log(JSON.stringify(app?.currentUser?.id));
     // UserID retrieval happens server-side
-    return http.get(`/getFriends`);
+    return auth.get(`/getFriends`);
   }
 
   find(query, by = 'name', page = 0) {
-    return http.get(`restaurants?${by}=${query}&page=${page}`);
+    return auth.get(`restaurants?${by}=${query}&page=${page}`);
   }
 
   createReview(data) {
-    return http.post('/review-new', data);
+    return auth.post('/review-new', data);
   }
 
   updateReview(data) {
-    return http.put('/review-edit', data);
+    return auth.put('/review-edit', data);
   }
 
   deleteReview(id, userId) {
-    return http.delete(`/review-delete?id=${id}`, {
+    return auth.delete(`/review-delete?id=${id}`, {
       data: { user_id: userId },
     });
   }
 
   getCuisines(id) {
-    return http.get(`/cuisines`);
+    return auth.get(`/cuisines`);
   }
 }
 

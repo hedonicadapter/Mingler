@@ -26,6 +26,14 @@ exports.register = async (req, res, next) => {
 exports.registerGuest = async (req, res, next) => {
   const { username, clientFingerprint } = req.body;
 
+  if (!clientFingerprint) {
+    return next(new ErrorResponse("We didn't receive an ID.", 400));
+  }
+
+  if (!username) {
+    return next(new ErrorResponse("We didn't receive a username.", 400));
+  }
+
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(process.env.ANONYMOUS_PASSWORD, salt);
 
@@ -65,6 +73,8 @@ exports.login = async (req, res, next) => {
     }
 
     user.clientFingerprint = clientFingerprint;
+    // If user was set to 'Busy' for example during last use, set back to 'Busy'
+    user.status = user.previousStatus;
     await user.save();
 
     sendToken(user, 200, res);
@@ -77,7 +87,6 @@ exports.login = async (req, res, next) => {
 
 exports.loginGuest = async (req, res, next) => {
   const { guestID, clientFingerprint } = req.body;
-
   if (!clientFingerprint) {
     return next(new ErrorResponse("We didn't receive an ID.", 400));
   }
@@ -85,7 +94,7 @@ exports.loginGuest = async (req, res, next) => {
   try {
     const user = await User.findOne({
       _id: mongoose.Types.ObjectId(guestID),
-      clientFingerPrint,
+      clientFingerprint,
     });
 
     if (!user) {

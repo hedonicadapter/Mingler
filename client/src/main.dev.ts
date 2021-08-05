@@ -192,25 +192,24 @@ var http = require('http');
 let server;
 
 const sendUserIDToChromiumExtension = (userID) => {
-  server?.close();
-  const PORT = process.env.PORT || 8080;
-
-  try {
-    server = http
-      .createServer(function (request, response) {
-        response.writeHeader(200, {
-          'Cache-Control': 'no-cache',
-          'Content-Type': 'text/html',
-        });
-        response.write(userID, () => {
-          console.log('Writing string Data...');
-        });
-        response.end();
-      })
-      .listen(PORT);
-  } catch (exception) {
-    console.log('Creating server exception: ', exception);
-  }
+  //   server?.close();
+  //   const PORT = process.env.PORT || 8080;
+  //   try {
+  //     server = http
+  //       .createServer(function (request, response) {
+  //         response.writeHeader(200, {
+  //           'Cache-Control': 'no-cache',
+  //           'Content-Type': 'text/html',
+  //         });
+  //         response.write(userID, () => {
+  //           console.log('Writing string Data...');
+  //         });
+  //         response.end();
+  //       })
+  //       .listen(PORT);
+  //   } catch (exception) {
+  //     console.log('Creating server exception: ', exception);
+  //   }
 };
 
 let showing = false;

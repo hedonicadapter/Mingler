@@ -64,7 +64,7 @@ const continueButtonStyle = css({
 });
 
 export default function WelcomePane({}) {
-  const { currentUser, nameNewAccount, anonymousLogin } = useAuth();
+  const { currentUser, loginGuest, registerGuest } = useAuth();
   const [userName, setUserName] = useState(null);
   const [inputFocus, setInputFocus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -76,6 +76,15 @@ export default function WelcomePane({}) {
     inputRef?.current?.focus();
   }, [inputRef?.current]);
 
+  // Set new user status to false on unmount
+  // so an experienced user is not met with
+  // the same welcome screen
+  useEffect(() => {
+    return () => {
+      window.localStorage.setItem('newUser', false);
+    };
+  }, []);
+
   const inputFocusToggle = (evt) => {
     setInputFocus(!inputFocus);
   };
@@ -86,17 +95,23 @@ export default function WelcomePane({}) {
 
   const handleContinueClick = () => {
     setLoading(true);
-    nameNewAccount(userName).then(({ registered = null }) => {
-      if (registered) {
-        anonymousLogin().then((result) => {
-          setShowSuccessScreen(true);
-          // setTimeout(()=>setShowSuccessScreen(false),)
-        });
-      }
-      if (!registered) {
-        console.log('not registered');
-        // Something went wrong, please try again.
-      }
+    // nameNewAccount(userName).then(({ registered = null }) => {
+    //   if (registered) {
+    //     anonymousLogin().then((result) => {
+    //       setShowSuccessScreen(true);
+    //       // setTimeout(()=>setShowSuccessScreen(false),)
+    //     });
+    //   }
+    //   if (!registered) {
+    //     console.log('not registered');
+    //     // Something went wrong, please try again.
+    //   }
+    // });
+    const fingerprint = window.localStorage.getItem('clientFingerprint');
+
+    registerGuest(userName, fingerprint).then(({ success, error }) => {
+      success && loginGuest();
+      console.log(error);
     });
   };
 
