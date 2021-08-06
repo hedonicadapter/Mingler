@@ -8,7 +8,7 @@ const {
   resetPassword,
   registerGuest,
   loginGuest,
-} = require('../controllers/auth');
+} = require('../controllers/authController');
 
 //If we hit /register as a route it will trigger the register function
 router.route('/register').post(register);

@@ -29,6 +29,7 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  friends: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
   guest: Boolean,
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },

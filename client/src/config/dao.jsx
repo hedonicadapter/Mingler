@@ -7,13 +7,22 @@ const auth = axios.create({
     'Content-type': 'application/json',
   },
 });
-// const auth = axios.create({
-//   baseURL:
-//     'auths://webhooks.mongodb-realm.com/api/client/v2.0/app/sharehub-rhajd/service/Mainframe/incoming_webhook',
-//   headers: {
-//     'Content-type': 'application/json',
-//   },
-// });
+
+const private = axios.create({
+  baseURL: 'http://localhost:8080/api/private/',
+  headers: {
+    'Content-type': 'application/json',
+  },
+});
+
+export const setAuthToken = (token) => {
+  if (token) {
+    private.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+  } else {
+    //deleting the token from header
+    delete private.defaults.headers.common['Authorization'];
+  }
+};
 
 class DAO {
   async logOut() {
@@ -32,13 +41,21 @@ class DAO {
     return auth.post('/loginGuest', data);
   }
 
+  login(email, password, clientFingerprint) {
+    const data = { email, password, clientFingerprint };
+
+    return auth.post('/login', data);
+  }
+
   findUserByEmail(email) {
     return auth.get(`/findUser?email=${email}`);
   }
 
-  getFriends() {
-    // UserID retrieval happens server-side
-    return auth.get(`/getFriends`);
+  getFriends(userID) {
+    console.log(userID);
+    const data = { userID };
+
+    return user.get(`/getFriends`, data);
   }
 
   find(query, by = 'name', page = 0) {

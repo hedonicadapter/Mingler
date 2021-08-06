@@ -1,9 +1,9 @@
-setMostRecentUser = (userID, username = '', fingerprint = '', guest) => {
+setMostRecentUser = (userID = '', email = '', fingerprint = '', guest) => {
   let recentUsers =
     window.localStorage.getObject('mostRecentRememberedUser') || [];
 
   console.log(recentUsers instanceof Array);
-  recentUsers.unshift({ userID, username, fingerprint, guest });
+  recentUsers.unshift({ userID, email, fingerprint, guest });
 
   window.localStorage.setObject('mostRecentRememberedUser', recentUsers);
 };

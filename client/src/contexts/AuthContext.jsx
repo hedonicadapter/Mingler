@@ -7,7 +7,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import { app, anonCredentials } from '../config/realmDB';
 import WelcomePane from '../components/WelcomePane';
-import DAO from '../config/DAO';
+import DAO, { setAuthToken } from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const {
@@ -41,6 +41,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -87,6 +88,17 @@ export function AuthProvider({ children }) {
     return await DAO.loginGuest(guestID, fingerprint).then((result) => {
       setMostRecentUser(guestID, null, fingerprint, true);
       setCurrentUser(result.data.guestID);
+      setToken(result.data.token);
+    });
+  };
+
+  const login = async (email, password) => {
+    const fingerprint = window.localStorage.getItem('clientFingerprint');
+
+    return await DAO.login(email, password, fingerprint).then((result) => {
+      setMostRecentUser(result.data._id, email, fingerprint, true);
+      setCurrentUser(result.data._id);
+      setToken(result.data.token);
     });
   };
 
@@ -99,16 +111,6 @@ export function AuthProvider({ children }) {
     logoutDB().then(() => {
       setCurrentUser(null);
     });
-    //   // Add current user to each of their friends' OnlineFriends collection
-    //   userRef.get().then((doc) => {
-    //     doc.data().Friends.forEach((friend) => {
-    //       usersRef
-    //         .doc(friend)
-    //         .collection('OnlineFriends')
-    //         .doc(user.uid)
-    //         .set(new Object());
-    //     });
-    //   });
   };
 
   var http = require('http');
@@ -137,12 +139,18 @@ export function AuthProvider({ children }) {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    console.log('token changed ', token);
+    setAuthToken(token);
+  }, [token]);
+
   const value = {
     currentUser,
     setName,
     logout,
     registerGuest,
     loginGuest,
+    login,
   };
 
   return (
