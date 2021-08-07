@@ -183,8 +183,18 @@ exports.resetPassword = async (req, res, next) => {
 const sendToken = (user, statusCode, res) => {
   const token = user.getSignedToken();
   if (user.guest) {
-    res.status(statusCode).json({ success: true, token, guestID: user._id });
+    res.status(statusCode).json({
+      success: true,
+      token,
+      _id: user._id,
+      username: user.username,
+    });
   } else {
-    res.status(statusCode).json({ success: true, token });
+    res.status(statusCode).json({
+      success: true,
+      token,
+      _id: user._id,
+      username: user.username,
+    });
   }
 };

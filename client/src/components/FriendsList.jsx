@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@stitches/react';
 
 import '../App.global.css';
@@ -35,10 +35,13 @@ const findButton = css({
 export default function FriendsList() {
   const { currentUser } = useAuth();
 
+  const searchInputRef = useRef();
+
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchValue, setSearchValue] = useState();
   const [findFriendsVisible, setFindFriendsVisible] = useState(false);
+  const [searchInputFocus, setSearchInputFocus] = useState(null);
 
   const handleSearchInput = (evt) => {
     setSearchValue(evt.target.value);
@@ -66,20 +69,30 @@ export default function FriendsList() {
 
   // Get friends
   useEffect(() => {
-    DAO.getFriends(currentUser)
+    console.log('currentguy ', currentUser);
+    DAO.getFriends(currentUser._id)
       .then((res) => {
-        console.log(res);
+        res.data.forEach((object, index) => {
+          object.key = index;
+        });
+        console.log(res.data);
+        setFriends(res.data);
       })
       .catch((e) => {
         console.log(e);
+        //show some error component
       });
   }, []);
+
+  useEffect(() => {
+    if (!friends) searchInputRef?.current?.focus();
+  }, [searchInputRef?.current]);
 
   return (
     <div className={container()}>
       {friends.length ? (
         !findFriendsVisible &&
-        filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+        friends.map((friend) => <AccordionItem friend={friend} />)
       ) : (
         <div className={container()}>
           <h1>you have no friends Sadge</h1>
@@ -97,6 +110,14 @@ export default function FriendsList() {
         value={searchValue || ''}
         onChange={handleSearchInput}
         className={searchInputStyle()}
+        ref={searchInputRef}
+        onBlur={() => {
+          if (!friends) {
+            setSearchInputFocus(true);
+            searchInputRef?.current?.focus();
+          }
+        }}
+        focus={searchInputFocus}
       />
     </div>
   );

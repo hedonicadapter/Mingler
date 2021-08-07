@@ -14,6 +14,7 @@ exports.getPrivateData = (req, res, next) => {
 
 exports.getFriends = async (req, res, next) => {
   const { userID } = req.body;
+  console.log(userID);
 
   try {
     User.findById(userID, 'friends', function (err, result) {

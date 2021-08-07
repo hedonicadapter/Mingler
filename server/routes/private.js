@@ -8,6 +8,6 @@ const {
 
 router.route('/').get(protect, getPrivateData);
 
-router.route('/getFriends').get(protect, getFriends);
+router.route('/getFriends').post(protect, getFriends);
 
 module.exports = router;

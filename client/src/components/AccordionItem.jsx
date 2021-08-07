@@ -38,9 +38,8 @@ export default function AccordionItem({ friend }) {
       >
         <CardHeader
           key={friend.key}
-          name={friend.Name}
-          mainActivity={friend.Activity[0]}
-          userID={friend.UserID}
+          name={friend.username}
+          mainActivity={friend.Activity?.[0]}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
@@ -65,7 +64,7 @@ export default function AccordionItem({ friend }) {
               }}
             >
               <CardBody
-                activity={friend.Activity}
+                activity={friend?.Activity}
                 userID={friend.UserID}
                 markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
                 setMarkyToReplaceWithYouTubeVideo={

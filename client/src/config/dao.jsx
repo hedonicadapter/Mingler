@@ -8,23 +8,38 @@ const auth = axios.create({
   },
 });
 
-const private = axios.create({
+const privateRoute = axios.create({
   baseURL: 'http://localhost:8080/api/private/',
+  withCredentials: true,
   headers: {
     'Content-type': 'application/json',
   },
 });
 
-export const setAuthToken = (token) => {
-  if (token) {
-    private.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-  } else {
-    //deleting the token from header
-    delete private.defaults.headers.common['Authorization'];
-  }
-};
+// export const setAuthToken = (token) => {
+//   console.log('hy ', token);
+//   // if (token) {
+//   //   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+//   // } else {
+//   //   //deleting the token from header
+//   //   delete axios.defaults.headers.common['Authorization'];
+//   // }
+//   privateRoute.interceptors.request.use(function (config) {
+//     if (token) config.headers.Authorization = `Bearer ${token}`;
+//     else config.headers.Authorization = null;
+
+//     return config;
+//   });
+// };
 
 class DAO {
+  token = undefined;
+
+  async setAuthToken(token) {
+    this.token = token;
+    return await token;
+  }
+
   async logOut() {
     await app?.currentUser?.logOut();
   }
@@ -52,10 +67,14 @@ class DAO {
   }
 
   getFriends(userID) {
-    console.log(userID);
+    const token = localStorage.getItem('token');
     const data = { userID };
 
-    return user.get(`/getFriends`, data);
+    return privateRoute.post(`/getFriends`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
   find(query, by = 'name', page = 0) {

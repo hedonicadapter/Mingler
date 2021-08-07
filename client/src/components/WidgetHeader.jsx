@@ -20,7 +20,8 @@ const text = css({});
 
 export default function WidgetHeader() {
   const { currentUser, setName } = useAuth();
-  const [userName, setUserName] = useState(currentUser?.displayName);
+  console.log(currentUser);
+  const [userName, setUserName] = useState(currentUser?.username);
   const [userData, setUserData] = useState({ Name: userName, Activity: [] });
   const [expanded, setExpanded] = useState(false);
 

@@ -7,7 +7,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import { app, anonCredentials } from '../config/realmDB';
 import WelcomePane from '../components/WelcomePane';
-import DAO, { setAuthToken } from '../config/DAO';
+import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const {
@@ -43,11 +43,6 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    console.log(currentUser);
-    currentUser ? setLoading(false) : setLoading(true);
-  }, [currentUser]);
 
   const refreshCustomUserData = async () => {
     await app.currentUser.refreshCustomData();
@@ -87,8 +82,9 @@ export function AuthProvider({ children }) {
 
     return await DAO.loginGuest(guestID, fingerprint).then((result) => {
       setMostRecentUser(guestID, null, fingerprint, true);
-      setCurrentUser(result.data.guestID);
+      setCurrentUser(result.data);
       setToken(result.data.token);
+      localStorage.setItem('token', result.data.token);
     });
   };
 
@@ -97,8 +93,9 @@ export function AuthProvider({ children }) {
 
     return await DAO.login(email, password, fingerprint).then((result) => {
       setMostRecentUser(result.data._id, email, fingerprint, true);
-      setCurrentUser(result.data._id);
+      setCurrentUser(result.data);
       setToken(result.data.token);
+      localStorage.setItem('token', result.data.token);
     });
   };
 
@@ -119,7 +116,7 @@ export function AuthProvider({ children }) {
   function sendUserIDToChromiumExtension() {
     ipcRenderer.send(
       'sendUserIDToChromiumExtension',
-      JSON.stringify(currentUser.uid)
+      JSON.stringify(currentUser._id)
     );
   }
 
@@ -140,8 +137,11 @@ export function AuthProvider({ children }) {
   }, [currentUser]);
 
   useEffect(() => {
-    console.log('token changed ', token);
-    setAuthToken(token);
+    if (token) {
+      DAO.setAuthToken(token).then(() => {
+        setLoading(false);
+      });
+    } else setLoading(true);
   }, [token]);
 
   const value = {
