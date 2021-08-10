@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 const {
   setMostRecentUser,
   getMostRecentUser,
+  useLocalStorage,
 } = require('../helpers/localStorageManager');
 const nameGenerator = require('positive-name-generator');
 const Store = require('electron-store');
@@ -43,6 +44,9 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [recentUser, setRecentUser] = useLocalStorage(
+    'mostRecentRememberedUser'
+  );
 
   const refreshCustomUserData = async () => {
     await app.currentUser.refreshCustomData();
@@ -64,9 +68,10 @@ export function AuthProvider({ children }) {
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)
       .then((result) => {
-        const userID = result.data.guestID;
+        console.log(result);
+        const userID = result.data._id;
 
-        window.localStorage.setItem('guestID', userID);
+        window.localStorage.setItem('userID', userID);
 
         //set fingerprint
         return { success: true };
@@ -77,11 +82,11 @@ export function AuthProvider({ children }) {
   };
 
   const loginGuest = async () => {
-    const guestID = window.localStorage.getItem('guestID');
+    const userID = window.localStorage.getItem('userID');
     const fingerprint = window.localStorage.getItem('clientFingerprint');
 
-    return await DAO.loginGuest(guestID, fingerprint).then((result) => {
-      setMostRecentUser(guestID, null, fingerprint, true);
+    return await DAO.loginGuest(userID, fingerprint).then((result) => {
+      setRecentUser({ userID, email: null, fingerprint, guest: true });
       setCurrentUser(result.data);
       setToken(result.data.token);
       localStorage.setItem('token', result.data.token);
@@ -92,7 +97,7 @@ export function AuthProvider({ children }) {
     const fingerprint = window.localStorage.getItem('clientFingerprint');
 
     return await DAO.login(email, password, fingerprint).then((result) => {
-      setMostRecentUser(result.data._id, email, fingerprint, true);
+      setRecentUser(result.data._id, email, fingerprint, true);
       setCurrentUser(result.data);
       setToken(result.data.token);
       localStorage.setItem('token', result.data.token);
@@ -121,14 +126,14 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    const recentUser = getMostRecentUser();
-
-    if (recentUser) {
-      if (recentUser.guest) loginGuest();
-      else if (!recentUser.guest)
+    const mostRecent = recentUser?.[0];
+    console.log('mostRecent ', mostRecent);
+    if (mostRecent) {
+      if (mostRecent.guest) loginGuest();
+      else if (!mostRecent.guest)
         console.log('log in with recent non guest user');
     } else console.log('show sign in or sign up screen');
-  }, []);
+  }, [recentUser]);
 
   useEffect(() => {
     if (currentUser) {

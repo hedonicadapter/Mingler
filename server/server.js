@@ -21,6 +21,19 @@ const PORT = process.env.PORT || 8080;
 
 const server = app.listen(PORT, () => console.log('server running on ' + PORT));
 
+// =========socket start=========
+const io = require('socket.io')(server);
+
+io.on('connection', (socket) => {
+  console.log('io connected: ', socket.id);
+  io.emit('big', 'yo');
+
+  io.on('disconnect', (reason) => {
+    console.log('io disconnected: ', reason);
+  });
+});
+// =========socket end=========
+
 process.on('unhandledRejection', (err, promise) => {
   console.log('Error: ', err);
 

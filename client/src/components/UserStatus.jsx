@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 var path = require('path');
 const execFile = require('child_process').execFile;
+import { io } from 'socket.io-client';
 
 import { useAuth } from '../contexts/AuthContext';
 
@@ -103,5 +104,21 @@ export default function UserStatus() {
     activeWindowListener();
     activeTrackListener();
     // return exitListeners();
+  }, []);
+
+  useEffect(() => {
+    const socket = io('127.0. 0.1');
+    // const io = socketIOClient(ENDPOINT);
+    socket.on('connection', () => {
+      console.log(socket.id);
+    });
+
+    socket.on('big', (result) => {
+      console.log(result);
+    });
+
+    socket.on('connect_error', (result) => {
+      console.log(result);
+    });
   }, []);
 }
