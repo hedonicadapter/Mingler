@@ -10,6 +10,11 @@ import colors from '../config/colors';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
 import UserItem from './UserItem';
+import FindFriendsPopUp from './FindFriendsPopUp';
+
+const electron = require('electron');
+const app = electron.remote.app;
+const BrowserWindow = electron.remote.BrowserWindow;
 
 const container = css({ backgroundColor: colors.classyWhite });
 
@@ -68,7 +73,29 @@ export default function FriendsList() {
   };
 
   const toggleFindFriends = () => {
-    setFindFriendsVisible(!findFriendsVisible);
+    // setFindFriendsVisible(!findFriendsVisible);
+    // const injectScript = (win) => {
+    //   win.webContents
+    //     .executeJavaScript('window.location.href.toString()')
+    //     .then((result) => {});
+    // };
+
+    let win = new BrowserWindow({
+      show: false,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+      },
+    });
+    win.on('close', function () {
+      win = null;
+    });
+    win.loadURL(`file://${app.getAppPath()}/index.html#/findfriends`);
+    win.once('ready-to-show', () => {
+      win.show();
+
+      // injectScript(win);
+    });
   };
 
   // Get friends
