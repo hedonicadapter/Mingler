@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { app } from './realmDB';
 
@@ -16,58 +17,37 @@ const privateRoute = axios.create({
   },
 });
 
-// export const setAuthToken = (token) => {
-//   console.log('hy ', token);
-//   // if (token) {
-//   //   axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
-//   // } else {
-//   //   //deleting the token from header
-//   //   delete axios.defaults.headers.common['Authorization'];
-//   // }
-//   privateRoute.interceptors.request.use(function (config) {
-//     if (token) config.headers.Authorization = `Bearer ${token}`;
-//     else config.headers.Authorization = null;
-
-//     return config;
-//   });
-// };
-
 class DAO {
-  token = undefined;
+  // token = undefined;
 
-  async setAuthToken(token) {
-    this.token = token;
-    return await token;
-  }
+  // const setAuthToken = async (token) => {
+  // this.token = token;
+  // return await token;
+  // };
 
-  async logOut() {
-    await app?.currentUser?.logOut();
-  }
-
-  registerGuest(username, clientFingerprint) {
+  registerGuest = (username, clientFingerprint) => {
     const data = { username, clientFingerprint };
 
     return auth.post('/registerGuest', data);
-  }
+  };
 
-  loginGuest(guestID, clientFingerprint) {
+  loginGuest = (guestID, clientFingerprint) => {
     const data = { guestID, clientFingerprint };
 
     return auth.post('/loginGuest', data);
-  }
+  };
 
-  login(email, password, clientFingerprint) {
+  login = (email, password, clientFingerprint) => {
     const data = { email, password, clientFingerprint };
 
     return auth.post('/login', data);
-  }
+  };
 
-  findUserByEmail(email) {
+  findUserByEmail = (email) => {
     return auth.get(`/findUser?email=${email}`);
-  }
+  };
 
-  getFriends(userID) {
-    const token = localStorage.getItem('token');
+  getFriends = (userID, token) => {
     const data = { userID };
 
     return privateRoute.post(`/getFriends`, data, {
@@ -75,29 +55,17 @@ class DAO {
         Authorization: `Bearer ${token}`,
       },
     });
-  }
+  };
 
-  find(query, by = 'name', page = 0) {
-    return auth.get(`restaurants?${by}=${query}&page=${page}`);
-  }
+  searchUsers = (searchTerm, token) => {
+    const data = { searchTerm };
 
-  createReview(data) {
-    return auth.post('/review-new', data);
-  }
-
-  updateReview(data) {
-    return auth.put('/review-edit', data);
-  }
-
-  deleteReview(id, userId) {
-    return auth.delete(`/review-delete?id=${id}`, {
-      data: { user_id: userId },
+    return privateRoute.post('/searchUsers', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-  }
-
-  getCuisines(id) {
-    return auth.get(`/cuisines`);
-  }
+  };
 }
 
 export default new DAO();

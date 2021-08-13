@@ -95,18 +95,7 @@ export default function WelcomePane({}) {
 
   const handleContinueClick = () => {
     setLoading(true);
-    // nameNewAccount(userName).then(({ registered = null }) => {
-    //   if (registered) {
-    //     anonymousLogin().then((result) => {
-    //       setShowSuccessScreen(true);
-    //       // setTimeout(()=>setShowSuccessScreen(false),)
-    //     });
-    //   }
-    //   if (!registered) {
-    //     console.log('not registered');
-    //     // Something went wrong, please try again.
-    //   }
-    // });
+
     const fingerprint = window.localStorage.getItem('clientFingerprint');
 
     registerGuest(userName, fingerprint).then(({ success, error }) => {
@@ -125,6 +114,11 @@ export default function WelcomePane({}) {
         <p>What do we call you?</p>
 
         <StyledInput
+          onKeyUp={(event) => {
+            if (event.key === 'Enter') {
+              userName && handleContinueClick();
+            }
+          }}
           placeholder="..."
           ref={inputRef}
           onBlur={() => {

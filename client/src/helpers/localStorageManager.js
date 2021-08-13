@@ -18,11 +18,21 @@ import React, { useState, useEffect } from 'react';
 //   return window.localStorage.getObject('mostRecentRememberedUser')?.[0];
 // };
 
+function parseValue(value) {
+  try {
+    return JSON.parse(value);
+  } catch (ex) {
+    // ain't no thang
+  }
+
+  return value;
+}
+
 export const useLocalStorage = (key, initialValue) => {
   const [value, setValue] = useState(() => {
     const jsonValue = localStorage.getItem(key);
-
-    if (jsonValue) return JSON.parse(jsonValue);
+    console.log(jsonValue);
+    if (jsonValue !== 'undefined') return parseValue(jsonValue);
     if (typeof initialValue === 'function') return initialValue();
     else return initialValue;
   });

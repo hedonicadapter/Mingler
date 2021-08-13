@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
+import UserItem from './UserItem';
 
 const container = css({ backgroundColor: colors.classyWhite });
 
@@ -33,7 +34,7 @@ const findButton = css({
 });
 
 export default function FriendsList() {
-  const { currentUser } = useAuth();
+  const { currentUser, token } = useAuth();
 
   const searchInputRef = useRef();
 
@@ -41,6 +42,7 @@ export default function FriendsList() {
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchValue, setSearchValue] = useState();
   const [findFriendsVisible, setFindFriendsVisible] = useState(false);
+  const [foundFriends, setFoundFriends] = useState(null);
   const [searchInputFocus, setSearchInputFocus] = useState(null);
 
   const handleSearchInput = (evt) => {
@@ -56,11 +58,13 @@ export default function FriendsList() {
   };
 
   const handleFindButtonClick = () => {
-    findFriends();
-  };
-
-  const findFriends = () => {
-    toggleFindFriends();
+    DAO.searchUsers(searchValue, token)
+      .then((res) => {
+        const users = res.data;
+        setFoundFriends(users);
+        toggleFindFriends();
+      })
+      .catch((e) => console.log(e));
   };
 
   const toggleFindFriends = () => {
@@ -69,13 +73,11 @@ export default function FriendsList() {
 
   // Get friends
   useEffect(() => {
-    console.log('currentguy ', currentUser);
-    DAO.getFriends(currentUser._id)
+    DAO.getFriends(currentUser._id, token)
       .then((res) => {
         res.data.forEach((object, index) => {
           object.key = index;
         });
-        console.log(res.data);
         setFriends(res.data);
       })
       .catch((e) => {
@@ -99,11 +101,6 @@ export default function FriendsList() {
         </div>
       )}
 
-      {searchValue && (
-        <div onClick={handleFindButtonClick} className={findButton()}>
-          Find '{searchValue}'
-        </div>
-      )}
       <input
         placeholder="Find friends..."
         type="text"
@@ -119,6 +116,16 @@ export default function FriendsList() {
         }}
         focus={searchInputFocus}
       />
+
+      {searchValue && (
+        <div onClick={handleFindButtonClick} className={findButton()}>
+          Find '{searchValue}'
+        </div>
+      )}
+
+      {findFriendsVisible &&
+        foundFriends &&
+        foundFriends.map((user) => <UserItem user={user} />)}
     </div>
   );
 }

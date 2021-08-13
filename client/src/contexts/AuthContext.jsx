@@ -10,11 +10,7 @@ import WelcomePane from '../components/WelcomePane';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
-const {
-  setMostRecentUser,
-  getMostRecentUser,
-  useLocalStorage,
-} = require('../helpers/localStorageManager');
+const { useLocalStorage } = require('../helpers/localStorageManager');
 const nameGenerator = require('positive-name-generator');
 const Store = require('electron-store');
 
@@ -42,8 +38,8 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useLocalStorage('token');
   const [recentUser, setRecentUser] = useLocalStorage(
     'mostRecentRememberedUser'
   );
@@ -68,7 +64,6 @@ export function AuthProvider({ children }) {
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)
       .then((result) => {
-        console.log(result);
         const userID = result.data._id;
 
         window.localStorage.setItem('userID', userID);
@@ -142,15 +137,13 @@ export function AuthProvider({ children }) {
   }, [currentUser]);
 
   useEffect(() => {
-    if (token) {
-      DAO.setAuthToken(token).then(() => {
-        setLoading(false);
-      });
-    } else setLoading(true);
-  }, [token]);
+    if (token && currentUser) setLoading(false);
+    else setLoading(true);
+  }, [token, currentUser]);
 
   const value = {
     currentUser,
+    token,
     setName,
     logout,
     registerGuest,

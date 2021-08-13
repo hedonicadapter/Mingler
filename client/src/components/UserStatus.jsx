@@ -107,7 +107,7 @@ export default function UserStatus() {
   }, []);
 
   useEffect(() => {
-    const socket = io('127.0. 0.1');
+    const socket = io('http://127.0.0.1:8080');
     // const io = socketIOClient(ENDPOINT);
     socket.on('connection', () => {
       console.log(socket.id);

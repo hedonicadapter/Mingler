@@ -14,7 +14,6 @@ exports.getPrivateData = (req, res, next) => {
 
 exports.getFriends = async (req, res, next) => {
   const { userID } = req.body;
-  console.log(userID);
 
   try {
     User.findById(userID, 'friends', function (err, result) {
@@ -38,6 +37,45 @@ exports.getFriends = async (req, res, next) => {
         }
       );
     });
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.searchUsers = async (req, res, next) => {
+  const { searchTerm } = req.body;
+
+  try {
+    let result = await User.aggregate([
+      {
+        $search: {
+          compound: {
+            should: [
+              {
+                autocomplete: {
+                  query: searchTerm,
+                  path: 'username',
+                  fuzzy: {
+                    maxEdits: 2,
+                  },
+                },
+              },
+              {
+                autocomplete: {
+                  query: searchTerm,
+                  path: 'email',
+                  fuzzy: {
+                    maxEdits: 2,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    ]);
+
+    res.send(result);
   } catch (e) {
     next(e);
   }

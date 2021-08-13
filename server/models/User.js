@@ -83,4 +83,6 @@ User.collection.createIndex('email', {
   },
 });
 
+// User.collection.createIndex({ username: 'text', status: 'text' });
+
 module.exports = User;
