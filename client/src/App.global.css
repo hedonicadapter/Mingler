@@ -29,6 +29,12 @@ body {
 .clickable {
   pointer-events: auto;
 }
+.draggable {
+  -webkit-app-region: drag;
+}
+.undraggable {
+  -webkit-app-region: no-drag;
+}
 
 button {
   background-color: rgba(255, 255, 255, 0);

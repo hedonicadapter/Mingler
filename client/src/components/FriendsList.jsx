@@ -43,12 +43,21 @@ export default function FriendsList() {
 
   const searchInputRef = useRef();
 
+  const [findFriendsOpen, setFindFriendsOpen] = useState(false);
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchValue, setSearchValue] = useState();
-  const [findFriendsVisible, setFindFriendsVisible] = useState(false);
-  const [foundFriends, setFoundFriends] = useState(null);
   const [searchInputFocus, setSearchInputFocus] = useState(null);
+  const [findFriendsWindow, setFindFriendsWindow] = useState(
+    new BrowserWindow({
+      show: false,
+      frame: false,
+      webPreferences: {
+        nodeIntegration: true,
+        enableRemoteModule: true,
+      },
+    })
+  );
 
   const handleSearchInput = (evt) => {
     setSearchValue(evt.target.value);
@@ -58,44 +67,44 @@ export default function FriendsList() {
         ? friends.filter((friend) =>
             friend.Name.toLowerCase().includes(evt.target.value.toLowerCase())
           )
-        : friends
+        : null
     );
   };
 
   const handleFindButtonClick = () => {
-    DAO.searchUsers(searchValue, token)
-      .then((res) => {
-        const users = res.data;
-        setFoundFriends(users);
-        toggleFindFriends();
-      })
-      .catch((e) => console.log(e));
+    toggleFindFriends();
   };
 
   const toggleFindFriends = () => {
-    // setFindFriendsVisible(!findFriendsVisible);
-    // const injectScript = (win) => {
-    //   win.webContents
-    //     .executeJavaScript('window.location.href.toString()')
-    //     .then((result) => {});
-    // };
+    if (!findFriendsOpen) {
+      // FindFriendsPopUp window
 
-    let win = new BrowserWindow({
-      show: false,
-      webPreferences: {
-        nodeIntegration: true,
-        enableRemoteModule: true,
-      },
-    });
-    win.on('close', function () {
-      win = null;
-    });
-    win.loadURL(`file://${app.getAppPath()}/index.html#/findfriends`);
-    win.once('ready-to-show', () => {
-      win.show();
+      findFriendsWindow.on('close', function () {
+        setFindFriendsWindow(null);
+      });
+      findFriendsWindow.on('closed', function () {
+        setFindFriendsWindow(
+          new BrowserWindow({
+            show: false,
+            frame: false,
+            webPreferences: {
+              nodeIntegration: true,
+              enableRemoteModule: true,
+            },
+          })
+        );
+        setFindFriendsOpen(false);
+      });
+      findFriendsWindow.loadURL(
+        `file://${app.getAppPath()}/index.html#/findfriends`
+      );
 
-      // injectScript(win);
-    });
+      findFriendsWindow.once('ready-to-show', () => {
+        findFriendsWindow.webContents.send('initialValue', searchValue);
+        findFriendsWindow.show();
+        setFindFriendsOpen(true);
+      });
+    } else findFriendsWindow.focus();
   };
 
   // Get friends
@@ -113,14 +122,21 @@ export default function FriendsList() {
       });
   }, []);
 
+  // // if there is no search term, set filteredFriends to null so
+  // // it rerenders the regular friends list
+  // useEffect(() => {
+  //   if (!searchValue) setFilteredFriends(null);
+  // }, [searchValue]);
+
   useEffect(() => {
-    if (!friends) searchInputRef?.current?.focus();
+    if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
   return (
     <div className={container()}>
-      {friends.length ? (
-        !findFriendsVisible &&
+      {searchValue ? (
+        filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+      ) : friends.length ? (
         friends.map((friend) => <AccordionItem friend={friend} />)
       ) : (
         <div className={container()}>
@@ -136,7 +152,8 @@ export default function FriendsList() {
         className={searchInputStyle()}
         ref={searchInputRef}
         onBlur={() => {
-          if (!friends) {
+          if (!friends.length) {
+            console.log('no friends onblur');
             setSearchInputFocus(true);
             searchInputRef?.current?.focus();
           }
@@ -149,10 +166,6 @@ export default function FriendsList() {
           Find '{searchValue}'
         </div>
       )}
-
-      {findFriendsVisible &&
-        foundFriends &&
-        foundFriends.map((user) => <UserItem user={user} />)}
     </div>
   );
 }

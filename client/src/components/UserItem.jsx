@@ -8,21 +8,19 @@ import CardHeader from './CardHeader';
 import colors from '../config/colors';
 
 const container = css({
-  backgroundColor: 'transparent',
   flexDirection: 'row',
   display: 'flex',
-  paddingLeft: 35,
-  paddingTop: 10,
-  paddingBottom: 10,
-  // marginTop: 10,
-  // borderTop: '1.5px solid',
-  // borderTopColor: colors.darkmodeBlack,
+  padding: 6,
 });
 
 const nameAndActivityContainer = css({
-  flexDirection: 'column',
-  width: '80%',
+  alignSelf: 'center',
+  display: 'flex',
+  flexDirection: 'row',
+  width: '100%',
+  justifyContent: 'space-between',
 });
+
 const text = css({
   paddingLeft: '7px',
   color: colors.darkmodeBlack,
@@ -32,40 +30,52 @@ const text = css({
 const header = css({});
 const avatar = css({});
 
-const statusIndicatorContainer = css({
-  position: 'absolute',
-  // marginTop: -25,
+const friendRequestButtonStyle = css({
+  opacity: 0,
+  fontSize: '0.9em',
+  fontWeight: 700,
+  color: colors.darkmodeDisabledText,
+  padding: 3,
+  borderRadius: 3,
+  border: '2px solid',
+  borderColor: colors.darkmodeDisabledText,
 });
 
-const nameAndActivityPadding = css({
-  paddingLeft: 2,
-});
+export default function UserItem({ user, index }) {
+  const [hovered, setHovered] = useState(false);
 
-export default function UserItem({ user }) {
+  const alternatingColor = [colors.classyWhite, colors.depressedWhite];
+
   return (
-    <>
-      <motion.header
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="clickable"
+    >
+      <header
         style={{
-          backgroundColor: 'rgba(253,245,241, 1)',
+          backgroundColor: alternatingColor[index % alternatingColor.length],
         }}
-        whileHover={{
-          backgroundColor: 'rgba(241,235,232,1)',
-        }}
-        transition={{ duration: 0.15 }}
-        onClick={() => toggleExpansion()}
         className={header()}
       >
         <motion.div className={container()}>
-          <Avatar round className={avatar()} name={user?.username} size="50" />
+          <Avatar round className={avatar()} name={user?.username} size="34" />
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user?.username}</div>
-            <div className={statusIndicatorContainer()}></div>
-            <div className={nameAndActivityPadding()}>
-              {/* add or remove buttons */}
-            </div>
+            <motion.div
+              initial={{ borderColor: 'rgba(131,133,140,1)' }}
+              whileHover={{
+                color: 'rgba(100, 245, 141, 1)',
+                borderColor: 'rgba(100, 245, 141, 1)',
+              }}
+              className={friendRequestButtonStyle()}
+              style={{ transition: 'opacity 0.15s', opacity: hovered ? 1 : 0 }}
+            >
+              Add
+            </motion.div>
           </div>
         </motion.div>
-      </motion.header>
-    </>
+      </header>
+    </div>
   );
 }
