@@ -93,7 +93,7 @@ exports.loginGuest = async (req, res, next) => {
 
   try {
     const user = await User.findOne({
-      _id: mongoose.Types.ObjectId(guestID),
+      _id: mongoose.Types.ObjectId(guestID.replace(/['"]+/g, '')),
       clientFingerprint,
     });
 

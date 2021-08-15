@@ -38,6 +38,17 @@ const findButton = css({
   padding: 10,
 });
 
+const findFriendsWindowConfig = {
+  show: false,
+  frame: false,
+  transparent: true,
+  width: 560,
+  webPreferences: {
+    nodeIntegration: true,
+    enableRemoteModule: true,
+  },
+};
+
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
 
@@ -49,14 +60,7 @@ export default function FriendsList() {
   const [searchValue, setSearchValue] = useState();
   const [searchInputFocus, setSearchInputFocus] = useState(null);
   const [findFriendsWindow, setFindFriendsWindow] = useState(
-    new BrowserWindow({
-      show: false,
-      frame: false,
-      webPreferences: {
-        nodeIntegration: true,
-        enableRemoteModule: true,
-      },
-    })
+    new BrowserWindow(findFriendsWindowConfig)
   );
 
   const handleSearchInput = (evt) => {
@@ -83,16 +87,7 @@ export default function FriendsList() {
         setFindFriendsWindow(null);
       });
       findFriendsWindow.on('closed', function () {
-        setFindFriendsWindow(
-          new BrowserWindow({
-            show: false,
-            frame: false,
-            webPreferences: {
-              nodeIntegration: true,
-              enableRemoteModule: true,
-            },
-          })
-        );
+        setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
         setFindFriendsOpen(false);
       });
       findFriendsWindow.loadURL(
@@ -153,7 +148,6 @@ export default function FriendsList() {
         ref={searchInputRef}
         onBlur={() => {
           if (!friends.length) {
-            console.log('no friends onblur');
             setSearchInputFocus(true);
             searchInputRef?.current?.focus();
           }

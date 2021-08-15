@@ -9,6 +9,7 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
+import { useAuth } from '../contexts/AuthContext';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -80,14 +81,6 @@ const FrameButtons = () => {
     BrowserWindow.getFocusedWindow().minimize();
   };
 
-  const handleMaximize = () => {
-    const maximized = BrowserWindow.getFocusedWindow().isMaximized();
-
-    maximized
-      ? BrowserWindow.getFocusedWindow().unmaximize()
-      : BrowserWindow.getFocusedWindow().maximize();
-  };
-
   const handleClose = () => {
     BrowserWindow.getFocusedWindow().close();
   };
@@ -106,14 +99,6 @@ const FrameButtons = () => {
         className="undraggable"
         whileHover={hoverAnimation}
         whileTap={tapAnimation}
-        onClick={() => handleMaximize()}
-      >
-        <BsCircle color={color} />
-      </motion.span>
-      <motion.span
-        className="undraggable"
-        whileHover={hoverAnimation}
-        whileTap={tapAnimation}
         onClick={() => handleClose()}
       >
         <IoIosClose color={color} />
@@ -123,18 +108,22 @@ const FrameButtons = () => {
 };
 
 export default function FindFriendsPopUp() {
+  const [userID, setUserID] = useLocalStorage('userID');
   const [token, setToken] = useLocalStorage('token');
   const [foundFriends, setFoundFriends] = useState(null);
   const [searchValue, setSearchValue] = useState(null);
 
+  let timeouts = [];
+
   useEffect(() => {
+    timeouts.push(setTimeout(() => search(searchValue), 150));
+
     if (!searchValue) {
+      timeouts.forEach((item) => clearTimeout(item));
       setFoundFriends(null);
     }
 
-    const searchTimeout = setTimeout(() => search(searchValue), 150);
-
-    return () => clearTimeout(searchTimeout);
+    return () => timeouts.forEach((item) => clearTimeout(item));
   }, [searchValue]);
 
   ipcRenderer.once('initialValue', (event, value) => {
@@ -157,6 +146,10 @@ export default function FindFriendsPopUp() {
     setSearchValue(evt.target.value);
   };
 
+  const handleFriendRequestButton = (toID) => {
+    DAO.sendFriendRequest(toID, userID, token);
+  };
+
   return (
     <div className={container()}>
       <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
@@ -174,7 +167,11 @@ export default function FindFriendsPopUp() {
         <div className={searchResultsStyle()}>
           {foundFriends &&
             foundFriends.map((user, index) => (
-              <UserItem user={user} index={index} />
+              <UserItem
+                user={user}
+                index={index}
+                handleFriendRequestButton={handleFriendRequestButton}
+              />
             ))}
         </div>
       </div>

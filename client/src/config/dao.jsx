@@ -66,6 +66,17 @@ class DAO {
       },
     });
   };
+
+  sendFriendRequest = (toID, fromID, token) => {
+    const data = { to: toID, from: fromID };
+    console.log(data);
+
+    return privateRoute.post('/sendFriendRequest', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
 }
 
 export default new DAO();

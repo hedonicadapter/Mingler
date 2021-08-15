@@ -38,6 +38,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
+  const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useLocalStorage('token');
   const [recentUser, setRecentUser] = useLocalStorage(
@@ -64,9 +65,9 @@ export function AuthProvider({ children }) {
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)
       .then((result) => {
-        const userID = result.data._id;
+        const id = result.data._id;
 
-        window.localStorage.setItem('userID', userID);
+        window.localStorage.setItem('userID', id);
 
         //set fingerprint
         return { success: true };
@@ -79,6 +80,8 @@ export function AuthProvider({ children }) {
   const loginGuest = async () => {
     const userID = window.localStorage.getItem('userID');
     const fingerprint = window.localStorage.getItem('clientFingerprint');
+
+    console.log(userID);
 
     return await DAO.loginGuest(userID, fingerprint).then((result) => {
       setRecentUser({ userID, email: null, fingerprint, guest: true });

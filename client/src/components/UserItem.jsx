@@ -41,7 +41,19 @@ const friendRequestButtonStyle = css({
   borderColor: colors.darkmodeDisabledText,
 });
 
-export default function UserItem({ user, index }) {
+const hoverAnimation = {
+  color: 'rgba(100, 245, 141, 1)',
+  borderColor: 'rgba(100, 245, 141, 1)',
+};
+
+const tapAnimation = {
+  opacity: 0.3,
+  transition: {
+    duration: 0.15,
+  },
+};
+
+export default function UserItem({ user, index, handleFriendRequestButton }) {
   const [hovered, setHovered] = useState(false);
 
   const alternatingColor = [colors.classyWhite, colors.depressedWhite];
@@ -59,17 +71,16 @@ export default function UserItem({ user, index }) {
         className={header()}
       >
         <motion.div className={container()}>
-          <Avatar round className={avatar()} name={user?.username} size="34" />
+          <Avatar round className={avatar()} name={user.username} size="34" />
           <div className={nameAndActivityContainer()}>
-            <div className={text()}>{user?.username}</div>
+            <div className={text()}>{user.username}</div>
             <motion.div
               initial={{ borderColor: 'rgba(131,133,140,1)' }}
-              whileHover={{
-                color: 'rgba(100, 245, 141, 1)',
-                borderColor: 'rgba(100, 245, 141, 1)',
-              }}
+              whileHover={hoverAnimation}
+              whileTap={tapAnimation}
               className={friendRequestButtonStyle()}
               style={{ transition: 'opacity 0.15s', opacity: hovered ? 1 : 0 }}
+              onClick={() => handleFriendRequestButton(user._id)}
             >
               Add
             </motion.div>

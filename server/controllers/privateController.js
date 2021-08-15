@@ -80,3 +80,26 @@ exports.searchUsers = async (req, res, next) => {
     next(e);
   }
 };
+
+exports.sendFriendRequest = async (req, res, next) => {
+  const { toID, fromID } = req.body;
+
+  try {
+    await User.findOneAndUpdate(
+      { _id: toID },
+      { $push: { friendRequests: fromID } },
+      { new: true, safe: true, upsert: true, lean: true }
+    )
+      .then((result) => {
+        return res.status(201).json({
+          status: 'Success',
+          data: result,
+        });
+      })
+      .catch((error) => {
+        return next(new ErrorResponse('Database error', 500));
+      });
+  } catch (e) {
+    next(e);
+  }
+};
