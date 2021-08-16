@@ -95,30 +95,26 @@ exports.sendFriendRequest = async (req, res, next) => {
 
   try {
     const transactionResults = await session.withTransaction(async () => {
-      console.log(1);
       const send = await User.findOneAndUpdate(
         { _id: toID },
         { $push: { friendRequests: fromID } },
         { session, new: true, safe: true, lean: true }
       );
 
-      console.log(2);
       const sent = await User.findOneAndUpdate(
         { _id: fromID },
         { $push: { sentFriendRequests: toID } },
         { session, new: true, safe: true, lean: true }
       );
 
-      console.log(3);
       if (!send) {
-        console.log('Aborting transaction, check send function.');
+        console.log('Aborting transaction, check send.');
         await session.abortTransaction();
       }
       if (!sent) {
-        console.log('Aborting transaction, check sent function.');
+        console.log('Aborting transaction, check sent.');
         await session.abortTransaction();
       }
-      console.log(4);
     });
 
     if (transactionResults) {
@@ -134,25 +130,6 @@ exports.sendFriendRequest = async (req, res, next) => {
   } finally {
     await session.endSession();
   }
-
-  // try {
-  //   await User.findOneAndUpdate(
-  //     { _id: toID },
-  //     { $push: { friendRequests: fromID } },
-  //     { new: true, safe: true, upsert: true, lean: true }
-  //   )
-  //     .then((result) => {
-  //       return res.status(201).json({
-  //         status: 'Success',
-  //         data: result,
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       return next(new ErrorResponse('Database error', 500));
-  //     });
-  // } catch (e) {
-  //   next(e);
-  // }
 };
 
 exports.getSentFriendRequests = async (req, res, next) => {
@@ -164,10 +141,7 @@ exports.getSentFriendRequests = async (req, res, next) => {
       'sentFriendRequests',
       function (err, result) {
         if (err) return next(new ErrorResponse('Database error'), 500);
-        return res.status(201).json({
-          status: 'Success',
-          data: result,
-        });
+        return res.send(result);
       }
     );
   } catch (e) {

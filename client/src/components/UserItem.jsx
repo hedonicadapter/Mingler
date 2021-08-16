@@ -53,7 +53,12 @@ const tapAnimation = {
   },
 };
 
-export default function UserItem({ user, index, handleFriendRequestButton }) {
+export default function UserItem({
+  user,
+  index,
+  handleFriendRequestButton,
+  requestSent,
+}) {
   const [hovered, setHovered] = useState(false);
 
   const alternatingColor = [colors.classyWhite, colors.depressedWhite];
@@ -77,16 +82,23 @@ export default function UserItem({ user, index, handleFriendRequestButton }) {
           <Avatar round className={avatar()} name={user.username} size="34" />
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user.username}</div>
-            <motion.div
-              initial={{ borderColor: 'rgba(131,133,140,1)' }}
-              whileHover={hoverAnimation}
-              whileTap={tapAnimation}
-              className={friendRequestButtonStyle()}
-              style={{ transition: 'opacity 0.15s', opacity: hovered ? 1 : 0 }}
-              onClick={() => handleFriendRequestButton(user._id)}
-            >
-              Add
-            </motion.div>
+            {!requestSent ? (
+              <motion.div
+                initial={{ borderColor: 'rgba(131,133,140,1)' }}
+                whileHover={hoverAnimation}
+                whileTap={tapAnimation}
+                className={friendRequestButtonStyle()}
+                style={{
+                  transition: 'opacity 0.15s',
+                  opacity: hovered ? 1 : 0,
+                }}
+                onClick={() => handleFriendRequestButton(user._id)}
+              >
+                Add
+              </motion.div>
+            ) : (
+              <div>Request sent</div>
+            )}
           </div>
         </motion.div>
       </header>

@@ -127,14 +127,13 @@ export default function FindFriendsPopUp() {
     return () => timeouts.forEach((item) => clearTimeout(item));
   }, [searchValue]);
 
+  useEffect(() => {
+    getSentFriendRequests();
+  }, []);
+
   ipcRenderer.once('initialValue', (event, value) => {
     setSearchValue(value);
     search(value);
-  });
-
-  ipcRenderer.once('sentFriendRequests', (event, value) => {
-    console.log('yernamean ', value);
-    setSentFriendRequests(value);
   });
 
   const search = (value) => {
@@ -148,12 +147,28 @@ export default function FindFriendsPopUp() {
     }
   };
 
+  const getSentFriendRequests = () => {
+    DAO.getSentFriendRequests(userID, token)
+      .then((res) => {
+        setSentFriendRequests(res.data.sentFriendRequests || 'none');
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const handleSearchInput = (evt) => {
     setSearchValue(evt.target.value);
   };
 
   const handleFriendRequestButton = (toID) => {
-    DAO.sendFriendRequest(toID, userID, token);
+    DAO.sendFriendRequest(toID, userID, token)
+      .then((res) => {
+        setSentFriendRequests((oldValue) => [...oldValue, toID]);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   const handleEscapeKey = (event) => {
@@ -177,12 +192,13 @@ export default function FindFriendsPopUp() {
         />
         <div className={searchResultsStyle()}>
           {foundFriends &&
+            sentFriendRequests &&
             foundFriends.map((user, index) => (
               <UserItem
                 user={user}
+                requestSent={sentFriendRequests.includes(user._id)}
                 index={index}
                 handleFriendRequestButton={handleFriendRequestButton}
-                // setSentFriendRequests={setSentFriendRequests}
               />
             ))}
         </div>

@@ -15,7 +15,7 @@ router.route('/getFriends').post(protect, getFriends);
 
 router.route('/searchUsers').post(protect, searchUsers);
 
-router.route('/sendFriendRequest').post(sendFriendRequest);
+router.route('/sendFriendRequest').post(protect, sendFriendRequest);
 
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
 

@@ -85,7 +85,6 @@ export default function FriendsList() {
   const getFriendRequests = () => {};
 
   const handleSearchInput = (evt) => {
-    console.log(friends);
     setSearchValue(evt.target.value);
 
     setFilteredFriends(
@@ -120,13 +119,7 @@ export default function FriendsList() {
 
       findFriendsWindow.once('ready-to-show', () => {
         findFriendsWindow.webContents.send('initialValue', searchValue);
-        DAO.getSentFriendRequests(currentUser._id, token)
-          .then((res) => {
-            findFriendsWindow.webContents.send('sentFriendRequests', res.data);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+
         findFriendsWindow.show();
         setFindFriendsOpen(true);
       });
