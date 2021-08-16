@@ -6,19 +6,31 @@ import { css } from '@stitches/react';
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
+import UserItem from './UserItem';
+
+const generalPadding = 12;
 
 const header = css({
+  alignSelf: 'center',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  padding: generalPadding,
+
+  fontSize: '1em',
+
   zIndex: 5,
-  paddingBottom: 0,
 });
 
-export default function AccordionItem({ friend }) {
+export default function FriendRequestsAccordion({ friendRequests }) {
   const [expanded, setExpanded] = useState(false);
-  const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
-    useState(null);
+
+  const hasRequests = friendRequests.length > 0;
 
   const toggleExpansion = () => {
-    setExpanded(!expanded);
+    if (hasRequests) {
+      setExpanded(!expanded);
+    }
   };
 
   return (
@@ -29,6 +41,10 @@ export default function AccordionItem({ friend }) {
           backgroundColor: expanded
             ? 'rgba(241,235,232,1)'
             : 'rgba(253,245,241, 1)',
+          color: hasRequests
+            ? colors.darkmodeBlack
+            : colors.darkmodeDisabledText,
+          fontWeight: hasRequests ? 'normal' : '700',
         }}
         whileHover={{
           backgroundColor: 'rgba(241,235,232,1)',
@@ -37,14 +53,8 @@ export default function AccordionItem({ friend }) {
         onClick={() => toggleExpansion()}
         className={header()}
       >
-        <CardHeader
-          key={friend.key}
-          name={friend.username}
-          mainActivity={friend.Activity?.[0]}
-          expanded={expanded}
-          markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-          setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
-        />
+        <span>Friend requests</span>
+        <span>{friendRequests.length}</span>
       </motion.header>
       <AnimatePresence initial={false}>
         {expanded && (
@@ -60,19 +70,20 @@ export default function AccordionItem({ friend }) {
           >
             <motion.div
               variants={{
-                open: { marginTop: -40 },
-                collapsed: { marginTop: 0 },
+                open: { marginTop: 0 },
+                collapsed: { marginTop: -40 },
               }}
             >
-              <CardBody
-                activity={friend?.Activity}
-                userID={friend.UserID}
-                markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-                setMarkyToReplaceWithYouTubeVideo={
-                  setMarkyToReplaceWithYouTubeVideo
-                }
-                expanded={expanded}
-              />
+              {friendRequests.map((user) => (
+                <div
+                  style={{
+                    padding: generalPadding,
+                    backgroundColor: colors.depressedWhite,
+                  }}
+                >
+                  <UserItem user={user} />
+                </div>
+              ))}
             </motion.div>
           </motion.section>
         )}

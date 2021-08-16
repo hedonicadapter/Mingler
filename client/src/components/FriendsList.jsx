@@ -11,6 +11,7 @@ import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
 import UserItem from './UserItem';
 import FindFriendsPopUp from './FindFriendsPopUp';
+import FriendRequestsAccordion from './FriendRequestsAccordion';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -29,8 +30,8 @@ const searchInputStyle = css({
 
   width: '100%',
   padding: 15,
-  paddingLeft: 30,
-  paddingRight: 30,
+  paddingLeft: 20,
+  paddingRight: 20,
 });
 
 const findButton = css({
@@ -56,6 +57,9 @@ export default function FriendsList() {
 
   const [findFriendsOpen, setFindFriendsOpen] = useState(false);
   const [friends, setFriends] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([
+    { _id: '2141241', username: 'minge' },
+  ]);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchValue, setSearchValue] = useState();
   const [searchInputFocus, setSearchInputFocus] = useState(null);
@@ -63,13 +67,33 @@ export default function FriendsList() {
     new BrowserWindow(findFriendsWindowConfig)
   );
 
+  const getFriends = () => {
+    DAO.getFriends(currentUser._id, token)
+      .then((res) => {
+        res.data.forEach((object, index) => {
+          object.key = index;
+        });
+        console.log('frents ', res.data);
+        setFriends(res.data);
+      })
+      .catch((e) => {
+        console.log(e);
+        //show some error component
+      });
+  };
+
+  const getFriendRequests = () => {};
+
   const handleSearchInput = (evt) => {
+    console.log(friends);
     setSearchValue(evt.target.value);
 
     setFilteredFriends(
       evt.target.value
         ? friends.filter((friend) =>
-            friend.Name.toLowerCase().includes(evt.target.value.toLowerCase())
+            friend.username
+              .toLowerCase()
+              .includes(evt.target.value.toLowerCase())
           )
         : null
     );
@@ -96,32 +120,23 @@ export default function FriendsList() {
 
       findFriendsWindow.once('ready-to-show', () => {
         findFriendsWindow.webContents.send('initialValue', searchValue);
+        DAO.getSentFriendRequests(currentUser._id, token)
+          .then((res) => {
+            findFriendsWindow.webContents.send('sentFriendRequests', res.data);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
         findFriendsWindow.show();
         setFindFriendsOpen(true);
       });
     } else findFriendsWindow.focus();
   };
 
-  // Get friends
   useEffect(() => {
-    DAO.getFriends(currentUser._id, token)
-      .then((res) => {
-        res.data.forEach((object, index) => {
-          object.key = index;
-        });
-        setFriends(res.data);
-      })
-      .catch((e) => {
-        console.log(e);
-        //show some error component
-      });
+    getFriends();
+    getFriendRequests();
   }, []);
-
-  // // if there is no search term, set filteredFriends to null so
-  // // it rerenders the regular friends list
-  // useEffect(() => {
-  //   if (!searchValue) setFilteredFriends(null);
-  // }, [searchValue]);
 
   useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
@@ -129,16 +144,6 @@ export default function FriendsList() {
 
   return (
     <div className={container()}>
-      {searchValue ? (
-        filteredFriends.map((friend) => <AccordionItem friend={friend} />)
-      ) : friends.length ? (
-        friends.map((friend) => <AccordionItem friend={friend} />)
-      ) : (
-        <div className={container()}>
-          <h1>you have no friends Sadge</h1>
-        </div>
-      )}
-
       <input
         placeholder="Find friends..."
         type="text"
@@ -160,6 +165,15 @@ export default function FriendsList() {
           Find '{searchValue}'
         </div>
       )}
+
+      <FriendRequestsAccordion friendRequests={friendRequests} />
+
+      {searchValue
+        ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+        : friends.length
+        ? friends.map((friend) => <AccordionItem friend={friend} />)
+        : // <h2>you have no friends Sadge</h2>
+          null}
     </div>
   );
 }

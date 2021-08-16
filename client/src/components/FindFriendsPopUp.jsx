@@ -112,6 +112,7 @@ export default function FindFriendsPopUp() {
   const [token, setToken] = useLocalStorage('token');
   const [foundFriends, setFoundFriends] = useState(null);
   const [searchValue, setSearchValue] = useState(null);
+  const [sentFriendRequests, setSentFriendRequests] = useState(null);
 
   let timeouts = [];
 
@@ -129,6 +130,11 @@ export default function FindFriendsPopUp() {
   ipcRenderer.once('initialValue', (event, value) => {
     setSearchValue(value);
     search(value);
+  });
+
+  ipcRenderer.once('sentFriendRequests', (event, value) => {
+    console.log('yernamean ', value);
+    setSentFriendRequests(value);
   });
 
   const search = (value) => {
@@ -150,8 +156,14 @@ export default function FindFriendsPopUp() {
     DAO.sendFriendRequest(toID, userID, token);
   };
 
+  const handleEscapeKey = (event) => {
+    if (event.keyCode === 27) {
+      BrowserWindow.getFocusedWindow().close();
+    }
+  };
+
   return (
-    <div className={container()}>
+    <div className={container()} onKeyDown={handleEscapeKey}>
       <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
         <FrameButtons />
       </div>
@@ -162,7 +174,6 @@ export default function FindFriendsPopUp() {
           type="text"
           value={searchValue || ''}
           onChange={handleSearchInput}
-          // focus={searchInputFocus}
         />
         <div className={searchResultsStyle()}>
           {foundFriends &&
@@ -171,6 +182,7 @@ export default function FindFriendsPopUp() {
                 user={user}
                 index={index}
                 handleFriendRequestButton={handleFriendRequestButton}
+                // setSentFriendRequests={setSentFriendRequests}
               />
             ))}
         </div>

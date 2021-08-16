@@ -59,7 +59,10 @@ export default function UserItem({ user, index, handleFriendRequestButton }) {
   const alternatingColor = [colors.classyWhite, colors.depressedWhite];
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="clickable"
@@ -87,6 +90,6 @@ export default function UserItem({ user, index, handleFriendRequestButton }) {
           </div>
         </motion.div>
       </header>
-    </div>
+    </motion.div>
   );
 }

@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
   },
   friends: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
   friendRequests: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+  sentFriendRequests: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
   guest: Boolean,
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },
