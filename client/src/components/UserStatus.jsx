@@ -107,10 +107,17 @@ export default function UserStatus() {
   }, []);
 
   useEffect(() => {
-    const socket = io('http://127.0.0.1:8080');
+    const socket = io('http://127.0.0.1:8080/user', {
+      auth: {
+        token: 'test',
+      },
+      query: {
+        userID: currentUser._id,
+      },
+    });
     // const io = socketIOClient(ENDPOINT);
     socket.on('connection', () => {
-      console.log(socket.id);
+      console.log('connection ', socket.id);
     });
 
     socket.on('big', (result) => {
