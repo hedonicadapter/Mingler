@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 var path = require('path');
 const execFile = require('child_process').execFile;
-import { io } from 'socket.io-client';
 
 import { useAuth } from '../contexts/AuthContext';
 
 import { db } from '../config/firebase';
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
+const socket = require('../config/socket');
 
 // Starts the script (../scripts/ActiveWindowListener.py) that listens for the user's
 // foreground window and returns it here.
@@ -37,7 +37,7 @@ export default function UserStatus() {
 
     process.stderr.on('data', function (data) {
       console.log('stderr windowListener');
-      if (data) return console.log(data);
+      if (data) socket.sendActivity();
     });
 
     process.on('error', function (err) {
@@ -104,28 +104,5 @@ export default function UserStatus() {
     activeWindowListener();
     activeTrackListener();
     // return exitListeners();
-  }, []);
-
-  useEffect(() => {
-    const socket = io('http://127.0.0.1:8080/user', {
-      auth: {
-        token: 'test',
-      },
-      query: {
-        userID: currentUser._id,
-      },
-    });
-    // const io = socketIOClient(ENDPOINT);
-    socket.on('connection', () => {
-      console.log('connection ', socket.id);
-    });
-
-    socket.on('big', (result) => {
-      console.log(result);
-    });
-
-    socket.on('connect_error', (result) => {
-      console.log(result);
-    });
   }, []);
 }

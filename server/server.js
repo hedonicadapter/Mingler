@@ -52,42 +52,39 @@ function validateToken(token) {
   return true;
 }
 
+async function joinRooms(socket, rooms) {
+  return await socket.join(rooms);
+}
+
 userIo.on('connection', (socket) => {
   // Get the client's mongoDB ID
   const userID = socket.handshake.query.userID;
 
   if (userID) {
-    // Join a room by the client's own ID
-    socket.join(userID);
-
     // Get friend IDs (array of IDs of mongoDB user objects)
     // by the client's user ID (reference to mongoDB user object)
     User.findById(userID, 'friends', { lean: true }, function (err, result) {
       if (err) throw err;
-      const friendIDs = Object.values(result);
+      const friendIDs = Object.values(result).map(function (item) {
+        return item.toString();
+      });
 
-      // Join rooms by each friend's mongoDB user ID
-      friendIDs.forEach((friend) => {
-        socket.join(friend);
+      // Client's own UserID is returned by findById
+      joinRooms(socket, friendIDs).then(() => {
+        socket.on('activity:send', (msg) => {
+          // Since a client's friends joins a room by the client's ID on connection,
+          // anything emitted to the client's ID will be received by friends
+          userIo
+            .in(socket.handshake.query.userID)
+            .emit('activity:receive', msg);
+        });
       });
     });
-    console.log('roomss', socket.rooms);
+
+    userIo.on('disconnect', (reason) => {
+      console.log('io disconnected: ', reason);
+    });
   }
-
-  socket.on('activity', (msg) => {
-    // Since a client's friends joins a room by the client's ID on connection,
-    // anything emitted to the client's ID will be received by friends
-    socket.broadcast
-      .to(socket.handshake.query.userID)
-      .emit('private message', socket.id, msg);
-  });
-
-  // console.log('io connected: ', socket.id);
-  userIo.emit('big', 'yo');
-
-  userIo.on('disconnect', (reason) => {
-    console.log('io disconnected: ', reason);
-  });
 });
 // =========socket end=========
 

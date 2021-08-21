@@ -81,8 +81,6 @@ export function AuthProvider({ children }) {
     const userID = window.localStorage.getItem('userID');
     const fingerprint = window.localStorage.getItem('clientFingerprint');
 
-    console.log(userID);
-
     return await DAO.loginGuest(userID, fingerprint).then((result) => {
       setRecentUser({ userID, email: null, fingerprint, guest: true });
       setCurrentUser(result.data);
@@ -93,6 +91,8 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const fingerprint = window.localStorage.getItem('clientFingerprint');
+
+    //set current user in localstorage
 
     return await DAO.login(email, password, fingerprint).then((result) => {
       setRecentUser(result.data._id, email, fingerprint, true);
