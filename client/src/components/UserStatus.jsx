@@ -27,17 +27,12 @@ export default function UserStatus() {
 
       // Second comparison doesn't work for some reason
       if (activeWindow !== 'Sharehub' && activeWindow !== 'Task Switching') {
-        db.collection('Users')
-          .doc(currentUser.uid)
-          .collection('Activity')
-          .doc('ActiveWindow')
-          .set({ WindowTitle: activeWindow, Date: new Date() });
+        socket.sendActivity({ WindowTitle: activeWindow }, currentUser._id);
       }
     });
 
     process.stderr.on('data', function (data) {
-      console.log('stderr windowListener');
-      if (data) socket.sendActivity();
+      if (data) console.log('STDERR: ', data);
     });
 
     process.on('error', function (err) {

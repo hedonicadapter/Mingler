@@ -71,12 +71,13 @@ userIo.on('connection', (socket) => {
 
       // Client's own UserID is returned by findById
       joinRooms(socket, friendIDs).then(() => {
-        socket.on('activity:send', (msg) => {
+        socket.on('activity:send', (packet) => {
+          console.log('packet', packet);
           // Since a client's friends joins a room by the client's ID on connection,
           // anything emitted to the client's ID will be received by friends
           userIo
             .in(socket.handshake.query.userID)
-            .emit('activity:receive', msg);
+            .emit('activity:receive', packet);
         });
       });
     });

@@ -11,11 +11,39 @@ const socket = io('ws://127.0.0.1:8080/user', {
   },
 });
 
+const sendActivityToLocalStorage = (packet) => {
+  // Each packet contains the ID it was sent from
+  const userID = packet?.userID;
+
+  // activities are organized by userID so we can easily get them for each friend
+  const latestActivity = localStorage.getItem(userID);
+  if (latestActivity) {
+    let latestActivityParsed = JSON.parse(latestActivity);
+    // Put this activity on the top
+    latestActivityParsed.unshift(packet.data);
+
+    localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
+    // Clear storage if a user has more than 5 saved activitiees
+    if (latestActivityParsed.length > 5) {
+      cleanUpLocalStorageActivities(userID, latestActivityParsed);
+    }
+  } else {
+    const data = [packet.data];
+    localStorage.setItem(packet.userID, JSON.stringify(data));
+  }
+};
+
+// Removes the oldest activity from a given user's activities array
+const cleanUpLocalStorageActivities = (userID, latestActivityParsed) => {
+  latestActivityParsed.pop();
+  localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
+};
+
 socket.on('connect', () => {
   console.log('Client socket connected');
 
-  socket.on('activity:receive', (msg) => {
-    console.log('working pog');
+  socket.on('activity:receive', (packet) => {
+    sendActivityToLocalStorage(packet);
   });
 });
 
@@ -26,9 +54,10 @@ socket.io.on('reconnect', (attempt) => {
   console.log(attempt);
 });
 
-const sendActivity = () => {
-  console.log('sendactivity');
-  socket.emit('activity:send', 'activity sent');
+const sendActivity = (data, userID) => {
+  const packet = { data, userID };
+
+  socket.emit('activity:send', packet);
 };
 
 export { sendActivity };

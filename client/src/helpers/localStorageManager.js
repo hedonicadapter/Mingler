@@ -21,7 +21,7 @@ import React, { useState, useEffect } from 'react';
 function parseValue(value) {
   try {
     return JSON.parse(value);
-  } catch (ex) {
+  } catch (e) {
     // ain't no thang
   }
 
@@ -31,7 +31,7 @@ function parseValue(value) {
 export const useLocalStorage = (key, initialValue) => {
   const [value, setValue] = useState(() => {
     const jsonValue = localStorage.getItem(key);
-    console.log(jsonValue);
+
     if (jsonValue !== 'undefined') return parseValue(jsonValue);
     if (typeof initialValue === 'function') return initialValue();
     else return initialValue;
