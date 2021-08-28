@@ -6,7 +6,7 @@ export default {
   samBlack: '#373E40',
   lindaPurple: '#947BD3',
   samBlue: '#00B2CA',
-  samDeepRed: '#5A0D29',
+  samDeepRed: 'rgba(90,13,41,1)',
   yungBlue: '#2E86AB',
   darkOpacity: 'rgba(0,0,0,0.6)',
   samSexyRed: '#a70c42',

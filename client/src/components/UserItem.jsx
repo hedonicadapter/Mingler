@@ -41,9 +41,24 @@ const friendRequestButtonStyle = css({
   borderColor: colors.darkmodeDisabledText,
 });
 
-const hoverAnimation = {
+const cancelRequestButtonStyle = css({
+  fontSize: '0.9em',
+  fontWeight: 700,
+  color: colors.darkmodeDisabledText,
+  padding: 3,
+  borderRadius: 3,
+  border: '2px solid',
+  borderColor: colors.darkmodeDisabledText,
+});
+
+const friendRequestHoverAnimation = {
   color: 'rgba(100, 245, 141, 1)',
   borderColor: 'rgba(100, 245, 141, 1)',
+};
+
+const cancelRequestHoverAnimation = {
+  color: colors.samDeepRed,
+  borderColor: colors.samDeepRed,
 };
 
 const tapAnimation = {
@@ -57,6 +72,7 @@ export default function UserItem({
   user,
   index,
   handleFriendRequestButton,
+  handleCancelRequestButton,
   requestSent,
 }) {
   const [hovered, setHovered] = useState(false);
@@ -85,7 +101,7 @@ export default function UserItem({
             {!requestSent ? (
               <motion.div
                 initial={{ borderColor: 'rgba(131,133,140,1)' }}
-                whileHover={hoverAnimation}
+                whileHover={friendRequestHoverAnimation}
                 whileTap={tapAnimation}
                 className={friendRequestButtonStyle()}
                 style={{
@@ -97,7 +113,15 @@ export default function UserItem({
                 Add
               </motion.div>
             ) : (
-              <div>Request sent</div>
+              <motion.div
+                initial={{ borderColor: 'rgba(131,133,140,1)' }}
+                whileHover={cancelRequestHoverAnimation}
+                whileTap={tapAnimation}
+                className={cancelRequestButtonStyle()}
+                onClick={() => handleCancelRequestButton(user._id)}
+              >
+                Cancel request
+              </motion.div>
             )}
           </div>
         </motion.div>

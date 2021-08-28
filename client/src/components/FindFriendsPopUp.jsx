@@ -10,6 +10,7 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
 import { useAuth } from '../contexts/AuthContext';
+import { sendFriendRequest } from '../config/socket';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -165,6 +166,21 @@ export default function FindFriendsPopUp() {
     DAO.sendFriendRequest(toID, userID, token)
       .then((res) => {
         setSentFriendRequests((oldValue) => [...oldValue, toID]);
+        sendFriendRequest(toID, userID);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
+  const handleCancelRequestButton = (toID) => {
+    DAO.cancelFriendRequest(toID, userID, token)
+      .then((res) => {
+        const updatedRequests = sentFriendRequests.filter(
+          (item) => item !== toID
+        );
+
+        setSentFriendRequests(updatedRequests);
       })
       .catch((e) => {
         console.log(e);
@@ -199,6 +215,7 @@ export default function FindFriendsPopUp() {
                 requestSent={sentFriendRequests.includes(user._id)}
                 index={index}
                 handleFriendRequestButton={handleFriendRequestButton}
+                handleCancelRequestButton={handleCancelRequestButton}
               />
             ))}
         </div>

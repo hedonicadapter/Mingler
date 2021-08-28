@@ -79,6 +79,10 @@ userIo.on('connection', (socket) => {
             .in(socket.handshake.query.userID)
             .emit('activity:receive', packet);
         });
+
+        socket.on('friendrequest:send', (packet) => {
+          console.log('friendrequest:send', packet);
+        });
       });
     });
 

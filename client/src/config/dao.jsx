@@ -69,9 +69,19 @@ class DAO {
 
   sendFriendRequest = (toID, fromID, token) => {
     const data = { toID, fromID };
-    console.log(data);
 
     return privateRoute.post('/sendFriendRequest', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
+  cancelFriendRequest = (toID, fromID, token) => {
+    const data = { toID, fromID };
+    console.log('cancel friend request ', data);
+
+    return privateRoute.post('/cancelFriendRequest', data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

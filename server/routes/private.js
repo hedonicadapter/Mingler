@@ -7,6 +7,7 @@ const {
   searchUsers,
   sendFriendRequest,
   getSentFriendRequests,
+  cancelFriendRequest,
 } = require('../controllers/privateController');
 
 router.route('/').get(protect, getPrivateData);
@@ -18,5 +19,7 @@ router.route('/searchUsers').post(protect, searchUsers);
 router.route('/sendFriendRequest').post(protect, sendFriendRequest);
 
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
+
+router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
 
 module.exports = router;

@@ -108,11 +108,11 @@ exports.sendFriendRequest = async (req, res, next) => {
       );
 
       if (!send) {
-        console.log('Aborting transaction, check send.');
+        console.log('Aborting friend request transaction, check send.');
         await session.abortTransaction();
       }
       if (!sent) {
-        console.log('Aborting transaction, check sent.');
+        console.log('Aborting friend request transaction, check sent.');
         await session.abortTransaction();
       }
     });
@@ -123,7 +123,51 @@ exports.sendFriendRequest = async (req, res, next) => {
         data: transactionResults,
       });
     } else {
-      return next(new ErrorResponse('Transaction error', 500));
+      return next(new ErrorResponse('Friend request transaction error', 500));
+    }
+  } catch (e) {
+    next(e);
+  } finally {
+    await session.endSession();
+  }
+};
+
+exports.cancelFriendRequest = async (req, res, next) => {
+  const { toID, fromID } = req.body;
+
+  const session = await User.startSession();
+
+  try {
+    const transactionResults = await session.withTransaction(async () => {
+      const send = await User.findOneAndUpdate(
+        { _id: toID },
+        { $pull: { friendRequests: fromID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      const sent = await User.findOneAndUpdate(
+        { _id: fromID },
+        { $pull: { sentFriendRequests: toID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      if (!send) {
+        console.log('Aborting cancel request transaction, check send.');
+        await session.abortTransaction();
+      }
+      if (!sent) {
+        console.log('Aborting cancel request transaction, check sent.');
+        await session.abortTransaction();
+      }
+    });
+
+    if (transactionResults) {
+      return res.status(201).json({
+        status: 'Success',
+        data: transactionResults,
+      });
+    } else {
+      return next(new ErrorResponse('Cancel request transaction error', 500));
     }
   } catch (e) {
     next(e);

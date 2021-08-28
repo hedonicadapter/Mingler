@@ -23,6 +23,7 @@ const sendActivityToLocalStorage = (packet) => {
     latestActivityParsed.unshift(packet.data);
 
     localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
+
     // Clear storage if a user has more than 5 saved activitiees
     if (latestActivityParsed.length > 5) {
       cleanUpLocalStorageActivities(userID, latestActivityParsed);
@@ -45,6 +46,10 @@ socket.on('connect', () => {
   socket.on('activity:receive', (packet) => {
     sendActivityToLocalStorage(packet);
   });
+
+  socket.on('friendrequest:receive', () => {
+    console.log('friend request received');
+  });
 });
 
 socket.io.on('error', (error) => {
@@ -60,4 +65,10 @@ const sendActivity = (data, userID) => {
   socket.emit('activity:send', packet);
 };
 
-export { sendActivity };
+const sendFriendRequest = (toID, fromID) => {
+  const packet = { toID, fromID };
+
+  socket.emit('friendrequest:send', packet);
+};
+
+export { sendActivity, sendFriendRequest };
