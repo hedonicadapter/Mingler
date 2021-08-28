@@ -7,7 +7,7 @@ const socket = io('ws://127.0.0.1:8080/user', {
     token: 'test',
   },
   query: {
-    userID: JSON.parse(userID),
+    userID: userID?.replace(/['"]+/g, ''),
   },
 });
 
@@ -46,10 +46,6 @@ socket.on('connect', () => {
   socket.on('activity:receive', (packet) => {
     sendActivityToLocalStorage(packet);
   });
-
-  socket.on('friendrequest:receive', () => {
-    console.log('friend request received');
-  });
 });
 
 socket.io.on('error', (error) => {
@@ -71,4 +67,10 @@ const sendFriendRequest = (toID, fromID) => {
   socket.emit('friendrequest:send', packet);
 };
 
-export { sendActivity, sendFriendRequest };
+const cancelFriendRequest = (toID, fromID) => {
+  const packet = { toID, fromID };
+
+  socket.emit('friendrequest:cancel', packet);
+};
+
+export { sendActivity, sendFriendRequest, cancelFriendRequest, socket };

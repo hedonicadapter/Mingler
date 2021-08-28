@@ -12,15 +12,12 @@ import CardBody from './CardBody';
 const header = css({
   zIndex: 5,
   paddingBottom: 0,
-  // borderBottom: '3px solid rgba(0,0,0,0)',
-  // backgroundColor: 'rgba(0,0,0,0)',
 });
 
 const text = css({});
 
 export default function WidgetHeader() {
   const { currentUser, setName } = useAuth();
-  console.log(currentUser);
   const [userName, setUserName] = useState(currentUser?.username);
   const [userData, setUserData] = useState({ Name: userName, Activity: [] });
   const [expanded, setExpanded] = useState(false);
@@ -81,7 +78,6 @@ export default function WidgetHeader() {
   return (
     <>
       <motion.header
-        // user.offline ? 'transparent'
         style={{
           backgroundColor: expanded
             ? 'rgba(241,235,232,1)'

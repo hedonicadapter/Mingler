@@ -29,21 +29,24 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
-  friends: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    unique: true,
-  },
-  friendRequests: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    unique: true,
-  },
-  sentFriendRequests: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    unique: true,
-  },
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  friendRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
+  sentFriendRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
   guest: Boolean,
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },
@@ -96,6 +99,13 @@ User.collection.createIndex('email', {
     },
   },
 });
+
+// User.collection.dropIndexes(function (err, results) {
+//   // Handle errors
+// });
+User.collection.createIndex({ friends: 1 }, { sparse: true });
+User.collection.createIndex({ friendRequests: 1 }, { sparse: true });
+User.collection.createIndex({ sentFriendRequests: 1 }, { sparse: true });
 
 // User.collection.createIndex({ username: 'text', status: 'text' });
 

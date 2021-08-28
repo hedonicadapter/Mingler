@@ -9,9 +9,9 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
-import UserItem from './UserItem';
 import FindFriendsPopUp from './FindFriendsPopUp';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
+import { socket } from '../config/socket';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -57,9 +57,7 @@ export default function FriendsList() {
 
   const [findFriendsOpen, setFindFriendsOpen] = useState(false);
   const [friends, setFriends] = useState([]);
-  const [friendRequests, setFriendRequests] = useState([
-    { _id: '2141241', username: 'minge' },
-  ]);
+  const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
   const [searchValue, setSearchValue] = useState();
   const [searchInputFocus, setSearchInputFocus] = useState(null);
@@ -82,7 +80,20 @@ export default function FriendsList() {
       });
   };
 
-  const getFriendRequests = () => {};
+  const getFriendRequests = () => {
+    DAO.getFriendRequests(currentUser._id, token)
+      .then((res) => {
+        // res.data.forEach((object, index) => {
+        //   object.key = index;
+        // });
+        console.log('friendRequests ', res.data.friendRequests);
+        setFriendRequests(res.data.friendRequests);
+      })
+      .catch((e) => {
+        console.log(e);
+        //show some error component
+      });
+  };
 
   const handleSearchInput = (evt) => {
     setSearchValue(evt.target.value);
@@ -129,6 +140,14 @@ export default function FriendsList() {
   useEffect(() => {
     getFriends();
     getFriendRequests();
+
+    socket.on('friendrequest:receive', () => {
+      getFriendRequests();
+    });
+
+    socket.on('friendrequest:cancelreceive', () => {
+      getFriendRequests();
+    });
   }, []);
 
   useEffect(() => {

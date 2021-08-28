@@ -23,9 +23,10 @@ const header = css({
 });
 
 export default function FriendRequestsAccordion({ friendRequests }) {
+  console.log('friendRequests', friendRequests);
   const [expanded, setExpanded] = useState(false);
 
-  const hasRequests = friendRequests.length > 0;
+  const hasRequests = friendRequests?.length > 0;
 
   const toggleExpansion = () => {
     if (hasRequests) {
@@ -54,7 +55,7 @@ export default function FriendRequestsAccordion({ friendRequests }) {
         className={header()}
       >
         <span>Friend requests</span>
-        <span>{friendRequests.length}</span>
+        <span>{friendRequests?.length}</span>
       </motion.header>
       <AnimatePresence initial={false}>
         {expanded && (

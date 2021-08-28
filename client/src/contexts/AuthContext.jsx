@@ -26,7 +26,7 @@ const fpPromise = FingerprintJS.load();
   const fp = await fpPromise;
   const result = await fp.get();
 
-  window.localStorage.setItem('clientFingerprint', result.visitorId);
+  localStorage.setItem('clientFingerprint', result.visitorId);
 })();
 // ============ Client fingerprint ============
 
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
       .then((result) => {
         const id = result.data._id;
 
-        window.localStorage.setItem('userID', id);
+        localStorage.setItem('userID', id);
 
         //set fingerprint
         return { success: true };
@@ -78,8 +78,8 @@ export function AuthProvider({ children }) {
   };
 
   const loginGuest = async () => {
-    const userID = window.localStorage.getItem('userID');
-    const fingerprint = window.localStorage.getItem('clientFingerprint');
+    const userID = localStorage.getItem('userID');
+    const fingerprint = localStorage.getItem('clientFingerprint');
 
     return await DAO.loginGuest(userID, fingerprint).then((result) => {
       setRecentUser({ userID, email: null, fingerprint, guest: true });
@@ -89,8 +89,21 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const logoutGuest = async () => {
+    localStorage.removeItem('userID');
+    localStorage.removeItem('token');
+    setRecentUser({
+      userID: null,
+      email: null,
+      fingerprint: null,
+      guest: null,
+    });
+    setCurrentUser(null);
+    setToken(null);
+  };
+
   const login = async (email, password) => {
-    const fingerprint = window.localStorage.getItem('clientFingerprint');
+    const fingerprint = localStorage.getItem('clientFingerprint');
 
     //set current user in localstorage
 
@@ -151,12 +164,12 @@ export function AuthProvider({ children }) {
     logout,
     registerGuest,
     loginGuest,
+    logoutGuest,
     login,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {/* {loading ? <WelcomePane /> : children} */}
       <AnimatePresence>
         {loading ? (
           <motion.div

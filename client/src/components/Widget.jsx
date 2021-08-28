@@ -56,6 +56,7 @@ export default function Widget() {
   // setIgnoreMouseEvents(true, { forward: true });
 
   const [visible, setVisible] = useState(true);
+
   const toggleMainPane = () => {
     setVisible(!visible);
   };

@@ -81,7 +81,7 @@ export default function WelcomePane({}) {
   // the same welcome screen
   useEffect(() => {
     return () => {
-      window.localStorage.setItem('newUser', false);
+      localStorage.setItem('newUser', false);
     };
   }, []);
 
@@ -96,7 +96,7 @@ export default function WelcomePane({}) {
   const handleContinueClick = () => {
     setLoading(true);
 
-    const fingerprint = window.localStorage.getItem('clientFingerprint');
+    const fingerprint = localStorage.getItem('clientFingerprint');
 
     registerGuest(userName, fingerprint).then(({ success, error }) => {
       success && loginGuest();

@@ -1,7 +1,7 @@
+const User = require('../models/User');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
 
@@ -173,6 +173,22 @@ exports.cancelFriendRequest = async (req, res, next) => {
     next(e);
   } finally {
     await session.endSession();
+  }
+};
+
+exports.getFriendRequests = async (req, res, next) => {
+  const { userID } = req.body;
+
+  try {
+    await User.findOne({ _id: userID }, 'friendRequests')
+      .populate('friendRequests', 'username _id')
+      .exec(function (err, friends) {
+        if (err) return next(new ErrorResponse('Database error'), 500);
+
+        return res.send(friends);
+      });
+  } catch (e) {
+    next(e);
   }
 };
 

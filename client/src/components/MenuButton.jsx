@@ -46,9 +46,20 @@ const menuButtonStyle = css({
 });
 
 export default function MenuButton() {
+  const { logoutGuest, currentUser } = useAuth();
   const [menuVisibility, setMenuVisibility] = useState(false);
   const toggleMenu = () => {
     setMenuVisibility(!menuVisibility);
+  };
+
+  const handleSignoutButton = () => {
+    if (
+      window.confirm(
+        "Since you're a guest, this will delete your account. Do you really want to proceed?"
+      )
+    ) {
+      logoutGuest();
+    }
   };
 
   return (
@@ -101,6 +112,15 @@ export default function MenuButton() {
                 Close
               </motion.li>
               <hr />
+              {currentUser && (
+                <motion.li
+                  whileHover={{ color: 'rgba(255,255,255,0.7)' }}
+                  variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                  onClick={handleSignoutButton}
+                >
+                  Sign out
+                </motion.li>
+              )}
               <motion.li
                 whileHover={{ color: 'rgba(255,255,255,0.7)' }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}

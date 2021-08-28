@@ -1,9 +1,9 @@
+const User = require('./models/User');
+const connectDB = require('./config/db');
 require('dotenv').config({ path: './config.env' });
 const express = require('express');
-const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
 const ErrorResponse = require('./utils/errorResponse');
-const User = require('./models/User');
 
 connectDB();
 
@@ -64,7 +64,10 @@ userIo.on('connection', (socket) => {
     // Get friend IDs (array of IDs of mongoDB user objects)
     // by the client's user ID (reference to mongoDB user object)
     User.findById(userID, 'friends', { lean: true }, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        console.log('userIo on connection error: ', err);
+        return err;
+      }
       const friendIDs = Object.values(result).map(function (item) {
         return item.toString();
       });
@@ -72,7 +75,6 @@ userIo.on('connection', (socket) => {
       // Client's own UserID is returned by findById
       joinRooms(socket, friendIDs).then(() => {
         socket.on('activity:send', (packet) => {
-          console.log('packet', packet);
           // Since a client's friends joins a room by the client's ID on connection,
           // anything emitted to the client's ID will be received by friends
           userIo
@@ -81,7 +83,13 @@ userIo.on('connection', (socket) => {
         });
 
         socket.on('friendrequest:send', (packet) => {
-          console.log('friendrequest:send', packet);
+          const { toID } = packet;
+          userIo.in(toID).emit('friendrequest:receive');
+        });
+
+        socket.on('friendrequest:cancel', (packet) => {
+          const { toID } = packet;
+          userIo.in(toID).emit('friendrequest:cancelreceive');
         });
       });
     });

@@ -10,7 +10,7 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
 import { useAuth } from '../contexts/AuthContext';
-import { sendFriendRequest } from '../config/socket';
+import { sendFriendRequest, cancelFriendRequest } from '../config/socket';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -181,6 +181,7 @@ export default function FindFriendsPopUp() {
         );
 
         setSentFriendRequests(updatedRequests);
+        cancelFriendRequest(toID, userID);
       })
       .catch((e) => {
         console.log(e);

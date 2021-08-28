@@ -88,6 +88,16 @@ class DAO {
     });
   };
 
+  getFriendRequests = (userID, token) => {
+    const data = { userID };
+
+    return privateRoute.post('/getFriendRequests', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   getSentFriendRequests = (userID, token) => {
     const data = { userID };
 
