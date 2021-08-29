@@ -6,6 +6,7 @@ const {
   getFriends,
   searchUsers,
   sendFriendRequest,
+  acceptFriendRequest,
   getSentFriendRequests,
   cancelFriendRequest,
   getFriendRequests,
@@ -18,6 +19,8 @@ router.route('/getFriends').post(protect, getFriends);
 router.route('/searchUsers').post(protect, searchUsers);
 
 router.route('/sendFriendRequest').post(protect, sendFriendRequest);
+
+router.route('/acceptFriendRequest').post(protect, acceptFriendRequest);
 
 router.route('/getFriendRequests').post(protect, getFriendRequests);
 

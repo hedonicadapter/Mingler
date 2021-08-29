@@ -31,7 +31,7 @@ const header = css({});
 const avatar = css({});
 
 const friendRequestButtonStyle = css({
-  opacity: 0,
+  // opacity: 0,
   fontSize: '0.9em',
   fontWeight: 700,
   color: colors.darkmodeDisabledText,
@@ -72,8 +72,10 @@ export default function UserItem({
   user,
   index,
   handleFriendRequestButton,
+  handleAcceptRequestButton,
   handleCancelRequestButton,
   requestSent,
+  accept, // Flag to show accept or add button for each item
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -104,13 +106,19 @@ export default function UserItem({
                 whileHover={friendRequestHoverAnimation}
                 whileTap={tapAnimation}
                 className={friendRequestButtonStyle()}
-                style={{
-                  transition: 'opacity 0.15s',
-                  opacity: hovered ? 1 : 0,
-                }}
-                onClick={() => handleFriendRequestButton(user._id)}
+                style={
+                  !accept && {
+                    transition: 'opacity 0.15s',
+                    opacity: hovered ? 1 : 0,
+                  }
+                }
+                onClick={() =>
+                  accept
+                    ? handleAcceptRequestButton(user._id)
+                    : handleFriendRequestButton(user._id)
+                }
               >
-                Add
+                {accept ? <>Accept</> : <>Add</>}
               </motion.div>
             ) : (
               <motion.div

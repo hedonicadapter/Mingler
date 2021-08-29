@@ -83,10 +83,10 @@ export default function FriendsList() {
   const getFriendRequests = () => {
     DAO.getFriendRequests(currentUser._id, token)
       .then((res) => {
-        // res.data.forEach((object, index) => {
-        //   object.key = index;
-        // });
-        console.log('friendRequests ', res.data.friendRequests);
+        res.data.friendRequests.forEach((object, index) => {
+          object.key = index;
+        });
+
         setFriendRequests(res.data.friendRequests);
       })
       .catch((e) => {
@@ -178,7 +178,11 @@ export default function FriendsList() {
         </div>
       )}
 
-      <FriendRequestsAccordion friendRequests={friendRequests} />
+      <FriendRequestsAccordion
+        friendRequests={friendRequests}
+        getFriends={getFriends} // To refresh friends list after accepting a friend request
+        getFriendRequests={getFriendRequests} // Same thing here
+      />
 
       {searchValue
         ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)

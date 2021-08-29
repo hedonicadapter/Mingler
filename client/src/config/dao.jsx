@@ -77,6 +77,16 @@ class DAO {
     });
   };
 
+  acceptFriendRequest = (fromID, userID, token) => {
+    const data = { fromID, userID };
+
+    return privateRoute.post('/acceptFriendRequest', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   cancelFriendRequest = (toID, fromID, token) => {
     const data = { toID, fromID };
     console.log('cancel friend request ', data);

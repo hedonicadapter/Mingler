@@ -132,6 +132,60 @@ exports.sendFriendRequest = async (req, res, next) => {
   }
 };
 
+exports.acceptFriendRequest = async (req, res, next) => {
+  const { fromID, userID } = req.body;
+
+  const session = await User.startSession();
+
+  try {
+    const transactionResults = await session.withTransaction(async () => {
+      const newFriend = await User.findOneAndUpdate(
+        { _id: userID },
+        { $push: { friends: fromID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      const send = await User.findOneAndUpdate(
+        { _id: userID },
+        { $pull: { friendRequests: fromID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      const sent = await User.findOneAndUpdate(
+        { _id: fromID },
+        { $pull: { sentFriendRequests: userID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      if (!newFriend) {
+        console.log('Aborting accept request transaction, check newFriend.');
+        await session.abortTransaction();
+      }
+      if (!send) {
+        console.log('Aborting accept request transaction, check send.');
+        await session.abortTransaction();
+      }
+      if (!sent) {
+        console.log('Aborting accept request transaction, check sent.');
+        await session.abortTransaction();
+      }
+    });
+
+    if (transactionResults) {
+      return res.status(201).json({
+        status: 'Success',
+        data: transactionResults,
+      });
+    } else {
+      return next(new ErrorResponse('Accept request transaction error', 500));
+    }
+  } catch (e) {
+    next(e);
+  } finally {
+    await session.endSession();
+  }
+};
+
 exports.cancelFriendRequest = async (req, res, next) => {
   const { toID, fromID } = req.body;
 

@@ -7,6 +7,9 @@ import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
 import UserItem from './UserItem';
+import { useAuth } from '../contexts/AuthContext';
+import { useLocalStorage } from '../helpers/localStorageManager';
+import DAO from '../config/DAO';
 
 const generalPadding = 12;
 
@@ -22,8 +25,13 @@ const header = css({
   zIndex: 5,
 });
 
-export default function FriendRequestsAccordion({ friendRequests }) {
-  console.log('friendRequests', friendRequests);
+export default function FriendRequestsAccordion({
+  friendRequests,
+  getFriends,
+  getFriendRequests,
+}) {
+  const { currentUser, token } = useAuth();
+
   const [expanded, setExpanded] = useState(false);
 
   const hasRequests = friendRequests?.length > 0;
@@ -32,6 +40,18 @@ export default function FriendRequestsAccordion({ friendRequests }) {
     if (hasRequests) {
       setExpanded(!expanded);
     }
+  };
+
+  const handleAcceptRequestButton = (fromID) => {
+    DAO.acceptFriendRequest(fromID, currentUser._id, token)
+      .then((res) => {
+        // Refresh friends list
+        getFriends();
+        getFriendRequests();
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
 
   return (
@@ -82,7 +102,11 @@ export default function FriendRequestsAccordion({ friendRequests }) {
                     backgroundColor: colors.depressedWhite,
                   }}
                 >
-                  <UserItem user={user} />
+                  <UserItem
+                    user={user}
+                    accept={true}
+                    handleAcceptRequestButton={handleAcceptRequestButton}
+                  />
                 </div>
               ))}
             </motion.div>
