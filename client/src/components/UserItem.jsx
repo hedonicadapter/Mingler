@@ -51,6 +51,11 @@ const cancelRequestButtonStyle = css({
   borderColor: colors.darkmodeDisabledText,
 });
 
+const AcceptRejectButtonsContainer = css({
+  display: 'flex',
+  flexDirection: 'row',
+});
+
 const friendRequestHoverAnimation = {
   color: 'rgba(100, 245, 141, 1)',
   borderColor: 'rgba(100, 245, 141, 1)',
@@ -68,11 +73,61 @@ const tapAnimation = {
   },
 };
 
+const AcceptRejectButtons = ({
+  handleAcceptRequestButton,
+  handleRejectRequestButton,
+  userID,
+}) => {
+  return (
+    <div className={AcceptRejectButtonsContainer()}>
+      <motion.div
+        initial={{ borderColor: 'rgba(131,133,140,1)' }}
+        whileHover={friendRequestHoverAnimation}
+        whileTap={tapAnimation}
+        className={friendRequestButtonStyle()}
+        onClick={() => handleAcceptRequestButton(userID)}
+      >
+        Accept
+      </motion.div>
+      <motion.div
+        initial={{ borderColor: 'rgba(131,133,140,1)' }}
+        whileHover={friendRequestHoverAnimation}
+        whileTap={tapAnimation}
+        className={friendRequestButtonStyle()}
+        onClick={() => handleRejectRequestButton(userID)}
+      >
+        X
+      </motion.div>
+    </div>
+  );
+};
+
+const AddButton = ({ handleFriendRequestButton, userID }) => {
+  return (
+    <motion.div
+      initial={{ borderColor: 'rgba(131,133,140,1)' }}
+      whileHover={friendRequestHoverAnimation}
+      whileTap={tapAnimation}
+      className={friendRequestButtonStyle()}
+      style={
+        !accept && {
+          transition: 'opacity 0.15s',
+          opacity: hovered ? 1 : 0,
+        }
+      }
+      onClick={() => handleFriendRequestButton(userID)}
+    >
+      Add
+    </motion.div>
+  );
+};
+
 export default function UserItem({
   user,
   index,
-  handleFriendRequestButton,
+  handleSendRequestButton,
   handleAcceptRequestButton,
+  handleRejectRequestButton,
   handleCancelRequestButton,
   requestSent,
   accept, // Flag to show accept or add button for each item
@@ -101,25 +156,18 @@ export default function UserItem({
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user.username}</div>
             {!requestSent ? (
-              <motion.div
-                initial={{ borderColor: 'rgba(131,133,140,1)' }}
-                whileHover={friendRequestHoverAnimation}
-                whileTap={tapAnimation}
-                className={friendRequestButtonStyle()}
-                style={
-                  !accept && {
-                    transition: 'opacity 0.15s',
-                    opacity: hovered ? 1 : 0,
-                  }
-                }
-                onClick={() =>
-                  accept
-                    ? handleAcceptRequestButton(user._id)
-                    : handleFriendRequestButton(user._id)
-                }
-              >
-                {accept ? <>Accept</> : <>Add</>}
-              </motion.div>
+              accept ? (
+                <AcceptRejectButtons
+                  handleAcceptRequestButton={handleAcceptRequestButton}
+                  handleRejectRequestButton={handleRejectRequestButton}
+                  userID={user._id}
+                />
+              ) : (
+                <AddButton
+                  handleSendRequestButton={handleSendRequestButton}
+                  userID={user._id}
+                />
+              )
             ) : (
               <motion.div
                 initial={{ borderColor: 'rgba(131,133,140,1)' }}

@@ -10,6 +10,7 @@ import UserItem from './UserItem';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
+import { cancelFriendRequest } from '../config/socket';
 
 const generalPadding = 12;
 
@@ -47,6 +48,16 @@ export default function FriendRequestsAccordion({
       .then((res) => {
         // Refresh friends list
         getFriends();
+        getFriendRequests();
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
+  const handleRejectRequestButton = (toID) => {
+    DAO.cancelFriendRequest(currentUser._id, toID, token)
+      .then((res) => {
         getFriendRequests();
       })
       .catch((e) => {
@@ -106,6 +117,7 @@ export default function FriendRequestsAccordion({
                     user={user}
                     accept={true}
                     handleAcceptRequestButton={handleAcceptRequestButton}
+                    handleRejectRequestButton={handleRejectRequestButton}
                   />
                 </div>
               ))}

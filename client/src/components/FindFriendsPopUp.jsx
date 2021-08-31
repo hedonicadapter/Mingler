@@ -162,7 +162,7 @@ export default function FindFriendsPopUp() {
     setSearchValue(evt.target.value);
   };
 
-  const handleFriendRequestButton = (toID) => {
+  const handleSendRequestButton = (toID) => {
     DAO.sendFriendRequest(toID, userID, token)
       .then((res) => {
         setSentFriendRequests((oldValue) => [...oldValue, toID]);
@@ -215,7 +215,7 @@ export default function FindFriendsPopUp() {
                 user={user}
                 requestSent={sentFriendRequests.includes(user._id)}
                 index={index}
-                handleFriendRequestButton={handleFriendRequestButton}
+                handleSendRequestButton={handleSendRequestButton}
                 handleCancelRequestButton={handleCancelRequestButton}
               />
             ))}
