@@ -44,7 +44,7 @@ export default function UserStatus() {
     let process;
 
     const access_token = localStorage.getItem('access_token');
-    console.log(access_token);
+
     if (access_token) {
       var exePath = path.resolve(
         __dirname,

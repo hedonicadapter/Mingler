@@ -43,9 +43,9 @@ const cleanUpLocalStorageActivities = (userID, latestActivityParsed) => {
 socket.on('connect', () => {
   console.log('Client socket connected');
 
-  socket.on('activity:receive', (packet) => {
-    sendActivityToLocalStorage(packet);
-  });
+  // socket.on('activity:receive', (packet) => {
+  //   sendActivityToLocalStorage(packet);
+  // });
 });
 
 socket.io.on('error', (error) => {

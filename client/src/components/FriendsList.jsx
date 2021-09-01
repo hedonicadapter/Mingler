@@ -59,7 +59,7 @@ export default function FriendsList() {
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
-  const [searchValue, setSearchValue] = useState();
+  const [searchValue, setSearchValue] = useState(null);
   const [searchInputFocus, setSearchInputFocus] = useState(null);
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
@@ -151,8 +151,35 @@ export default function FriendsList() {
   }, []);
 
   useEffect(() => {
+    if (friends) {
+      socket.removeAllListeners('activity:receive');
+
+      socket.once('activity:receive', (packet) => {
+        console.log('rere ', packet.userID);
+        // Set activities in friends array
+        setFriends((prevState) => {
+          return prevState.map((friend) => {
+            console.log('friend._id ', friend._id, ' userID ', packet.userID);
+            if (friend._id === packet.userID) {
+              return {
+                ...friend,
+                activity: packet.data,
+              };
+            }
+            return friend;
+          });
+        });
+      });
+    }
+  }, [friends]);
+
+  useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
+
+  useEffect(() => {
+    console.log('useffect ', friends);
+  }, [friends]);
 
   return (
     <div className={container()}>

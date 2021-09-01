@@ -58,6 +58,7 @@ export default function FriendRequestsAccordion({
   const handleRejectRequestButton = (toID) => {
     DAO.cancelFriendRequest(currentUser._id, toID, token)
       .then((res) => {
+        // Refresh
         getFriendRequests();
       })
       .catch((e) => {
