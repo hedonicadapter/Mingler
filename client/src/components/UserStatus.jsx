@@ -24,6 +24,7 @@ export default function UserStatus() {
 
     process.stdout.on('data', function (data) {
       let activeWindow = data.toString().trim();
+
       // Second comparison doesn't work for some reason
       if (
         activeWindow &&
