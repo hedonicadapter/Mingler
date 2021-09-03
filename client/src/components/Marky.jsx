@@ -101,6 +101,7 @@ export default function Marky({
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState(0);
 
+  console.log('windowtitle ', WindowTitle);
   useEffect(() => {
     // marKey of this specific Marky changes when the
     // user changes activity. If:

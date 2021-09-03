@@ -21,6 +21,8 @@ export default function AccordionItem({ friend }) {
     setExpanded(!expanded);
   };
 
+  console.log('friend.activity ', Array.isArray(friend.activity));
+
   return (
     <>
       <motion.header
@@ -40,7 +42,7 @@ export default function AccordionItem({ friend }) {
         <CardHeader
           key={friend.key}
           name={friend.username}
-          mainActivity={friend.Activity?.[0]}
+          mainActivity={friend.activity?.[0]}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
@@ -65,8 +67,8 @@ export default function AccordionItem({ friend }) {
               }}
             >
               <CardBody
-                activity={friend?.Activity}
-                userID={friend.UserID}
+                activity={friend?.activity}
+                userID={friend._id}
                 markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
                 setMarkyToReplaceWithYouTubeVideo={
                   setMarkyToReplaceWithYouTubeVideo

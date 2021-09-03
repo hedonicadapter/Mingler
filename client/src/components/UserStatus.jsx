@@ -24,10 +24,13 @@ export default function UserStatus() {
 
     process.stdout.on('data', function (data) {
       let activeWindow = data.toString().trim();
-
       // Second comparison doesn't work for some reason
-      if (activeWindow !== 'Sharehub' && activeWindow !== 'Task Switching') {
-        socket.sendActivity({ WindowTitle: activeWindow }, currentUser._id);
+      if (
+        activeWindow &&
+        activeWindow !== 'Sharehub' &&
+        activeWindow !== 'Task Switching'
+      ) {
+        socket.sendActivity([{ WindowTitle: activeWindow }], currentUser._id);
       }
     });
 

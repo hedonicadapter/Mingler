@@ -155,11 +155,9 @@ export default function FriendsList() {
       socket.removeAllListeners('activity:receive');
 
       socket.once('activity:receive', (packet) => {
-        console.log('rere ', packet.userID);
         // Set activities in friends array
         setFriends((prevState) => {
           return prevState.map((friend) => {
-            console.log('friend._id ', friend._id, ' userID ', packet.userID);
             if (friend._id === packet.userID) {
               return {
                 ...friend,
@@ -171,15 +169,12 @@ export default function FriendsList() {
         });
       });
     }
+    friends.forEach((item) => console.log(item.activity));
   }, [friends]);
 
   useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
-
-  useEffect(() => {
-    console.log('useffect ', friends);
-  }, [friends]);
 
   return (
     <div className={container()}>

@@ -11,7 +11,6 @@ import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
-const nameGenerator = require('positive-name-generator');
 const Store = require('electron-store');
 
 const store = new Store();
@@ -54,13 +53,6 @@ export function AuthProvider({ children }) {
   }
 
   let retryLimit = 0;
-
-  const generatePlaceholderEmail = (name) => {
-    const appendedName = nameGenerator().replace(/ /g, '');
-    const placeholderAdress = '@example.com';
-
-    return name + appendedName + placeholderAdress;
-  };
 
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)

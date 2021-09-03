@@ -119,6 +119,8 @@ export default function CardHeader({
     setRefresh(!refresh);
   };
 
+  console.log('mainActivity ', mainActivity);
+
   return (
     <motion.div className={container()}>
       <MenuButton />

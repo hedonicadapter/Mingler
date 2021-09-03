@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { css, styled } from '@stitches/react';
-import FullHeight from 'react-full-height';
 
 import * as electron from 'electron';
 
@@ -21,7 +20,7 @@ ipc.setMaxListeners(2);
 const MainPane = styled('div', {
   // marginTop: -10,
   float: 'right',
-  overflow: 'hidden',
+  // overflow: 'hidden',
   transition: 'transform 300ms ease, opacity 150ms ease-in',
   width: window.innerWidth * 0.92,
   willChange: 'transform',
@@ -86,9 +85,7 @@ export default function Widget() {
         >
           <WidgetHeader />
           <FriendsList />
-          <FullHeight>
-            <WidgetFooter />
-          </FullHeight>
+          <WidgetFooter />
         </motion.div>
       </AuthProvider>
     </MainPane>
