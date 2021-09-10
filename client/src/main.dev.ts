@@ -124,7 +124,7 @@ const createWindow = async () => {
       e.preventDefault();
 
       server?.close(() => {
-        dao.logOut().then(() => {
+        dao.logout().then(() => {
           mainWindow.destroy();
           return;
         });
@@ -184,33 +184,9 @@ app.on('window-all-closed', () => {
   }
 });
 
-ipcMain.on('sendUserIDToChromiumExtension', (evt, data) => {
-  sendUserIDToChromiumExtension(data);
-});
-
-var http = require('http');
-let server;
-
-const sendUserIDToChromiumExtension = (userID) => {
-  //   server?.close();
-  //   const PORT = process.env.PORT || 8080;
-  //   try {
-  //     server = http
-  //       .createServer(function (request, response) {
-  //         response.writeHeader(200, {
-  //           'Cache-Control': 'no-cache',
-  //           'Content-Type': 'text/html',
-  //         });
-  //         response.write(userID, () => {
-  //           console.log('Writing string Data...');
-  //         });
-  //         response.end();
-  //       })
-  //       .listen(PORT);
-  //   } catch (exception) {
-  //     console.log('Creating server exception: ', exception);
-  //   }
-};
+// ipcMain.on('sendUserIDToChromiumExtension', (evt, data) => {
+//   sendUserIDToChromiumExtension(data);
+// });
 
 let showing = false;
 

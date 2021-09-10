@@ -43,6 +43,10 @@ class DAO {
     return auth.post('/login', data);
   };
 
+  logout = () => {
+    return;
+  };
+
   findUserByEmail = (email) => {
     return auth.get(`/findUser?email=${email}`);
   };

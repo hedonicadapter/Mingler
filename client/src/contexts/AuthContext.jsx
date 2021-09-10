@@ -36,6 +36,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
+  const [server, setServer] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
@@ -118,15 +119,15 @@ export function AuthProvider({ children }) {
     });
   };
 
-  var http = require('http');
-  let server;
+  const io = require('socket.io')({
+    path: '/test',
+    serveClient: false,
+  });
 
-  function sendUserIDToChromiumExtension() {
-    ipcRenderer.send(
-      'sendUserIDToChromiumExtension',
-      JSON.stringify(currentUser._id)
-    );
-  }
+  const sendUserIDToChromiumExtension = () => {
+    // Send ID to host
+    // io.sockets.emit("native:userID", currentUser._id);
+  };
 
   useEffect(() => {
     const mostRecent = recentUser?.[0];
@@ -139,10 +140,29 @@ export function AuthProvider({ children }) {
   }, [recentUser]);
 
   useEffect(() => {
+    server?.close();
+    const PORT = 8081 || process.env.PORT;
+
+    try {
+      server = require('http').createServer();
+
+      io.attach(server, {
+        pingInterval: 10000,
+        pingTimeout: 5000,
+        cookie: false,
+      });
+
+      server.listen(PORT);
+    } catch (exception) {
+      console.log('Creating server exception: ', exception);
+    }
+  }, [currentUser]); // If user changes, so will the server
+
+  useEffect(() => {
     if (currentUser) {
       sendUserIDToChromiumExtension();
     }
-  }, [currentUser]);
+  }, [server]); // If server changes, so will the ID sent to chromium host
 
   useEffect(() => {
     if (token && currentUser) setLoading(false);

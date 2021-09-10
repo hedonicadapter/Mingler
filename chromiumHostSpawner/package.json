@@ -1,0 +1,22 @@
+{
+  "name": "chromiumhostspawner",
+  "version": "1.0.0",
+  "description": "what spawns the host for native messaging between chromium and sharehub",
+  "bin": {
+    "chromiumhostspawner": "index.js"
+  },
+  "pkg": {
+    "assets": [
+      "host.py"
+    ],
+    "targets": [
+      "host"
+    ]
+  },
+  "main": "index.js",
+  "author": "Sam Ba",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

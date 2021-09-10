@@ -22,6 +22,8 @@ export default function UserStatus() {
     var exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
     process = execFile('python', [exePath]);
 
+    console.log('process ', process);
+
     process.stdout.on('data', function (data) {
       let activeWindow = data.toString().trim();
 
