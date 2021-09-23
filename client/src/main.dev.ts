@@ -22,7 +22,8 @@ import {
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-// import mainWindowCreator from '../mainWindow.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 import dao from './config/dao';
 
@@ -118,6 +119,43 @@ const createWindow = async () => {
     }
   });
 
+  mainWindow.webContents.once('dom-ready', () => {
+    mainWindow.webContents
+      .executeJavaScript('localStorage.getItem("userID");', true)
+      .then((result) => {
+        // ipcMain.on('toChromiumHost:userID', (evt, data) => {
+        console.log('YOOOooooooooooooo');
+        const PORT = 8081;
+        try {
+          const httpServer = createServer();
+          const io = new Server(httpServer, {
+            // path: '/auth',
+            pingInterval: 10000,
+            pingTimeout: 5000,
+            cookie: false,
+          });
+
+          const authIo = io.of('/auth');
+
+          authIo.on('connection', (socket) => {
+            console.log('connectet');
+
+            console.log('sending to host', result);
+            authIo.emit('fromApp:userID', result);
+          });
+
+          authIo.on('disconnect', (reason) => {
+            console.log('reason ', reason);
+          });
+
+          httpServer.listen(PORT);
+        } catch (exception) {
+          console.log('Creating socket server exception: ', exception);
+        }
+        // });
+      });
+  });
+
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
     mainWindow.on('close', async function (e) {
@@ -183,10 +221,6 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-
-// ipcMain.on('sendUserIDToChromiumExtension', (evt, data) => {
-//   sendUserIDToChromiumExtension(data);
-// });
 
 let showing = false;
 

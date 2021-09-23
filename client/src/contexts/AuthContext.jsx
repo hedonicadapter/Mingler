@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
-// import http from 'http';
+
 import { assert } from 'console';
 import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
@@ -36,7 +36,6 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [server, setServer] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
@@ -119,14 +118,9 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const io = require('socket.io')({
-    path: '/test',
-    serveClient: false,
-  });
-
-  const sendUserIDToChromiumExtension = () => {
-    // Send ID to host
-    // io.sockets.emit("native:userID", currentUser._id);
+  // Send ID to host
+  const sendUserIDToChromiumHost = () => {
+    io.sockets.emit('native:userID', currentUser._id);
   };
 
   useEffect(() => {
@@ -140,34 +134,15 @@ export function AuthProvider({ children }) {
   }, [recentUser]);
 
   useEffect(() => {
-    server?.close();
-    const PORT = 8081 || process.env.PORT;
-
-    try {
-      server = require('http').createServer();
-
-      io.attach(server, {
-        pingInterval: 10000,
-        pingTimeout: 5000,
-        cookie: false,
-      });
-
-      server.listen(PORT);
-    } catch (exception) {
-      console.log('Creating server exception: ', exception);
-    }
-  }, [currentUser]); // If user changes, so will the server
-
-  useEffect(() => {
-    if (currentUser) {
-      sendUserIDToChromiumExtension();
-    }
-  }, [server]); // If server changes, so will the ID sent to chromium host
-
-  useEffect(() => {
     if (token && currentUser) setLoading(false);
     else setLoading(true);
   }, [token, currentUser]);
+
+  useEffect(() => {
+    if (currentUser && loading) {
+      ipcRenderer.send('toChromiumHost:userID', currentUser._id);
+    }
+  }, [currentUser, loading]);
 
   const value = {
     currentUser,

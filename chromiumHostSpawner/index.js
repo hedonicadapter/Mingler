@@ -1,29 +1,55 @@
-var path = require('path');
-const execFile = require('child_process').execFile;
+const io = require('socket.io-client');
 
-var exePath = path.resolve(__dirname, 'host.py');
+// var path = require('path');
+// const execFile = require('child_process').execFile;
 
-var child = require('child_process').exec('python', [exePath]);
+// var exePath = path.resolve(__dirname, 'host.py');
+
+// var child = require('child_process').exec('python', [exePath]);
 
 // process = execFile('python', [exePath]);
-console.log(child);
 
-process.stdout.write('hello');
+// process.stdout.write('hello');
 
-child.stdout.on('data', function (data) {
-  let activeTab = data.toString().trim();
+// child.stdout.on('data', function (data) {
+//   let activeTab = data.toString().trim();
 
-  console.log('activeTab ', activeTab);
+//   console.log('activeTab ', activeTab);
+// });
+
+// child.stderr.on('data', function (data) {
+//   if (data) console.log('STDERR: ', data);
+// });
+
+// child.on('error', function (err) {
+//   if (err) return console.error(err);
+// });
+
+// child.on('exit', function () {
+//   process.exit();
+// });
+
+const socket = io('ws://127.0.0.1:8081/auth', {
+  // auth: {
+  //   token: 'test',
+  // },
+  // transports: ['websocket'],
+  // origins: 'localhost:* http://localhost:* http://www.localhost:*',
 });
 
-child.stderr.on('data', function (data) {
-  if (data) console.log('STDERR: ', data);
+socket.on('connection', () => {
+  console.log('Client socket connected');
+});
+socket.on('fromApp:userID', (packet) => {
+  // sendActivityToLocalStorage(packet);
+  console.log('lalala ', packet);
 });
 
-child.on('error', function (err) {
-  if (err) return console.error(err);
+socket.io.on('error', (error) => {
+  console.log('error', error);
+});
+socket.io.on('reconnect', (attempt) => {
+  console.log('attempt', attempt);
 });
 
-child.on('exit', function () {
-  process.exit();
-});
+// while (true) {}
