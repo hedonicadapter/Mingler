@@ -1,0 +1,18 @@
+{
+  "name": "electron-react-boilerplate",
+  "productName": "electron-react-boilerplate",
+  "version": "2.3.0",
+  "description": "ShareHub",
+  "main": "./main.prod.js",
+  "author": {
+    "name": "Samba",
+    "email": "thethebatsam@gmail.com",
+    "url": "https://github.com/YungMilky/ShareHub"
+  },
+  "scripts": {
+    "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",
+    "postinstall": "yarn electron-rebuild"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

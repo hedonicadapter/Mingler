@@ -1,0 +1,111 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+html,
+body,
+#root,
+.App {
+  height: 100%;
+}
+[data-reactroot] {
+  height: 100% !important;
+}
+
+body {
+  position: relative;
+  color: #121212;
+  /* font-family: 'Segoe UI', Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
+    'Bitstream Vera Sans', 'Trebuchet MS', Verdana, 'Verdana Ref', sans serif; */
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  margin: auto;
+  pointer-events: none;
+  cursor: default;
+}
+
+.clickable {
+  pointer-events: auto;
+}
+.draggable {
+  -webkit-app-region: drag;
+}
+.undraggable {
+  -webkit-app-region: no-drag;
+}
+
+button {
+  background-color: rgba(255, 255, 255, 0);
+  border: none;
+  appearance: none;
+  font-size: 1.3rem;
+  box-shadow: 0px 8px 28px -6px rgba(24, 39, 75, 0.12),
+    0px 18px 88px -4px rgba(24, 39, 75, 0.14);
+  transition: transform ease-in 0.1s;
+  cursor: pointer;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  height: fit-content;
+  width: fit-content;
+}
+
+/* a:hover {
+  opacity: 1;
+  text-decoration: none;
+} */
+
+/* .bottomHoverBorder {
+  background-color: black;
+  height: 20;
+  -webkit-transition: opacity 1s ease-in-out;
+  -moz-transition: opacity 1s ease-in-out;
+  -ms-transition: opacity 1s ease-in-out;
+  -o-transition: opacity 1s ease-in-out;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+}
+.bottomHoverBorder:hover {
+  opacity: 1;
+} */
+
+h1,
+h2 {
+  padding: 0;
+  margin: 0px;
+  line-height: 100%;
+}
+
+.dotter:after {
+  animation: dotty steps(1, end) 1s infinite;
+  content: '\00a0';
+}
+
+@keyframes dotty {
+  0% {
+    content: '\00a0';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
+  100% {
+    content: '\00a0';
+  }
+}
