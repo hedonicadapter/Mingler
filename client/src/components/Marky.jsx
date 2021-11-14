@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import * as electron from 'electron';
 import { css, styled } from '@stitches/react';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
 import { RiArrowDropUpLine } from 'react-icons/ri';
@@ -10,8 +11,11 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
+import DAO from '../config/DAO';
+import { sendYouTubeTimeRequest, socket } from '../config/socket';
 
-const shell = require('electron').shell;
+const shell = electron.shell;
+const ipcRenderer = electron.ipcRenderer;
 
 const buttonVariants = {
   hover: {
@@ -101,7 +105,6 @@ export default function Marky({
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState(0);
 
-  console.log('windowtitle ', WindowTitle);
   useEffect(() => {
     // marKey of this specific Marky changes when the
     // user changes activity. If:
@@ -143,16 +146,13 @@ export default function Marky({
         markyToReplaceWithYouTubeVideo ? null : marKey
       );
       if (userID) {
-        db.collection('Users')
-          .doc(userID)
-          .collection('YouTubeTimeRequests')
-          .add(new Object())
-          .then(() => {
-            console.log('YouTube time successfully written!');
-          })
-          .catch((error) => {
-            console.error('Error writing YouTube time: ', error);
-          });
+        //Send yt time request to a user through server socket
+        sendYouTubeTimeRequest(userID, YouTubeTitle, YouTubeURL);
+
+        // Wait for response from ipcMain, which is connected to the server socket
+        ipcRenderer.once('chromiumHostData:YouTubeTime', (event, data) => {
+          shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
+        });
       }
     } else if (TabURL) {
       shell.openExternal(TabURL);
@@ -194,6 +194,7 @@ export default function Marky({
                 repeat: Infinity,
                 repeatType: 'mirror',
                 repeatDelay: 0.75,
+                delay: 0.15,
                 duration:
                   marqueeWidth > 40
                     ? 1

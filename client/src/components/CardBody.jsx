@@ -43,7 +43,7 @@ export default function CardBody({
   const [ytTime, setYtTime] = useState(null);
 
   useEffect(() => {
-    activity.forEach((item) => {
+    activity?.forEach((item) => {
       item.YouTubeURL && setURL(item.YouTubeURL);
       item.YouTubeTime && setYtTime(item.YouTubeTime);
     });
@@ -62,7 +62,7 @@ export default function CardBody({
     <>
       <Flipper className={flipper()}>
         <ul>
-          {activity.map((activity, index) =>
+          {activity?.map((activity, index) =>
             markyToReplaceWithYouTubeVideo != index ? (
               <Flipped key={index} flipId={'yo'}>
                 <Marky

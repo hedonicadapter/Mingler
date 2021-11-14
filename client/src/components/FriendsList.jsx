@@ -12,6 +12,7 @@ import DAO from '../config/dao';
 import FindFriendsPopUp from './FindFriendsPopUp';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { socket } from '../config/socket';
+import UserStatus from './UserStatus';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -52,6 +53,8 @@ const findFriendsWindowConfig = {
 
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
+
+  UserStatus();
 
   const searchInputRef = useRef();
 
@@ -137,6 +140,11 @@ export default function FriendsList() {
     } else findFriendsWindow.focus();
   };
 
+  const handleNameChange = (evt) => {
+    setUserName(evt.target.value);
+    setName(evt.target.value);
+  };
+
   useEffect(() => {
     getFriends();
     getFriendRequests();
@@ -152,32 +160,40 @@ export default function FriendsList() {
 
   useEffect(() => {
     if (friends) {
-      socket.removeAllListeners('activity:receive');
-
-      socket.once('activity:receive', (packet) => {
-        // Set activities in friends array
-        setFriends((prevState) => {
-          return prevState.map((friend) => {
-            if (friend._id === packet.userID) {
-              return {
-                ...friend,
-                activity: packet.data,
-              };
-            }
-            return friend;
-          });
-        });
-      });
+      setActivityListeners();
     }
-    friends.forEach((item) => console.log(item.activity));
   }, [friends]);
 
   useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
+  const setActivityListeners = () => {
+    socket.removeAllListeners('activity:receive');
+
+    socket.once('activity:receive', (packet) => {
+      // Set activities in friends array
+      setFriends((prevState) => {
+        return prevState.map((friend) => {
+          if (friend._id === packet.userID) {
+            return {
+              ...friend,
+              activity: packet.data,
+            };
+          }
+          return friend;
+        });
+      });
+    });
+  };
+
   return (
     <div className={container()}>
+      <AccordionItem
+        friend={friends.find((friend) => friend._id === currentUser._id)}
+        handleNameChange={handleNameChange}
+      />
+
       <input
         placeholder="Find friends..."
         type="text"

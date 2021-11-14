@@ -82,6 +82,24 @@ userIo.on('connection', (socket) => {
             .emit('activity:receive', packet);
         });
 
+        // User wants to send time request to a friend
+        socket.on('youtubetimerequest:send', (packet) => {
+          const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
+          // Time request is sent to friend
+          userIo.in(toID).emit('youtubetimerequest:receive', {
+            fromID: fromID,
+            YouTubeTitle: YouTubeTitle,
+            YouTubeURL: YouTubeURL,
+          });
+        });
+
+        // Friend answers time request
+        socket.on('youtubetimerequest:answer', (packet) => {
+          const { toID, time } = packet;
+          //By sending current youtube time back
+          userIo.in(toID).emit('youtubetime:receive', time);
+        });
+
         socket.on('friendrequest:send', (packet) => {
           const { toID } = packet;
           userIo.in(toID).emit('friendrequest:receive');

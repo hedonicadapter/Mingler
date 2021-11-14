@@ -8,6 +8,8 @@ import { db } from '../config/firebase';
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
 const socket = require('../config/socket');
 
+const { ipcRenderer } = require('electron');
+
 // Starts the script (../scripts/ActiveWindowListener.py) that listens for the user's
 // foreground window and returns it here.
 //
@@ -17,12 +19,35 @@ export default function UserStatus() {
 
   let currentListener;
 
+  ipcRenderer.on('chromiumHostData', function (event, data) {
+    socket.sendActivity(
+      [
+        {
+          TabTitle: data?.TabTitle,
+          TabURL: data?.TabURL,
+          YouTubeTitle: data?.YouTubeTitle,
+          YouTubeURL: data?.YouTubeURL,
+          Date: data?.Date,
+        },
+      ],
+      currentUser._id
+    );
+    socket.sendActivityToLocalStorage({
+      userID: currentUser._id,
+      data: {
+        TabTitle: data?.TabTitle,
+        TabURL: data?.TabURL,
+        YouTubeTitle: data?.YouTubeTitle,
+        YouTubeURL: data?.YouTubeURL,
+        Date: data?.Date,
+      },
+    });
+  });
+
   const activeWindowListener = () => {
     let process;
     var exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
     process = execFile('python', [exePath]);
-
-    console.log('process ', process);
 
     process.stdout.on('data', function (data) {
       let activeWindow = data.toString().trim();
@@ -31,15 +56,20 @@ export default function UserStatus() {
       if (
         activeWindow &&
         activeWindow !== 'Sharehub' &&
-        activeWindow !== 'Task Switching'
+        activeWindow !== 'Task Switching' &&
+        activeWindow !== 'Snap Assist'
       ) {
         socket.sendActivity([{ WindowTitle: activeWindow }], currentUser._id);
+        socket.sendActivityToLocalStorage({
+          userID: currentUser._id,
+          data: { WindowTitle: activeWindow, Date: new Date() },
+        });
       }
     });
 
-    process.stderr.on('data', function (data) {
-      if (data) console.log('STDERR: ', data);
-    });
+    // process.stderr.on('data', function (data) {
+    // if (data) console.log('STDERR: ', data);
+    // });
 
     process.on('error', function (err) {
       if (err) return console.error(err);

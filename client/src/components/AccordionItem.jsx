@@ -12,7 +12,7 @@ const header = css({
   paddingBottom: 0,
 });
 
-export default function AccordionItem({ friend }) {
+export default function AccordionItem({ friend, handleNameChange }) {
   const [expanded, setExpanded] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
@@ -20,8 +20,6 @@ export default function AccordionItem({ friend }) {
   const toggleExpansion = () => {
     setExpanded(!expanded);
   };
-
-  console.log('friend.activity ', Array.isArray(friend.activity));
 
   return (
     <>
@@ -40,12 +38,13 @@ export default function AccordionItem({ friend }) {
         className={header()}
       >
         <CardHeader
-          key={friend.key}
-          name={friend.username}
-          mainActivity={friend.activity?.[0]}
+          key={friend?.key}
+          name={friend?.username}
+          mainActivity={friend?.activity?.[0]}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
+          handleNameChange={handleNameChange}
         />
       </motion.header>
       <AnimatePresence initial={false}>

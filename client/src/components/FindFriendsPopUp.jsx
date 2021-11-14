@@ -9,7 +9,6 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
-import { useAuth } from '../contexts/AuthContext';
 import { sendFriendRequest, cancelFriendRequest } from '../config/socket';
 
 const { remote } = require('electron');

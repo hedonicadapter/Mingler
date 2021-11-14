@@ -1,3 +1,5 @@
+import * as electron from 'electron';
+const ipcRenderer = electron.ipcRenderer;
 import { io } from 'socket.io-client';
 
 const userID = localStorage.getItem('userID');
@@ -12,8 +14,10 @@ const socket = io('ws://127.0.0.1:8080/user', {
 });
 
 const sendActivityToLocalStorage = (packet) => {
-  // Each packet contains the ID it was sent from
+  // Each packet contains the ID it was sent from, and an activity wrapped in a data object
   const userID = packet?.userID;
+
+  console.log('packet data    ', packet.data);
 
   // activities are organized by userID so we can easily get them for each friend
   const latestActivity = localStorage.getItem(userID);
@@ -44,6 +48,13 @@ socket.on('connect', () => {
   console.log('Client socket connected');
 });
 
+// User receives yt time request, and sends get request to ipcMain,
+// which forwards the request through the host to chromium to get the time
+// Packet contains url and tab title to find the right tab
+socket.on('youtubetimerequest:receive', (packet) => {
+  ipcRenderer.send('getYouTubeTime', packet);
+});
+
 socket.io.on('error', (error) => {
   console.log(error);
 });
@@ -55,6 +66,18 @@ const sendActivity = (data, userID) => {
   const packet = { data, userID };
 
   socket.emit('activity:send', packet);
+};
+
+const sendYouTubeTimeRequest = (toID, YouTubeTitle, YouTubeURL) => {
+  const packet = { toID, YouTubeTitle, YouTubeURL };
+
+  socket.emit('youtubetimerequest:send', packet);
+};
+
+const answerYouTubeTimeRequest = (toID, time) => {
+  const packet = { toID, time };
+
+  socket.emit('youtubetimerequest:answer', packet);
 };
 
 const sendFriendRequest = (toID, fromID) => {
@@ -69,4 +92,12 @@ const cancelFriendRequest = (toID, fromID) => {
   socket.emit('friendrequest:cancel', packet);
 };
 
-export { sendActivity, sendFriendRequest, cancelFriendRequest, socket };
+export {
+  sendActivity,
+  sendFriendRequest,
+  cancelFriendRequest,
+  sendActivityToLocalStorage,
+  sendYouTubeTimeRequest,
+  answerYouTubeTimeRequest,
+  socket,
+};

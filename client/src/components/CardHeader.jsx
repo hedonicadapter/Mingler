@@ -21,7 +21,7 @@ const container = css({
 
 const nameAndActivityContainer = css({
   flexDirection: 'column',
-  width: '80%',
+  width: '100%',
 });
 const text = css({
   paddingLeft: '7px',
@@ -118,8 +118,6 @@ export default function CardHeader({
   const refreshOverflowChecker = () => {
     setRefresh(!refresh);
   };
-
-  console.log('mainActivity ', mainActivity);
 
   return (
     <motion.div className={container()}>

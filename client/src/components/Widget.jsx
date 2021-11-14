@@ -6,7 +6,6 @@ import * as electron from 'electron';
 import './Widget.css';
 
 import colors from '../config/colors';
-import WidgetHeader from './WidgetHeader';
 import FriendsList from './FriendsList';
 import SettingsPane from './SettingsPane';
 import WidgetFooter from './WidgetFooter';
@@ -22,7 +21,7 @@ const MainPane = styled('div', {
   float: 'right',
   // overflow: 'hidden',
   transition: 'transform 300ms ease, opacity 150ms ease-in',
-  width: window.innerWidth * 0.92,
+  width: '90%',
   willChange: 'transform',
   height: window.innerHeight,
 
@@ -83,7 +82,6 @@ export default function Widget() {
           }}
           transition={{ duration: 0.5 }}
         >
-          <WidgetHeader />
           <FriendsList />
           <WidgetFooter />
         </motion.div>

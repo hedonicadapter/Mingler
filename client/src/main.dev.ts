@@ -89,14 +89,22 @@ const createWindow = async () => {
     frame: false,
     transparent: true,
     show: false,
-    resizable: false,
+    // resizable: false,
     width: width / 4,
     height: height,
+    x: 0,
+    y: height,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
       devTools: true,
     },
+  });
+
+  mainWindow.on('will-resize', async function (e, details) {
+    if (details.y != 0) {
+      e.preventDefault();
+    }
   });
 
   mainWindow.setAlwaysOnTop(true, 'status');
@@ -120,12 +128,12 @@ const createWindow = async () => {
   });
 
   mainWindow.webContents.once('dom-ready', () => {
-    mainWindow.webContents
+    mainWindow?.webContents
       .executeJavaScript('localStorage.getItem("userID");', true)
       .then((result) => {
         // ipcMain.on('toChromiumHost:userID', (evt, data) => {
-        console.log('YOOOooooooooooooo');
         const PORT = 8081;
+
         try {
           const httpServer = createServer();
           const io = new Server(httpServer, {
@@ -138,19 +146,43 @@ const createWindow = async () => {
           const authIo = io.of('/auth');
 
           authIo.on('connection', (socket) => {
-            console.log('connectet');
+            console.log('host socket connected');
 
-            console.log('sending to host', result);
-            authIo.emit('fromApp:userID', result);
+            console.log('sending to host: ', result);
+            authIo.emit('fromAppToHost:userID', result);
+
+            socket.on('fromHostToApp:data', (data) => {
+              console.log('from host: ', data);
+
+              // if data = time send time not chromiumhostdata
+              // Picked up by Marky which then opens a browser tab for the video with the correct time
+              if (data.time) {
+                mainWindow?.webContents.send(
+                  'chromiumHostData:YouTubeTime',
+                  data
+                );
+              } else {
+                mainWindow?.webContents.send('chromiumHostData', data);
+              }
+            });
+
+            ipcMain.on('getYouTubeTime', (event, packet) => {
+              const { YouTubeTitle, YouTubeURL } = packet;
+
+              socket.emit('getYouTubeTime', {
+                YouTubeTitle,
+                YouTubeURL,
+              });
+            });
           });
 
           authIo.on('disconnect', (reason) => {
-            console.log('reason ', reason);
+            console.log('Host socket dc reason: ', reason);
           });
 
           httpServer.listen(PORT);
         } catch (exception) {
-          console.log('Creating socket server exception: ', exception);
+          console.log('Creating host socket server exception: ', exception);
         }
         // });
       });
