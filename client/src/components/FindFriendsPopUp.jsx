@@ -140,7 +140,7 @@ export default function FindFriendsPopUp() {
     if (value) {
       DAO.searchUsers(value, token)
         .then((res) => {
-          const users = res.data;
+          const users = res.data.filter((user) => user._id != userID);
           setFoundFriends(users);
         })
         .catch((e) => console.log(e));
