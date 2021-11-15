@@ -10,8 +10,8 @@ import Marky from './Marky';
 
 const flipper = css({
   backgroundColor: colors.depressedWhite,
-  marginTop: -16, // the Flipper component has some inherent top margin
-  marginLeft: -25,
+  // marginTop: -16, // the Flipper component has some inherent top margin
+  // marginLeft: -25,
   // paddingBottom: 1,
 });
 const playerContainer = css({

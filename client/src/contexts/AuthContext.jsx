@@ -175,6 +175,11 @@ export function AuthProvider({ children }) {
             animate={{ x: '0%' }}
             exit={{ x: '120%' }}
             duration={0.1}
+            style={{
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
             {children}
           </motion.div>

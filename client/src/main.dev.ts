@@ -90,10 +90,10 @@ const createWindow = async () => {
     transparent: true,
     show: false,
     // resizable: false,
-    width: width / 4,
+    // width: width / 4,
     height: height,
-    x: 0,
-    y: height,
+    // x: 0,
+    // y: height,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,

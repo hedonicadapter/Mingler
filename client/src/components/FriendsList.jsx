@@ -29,10 +29,10 @@ const searchInputStyle = css({
   fontSize: '1.0em',
   fontWeight: 600,
 
-  width: '100%',
-  padding: 15,
-  paddingLeft: 20,
-  paddingRight: 20,
+  // width: '100%',
+  margin: 15,
+  marginLeft: 20,
+  marginRight: 20,
 });
 
 const findButton = css({
@@ -195,7 +195,7 @@ export default function FriendsList() {
       />
 
       <input
-        placeholder="Find friends..."
+        placeholder="Search... 🔍"
         type="text"
         value={searchValue || ''}
         onChange={handleSearchInput}
