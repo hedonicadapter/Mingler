@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
 
-import CardHeader from './CardHeader';
 import colors from '../config/colors';
 
 const container = css({

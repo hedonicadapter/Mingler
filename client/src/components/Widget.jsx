@@ -18,7 +18,7 @@ ipc.setMaxListeners(2);
 
 const MainPane = styled('div', {
   // marginTop: -10,
-  float: 'right',
+  // float: 'right',
   // overflow: 'hidden',
   transition: 'transform 300ms ease, opacity 150ms ease-in',
   // width: window.innerWidth / 4,

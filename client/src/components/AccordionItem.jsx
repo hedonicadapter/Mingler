@@ -27,11 +27,11 @@ export default function AccordionItem({ friend, handleNameChange }) {
         // user.offline ? 'transparent'
         style={{
           backgroundColor: expanded
-            ? 'rgba(241,235,232,1)'
-            : 'rgba(253,245,241, 1)',
+            ? 'rgba(36,36,36,1)' //used to be rgba(241,235,232,1)
+            : 'rgba(18,18,18, 1)', //used to be rgba(253,245,241, 1)
         }}
         whileHover={{
-          backgroundColor: 'rgba(241,235,232,1)',
+          backgroundColor: 'rgba(36,36,36,1)', //used to be rgba(241,235,232,1)
         }}
         transition={{ duration: 0.15 }}
         onClick={() => toggleExpansion()}

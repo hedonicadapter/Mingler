@@ -18,7 +18,7 @@ const electron = require('electron');
 const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
 
-const container = css({ backgroundColor: colors.classyWhite });
+const container = css({ backgroundColor: colors.darkmodeBlack });
 
 const searchInputStyle = css({
   WebkitAppearance: 'none',
@@ -36,7 +36,7 @@ const searchInputStyle = css({
 });
 
 const findButton = css({
-  backgroundColor: 'white',
+  backgroundColor: colors.darkmodeBlack,
   padding: 10,
 });
 
@@ -74,7 +74,6 @@ export default function FriendsList() {
         res.data.forEach((object, index) => {
           object.key = index;
         });
-        console.log('frents ', res.data);
         setFriends(res.data);
       })
       .catch((e) => {
@@ -176,6 +175,7 @@ export default function FriendsList() {
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === packet.userID) {
+            friend.activity?.push(packet.data);
             return {
               ...friend,
               activity: packet.data,

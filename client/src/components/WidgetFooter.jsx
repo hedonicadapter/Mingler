@@ -4,7 +4,7 @@ import { css, styled } from '@stitches/react';
 import colors from '../config/colors';
 
 const container = css({
-  backgroundColor: colors.classyWhite,
+  backgroundColor: colors.darkmodeBlack,
   flex: 1,
   height: '100%',
   display: 'flex',

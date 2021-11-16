@@ -9,7 +9,7 @@ import colors from '../config/colors';
 import Marky from './Marky';
 
 const flipper = css({
-  backgroundColor: colors.depressedWhite,
+  backgroundColor: colors.darkmodeLightBlack,
   // marginTop: -16, // the Flipper component has some inherent top margin
   // marginLeft: -25,
   // paddingBottom: 1,
@@ -37,6 +37,7 @@ export default function CardBody({
   setMarkyToReplaceWithYouTubeVideo,
   expanded,
 }) {
+  console.log('activity ', activity);
   const playerRef = useRef();
 
   const [URL, setURL] = useState(null);
@@ -47,7 +48,6 @@ export default function CardBody({
       item.YouTubeURL && setURL(item.YouTubeURL);
       item.YouTubeTime && setYtTime(item.YouTubeTime);
     });
-    console.log(markyToReplaceWithYouTubeVideo);
   }, [markyToReplaceWithYouTubeVideo]);
 
   useEffect(() => {

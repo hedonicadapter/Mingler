@@ -7,6 +7,7 @@ body,
 #root,
 .App {
   height: 100%;
+  user-select: none;
 }
 [data-reactroot] {
   height: 100% !important;
@@ -14,7 +15,7 @@ body,
 
 body {
   position: relative;
-  color: #121212;
+  color: rgba(255, 255, 255, 0.87);
   /* font-family: 'Segoe UI', Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
     'Bitstream Vera Sans', 'Trebuchet MS', Verdana, 'Verdana Ref', sans serif; */
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;

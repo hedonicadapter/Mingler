@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
-import CardHeader from './CardHeader';
-import CardBody from './CardBody';
 import colors from '../config/colors';
 import UserItem from './UserItem';
 import { useAuth } from '../contexts/AuthContext';
@@ -71,16 +69,14 @@ export default function FriendRequestsAccordion({
       <motion.header
         // user.offline ? 'transparent'
         style={{
-          backgroundColor: expanded
-            ? 'rgba(241,235,232,1)'
-            : 'rgba(253,245,241, 1)',
+          backgroundColor: expanded ? 'rgba(36,36,36,1)' : 'rgba(18,18,18, 1)',
           color: hasRequests
-            ? colors.darkmodeBlack
-            : colors.darkmodeDisabledText,
+            ? colors.darkmodeMediumWhite
+            : colors.darkmodeDisabledWhite,
           fontWeight: hasRequests ? 'normal' : '700',
         }}
         whileHover={{
-          backgroundColor: 'rgba(241,235,232,1)',
+          backgroundColor: 'rgba(36,36,36,1)',
         }}
         transition={{ duration: 0.15 }}
         onClick={() => toggleExpansion()}

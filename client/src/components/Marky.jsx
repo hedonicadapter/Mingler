@@ -29,9 +29,7 @@ const MarkyDiv = styled('div', {
   flexDirection: 'row',
   display: 'flex',
   transition: 'color .25s ease',
-  // -moz-transition: color 0.2s ease-in;
-  // -o-transition: color 0.2s ease-in;
-  // -webkit-transition: color 0.2s ease-in;
+  color: colors.darkmodeHighWhite,
   variants: {
     markyType: {
       Window: { cursor: 'default' },
@@ -55,6 +53,7 @@ const activityText = css({
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  fontSize: '0.9em',
 });
 const closeText = css({
   float: 'right',
@@ -185,7 +184,15 @@ export default function Marky({
     <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
 
-      <div ref={marqueeRef} className={activityText()}>
+      <div
+        ref={marqueeRef}
+        className={activityText()}
+        style={{
+          color: expanded
+            ? colors.darkmodeHighWhite
+            : colors.darkmodeMediumWhite,
+        }}
+      >
         <motion.div
           whileHover={{
             x: [0, -marqueeWidth],

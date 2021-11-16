@@ -171,9 +171,9 @@ export function AuthProvider({ children }) {
         ) : (
           <motion.div
             key={1}
-            initial={{ x: '120%' }}
-            animate={{ x: '0%' }}
-            exit={{ x: '120%' }}
+            // initial={{ x: '120%' }}
+            // animate={{ x: '0%' }}
+            // exit={{ x: '120%' }}
             duration={0.1}
             style={{
               height: '100vh',
