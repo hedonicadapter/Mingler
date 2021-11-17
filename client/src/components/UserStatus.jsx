@@ -21,27 +21,26 @@ export default function UserStatus() {
 
   ipcRenderer.on('chromiumHostData', function (event, data) {
     socket.sendActivity(
-      [
-        {
-          TabTitle: data?.TabTitle,
-          TabURL: data?.TabURL,
-          YouTubeTitle: data?.YouTubeTitle,
-          YouTubeURL: data?.YouTubeURL,
-          Date: data?.Date,
-        },
-      ],
-      currentUser._id
-    );
-    socket.sendActivityToLocalStorage({
-      userID: currentUser._id,
-      data: {
+      {
+        //Either tabdata or youtube data is sent, never both
         TabTitle: data?.TabTitle,
         TabURL: data?.TabURL,
         YouTubeTitle: data?.YouTubeTitle,
         YouTubeURL: data?.YouTubeURL,
-        Date: data?.Date,
+        Date: new Date(),
       },
-    });
+      currentUser._id
+    );
+    // socket.sendActivityToLocalStorage({
+    //   userID: currentUser._id,
+    //   data: {
+    //     TabTitle: data?.TabTitle,
+    //     TabURL: data?.TabURL,
+    //     YouTubeTitle: data?.YouTubeTitle,
+    //     YouTubeURL: data?.YouTubeURL,
+    //     Date: new Date(),
+    //   },
+    // });
   });
 
   const activeWindowListener = () => {
@@ -57,13 +56,17 @@ export default function UserStatus() {
         activeWindow &&
         activeWindow !== 'Sharehub' &&
         activeWindow !== 'Task Switching' &&
-        activeWindow !== 'Snap Assist'
+        activeWindow !== 'Snap Assist' &&
+        activeWindow !== 'Spotify Free'
       ) {
-        socket.sendActivity([{ WindowTitle: activeWindow }], currentUser._id);
-        socket.sendActivityToLocalStorage({
-          userID: currentUser._id,
-          data: { WindowTitle: activeWindow, Date: new Date() },
-        });
+        socket.sendActivity(
+          { WindowTitle: activeWindow, Date: new Date() },
+          currentUser._id
+        );
+        // socket.sendActivityToLocalStorage({
+        //   userID: currentUser._id,
+        //   data: { WindowTitle: activeWindow, Date: new Date() },
+        // });
       }
     });
 
@@ -90,16 +93,18 @@ export default function UserStatus() {
       process = execFile('python', [exePath, access_token]);
 
       process.stdout.on('data', function (data) {
-        console.log(data);
-        let activeTrack = data.toString().trim();
+        let trackInfo = JSON.parse(data.toString().trim().replaceAll("'", '"'));
 
-        // Second comparison doesn't work for some reason
-        if (activeTrack) {
-          db.collection('Users')
-            .doc(currentUser.uid)
-            .collection('Activity')
-            .doc('ActiveTrack')
-            .set({ TrackTitle: activeTrack, Date: new Date() });
+        if (trackInfo) {
+          socket.sendActivity(
+            {
+              Artists: trackInfo.artists,
+              TrackTitle: trackInfo.name,
+              TrackURL: trackInfo.link,
+              Date: new Date(),
+            },
+            currentUser._id
+          );
         }
       });
 

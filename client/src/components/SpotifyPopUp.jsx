@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import DAO from '../config/DAO';
 import { spotifyApi } from '../config/spotify';
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
 
 // TODO:
 // use a proper redirect uri
-export default function SpotifyPopUp() {
+export default function SpotifyPopUp(token) {
   const scopes = [
     'user-read-playback-state',
     'user-read-currently-playing',
@@ -15,38 +16,24 @@ export default function SpotifyPopUp() {
   const authorizeURL = spotifyApi.createAuthorizeURL(scopes);
   console.log(authorizeURL);
 
-  const getReturnedAuthParams = (hash) => {
-    return hash.replaceFirst(/.*(?=http:\/\/localhost:1212\/?code=)/);
-    // const stringAfterHashtag = hash.substring(1);
-    // const paramsInURL = stringAfterHashtag.split('&');
-    // const splitData = paramsInURL.reduce((accumulator, currentValue) => {
-    //   const [key, value] = currentValue.split('=');
-    //   accumulator[key] = value;
-    //   return accumulator;
-    // }, {});
-    // return splitData;
-  };
-
   const injectScript = (win) => {
     win.webContents
       .executeJavaScript('window.location.href.toString()')
       .then((result) => {
         const code = result.substring(result.indexOf('=') + 1); // get only the string content after "="
 
-        spotifyApi.authorizationCodeGrant(code).then(
-          function (data) {
-            localStorage.setItem('access_token', data.body['access_token']);
-            localStorage.setItem('expires_in', data.body['expires_in']);
-            localStorage.setItem('refresh_token', data.body['refresh_token']);
-
-            // Set the access token on the API object to use it in later calls
-            spotifyApi.setAccessToken(data.body['access_token']);
-            spotifyApi.setRefreshToken(data.body['refresh_token']);
-          },
-          function (e) {
-            console.log('Spotify authorization code grant error: ', e);
-          }
-        );
+        DAO.authorizeSpotify(code, token).then((result) => {
+          console.log(result);
+          localStorage.setItem(
+            'access_token',
+            result.data.body['access_token']
+          );
+          localStorage.setItem('expires_in', result.data.body['expires_in']);
+          localStorage.setItem(
+            'refresh_token',
+            result.data.body['refresh_token']
+          );
+        });
 
         win.close();
       });

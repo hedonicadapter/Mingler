@@ -121,6 +121,16 @@ class DAO {
       },
     });
   };
+
+  authorizeSpotify = (code, token) => {
+    const data = { code };
+
+    return privateRoute.post('/authorizeSpotify', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
 }
 
 export default new DAO();

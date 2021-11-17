@@ -21,6 +21,8 @@ export default function AccordionItem({ friend, handleNameChange }) {
     setExpanded(!expanded);
   };
 
+  console.log(friend?.activity);
+
   return (
     <>
       <motion.header

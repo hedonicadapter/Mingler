@@ -144,6 +144,57 @@ export default function FriendsList() {
     setName(evt.target.value);
   };
 
+  // Ensure activities remain unique.
+  // E.g. if a user switches from one tab to another tab
+  // it replaces that tab activity with the new tab activity.
+  // Also prevents track activities counting as window activities.
+  const manageActivities = (activitiesArray, newActivity) => {
+    let windowActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.WindowTitle
+    );
+    let trackActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.TrackTitle
+    );
+    let chromiumActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.TabTitle
+    );
+    let youtubeActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.YouTubeTitle
+    );
+
+    if (windowActivityExists > -1 && newActivity?.WindowTitle) {
+      activitiesArray[windowActivityExists] = newActivity;
+    } else if (newActivity?.WindowTitle) {
+      // Prevents tracks being counted as windows
+      if (
+        activitiesArray?.filter(
+          (actvt) => actvt.TrackTitle != newActivity?.WindowTitle
+        )
+      ) {
+        activitiesArray?.push(newActivity);
+      }
+    }
+    if (trackActivityExists > -1 && newActivity?.TrackTitle) {
+      activitiesArray[trackActivityExists] = newActivity;
+    } else if (newActivity?.TrackTitle) {
+      activitiesArray?.push(newActivity);
+    }
+    if (chromiumActivityExists > -1 && newActivity?.TabTitle) {
+      activitiesArray[chromiumActivityExists] = newActivity;
+    } else if (newActivity?.TabTitle) {
+      activitiesArray?.push(newActivity);
+    }
+    if (youtubeActivityExists > -1 && newActivity?.YouTubeTitle) {
+      activitiesArray[youtubeActivityExists] = newActivity;
+    } else if (newActivity?.YouTubeTitle) {
+      activitiesArray?.push(newActivity);
+    }
+
+    activitiesArray?.sort((a, b) => {
+      return new Date(b.Date) - new Date(a.Date);
+    });
+  };
+
   useEffect(() => {
     getFriends();
     getFriendRequests();
@@ -171,14 +222,20 @@ export default function FriendsList() {
     socket.removeAllListeners('activity:receive');
 
     socket.once('activity:receive', (packet) => {
+      // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === packet.userID) {
-            friend.activity?.push(packet.data);
+            manageActivities(friend.activity, packet.data);
+            console.log('ssss ', packet.data);
+            // friend.activity?.sort((a, b) => {
+            //   return new Date(b.Date) - new Date(a.Date);
+            // });
+
             return {
               ...friend,
-              activity: packet.data,
+              activity: friend.activity ? friend.activity : [packet.data],
             };
           }
           return friend;

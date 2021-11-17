@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
+const { spotifyApi } = require('../config/spotify');
 
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
@@ -261,4 +262,22 @@ exports.getSentFriendRequests = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+};
+
+exports.authorizeSpotify = async (req, res, next) => {
+  const { code } = req.body;
+
+  spotifyApi.authorizationCodeGrant(code).then(
+    function (data) {
+      // Set the access token on the API object to use it in later calls
+      spotifyApi.setAccessToken(data.body['access_token']);
+      spotifyApi.setRefreshToken(data.body['refresh_token']);
+
+      return res.send(data);
+    },
+    function (e) {
+      console.log('Spotify authorization code grant error: ', e);
+      next(e);
+    }
+  );
 };

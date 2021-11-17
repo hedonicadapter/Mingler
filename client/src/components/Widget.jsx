@@ -68,7 +68,7 @@ export default function Widget() {
   });
 
   return (
-    <MainPane visible={visible}>
+    <MainPane visible={true}>
       <AuthProvider>
         {/* <motion.div
           initial={{

@@ -92,6 +92,7 @@ const createWindow = async () => {
     // resizable: false,
     // width: width / 4,
     height: height,
+    minWidth: 360,
     // x: 0,
     // y: height,
     webPreferences: {

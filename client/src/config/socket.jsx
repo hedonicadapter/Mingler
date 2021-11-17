@@ -17,8 +17,6 @@ const sendActivityToLocalStorage = (packet) => {
   // Each packet contains the ID it was sent from, and an activity wrapped in a data object
   const userID = packet?.userID;
 
-  console.log('packet data    ', packet.data);
-
   // activities are organized by userID so we can easily get them for each friend
   const latestActivity = localStorage.getItem(userID);
   if (latestActivity) {

@@ -39,6 +39,11 @@ const nameAndActivityPadding = css({
   paddingLeft: 2,
 });
 
+const markyContainer = css({
+  padding: 5,
+  paddingLeft: 6,
+});
+
 const OfflineIndicatorAndBackground = styled('div', {
   position: 'absolute',
   top: -4,
@@ -156,7 +161,7 @@ export default function CardHeader({
         <motion.div
           animate={{
             scale: expanded ? 0.9 : 1,
-            originX: expanded ? -0.6 : 0,
+            originX: expanded ? -0.8 : 0,
             originY: expanded ? 0.5 : 0,
           }}
           className={nameAndActivityPadding()}
@@ -196,6 +201,7 @@ export default function CardHeader({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                className={markyContainer()}
               >
                 <Marky
                   {...mainActivity}
