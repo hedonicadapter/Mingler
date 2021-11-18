@@ -18,13 +18,6 @@ const privateRoute = axios.create({
 });
 
 class DAO {
-  // token = undefined;
-
-  // const setAuthToken = async (token) => {
-  // this.token = token;
-  // return await token;
-  // };
-
   registerGuest = (username, clientFingerprint) => {
     const data = { username, clientFingerprint };
 
@@ -126,6 +119,18 @@ class DAO {
     const data = { code };
 
     return privateRoute.post('/authorizeSpotify', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
+  refreshSpotify = (refreshToken, token) => {
+    const data = {
+      refreshToken,
+    };
+
+    return privateRoute.post('/refreshSpotify', data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

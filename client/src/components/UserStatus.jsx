@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext';
 
 import { db } from '../config/firebase';
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
+import DAO from '../config/DAO';
+import { useLocalStorage } from '../helpers/localStorageManager';
 const socket = require('../config/socket');
 
 const { ipcRenderer } = require('electron');
@@ -15,9 +17,9 @@ const { ipcRenderer } = require('electron');
 //
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
 export default function UserStatus() {
-  const { currentUser } = useAuth();
-
-  let currentListener;
+  const { currentUser, token } = useAuth();
+  const [accessToken, setAccessToken] = useLocalStorage('access_token');
+  const [refreshToken, setRefreshToken] = useLocalStorage('refresh_token');
 
   ipcRenderer.on('chromiumHostData', function (event, data) {
     socket.sendActivity(
@@ -79,20 +81,19 @@ export default function UserStatus() {
     });
   };
 
+  let trackProcess;
   const activeTrackListener = () => {
-    let process;
+    trackProcess?.kill();
 
-    const access_token = localStorage.getItem('access_token');
-
-    if (access_token) {
+    if (accessToken) {
       var exePath = path.resolve(
         __dirname,
         '../scripts/ActiveTrackListener.py'
       );
 
-      process = execFile('python', [exePath, access_token]);
+      trackProcess = execFile('python', [exePath, accessToken]);
 
-      process.stdout.on('data', function (data) {
+      trackProcess.stdout.on('data', function (data) {
         let trackInfo = JSON.parse(data.toString().trim().replaceAll("'", '"'));
 
         if (trackInfo) {
@@ -108,37 +109,44 @@ export default function UserStatus() {
         }
       });
 
-      process.stderr.on('data', function (data) {
+      trackProcess.stderr.on('data', function (data) {
         console.log('stderr activeTrackListener');
-        if (data) refreshToken();
+        if (data) refreshSpotify();
       });
 
-      process.on('error', function (err) {
+      trackProcess.on('error', function (err) {
         if (err) return console.error(err);
       });
-
-      window.onstorage = () => {
-        // kill spotify script process,
-        // recreate process with now updated variables
-        console.log('stored stuff');
-        process.kill();
-        activeTrackListener();
-      };
     }
   };
 
-  const refreshToken = () => {
-    // refreshAccessToken();
+  const refreshSpotify = () => {
+    DAO.refreshSpotify(refreshToken, token)
+      .then((result) => {
+        console.log('refresh ', result);
+        setAccessToken(result.data.body.access_token);
+      })
+      .catch((e) => {
+        console.log('Refreshing spotify auth error ', e);
+      });
   };
 
   const exitListeners = () => {
     process.kill();
-    currentListener(); // for firestore onSnapshot listeners
   };
 
   useEffect(() => {
-    activeWindowListener();
     activeTrackListener();
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (refreshToken && token) {
+      refreshSpotify();
+    }
+  }, [refreshToken, token]);
+
+  useEffect(() => {
+    activeWindowListener();
     // return exitListeners();
   }, []);
 }

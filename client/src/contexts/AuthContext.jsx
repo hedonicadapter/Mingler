@@ -29,8 +29,6 @@ const fpPromise = FingerprintJS.load();
 })();
 // ============ Client fingerprint ============
 
-let generateNameRetryLimit = 0;
-
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -44,15 +42,15 @@ export function AuthProvider({ children }) {
     'mostRecentRememberedUser'
   );
 
+  // deprecated: realm
   const refreshCustomUserData = async () => {
     await app.currentUser.refreshCustomData();
   };
 
+  // deprecated: realm
   function setName(newName) {
     refreshCustomUserData();
   }
-
-  let retryLimit = 0;
 
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)
@@ -123,6 +121,13 @@ export function AuthProvider({ children }) {
     io.sockets.emit('native:userID', currentUser._id);
   };
 
+  const refreshSpotify = async () => {
+    return await DAO.refreshSpotify(token).then((result) => {
+      localStorage.setItem('expires_in', result.data.body['expires_in']);
+      localStorage.setItem('access_token', result.data.body['access_token']);
+    });
+  };
+
   useEffect(() => {
     const mostRecent = recentUser?.[0];
     console.log('mostRecent ', mostRecent);
@@ -138,6 +143,7 @@ export function AuthProvider({ children }) {
     else setLoading(true);
   }, [token, currentUser]);
 
+  // Finished logging in
   useEffect(() => {
     if (currentUser && loading) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
@@ -153,6 +159,7 @@ export function AuthProvider({ children }) {
     loginGuest,
     logoutGuest,
     login,
+    refreshSpotify,
   };
 
   return (

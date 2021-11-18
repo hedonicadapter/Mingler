@@ -150,7 +150,7 @@ export default function Marky({
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeURL]);
 
   const handleClick = () => {
-    // SpotifyPopUp(token);
+    SpotifyPopUp(token);
     if (WindowTitle) {
       return;
     } else if (TrackTitle) {

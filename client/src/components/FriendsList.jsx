@@ -149,6 +149,11 @@ export default function FriendsList() {
   // it replaces that tab activity with the new tab activity.
   // Also prevents track activities counting as window activities.
   const manageActivities = (activitiesArray, newActivity) => {
+    const newWindow = newActivity?.WindowTitle;
+    const newTrack = newActivity?.TrackTitle;
+    const newChromiumTab = newActivity?.TabTitle;
+    const newYoutube = newActivity?.YouTubeTitle;
+
     let windowActivityExists = activitiesArray?.findIndex(
       (actvt) => actvt.WindowTitle
     );
@@ -162,34 +167,45 @@ export default function FriendsList() {
       (actvt) => actvt.YouTubeTitle
     );
 
-    if (windowActivityExists > -1 && newActivity?.WindowTitle) {
+    if (windowActivityExists > -1 && newWindow) {
       activitiesArray[windowActivityExists] = newActivity;
-    } else if (newActivity?.WindowTitle) {
+      return;
+    } else if (newWindow) {
       // Prevents tracks being counted as windows
-      if (
-        activitiesArray?.filter(
-          (actvt) => actvt.TrackTitle != newActivity?.WindowTitle
-        )
-      ) {
+      if (activitiesArray?.filter((actvt) => actvt.TrackTitle != newWindow)) {
         activitiesArray?.push(newActivity);
+        return;
       }
     }
-    if (trackActivityExists > -1 && newActivity?.TrackTitle) {
+
+    if (trackActivityExists > -1 && newTrack) {
       activitiesArray[trackActivityExists] = newActivity;
-    } else if (newActivity?.TrackTitle) {
+      return;
+    } else if (newTrack) {
       activitiesArray?.push(newActivity);
-    }
-    if (chromiumActivityExists > -1 && newActivity?.TabTitle) {
-      activitiesArray[chromiumActivityExists] = newActivity;
-    } else if (newActivity?.TabTitle) {
-      activitiesArray?.push(newActivity);
-    }
-    if (youtubeActivityExists > -1 && newActivity?.YouTubeTitle) {
-      activitiesArray[youtubeActivityExists] = newActivity;
-    } else if (newActivity?.YouTubeTitle) {
-      activitiesArray?.push(newActivity);
+      return;
     }
 
+    if (chromiumActivityExists > -1 && newChromiumTab) {
+      activitiesArray[chromiumActivityExists] = newActivity;
+      return;
+    } else if (newChromiumTab) {
+      activitiesArray?.push(newActivity);
+      return;
+    }
+
+    if (youtubeActivityExists > -1 && newYoutube) {
+      activitiesArray[youtubeActivityExists] = newActivity;
+      return;
+    } else if (newYoutube) {
+      activitiesArray?.push(newActivity);
+      return;
+    }
+  };
+
+  // Expand functionality to include favorites
+  // and other stuff in the future
+  const sortActivities = (activitiesArray) => {
     activitiesArray?.sort((a, b) => {
       return new Date(b.Date) - new Date(a.Date);
     });
@@ -228,10 +244,7 @@ export default function FriendsList() {
         return prevState.map((friend) => {
           if (friend._id === packet.userID) {
             manageActivities(friend.activity, packet.data);
-            console.log('ssss ', packet.data);
-            // friend.activity?.sort((a, b) => {
-            //   return new Date(b.Date) - new Date(a.Date);
-            // });
+            sortActivities(friend.activity);
 
             return {
               ...friend,

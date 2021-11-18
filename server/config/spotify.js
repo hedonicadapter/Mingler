@@ -11,7 +11,7 @@ exports.spotifyApi = new SpotifyWebApi({
   clientSecret: clientSecret,
 });
 
-exports.refreshAccessToken = () => {
+const refresh = (expires_in) => {
   spotifyApi.refreshAccessToken().then(
     function (data) {
       console.log('The access token has been refreshed!');
@@ -20,6 +20,7 @@ exports.refreshAccessToken = () => {
       // localStorage.setItem('access_token', data.body['access_token']);
 
       spotifyApi.setAccessToken(data.body['access_token']);
+      refresh(expires_in);
     },
     function (e) {
       console.log('Could not refresh access token', e);
