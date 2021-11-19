@@ -121,13 +121,6 @@ export function AuthProvider({ children }) {
     io.sockets.emit('native:userID', currentUser._id);
   };
 
-  const refreshSpotify = async () => {
-    return await DAO.refreshSpotify(token).then((result) => {
-      localStorage.setItem('expires_in', result.data.body['expires_in']);
-      localStorage.setItem('access_token', result.data.body['access_token']);
-    });
-  };
-
   useEffect(() => {
     const mostRecent = recentUser?.[0];
     console.log('mostRecent ', mostRecent);
@@ -159,7 +152,6 @@ export function AuthProvider({ children }) {
     loginGuest,
     logoutGuest,
     login,
-    refreshSpotify,
   };
 
   return (

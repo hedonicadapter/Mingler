@@ -12,6 +12,7 @@ const {
   getFriendRequests,
   authorizeSpotify,
   refreshSpotify,
+  createSpotifyURL,
 } = require('../controllers/privateController');
 
 router.route('/').get(protect, getPrivateData);
@@ -26,6 +27,7 @@ router.route('/getFriendRequests').post(protect, getFriendRequests);
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
 router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
 
+router.route('/createSpotifyURL').post(protect, createSpotifyURL);
 router.route('/authorizeSpotify').post(protect, authorizeSpotify);
 router.route('/refreshSpotify').post(protect, refreshSpotify);
 

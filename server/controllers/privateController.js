@@ -264,6 +264,18 @@ exports.getSentFriendRequests = async (req, res, next) => {
   }
 };
 
+exports.createSpotifyURL = async (req, res, next) => {
+  const scopes = [
+    'user-read-playback-state',
+    'user-read-currently-playing',
+    'user-read-playback-position',
+  ];
+
+  const authorizeURL = spotifyApi.createAuthorizeURL(scopes);
+
+  return res.send(authorizeURL);
+};
+
 exports.authorizeSpotify = async (req, res, next) => {
   const { code } = req.body;
 

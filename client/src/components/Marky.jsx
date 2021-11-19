@@ -13,6 +13,7 @@ import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
 import { sendYouTubeTimeRequest, socket } from '../config/socket';
+import { useStatus } from '../contexts/UserStatusContext';
 
 const shell = electron.shell;
 const ipcRenderer = electron.ipcRenderer;
@@ -109,8 +110,8 @@ export default function Marky({
   marKey,
 }) {
   const marqueeRef = useRef();
-
   const { currentUser, token } = useAuth();
+  const { setAccessToken, setRefreshToken } = useStatus();
 
   const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState(null);
@@ -150,7 +151,7 @@ export default function Marky({
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeURL]);
 
   const handleClick = () => {
-    SpotifyPopUp(token);
+    SpotifyPopUp(token, setAccessToken, setRefreshToken);
     if (WindowTitle) {
       return;
     } else if (TrackTitle) {

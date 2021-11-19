@@ -12,7 +12,7 @@ import DAO from '../config/dao';
 import FindFriendsPopUp from './FindFriendsPopUp';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { socket } from '../config/socket';
-import UserStatus from './UserStatus';
+import { UserStatusProvider } from '../contexts/UserStatusContext';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -53,8 +53,6 @@ const findFriendsWindowConfig = {
 
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
-
-  UserStatus();
 
   const searchInputRef = useRef();
 
@@ -258,46 +256,48 @@ export default function FriendsList() {
   };
 
   return (
-    <div className={container()}>
-      <AccordionItem
-        friend={friends.find((friend) => friend._id === currentUser._id)}
-        handleNameChange={handleNameChange}
-      />
+    <UserStatusProvider>
+      <div className={container()}>
+        <AccordionItem
+          friend={friends.find((friend) => friend._id === currentUser._id)}
+          handleNameChange={handleNameChange}
+        />
 
-      <input
-        placeholder="Search... 🔍"
-        type="text"
-        value={searchValue || ''}
-        onChange={handleSearchInput}
-        className={searchInputStyle()}
-        ref={searchInputRef}
-        onBlur={() => {
-          if (!friends.length) {
-            setSearchInputFocus(true);
-            searchInputRef?.current?.focus();
-          }
-        }}
-        focus={searchInputFocus}
-      />
+        <input
+          placeholder="Search... 🔍"
+          type="text"
+          value={searchValue || ''}
+          onChange={handleSearchInput}
+          className={searchInputStyle()}
+          ref={searchInputRef}
+          onBlur={() => {
+            if (!friends.length) {
+              setSearchInputFocus(true);
+              searchInputRef?.current?.focus();
+            }
+          }}
+          focus={searchInputFocus}
+        />
 
-      {searchValue && (
-        <div onClick={handleFindButtonClick} className={findButton()}>
-          Find '{searchValue}'
-        </div>
-      )}
+        {searchValue && (
+          <div onClick={handleFindButtonClick} className={findButton()}>
+            Find '{searchValue}'
+          </div>
+        )}
 
-      <FriendRequestsAccordion
-        friendRequests={friendRequests}
-        getFriends={getFriends} // To refresh friends list after accepting a friend request
-        getFriendRequests={getFriendRequests} // Same thing here
-      />
+        <FriendRequestsAccordion
+          friendRequests={friendRequests}
+          getFriends={getFriends} // To refresh friends list after accepting a friend request
+          getFriendRequests={getFriendRequests} // Same thing here
+        />
 
-      {searchValue
-        ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
-        : friends.length
-        ? friends.map((friend) => <AccordionItem friend={friend} />)
-        : // <h2>you have no friends Sadge</h2>
-          null}
-    </div>
+        {searchValue
+          ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+          : friends.length
+          ? friends.map((friend) => <AccordionItem friend={friend} />)
+          : // <h2>you have no friends Sadge</h2>
+            null}
+      </div>
+    </UserStatusProvider>
   );
 }

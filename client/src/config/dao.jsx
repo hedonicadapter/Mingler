@@ -115,6 +115,14 @@ class DAO {
     });
   };
 
+  createSpotifyURL = (token) => {
+    return privateRoute.post('/createSpotifyURL', null, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   authorizeSpotify = (code, token) => {
     const data = { code };
 
