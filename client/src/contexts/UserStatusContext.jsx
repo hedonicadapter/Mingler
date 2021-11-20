@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, createContext } from 'react';
 var path = require('path');
 const execFile = require('child_process').execFile;
 
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './AuthContext';
 
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
 import DAO from '../config/DAO';
@@ -11,11 +11,17 @@ const socket = require('../config/socket');
 
 const { ipcRenderer } = require('electron');
 
+const UserStatusContext = createContext();
+
+export function useStatus() {
+  return useContext(UserStatusContext);
+}
+
 // Starts the script (../scripts/ActiveWindowListener.py) that listens for the user's
 // foreground window and returns it here.
 //
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
-export default function UserStatus() {
+export function UserStatusProvider({ children }) {
   const { currentUser, token } = useAuth();
   const [accessToken, setAccessToken] = useLocalStorage('access_token');
   const [refreshToken, setRefreshToken] = useLocalStorage('refresh_token');
@@ -32,16 +38,6 @@ export default function UserStatus() {
       },
       currentUser._id
     );
-    // socket.sendActivityToLocalStorage({
-    //   userID: currentUser._id,
-    //   data: {
-    //     TabTitle: data?.TabTitle,
-    //     TabURL: data?.TabURL,
-    //     YouTubeTitle: data?.YouTubeTitle,
-    //     YouTubeURL: data?.YouTubeURL,
-    //     Date: new Date(),
-    //   },
-    // });
   });
 
   const activeWindowListener = () => {
@@ -64,10 +60,6 @@ export default function UserStatus() {
           { WindowTitle: activeWindow, Date: new Date() },
           currentUser._id
         );
-        // socket.sendActivityToLocalStorage({
-        //   userID: currentUser._id,
-        //   data: { WindowTitle: activeWindow, Date: new Date() },
-        // });
       }
     });
 
@@ -82,7 +74,6 @@ export default function UserStatus() {
 
   let trackProcess;
   let refreshRetryLimit = 0;
-
   const activeTrackListener = () => {
     trackProcess?.kill();
 
@@ -95,16 +86,15 @@ export default function UserStatus() {
       trackProcess = execFile('python', [exePath, accessToken]);
 
       trackProcess.stdout.on('data', function (data) {
-        let processedData = data.toString().trim();
-
-        if (processedData === '401' && refreshRetryLimit < 2) {
+        if (data === '401' && refreshRetryLimit < 2) {
           refreshSpotify();
           refreshRetryLimit++;
+          return;
         }
 
-        let trackInfo = JSON.parse(processedData.replaceAll("'", '"'));
+        let processedData = data.toString().trim();
 
-        console.log('trackInfo ', trackInfo);
+        let trackInfo = JSON.parse(processedData.replaceAll("'", '"'));
 
         if (trackInfo) {
           socket.sendActivity(
@@ -121,8 +111,6 @@ export default function UserStatus() {
 
       trackProcess.stderr.on('data', function (data) {
         console.log('stderr activeTrackListener', data);
-        // Fix infinite loop by checking if data = 401
-        // if (data) refreshSpotify();
       });
 
       trackProcess.on('error', function (err) {
@@ -146,7 +134,9 @@ export default function UserStatus() {
   };
 
   useEffect(() => {
-    activeTrackListener();
+    if (accessToken) {
+      activeTrackListener();
+    }
   }, [accessToken]);
 
   useEffect(() => {
@@ -159,4 +149,15 @@ export default function UserStatus() {
     activeWindowListener();
     // return exitListeners();
   }, []);
+
+  const value = {
+    setAccessToken,
+    setRefreshToken,
+  };
+
+  return (
+    <UserStatusContext.Provider value={value}>
+      {children}
+    </UserStatusContext.Provider>
+  );
 }

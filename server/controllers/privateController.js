@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
+const { spotifyApi } = require('../config/spotify');
 
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
@@ -261,4 +262,57 @@ exports.getSentFriendRequests = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
+};
+
+exports.createSpotifyURL = async (req, res, next) => {
+  const scopes = [
+    'user-read-playback-state',
+    'user-read-currently-playing',
+    'user-read-playback-position',
+  ];
+
+  const authorizeURL = spotifyApi.createAuthorizeURL(scopes);
+
+  return res.send(authorizeURL);
+};
+
+exports.authorizeSpotify = async (req, res, next) => {
+  const { code } = req.body;
+
+  spotifyApi.authorizationCodeGrant(code).then(
+    function (data) {
+      spotifyApi.setAccessToken(data.body['access_token']);
+      spotifyApi.setRefreshToken(data.body['refresh_token']);
+
+      return res.send(data);
+    },
+    function (e) {
+      console.log('Spotify authorization code grant error: ', e);
+      next(e);
+    }
+  );
+};
+
+exports.refreshSpotify = async (req, res, next) => {
+  const {
+    refreshToken,
+    // , accessToken
+  } = req.body;
+
+  spotifyApi.setRefreshToken(refreshToken);
+  // spotifyApi.setAccessToken(accessToken);
+
+  spotifyApi.refreshAccessToken().then(
+    function (data) {
+      console.log('The access token has been refreshed!');
+
+      spotifyApi.setAccessToken(data.body['access_token']);
+
+      return res.send(data);
+    },
+    function (e) {
+      console.log('Could not refresh access token', e);
+      next(e);
+    }
+  );
 };

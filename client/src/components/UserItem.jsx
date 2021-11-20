@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
 
-import CardHeader from './CardHeader';
 import colors from '../config/colors';
 
 const container = css({
@@ -102,7 +101,7 @@ const AcceptRejectButtons = ({
   );
 };
 
-const AddButton = ({ handleFriendRequestButton, userID }) => {
+const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
   return (
     <motion.div
       initial={{ borderColor: 'rgba(131,133,140,1)' }}
@@ -115,7 +114,7 @@ const AddButton = ({ handleFriendRequestButton, userID }) => {
           opacity: hovered ? 1 : 0,
         }
       }
-      onClick={() => handleFriendRequestButton(userID)}
+      onClick={() => handleSendRequestButton(userID)}
     >
       Add
     </motion.div>
@@ -164,6 +163,8 @@ export default function UserItem({
                 />
               ) : (
                 <AddButton
+                  hovered={hovered}
+                  accept={accept}
                   handleSendRequestButton={handleSendRequestButton}
                   userID={user._id}
                 />

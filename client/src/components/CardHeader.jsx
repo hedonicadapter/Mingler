@@ -25,7 +25,6 @@ const nameAndActivityContainer = css({
 });
 const text = css({
   paddingLeft: '7px',
-  color: colors.darkmodeBlack,
   fontSize: '1.2em',
 });
 
@@ -40,6 +39,11 @@ const nameAndActivityPadding = css({
   paddingLeft: 2,
 });
 
+const markyContainer = css({
+  padding: 5,
+  paddingLeft: 6,
+});
+
 const OfflineIndicatorAndBackground = styled('div', {
   position: 'absolute',
   top: -4,
@@ -49,7 +53,7 @@ const OfflineIndicatorAndBackground = styled('div', {
   borderRadius: '50%',
   clipPath: 'inset(-325% -4000% -350% -580%)',
   zIndex: -1,
-  boxShadow: '0 0 0 9999px rgba(253,245,241,255)', // colors.classyWhite
+  boxShadow: '0 0 0 9999px rgb(18,18,18)', // used to be colors.classyWhite
 });
 
 const StyledInput = styled('input', {
@@ -130,7 +134,7 @@ export default function CardHeader({
         }}
         animate={{
           scale: expanded ? 0.9 : 1,
-          x: expanded ? -5 : 0,
+          x: expanded ? -6 : 0,
           y: expanded ? -12 : 0,
         }}
       >
@@ -157,12 +161,21 @@ export default function CardHeader({
         <motion.div
           animate={{
             scale: expanded ? 0.9 : 1,
-            originX: expanded ? -1 : 0,
+            originX: expanded ? -0.8 : 0,
             originY: expanded ? 0.5 : 0,
           }}
           className={nameAndActivityPadding()}
         >
-          <div className={text()}>{name}</div>
+          <div
+            className={text()}
+            style={{
+              color: expanded
+                ? colors.darkmodeMediumWhite
+                : colors.darkmodeHighWhite,
+            }}
+          >
+            {name}
+          </div>
           {/* <StyledInput
               onFocus={setFocus}
               onBlur={setBlur}
@@ -188,6 +201,7 @@ export default function CardHeader({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                className={markyContainer()}
               >
                 <Marky
                   {...mainActivity}

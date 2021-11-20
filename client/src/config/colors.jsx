@@ -1,10 +1,8 @@
 export default {
   classyWhite: '#fdf5f1',
   depressedWhite: '#f1ebe8',
-  samGreen: '#64F58D',
   samRed: '#DB5461',
   samBlack: '#373E40',
-  lindaPurple: '#947BD3',
   samBlue: '#00B2CA',
   samDeepRed: 'rgba(90,13,41,1)',
   yungBlue: '#2E86AB',
@@ -26,7 +24,7 @@ export default {
   //  https://material.io/design/color/dark-theme.html
 
   darkmodeBlack: '#121212',
-  darkmodeLightBlack: '#292929',
+  darkmodeLightBlack: '#242424',
 
   darkmodeHighWhite: 'rgba(255,255,255,0.87)',
   darkmodeMediumWhite: 'rgba(255,255,255,0.60)',

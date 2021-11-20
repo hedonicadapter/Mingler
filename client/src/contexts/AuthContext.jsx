@@ -29,8 +29,6 @@ const fpPromise = FingerprintJS.load();
 })();
 // ============ Client fingerprint ============
 
-let generateNameRetryLimit = 0;
-
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -44,15 +42,15 @@ export function AuthProvider({ children }) {
     'mostRecentRememberedUser'
   );
 
+  // deprecated: realm
   const refreshCustomUserData = async () => {
     await app.currentUser.refreshCustomData();
   };
 
+  // deprecated: realm
   function setName(newName) {
     refreshCustomUserData();
   }
-
-  let retryLimit = 0;
 
   const registerGuest = async (username, clientFingerprint) => {
     return await DAO.registerGuest(username, clientFingerprint)
@@ -138,6 +136,7 @@ export function AuthProvider({ children }) {
     else setLoading(true);
   }, [token, currentUser]);
 
+  // Finished logging in
   useEffect(() => {
     if (currentUser && loading) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
@@ -171,10 +170,15 @@ export function AuthProvider({ children }) {
         ) : (
           <motion.div
             key={1}
-            initial={{ x: '120%' }}
-            animate={{ x: '0%' }}
-            exit={{ x: '120%' }}
+            // initial={{ x: '120%' }}
+            // animate={{ x: '0%' }}
+            // exit={{ x: '120%' }}
             duration={0.1}
+            style={{
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
             {children}
           </motion.div>

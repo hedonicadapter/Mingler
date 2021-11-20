@@ -11,27 +11,37 @@ def get_current_track(access_token):
         headers={
             'Authorization': f"Bearer {access_token}"
         }
-
     )
-    json_response = response.json();
 
-    track_id = json_response["item"]["id"]
-    track_name = json_response["item"]["name"]
-    link = json_response["item"]["external_urls"]["spotify"]
+    if response.status_code == 401:
+        send_to_app('401')
+        return;
     
-    artists = json_response["item"]["artists"]
-    artists_names = ', '.join([artist["name"] for artist in artists])
-    
+    if response.status_code != 204:
+        json_response = response.json();
 
-    current_track_info = {
-        "id": track_id,
-        "name": track_name,
-        "link": link,
-        "artists": artists_names,
-    }
 
-    return current_track_info
+        track_id = json_response["item"]["id"]
+        track_name = json_response["item"]["name"]
+        link = json_response["item"]["external_urls"]["spotify"]
+        
+        artists = json_response["item"]["artists"]
+        artists_names = ', '.join([artist["name"] for artist in artists])
+        
+
+        current_track_info = {
+            "id": track_id,
+            "name": track_name,
+            "link": link,
+            "artists": artists_names,
+        }
+
+        return current_track_info
     
+def send_to_app(data):
+    print(data)
+    sys.stdout.flush()
+
 def main():
     previous_track_id = None
 
@@ -40,9 +50,10 @@ def main():
 
             current_track_info = get_current_track(SPOTIFY_ACCESS_TOKEN)
             
-            if previous_track_id != current_track_info["id"]:
-                print(current_track_info)
-                sys.stdout.flush()
+            if current_track_info["id"] is None:
+                pass;
+            elif previous_track_id != current_track_info["id"]:
+                send_to_app(current_track_info)
 
                 previous_track_id = current_track_info["id"]
             

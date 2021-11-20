@@ -18,12 +18,11 @@ ipc.setMaxListeners(2);
 
 const MainPane = styled('div', {
   // marginTop: -10,
-  float: 'right',
+  // float: 'right',
   // overflow: 'hidden',
   transition: 'transform 300ms ease, opacity 150ms ease-in',
-  width: '90%',
+  // width: window.innerWidth / 4,
   willChange: 'transform',
-  height: window.innerHeight,
 
   variants: {
     visible: {
@@ -34,7 +33,7 @@ const MainPane = styled('div', {
       },
       false: {
         pointerEvents: 'none',
-        transform: 'translateX(120%)',
+        transform: 'translateX(100%)',
         opacity: 0,
       },
     },
@@ -71,7 +70,7 @@ export default function Widget() {
   return (
     <MainPane visible={visible}>
       <AuthProvider>
-        <motion.div
+        {/* <motion.div
           initial={{
             x: '120%',
             opacity: 0,
@@ -81,10 +80,10 @@ export default function Widget() {
             opacity: 1,
           }}
           transition={{ duration: 0.5 }}
-        >
-          <FriendsList />
-          <WidgetFooter />
-        </motion.div>
+        > */}
+        <FriendsList />
+        <WidgetFooter />
+        {/* </motion.div> */}
       </AuthProvider>
     </MainPane>
   );

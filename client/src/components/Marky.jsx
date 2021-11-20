@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as electron from 'electron';
 import { css, styled } from '@stitches/react';
 import { BiPlanet, BiWindows } from 'react-icons/bi';
-import { RiArrowDropUpLine } from 'react-icons/ri';
+import { RiArrowDropUpLine, RiSpotifyLine } from 'react-icons/ri';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
@@ -13,6 +13,7 @@ import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
 import { sendYouTubeTimeRequest, socket } from '../config/socket';
+import { useStatus } from '../contexts/UserStatusContext';
 
 const shell = electron.shell;
 const ipcRenderer = electron.ipcRenderer;
@@ -23,18 +24,21 @@ const buttonVariants = {
   },
 };
 
-const MarkyDiv = styled('div', {
+const MarkyDiv = styled('motion.div', {
   zIndex: 50,
-  padding: 6,
   flexDirection: 'row',
   display: 'flex',
   transition: 'color .25s ease',
-  // -moz-transition: color 0.2s ease-in;
-  // -o-transition: color 0.2s ease-in;
-  // -webkit-transition: color 0.2s ease-in;
+  color: colors.darkmodeHighWhite,
   variants: {
     markyType: {
       Window: { cursor: 'default' },
+      Track: {
+        '&:hover': {
+          color: colors.pastelGreen,
+          cursor: 'pointer',
+        },
+      },
       Tab: {
         '&:hover': {
           color: colors.pastelBlue,
@@ -51,10 +55,11 @@ const MarkyDiv = styled('div', {
   },
 });
 const activityText = css({
-  width: '90%',
+  // width: '80vw',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  fontSize: '0.9em',
 });
 const closeText = css({
   float: 'right',
@@ -84,10 +89,17 @@ const highZIndex = css({
 
 export default function Marky({
   WindowTitle,
+
+  TrackTitle,
+  Artists,
+  TrackURL,
+
   TabTitle,
   TabURL,
+
   YouTubeURL,
   YouTubeTitle,
+
   userID,
 
   expanded,
@@ -98,8 +110,8 @@ export default function Marky({
   marKey,
 }) {
   const marqueeRef = useRef();
-
-  const { currentUser } = useAuth();
+  const { currentUser, token } = useAuth();
+  const { setAccessToken, setRefreshToken } = useStatus();
 
   const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState(null);
@@ -133,14 +145,17 @@ export default function Marky({
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
+      (TrackTitle && setMarkyType('Track')) ||
       (TabTitle && setMarkyType('Tab')) ||
       (YouTubeURL && setMarkyType('YouTubeVideo'));
-  }, [WindowTitle, TabTitle, YouTubeURL]);
+  }, [WindowTitle, TrackTitle, TabTitle, YouTubeURL]);
 
   const handleClick = () => {
-    // SpotifyPopUp();
+    SpotifyPopUp(token, setAccessToken, setRefreshToken);
     if (WindowTitle) {
       return;
+    } else if (TrackTitle) {
+      shell.openExternal(TrackURL);
     } else if (YouTubeURL) {
       setMarkyToReplaceWithYouTubeVideo(
         markyToReplaceWithYouTubeVideo ? null : marKey
@@ -164,6 +179,10 @@ export default function Marky({
       return <BiWindows className={activityIconStyle()} />;
     }
 
+    if (TrackTitle) {
+      return <RiSpotifyLine className={activityIconStyle()} />;
+    }
+
     if (TabTitle || TabURL) {
       return <BiPlanet className={activityIconStyle()} />;
     }
@@ -181,11 +200,45 @@ export default function Marky({
     return null;
   };
 
+  const ActivityText = () => {
+    if (TabURL) {
+      return <a>{TabTitle}</a>;
+    }
+    if (YouTubeURL) {
+      return markyToReplaceWithYouTubeVideo == null && YouTubeTitle;
+    }
+    if (WindowTitle) {
+      return WindowTitle;
+    }
+    if (TrackTitle) {
+      return Artists + ' - ' + TrackTitle;
+    }
+
+    return null;
+    // {
+    //   TabURL ? (
+    //     <a>{TabTitle}</a>
+    //   ) : YouTubeURL ? (
+    //     markyToReplaceWithYouTubeVideo == null && YouTubeTitle
+    //   ) : (
+    //     WindowTitle
+    //   );
+    // }
+  };
+
   return (
-    <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
+    <MarkyDiv layout markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
 
-      <div ref={marqueeRef} className={activityText()}>
+      <div
+        ref={marqueeRef}
+        className={activityText()}
+        style={{
+          color: expanded
+            ? colors.darkmodeHighWhite
+            : colors.darkmodeMediumWhite,
+        }}
+      >
         <motion.div
           whileHover={{
             x: [0, -marqueeWidth],
@@ -210,13 +263,7 @@ export default function Marky({
             },
           }}
         >
-          {TabURL ? (
-            <a>{TabTitle}</a>
-          ) : YouTubeURL ? (
-            markyToReplaceWithYouTubeVideo == null && YouTubeTitle
-          ) : (
-            WindowTitle
-          )}
+          <ActivityText />
         </motion.div>
       </div>
     </MarkyDiv>

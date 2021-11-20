@@ -12,13 +12,13 @@ import DAO from '../config/dao';
 import FindFriendsPopUp from './FindFriendsPopUp';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { socket } from '../config/socket';
-import UserStatus from './UserStatus';
+import { UserStatusProvider } from '../contexts/UserStatusContext';
 
 const electron = require('electron');
 const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
 
-const container = css({ backgroundColor: colors.classyWhite });
+const container = css({ backgroundColor: colors.darkmodeBlack });
 
 const searchInputStyle = css({
   WebkitAppearance: 'none',
@@ -29,14 +29,14 @@ const searchInputStyle = css({
   fontSize: '1.0em',
   fontWeight: 600,
 
-  width: '100%',
-  padding: 15,
-  paddingLeft: 20,
-  paddingRight: 20,
+  // width: '100%',
+  margin: 15,
+  marginLeft: 20,
+  marginRight: 20,
 });
 
 const findButton = css({
-  backgroundColor: 'white',
+  backgroundColor: colors.darkmodeBlack,
   padding: 10,
 });
 
@@ -53,8 +53,6 @@ const findFriendsWindowConfig = {
 
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
-
-  UserStatus();
 
   const searchInputRef = useRef();
 
@@ -74,7 +72,6 @@ export default function FriendsList() {
         res.data.forEach((object, index) => {
           object.key = index;
         });
-        console.log('frents ', res.data);
         setFriends(res.data);
       })
       .catch((e) => {
@@ -145,6 +142,73 @@ export default function FriendsList() {
     setName(evt.target.value);
   };
 
+  // Ensure activities remain unique.
+  // E.g. if a user switches from one tab to another tab
+  // it replaces that tab activity with the new tab activity.
+  // Also prevents track activities counting as window activities.
+  const manageActivities = (activitiesArray, newActivity) => {
+    const newWindow = newActivity?.WindowTitle;
+    const newTrack = newActivity?.TrackTitle;
+    const newChromiumTab = newActivity?.TabTitle;
+    const newYoutube = newActivity?.YouTubeTitle;
+
+    let windowActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.WindowTitle
+    );
+    let trackActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.TrackTitle
+    );
+    let chromiumActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.TabTitle
+    );
+    let youtubeActivityExists = activitiesArray?.findIndex(
+      (actvt) => actvt.YouTubeTitle
+    );
+
+    if (windowActivityExists > -1 && newWindow) {
+      activitiesArray[windowActivityExists] = newActivity;
+      return;
+    } else if (newWindow) {
+      // Prevents tracks being counted as windows
+      if (activitiesArray?.filter((actvt) => actvt.TrackTitle != newWindow)) {
+        activitiesArray?.push(newActivity);
+        return;
+      }
+    }
+
+    if (trackActivityExists > -1 && newTrack) {
+      activitiesArray[trackActivityExists] = newActivity;
+      return;
+    } else if (newTrack) {
+      activitiesArray?.push(newActivity);
+      return;
+    }
+
+    if (chromiumActivityExists > -1 && newChromiumTab) {
+      activitiesArray[chromiumActivityExists] = newActivity;
+      return;
+    } else if (newChromiumTab) {
+      activitiesArray?.push(newActivity);
+      return;
+    }
+
+    if (youtubeActivityExists > -1 && newYoutube) {
+      activitiesArray[youtubeActivityExists] = newActivity;
+      return;
+    } else if (newYoutube) {
+      activitiesArray?.push(newActivity);
+      return;
+    }
+  };
+
+  // Expand functionality to include favorites
+  // and other stuff in the future
+  const sortActivities = (activitiesArray) => {
+    activitiesArray?.sort((a, b) => {
+      return new Date(b.Date) - new Date(a.Date);
+    });
+  };
+
   useEffect(() => {
     getFriends();
     getFriendRequests();
@@ -172,13 +236,17 @@ export default function FriendsList() {
     socket.removeAllListeners('activity:receive');
 
     socket.once('activity:receive', (packet) => {
+      // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === packet.userID) {
+            manageActivities(friend.activity, packet.data);
+            sortActivities(friend.activity);
+
             return {
               ...friend,
-              activity: packet.data,
+              activity: friend.activity ? friend.activity : [packet.data],
             };
           }
           return friend;
@@ -188,46 +256,48 @@ export default function FriendsList() {
   };
 
   return (
-    <div className={container()}>
-      <AccordionItem
-        friend={friends.find((friend) => friend._id === currentUser._id)}
-        handleNameChange={handleNameChange}
-      />
+    <UserStatusProvider>
+      <div className={container()}>
+        <AccordionItem
+          friend={friends.find((friend) => friend._id === currentUser._id)}
+          handleNameChange={handleNameChange}
+        />
 
-      <input
-        placeholder="Find friends..."
-        type="text"
-        value={searchValue || ''}
-        onChange={handleSearchInput}
-        className={searchInputStyle()}
-        ref={searchInputRef}
-        onBlur={() => {
-          if (!friends.length) {
-            setSearchInputFocus(true);
-            searchInputRef?.current?.focus();
-          }
-        }}
-        focus={searchInputFocus}
-      />
+        <input
+          placeholder="Search... 🔍"
+          type="text"
+          value={searchValue || ''}
+          onChange={handleSearchInput}
+          className={searchInputStyle()}
+          ref={searchInputRef}
+          onBlur={() => {
+            if (!friends.length) {
+              setSearchInputFocus(true);
+              searchInputRef?.current?.focus();
+            }
+          }}
+          focus={searchInputFocus}
+        />
 
-      {searchValue && (
-        <div onClick={handleFindButtonClick} className={findButton()}>
-          Find '{searchValue}'
-        </div>
-      )}
+        {searchValue && (
+          <div onClick={handleFindButtonClick} className={findButton()}>
+            Find '{searchValue}'
+          </div>
+        )}
 
-      <FriendRequestsAccordion
-        friendRequests={friendRequests}
-        getFriends={getFriends} // To refresh friends list after accepting a friend request
-        getFriendRequests={getFriendRequests} // Same thing here
-      />
+        <FriendRequestsAccordion
+          friendRequests={friendRequests}
+          getFriends={getFriends} // To refresh friends list after accepting a friend request
+          getFriendRequests={getFriendRequests} // Same thing here
+        />
 
-      {searchValue
-        ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
-        : friends.length
-        ? friends.map((friend) => <AccordionItem friend={friend} />)
-        : // <h2>you have no friends Sadge</h2>
-          null}
-    </div>
+        {searchValue
+          ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+          : friends.length
+          ? friends.map((friend) => <AccordionItem friend={friend} />)
+          : // <h2>you have no friends Sadge</h2>
+            null}
+      </div>
+    </UserStatusProvider>
   );
 }
