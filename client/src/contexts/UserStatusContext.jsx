@@ -74,7 +74,6 @@ export function UserStatusProvider({ children }) {
 
   let trackProcess;
   let refreshRetryLimit = 0;
-
   const activeTrackListener = () => {
     trackProcess?.kill();
 
@@ -152,7 +151,6 @@ export function UserStatusProvider({ children }) {
   }, []);
 
   const value = {
-    activeTrackListener,
     setAccessToken,
     setRefreshToken,
   };

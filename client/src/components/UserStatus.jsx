@@ -104,6 +104,8 @@ export default function UserStatus() {
 
         let trackInfo = JSON.parse(processedData.replaceAll("'", '"'));
 
+        console.log('trackInfo ', trackInfo);
+
         if (trackInfo) {
           socket.sendActivity(
             {
