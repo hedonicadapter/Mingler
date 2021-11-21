@@ -3,11 +3,14 @@ import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { RiMessageLine } from 'react-icons/ri';
+
 import colors from '../config/colors';
 import Marky from './Marky';
 import MenuButton from './MenuButton';
 
 const container = css({
+  width: '100%',
   backgroundColor: 'transparent',
   flexDirection: 'row',
   display: 'flex',
@@ -21,8 +24,9 @@ const container = css({
 
 const nameAndActivityContainer = css({
   flexDirection: 'column',
-  width: '100%',
+  width: '80%',
 });
+
 const text = css({
   paddingLeft: '7px',
   fontSize: '1.2em',
@@ -40,6 +44,8 @@ const nameAndActivityPadding = css({
 });
 
 const markyContainer = css({
+  display: 'flex',
+  flexDirection: 'row',
   padding: 5,
   paddingLeft: 6,
 });
@@ -88,6 +94,52 @@ const StyledInput = styled('input', {
   },
 });
 
+const messageIcon = css({
+  height: 30,
+  width: 30,
+});
+
+const OnlineStatusIndicator = ({ expanded }) => {
+  return (
+    <motion.span
+      style={{
+        left: 13,
+        marginTop: 16,
+        position: 'absolute',
+      }}
+      animate={{
+        scale: expanded ? 0.9 : 1,
+        x: expanded ? -6 : 0,
+        y: expanded ? -12 : 0,
+      }}
+    >
+      <span
+        style={{
+          height: '12px',
+          width: '12px',
+          backgroundColor: '#bbb',
+          borderRadius: '50%',
+          display: 'inline-block',
+        }}
+      ></span>
+    </motion.span>
+  );
+};
+
+const AvatarContainer = ({ expanded, name }) => {
+  return (
+    <motion.div
+      animate={{
+        scale: expanded ? 0.6 : 1,
+        originX: expanded ? -0.5 : 0,
+        originY: expanded ? -0.1 : 0,
+      }}
+    >
+      <Avatar round className={avatar()} name={name} size="50" />
+    </motion.div>
+  );
+};
+
 export default function CardHeader({
   name,
   handleNameChange,
@@ -95,6 +147,7 @@ export default function CardHeader({
   mainActivity,
   setMarkyToReplaceWithYouTubeVideo,
   markyToReplaceWithYouTubeVideo,
+  toggleChat,
 }) {
   const el = useRef(undefined);
   const [refresh, setRefresh] = useState(true);
@@ -125,58 +178,36 @@ export default function CardHeader({
 
   return (
     <motion.div className={container()}>
-      <MenuButton />
-      <motion.span
-        style={{
-          left: 13,
-          marginTop: 16,
-          position: 'absolute',
-        }}
-        animate={{
-          scale: expanded ? 0.9 : 1,
-          x: expanded ? -6 : 0,
-          y: expanded ? -12 : 0,
-        }}
-      >
-        <span
-          style={{
-            height: '12px',
-            width: '12px',
-            backgroundColor: '#bbb',
-            borderRadius: '50%',
-            display: 'inline-block',
-          }}
-        ></span>
-      </motion.span>
-      <motion.div
-        animate={{
-          scale: expanded ? 0.6 : 1,
-          originX: expanded ? -0.5 : 0,
-          originY: expanded ? -0.1 : 0,
-        }}
-      >
-        <Avatar round className={avatar()} name={name} size="50" />
-      </motion.div>
+      {/* <MenuButton /> */}
+      <OnlineStatusIndicator expanded={expanded} />
+      <AvatarContainer expanded={expanded} name={name} />
       <div className={nameAndActivityContainer()}>
-        <motion.div
-          animate={{
-            scale: expanded ? 0.9 : 1,
-            originX: expanded ? -0.8 : 0,
-            originY: expanded ? 0.5 : 0,
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
           }}
-          className={nameAndActivityPadding()}
         >
-          <div
-            className={text()}
-            style={{
-              color: expanded
-                ? colors.darkmodeMediumWhite
-                : colors.darkmodeHighWhite,
+          <motion.div
+            animate={{
+              scale: expanded ? 0.9 : 1,
+              originX: expanded ? -0.8 : 0,
+              originY: expanded ? 0.5 : 0,
             }}
           >
-            {name}
-          </div>
-          {/* <StyledInput
+            <div
+              className={text()}
+              style={{
+                color: expanded
+                  ? colors.darkmodeMediumWhite
+                  : colors.darkmodeHighWhite,
+              }}
+            >
+              {name}
+            </div>
+
+            {/* <StyledInput
               onFocus={setFocus}
               onBlur={setBlur}
               onChange={handleNameChange}
@@ -189,35 +220,35 @@ export default function CardHeader({
               type="text"
               spellCheck={false}
             /> */}
-        </motion.div>
-        <div className={statusIndicatorContainer()}>
-          {/* {user.offline && <OfflineIndicatorAndBackground />} */}
-          {/* <OfflineIndicatorAndBackground /> */}
+          </motion.div>
+          <div onClick={(e) => toggleChat(e)}>
+            <RiMessageLine className={messageIcon()} />
+          </div>
+          <div className={statusIndicatorContainer()}>
+            {/* {user.offline && <OfflineIndicatorAndBackground />} */}
+            {/* <OfflineIndicatorAndBackground /> */}
+          </div>
         </div>
-        <div className={nameAndActivityPadding()}>
-          <AnimatePresence>
-            {!expanded && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={markyContainer()}
-              >
-                <Marky
-                  {...mainActivity}
-                  setMarkyToReplaceWithYouTubeVideo={
-                    setMarkyToReplaceWithYouTubeVideo
-                  }
-                  markyToReplaceWithYouTubeVideo={
-                    markyToReplaceWithYouTubeVideo
-                  }
-                  marKey={1}
-                  expanded={expanded}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <AnimatePresence>
+          {!expanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={markyContainer()}
+            >
+              <Marky
+                {...mainActivity}
+                setMarkyToReplaceWithYouTubeVideo={
+                  setMarkyToReplaceWithYouTubeVideo
+                }
+                markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+                marKey={1}
+                expanded={expanded}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

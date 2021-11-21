@@ -14,6 +14,7 @@ const header = css({
 
 export default function AccordionItem({ friend, handleNameChange }) {
   const [expanded, setExpanded] = useState(false);
+  const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
 
@@ -21,7 +22,14 @@ export default function AccordionItem({ friend, handleNameChange }) {
     setExpanded(!expanded);
   };
 
-  console.log(friend?.activity);
+  const toggleChat = (e) => {
+    e.stopPropagation();
+    setChatVisible(!chatVisible);
+
+    if (!expanded) {
+      toggleExpansion();
+    }
+  };
 
   return (
     <>
@@ -47,6 +55,7 @@ export default function AccordionItem({ friend, handleNameChange }) {
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
           handleNameChange={handleNameChange}
+          toggleChat={toggleChat}
         />
       </motion.header>
       <AnimatePresence initial={false}>
@@ -69,12 +78,13 @@ export default function AccordionItem({ friend, handleNameChange }) {
             >
               <CardBody
                 activity={friend?.activity}
-                userID={friend._id}
+                userID={friend?._id}
                 markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
                 setMarkyToReplaceWithYouTubeVideo={
                   setMarkyToReplaceWithYouTubeVideo
                 }
                 expanded={expanded}
+                chatVisible={chatVisible}
               />
             </motion.div>
           </motion.section>

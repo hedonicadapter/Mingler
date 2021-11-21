@@ -5,8 +5,16 @@ import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import ReactPlayer from 'react-player/youtube';
 
+import { MdSend } from 'react-icons/md';
+
 import colors from '../config/colors';
 import Marky from './Marky';
+import { useLocalStorage } from '../helpers/localStorageManager';
+import { useAuth } from '../contexts/AuthContext';
+
+const electron = require('electron');
+const BrowserWindow = electron.remote.BrowserWindow;
+const app = electron.remote.app;
 
 const flipper = css({
   backgroundColor: colors.darkmodeLightBlack,
@@ -19,7 +27,227 @@ const markyContainer = css({
   padding: 6,
 });
 
-export default function CardBody({ activity, userID, expanded }) {
+const connectChatClientPopUpConfig = {
+  show: false,
+  frame: true,
+  transparent: true,
+  resizable: true,
+  width: 480,
+  webPreferences: {
+    nodeIntegration: true,
+    enableRemoteModule: true,
+  },
+};
+
+const ChatBox = () => {
+  const [inputText, setInputText] = useState(false);
+
+  const [chatClientSelection, setChatClientSelection] = useState(null);
+  // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
+
+  const chatContainer = css({
+    borderRadius: '5px',
+    borderColor: 'grey',
+    display: 'flex',
+    flexDirection: 'column',
+    height: 200,
+    padding: 10,
+    marginLeft: -40,
+    zIndex: 200,
+  });
+  const messageArea = css({
+    flex: 1,
+    height: 300,
+  });
+  const inputContainer = css({
+    borderTop: '1px solid #121212',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  });
+  const inputBox = css({
+    border: 'none',
+    outline: 'none',
+    resize: 'none',
+    backgroundColor: 'transparent',
+    paddingTop: 8,
+    marginLeft: 4,
+    marginRight: 4,
+    color: colors.darkmodeHighWhite,
+    flex: 1,
+  });
+
+  const handleInput = (evt) => {
+    setInputText(evt.target.value);
+  };
+
+  const ConnectButton = () => {
+    const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
+    const [connectChatClientPopUpWindow, setConnectChatClientPopupWindow] =
+      useState(new BrowserWindow(connectChatClientPopUpConfig));
+
+    const { currentUser } = useAuth();
+
+    const connectButtonContainer = css({
+      flex: 1,
+      color: colors.darkmodeMediumWhite,
+      fontWeight: 'bold',
+      fontSize: '0.8em',
+      cursor: 'pointer',
+      borderRadius: 3,
+    });
+
+    const connectChatClientPopUp = (chosenClient) => {
+      connectChatClientPopUpWindow.setResizable(true);
+      if (!chatClientPopUpOpen) {
+        // FindFriendsPopUp window
+
+        connectChatClientPopUpWindow.on('close', function () {
+          setConnectChatClientPopupWindow(null);
+        });
+        connectChatClientPopUpWindow.on('closed', function () {
+          setConnectChatClientPopupWindow(
+            new BrowserWindow(connectChatClientPopUpConfig)
+          );
+          setChatClientPopUpOpen(false);
+        });
+        connectChatClientPopUpWindow.loadURL(
+          `file://${app.getAppPath()}/index.html#/connectChatClient`
+        );
+
+        connectChatClientPopUpWindow.once('ready-to-show', () => {
+          connectChatClientPopUpWindow.webContents.send('chosenClient', {
+            chosenClient,
+            email: currentUser?.email,
+          });
+
+          connectChatClientPopUpWindow.show();
+          setChatClientPopUpOpen(true);
+        });
+      } else connectChatClientPopUpWindow.focus();
+    };
+
+    return (
+      <motion.div
+        className={connectButtonContainer()}
+        onClick={() => connectChatClientPopUp(chatClientSelection)}
+      >
+        Connect
+      </motion.div>
+    );
+  };
+
+  const Dropdown = () => {
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const defaultChatClient = 'Messenger'; //change to useLocalStorage value later
+
+    const chatClientDropdown = css({
+      marginRight: 8,
+      border: 'none',
+      outline: 'none',
+      backgroundColor: colors.darkmodeBlack,
+      color: dropdownVisible
+        ? colors.darkmodeMediumWhite
+        : colors.darkmodeLightBlack,
+      fontWeight: 'bold',
+      marginTop: 6,
+      padding: 3,
+      paddingRight: 5,
+      transition: 'color .15 ease',
+      borderRadius: '2px',
+      boxShadow: 'none',
+    });
+    const dropdownItem = css({
+      outline: 'none',
+    });
+
+    const handleChatClientSelection = (evt) => {
+      setChatClientSelection(evt.target.value);
+    };
+
+    const toggleChatClientDropdown = () => {
+      setDropdownVisible(!dropdownVisible);
+    };
+
+    return (
+      <select
+        onClick={toggleChatClientDropdown}
+        className={chatClientDropdown()}
+        value={chatClientSelection}
+        defaultValue={defaultChatClient}
+        onChange={handleChatClientSelection}
+      >
+        <option
+          className={dropdownItem()}
+          value="Discord"
+          // onMouseOver={{ color: colors.darkmodeHighWhite }}
+        >
+          Discord
+        </option>
+        <option
+          className={dropdownItem()}
+          value="Messenger"
+          // onMouseOver={{ color: colors.darkmodeHighWhite }}
+        >
+          Messenger
+        </option>
+        <option
+          className={dropdownItem()}
+          value="ShareHub"
+          // onMouseOver={{ color: colors.darkmodeHighWhite }}
+        >
+          ShareHub
+        </option>
+      </select>
+    );
+  };
+
+  const SendButton = () => {
+    const iconContainer = css({
+      marginTop: 8,
+    });
+    const sendIcon = css({
+      width: 22,
+      height: 22,
+    });
+
+    return (
+      <motion.div
+        className={iconContainer()}
+        whileHover={{ cursor: 'pointer' }}
+      >
+        <MdSend
+          color={inputText ? colors.samBlue : colors.darkmodeBlack}
+          className={sendIcon()}
+        />
+      </motion.div>
+    );
+  };
+
+  return (
+    <div className={chatContainer()}>
+      <div className={messageArea()}></div>
+      <div className={inputContainer()}>
+        {chatClientSelection === 'ShareHub' ? (
+          <textarea
+            autoFocus
+            placeholder="Aa"
+            rows={1}
+            className={inputBox()}
+            onChange={handleInput}
+          />
+        ) : (
+          <ConnectButton />
+        )}
+        <Dropdown />
+        <SendButton />
+      </div>
+    </div>
+  );
+};
+
+export default function CardBody({ activity, userID, expanded, chatVisible }) {
   return (
     <>
       <div className={flipper()}>
@@ -34,6 +262,7 @@ export default function CardBody({ activity, userID, expanded }) {
               />
             </motion.div>
           ))}
+          {chatVisible && <ChatBox />}
         </motion.ul>
       </div>
     </>

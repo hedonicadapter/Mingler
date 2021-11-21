@@ -62,7 +62,7 @@ const activityText = css({
   fontSize: '0.9em',
 });
 const closeText = css({
-  float: 'right',
+  // float: 'right',
   fontWeight: '700',
   fontSize: '0.9em',
   color: colors.darkmodeDisabledText,
