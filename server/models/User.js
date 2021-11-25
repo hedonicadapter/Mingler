@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema({
       unique: true,
     },
   ],
-  guest: Boolean,
+  guest: { type: Boolean, default: false },
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },
   clientFingerprint: String,

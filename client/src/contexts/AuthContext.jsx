@@ -6,7 +6,7 @@ import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import { app, anonCredentials } from '../config/realmDB';
-import WelcomePane from '../components/WelcomePane';
+import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -41,6 +41,8 @@ export function AuthProvider({ children }) {
   const [recentUser, setRecentUser] = useLocalStorage(
     'mostRecentRememberedUser'
   );
+  const [clientFingerprint, setClientFingerprint] =
+    useLocalStorage('clientFingerprint');
 
   // deprecated: realm
   const refreshCustomUserData = async () => {
@@ -52,7 +54,35 @@ export function AuthProvider({ children }) {
     refreshCustomUserData();
   }
 
-  const registerGuest = async (username, clientFingerprint) => {
+  const registerWithEmail = async (name, email, password) => {
+    return await DAO.registerWithEmail(name, email, password, clientFingerprint)
+      .then((result) => {
+        setToken(result.data.token);
+
+        return { success: true };
+      })
+      .catch((e) => {
+        return { error: e.response.data.error };
+      });
+  };
+
+  const loginWithEmailAndPassword = async (email, password) => {
+    console.log('logging in');
+    return await DAO.login(email, password)
+      .then((result) => {
+        console.log('logging in2');
+        //   setRecentUser({ userID, email, fingerprint: clientFingerprint, guest: false });
+        // setCurrentUser(result.data);
+        // setToken(result.data.token);
+
+        return { success: true };
+      })
+      .catch((e) => {
+        return { error: e.response.data.error };
+      });
+  };
+
+  const registerGuest = async (username) => {
     return await DAO.registerGuest(username, clientFingerprint)
       .then((result) => {
         const id = result.data._id;
@@ -69,13 +99,16 @@ export function AuthProvider({ children }) {
 
   const loginGuest = async () => {
     const userID = localStorage.getItem('userID');
-    const fingerprint = localStorage.getItem('clientFingerprint');
 
-    return await DAO.loginGuest(userID, fingerprint).then((result) => {
-      setRecentUser({ userID, email: null, fingerprint, guest: true });
+    return await DAO.loginGuest(userID, clientFingerprint).then((result) => {
+      setRecentUser({
+        userID,
+        email: null,
+        fingerprint: clientFingerprint,
+        guest: true,
+      });
       setCurrentUser(result.data);
       setToken(result.data.token);
-      localStorage.setItem('token', result.data.token);
     });
   };
 
@@ -93,16 +126,24 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    const fingerprint = localStorage.getItem('clientFingerprint');
-
     //set current user in localstorage
 
-    return await DAO.login(email, password, fingerprint).then((result) => {
-      setRecentUser(result.data._id, email, fingerprint, true);
-      setCurrentUser(result.data);
-      setToken(result.data.token);
-      localStorage.setItem('token', result.data.token);
-    });
+    return await DAO.login(email, password, clientFingerprint)
+      .then((result) => {
+        setRecentUser({
+          userID: result.data._id,
+          email,
+          fingerprint: clientFingerprint,
+          guest: false,
+        });
+        setCurrentUser(result.data);
+        setToken(result.data.token);
+
+        return { success: true };
+      })
+      .catch((e) => {
+        return { error: e.response.data.error };
+      });
   };
 
   const logout = async () => {
@@ -121,17 +162,19 @@ export function AuthProvider({ children }) {
     io.sockets.emit('native:userID', currentUser._id);
   };
 
-  useEffect(() => {
-    const mostRecent = recentUser?.[0];
-    console.log('mostRecent ', mostRecent);
-    if (mostRecent) {
-      if (mostRecent.guest) loginGuest();
-      else if (!mostRecent.guest)
-        console.log('log in with recent non guest user');
-    } else console.log('show sign in or sign up screen');
-  }, [recentUser]);
+  // useEffect(() => {
+  //   const mostRecent = recentUser?.[0];
+
+  //   if (mostRecent) {
+  //     if (mostRecent.guest) loginGuest();
+  //     else if (!mostRecent.guest)
+  //       console.log('log in with recent non guest user');
+  //   } else console.log('show sign in or sign up screen');
+  // }, [recentUser]);
 
   useEffect(() => {
+    console.log('token', token);
+    console.log('currentUser', currentUser);
     if (token && currentUser) setLoading(false);
     else setLoading(true);
   }, [token, currentUser]);
@@ -141,6 +184,8 @@ export function AuthProvider({ children }) {
     if (currentUser && loading) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
     }
+
+    console.log('currentUser ', currentUser);
   }, [currentUser, loading]);
 
   const value = {
@@ -148,6 +193,8 @@ export function AuthProvider({ children }) {
     token,
     setName,
     logout,
+    registerWithEmail,
+    loginWithEmailAndPassword,
     registerGuest,
     loginGuest,
     logoutGuest,
@@ -157,7 +204,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={value}>
       <AnimatePresence>
-        {loading ? (
+        {!currentUser ? (
           <motion.div
             key={0}
             initial={{ opacity: 0, x: '120%' }}
@@ -165,24 +212,35 @@ export function AuthProvider({ children }) {
             exit={{ opacity: 0, x: '120%' }}
             duration={0.1}
           >
-            <WelcomePane />
+            <SplashScreen />
           </motion.div>
         ) : (
-          <motion.div
-            key={1}
-            // initial={{ x: '120%' }}
-            // animate={{ x: '0%' }}
-            // exit={{ x: '120%' }}
-            duration={0.1}
-            style={{
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {children}
-          </motion.div>
+          !loading && (
+            <motion.div
+              // key={1}
+              // initial={{ x: '120%' }}
+              // animate={{ x: '0%' }}
+              // exit={{ x: '120%' }}
+              // duration={0.1}
+              style={{
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {children}
+            </motion.div>
+          )
         )}
+        {/* <motion.div
+          key={0}
+          initial={{ opacity: 0, x: '120%' }}
+          animate={{ opacity: 1, x: '0%' }}
+          exit={{ opacity: 0, x: '120%' }}
+          duration={0.1}
+        >
+          <SplashScreen />
+        </motion.div> */}
       </AnimatePresence>
     </AuthContext.Provider>
   );

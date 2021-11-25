@@ -5,22 +5,34 @@ import DAO from '../config/DAO';
 import { motion } from 'framer-motion';
 
 const ipcRenderer = require('electron').ipcRenderer;
+const login = require('facebook-chat-api');
+const fs = require('fs');
+
+import messengerLogo from '../../assets/icons/messenger_logo.png';
+import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 // TODO:
 // use a proper redirect uri
 export default function ConnectChatClientPopup() {
   const [chosenClient, setChosenClient] = useState();
   const [emailOrPhone, setEmailOrPhone] = useState();
-  const [password, setPassword] = useState();
+  const [password, setPassword] = useState(null);
   const [emailOrPhoneFieldFocused, setEmailOrPhoneFieldFocused] = useState();
   const [passwordFieldFocused, setPasswordFieldFocused] = useState();
-  const [formFilled, setFormFilled] = useState(false);
+  // String booleans to include loading. Done this way to add an extra variant for
+  // the connect button motion component.
+  const [formFilled, setFormFilled] = useState('false');
+  const [error, setError] = useState(null);
+  const [token, setToken] = useState(null);
+  const [_id, set_id] = useState(null);
 
   ipcRenderer.once('chosenClient', (event, value) => {
-    const { chosenClient, email } = value;
+    const { chosenClient, email, token, userID } = value;
 
     setChosenClient(chosenClient);
     setEmailOrPhone(email);
+    setToken(token);
+    set_id(userID);
   });
 
   const container = css({
@@ -56,25 +68,14 @@ export default function ConnectChatClientPopup() {
     padding: 10,
     borderRadius: 3,
   });
-  const ConnectButton = styled('div', {
+  const connectButton = css({
     margin: 4,
     padding: 8,
     borderRadius: 3,
     border: '1px solid black',
     fontWeight: 'bold',
 
-    variants: {
-      formFilled: {
-        true: {
-          backgroundColor: colors.samBlue,
-          color: colors.darkmodeHighWhite,
-        },
-        false: {
-          backgroundColor: colors.darkmodeDisabledBlack,
-          color: colors.darkmodeDisabledText,
-        },
-      },
-    },
+    cursor: 'pointer',
   });
 
   const handleEmailInput = (evt) => {
@@ -85,8 +86,10 @@ export default function ConnectChatClientPopup() {
     setPassword(evt.target.value);
     validator();
   };
-  const handleBackspace = (evt, fieldName) => {
-    if (evt.key === 'Delete' || evt.key === 'Backspace') {
+  const handleBackspaceAndEnter = (evt, fieldName) => {
+    if (evt.key === 'Enter') {
+      if (formFilled === 'true') handleConnectButton();
+    } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
       if (fieldName === 'emailOrPhone') {
         setEmailOrPhone(evt.target.value);
       } else if (fieldName === 'password') {
@@ -96,26 +99,75 @@ export default function ConnectChatClientPopup() {
     }
   };
 
+  const handleConnectButton = () => {
+    let credentials = { email: emailOrPhone, password };
+    setFormFilled('loading');
+
+    let options = {
+      userAgent:
+        'Mozilla/5.0 (Linux; Android 6.0.1; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Mobile Safari/537.36',
+      listenEvents: true,
+      selfListen: true,
+    };
+
+    try {
+      login(credentials, options, (err, api) => {
+        if (err) {
+          setFormFilled('true');
+          setError(err.error);
+          return;
+        }
+
+        DAO.saveMessengerCredentials(
+          token,
+          'appstate.json',
+          JSON.stringify(api.getAppState())
+        ).then((res) => {
+          setError(null);
+          setFormFilled('true');
+          console.log(res);
+        });
+      });
+    } catch (e) {
+      setError(null);
+      throw new Error(e);
+    }
+  };
+
   const validator = () => {
     if (emailOrPhone && password) {
-      setFormFilled(true);
-    } else setFormFilled(false);
+      setFormFilled('true');
+    } else setFormFilled('false');
   };
 
   return (
     <div className={containerBg()}>
       <div className={[container(), 'clickable'].join(' ')}>
-        icon
+        <img
+          src={messengerLogo}
+          width={55}
+          height={55}
+          style={{ marginLeft: 'auto', marginRight: 'auto', paddingBottom: 30 }}
+        />
         <h1 className={headerText()}>Messenger</h1>
-        <h3 className={subHeaderText()}>
-          Sign in with Facebook to get started.
-        </h3>
+        <h3 className={subHeaderText()}>Sign in with Facebook to connect.</h3>
+        <div
+          style={{
+            color: colors.samSexyRed,
+            textAlign: 'left',
+            marginLeft: 6,
+            fontSize: '0.7em',
+          }}
+        >
+          {error}
+        </div>
         <input
+          disabled={formFilled === 'loading' ? true : false}
           placeholder="Email adress or phone number"
           type="email"
           value={emailOrPhone || ''}
           onChange={handleEmailInput}
-          onKeyUp={(evt) => handleBackspace(evt, 'emailOrPhone')}
+          onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'emailOrPhone')}
           className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
           style={{
             color:
@@ -132,11 +184,12 @@ export default function ConnectChatClientPopup() {
           }}
         />
         <input
+          disabled={formFilled === 'loading' ? true : false}
           placeholder="Password"
           type="password"
           value={password || ''}
           onChange={handlePasswordInput}
-          onKeyUp={(evt) => handleBackspace(evt, 'password')}
+          onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
           className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
           style={{
             color:
@@ -151,7 +204,31 @@ export default function ConnectChatClientPopup() {
             setPasswordFieldFocused(false);
           }}
         />
-        <ConnectButton formFilled={formFilled}>Connect</ConnectButton>
+        <motion.div
+          animate={formFilled}
+          variants={{
+            true: {
+              backgroundColor: colors.samBlue,
+              color: colors.darkmodeHighWhite,
+            },
+            false: {
+              backgroundColor: colors.darkmodeDisabledBlack,
+              color: colors.darkmodeDisabledText,
+            },
+            loading: {
+              backgroundColor: colors.darkmodeDisabledBlack,
+              color: colors.darkmodeDisabledText,
+              cursor: 'auto',
+            },
+          }}
+          whileTap={{ opacity: 0.4, transition: { duration: 0.1 } }}
+          className={connectButton()}
+          // formFilled={formFilled}
+          onClick={handleConnectButton}
+        >
+          Connect
+          {formFilled === 'loading' && <LoadingAnimation />}
+        </motion.div>
         keep me signed in
       </div>
     </div>

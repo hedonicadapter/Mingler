@@ -13,6 +13,7 @@ const {
   authorizeSpotify,
   refreshSpotify,
   createSpotifyURL,
+  saveMessengerCredentials,
 } = require('../controllers/privateController');
 
 router.route('/').get(protect, getPrivateData);
@@ -30,5 +31,9 @@ router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
 router.route('/createSpotifyURL').post(protect, createSpotifyURL);
 router.route('/authorizeSpotify').post(protect, authorizeSpotify);
 router.route('/refreshSpotify').post(protect, refreshSpotify);
+
+router
+  .route('/saveMessengerCredentials')
+  .post(protect, saveMessengerCredentials);
 
 module.exports = router;

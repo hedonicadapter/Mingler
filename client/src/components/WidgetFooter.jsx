@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { css, styled } from '@stitches/react';
+import { css } from '@stitches/react';
 
 import colors from '../config/colors';
 

@@ -5,20 +5,45 @@ const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
 
-exports.register = async (req, res, next) => {
-  const { username, email, password, clientFingerprint } = req.body;
+exports.registerWithEmail = async (req, res, next) => {
+  const { name, email, password, clientFingerprint } = req.body;
+
+  if (!name) {
+    return next(new ErrorResponse("We didn't receive a name.", 400));
+  }
+
+  if (!email) {
+    return next(new ErrorResponse("We didn't receive a username.", 400));
+  }
+
+  if (!password) {
+    return next(new ErrorResponse("We didn't receive a username.", 400));
+  }
+
+  const user = await User.findOne({
+    email: email,
+  });
+
+  if (user) {
+    return next(
+      new ErrorResponse('There is already an account with this email.', 409)
+    );
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const encryptedPassword = await bcrypt.hash(password, salt);
 
   try {
     const user = await User.create({
-      username,
+      username: name,
       email,
-      password,
+      password: encryptedPassword,
       clientFingerprint,
-      guest: false,
     });
 
     sendToken(user, 201, res);
   } catch (e) {
+    console.log(e);
     next(e);
   }
 };
@@ -87,8 +112,13 @@ exports.login = async (req, res, next) => {
 
 exports.loginGuest = async (req, res, next) => {
   const { guestID, clientFingerprint } = req.body;
-  if (!clientFingerprint) {
+
+  if (!guestID) {
     return next(new ErrorResponse("We didn't receive an ID.", 400));
+  }
+
+  if (!clientFingerprint) {
+    return next(new ErrorResponse('Unfamiliar fingerprint.', 400));
   }
 
   try {

@@ -2,16 +2,15 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  register,
   login,
   forgotPassword,
   resetPassword,
+  registerWithEmail,
   registerGuest,
   loginGuest,
 } = require('../controllers/authController');
 
-//If we hit /register as a route it will trigger the register function
-router.route('/register').post(register);
+router.route('/registerWithEmail').post(registerWithEmail);
 
 router.route('/registerGuest').post(registerGuest);
 

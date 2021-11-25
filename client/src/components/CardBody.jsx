@@ -87,7 +87,7 @@ const ChatBox = () => {
     const [connectChatClientPopUpWindow, setConnectChatClientPopupWindow] =
       useState(new BrowserWindow(connectChatClientPopUpConfig));
 
-    const { currentUser } = useAuth();
+    const { currentUser, token } = useAuth();
 
     const connectButtonContainer = css({
       flex: 1,
@@ -120,6 +120,8 @@ const ChatBox = () => {
           connectChatClientPopUpWindow.webContents.send('chosenClient', {
             chosenClient,
             email: currentUser?.email,
+            token,
+            userID: currentUser._id,
           });
 
           connectChatClientPopUpWindow.show();
@@ -140,7 +142,7 @@ const ChatBox = () => {
 
   const Dropdown = () => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
-    const defaultChatClient = 'Messenger'; //change to useLocalStorage value later
+    const defaultChatClient = 'ShareHub'; //change to useLocalStorage value later
 
     const chatClientDropdown = css({
       marginRight: 8,
@@ -186,6 +188,7 @@ const ChatBox = () => {
           Discord
         </option>
         <option
+          disabled
           className={dropdownItem()}
           value="Messenger"
           // onMouseOver={{ color: colors.darkmodeHighWhite }}

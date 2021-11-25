@@ -18,6 +18,12 @@ const privateRoute = axios.create({
 });
 
 class DAO {
+  registerWithEmail = (name, email, password, clientFingerprint) => {
+    const data = { name, email, password, clientFingerprint };
+
+    return auth.post('/registerWithEmail', data);
+  };
+
   registerGuest = (username, clientFingerprint) => {
     const data = { username, clientFingerprint };
 
@@ -139,6 +145,18 @@ class DAO {
     };
 
     return privateRoute.post('/refreshSpotify', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
+  saveMessengerCredentials = (token, appState) => {
+    const data = {
+      appState,
+    };
+
+    return privateRoute.post('/saveMessengerCredentials', data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

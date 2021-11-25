@@ -316,3 +316,24 @@ exports.refreshSpotify = async (req, res, next) => {
     }
   );
 };
+
+exports.saveMessengerCredentials = async (req, res, next) => {
+  const {
+    appState,
+    // , accessToken
+  } = req.body;
+  console.log(appState);
+  return res.send(appState);
+  // try {
+  //   await User.findOne(
+  //     { _id: userID },
+  //     'sentFriendRequests',
+  //     function (err, result) {
+  //       if (err) return next(new ErrorResponse('Database error'), 500);
+  //       return res.send(result);
+  //     }
+  //   );
+  // } catch (e) {
+  //   next(e);
+  // }
+};
