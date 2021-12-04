@@ -46,19 +46,25 @@ const menuButtonStyle = css({
 });
 
 export default function MenuButton() {
-  const { logoutGuest, currentUser } = useAuth();
+  const { signOut, currentUser } = useAuth();
   const [menuVisibility, setMenuVisibility] = useState(false);
   const toggleMenu = () => {
     setMenuVisibility(!menuVisibility);
   };
 
   const handleSignoutButton = () => {
-    if (
-      window.confirm(
-        "Since you're a guest, this will delete your account. Do you really want to proceed?"
-      )
-    ) {
-      logoutGuest();
+    if (currentUser.guest) {
+      if (
+        window.confirm(
+          "Since you're a guest, this will delete your account. Do you really want to proceed?"
+        )
+      ) {
+        signOut();
+      }
+    } else {
+      if (window.confirm('Log out?')) {
+        signOut();
+      }
     }
   };
 

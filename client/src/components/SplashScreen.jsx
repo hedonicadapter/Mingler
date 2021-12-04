@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import * as electron from 'electron';
+import { IoIosArrowRoundBack } from 'react-icons/io';
 
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
@@ -54,8 +55,10 @@ const container = css({
   flexDirection: 'column',
 });
 const header = css({
+  fontSize: '1.4em',
   textAlign: 'center',
   paddingInline: 20,
+  paddingBottom: 10,
 });
 
 const buttonStyle = css({
@@ -81,7 +84,7 @@ const inputStyle = css({
 const Separator = styled('h5', {
   display: 'flex',
   flexDirection: 'row',
-  paddingInline: '5%',
+  paddingInline: '10%',
   color: colors.darkmodeDisabledText,
 
   '&:before': {
@@ -115,6 +118,7 @@ const unavailableButtonStyle = css({
 export default function SplashScreen({}) {
   const {
     currentUser,
+    recentUser,
     signInGuest,
     signUpGuest,
     signUpWithEmail,
@@ -140,6 +144,8 @@ export default function SplashScreen({}) {
   // so an experienced user is not met with
   // the same welcome screen
   useEffect(() => {
+    if (recentUser) setSlide('SignIn');
+
     return () => {
       localStorage.setItem('newUser', false);
     };
@@ -166,17 +172,49 @@ export default function SplashScreen({}) {
     return (
       <AnimatePresence>
         <motion.div
-          initial={{ x: 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -300, opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            duration: 0.35,
+          }}
           style={{
-            width: '40%',
+            maxWidth: '70%',
             marginInline: 'auto',
           }}
         >
           {children}
         </motion.div>
       </AnimatePresence>
+    );
+  };
+
+  const BackButton = () => {
+    const handleBackButton = () => {
+      setSlide('Init');
+    };
+
+    const backButton = css({
+      marginTop: -20,
+      display: 'flex',
+      flexDirection: 'row',
+      alignContent: 'center',
+      alignItems: 'center',
+      fontWeight: 'bold',
+      fontSize: '0.6em',
+    });
+
+    return (
+      slide !== 'Init' &&
+      slide !== 'SignIn' && (
+        <motion.div
+          whileHover={{ cursor: 'pointer' }}
+          className={backButton()}
+          onClick={handleBackButton}
+        >
+          <IoIosArrowRoundBack size={20} /> <div>GO BACK</div>
+        </motion.div>
+      )
     );
   };
 
@@ -201,25 +239,6 @@ export default function SplashScreen({}) {
       { title: 'Email' },
     ];
 
-    const BackButton = () => {
-      const handleBackButton = () => {
-        // const goBackToIndex =
-        //   slides.findIndex((item) => item.title === slide) - 1;
-
-        // if (goBackToIndex > -1) {
-        //   setSlide(slides[goBackToIndex].title);
-        // }
-        setSlide('Init');
-      };
-
-      return (
-        slide !== 'Init' &&
-        slide !== 'SignIn' && (
-          <div onClick={handleBackButton}>&#60; Go back</div>
-        )
-      );
-    };
-
     const ServiceSelector = () => {
       return (
         <AnimationWrapper>
@@ -243,6 +262,10 @@ export default function SplashScreen({}) {
                         ? availableButtonStyle()
                         : unavailableButtonStyle(),
                     ].join(' ')}
+                    style={{
+                      backgroundColor:
+                        service.title === 'Guest' && colors.nudeBloo,
+                    }}
                     onClick={() =>
                       service.available &&
                       handleServiceButtonClick(service.title)
@@ -264,6 +287,7 @@ export default function SplashScreen({}) {
               transition: { duration: 0.1 },
             }}
             className={[buttonStyle(), availableButtonStyle()].join(' ')}
+            style={{ backgroundColor: colors.nudePink }}
             onClick={() => handleServiceButtonClick('Email')}
           >
             {'Sign up with Email'}
@@ -274,7 +298,6 @@ export default function SplashScreen({}) {
 
     return (
       <div className={container()}>
-        <BackButton />
         {slide === 'Init' && <ServiceSelector />}
         {slide === 'Guest' && <GuestSlide />}
         {slide === 'Email' && <EmailSlide />}
@@ -327,6 +350,7 @@ export default function SplashScreen({}) {
           >
             {loading ? <div className="dotter" /> : 'continue'}
           </motion.div>
+          <BackButton />
         </AnimationWrapper>
       </>
     );
@@ -403,6 +427,12 @@ export default function SplashScreen({}) {
       });
     };
 
+    const buttonsContainer = css({
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    });
+
     return (
       <AnimationWrapper>
         <div
@@ -473,43 +503,46 @@ export default function SplashScreen({}) {
             }}
           />
         </div>
-        <motion.div
-          animate={formFilled}
-          variants={{
-            true: {
-              backgroundColor: colors.samBlue,
-              color: colors.darkmodeHighWhite,
-              cursor: 'pointer',
-            },
-            false: {
-              backgroundColor: colors.darkmodeDisabledBlack,
-              color: colors.darkmodeDisabledText,
-              cursor: 'auto',
-            },
-            loading: {
-              backgroundColor: colors.darkmodeDisabledBlack,
-              color: colors.darkmodeDisabledText,
-              cursor: 'auto',
-            },
-          }}
-          whileTap={
-            formFilled != 'false' &&
-            formFilled != 'loading' && {
-              opacity: 0.4,
-              transition: { duration: 0.1 },
+        <div className={buttonsContainer()}>
+          <BackButton />
+          <motion.div
+            animate={formFilled}
+            variants={{
+              true: {
+                backgroundColor: colors.samBlue,
+                color: colors.darkmodeHighWhite,
+                cursor: 'pointer',
+              },
+              false: {
+                backgroundColor: colors.darkmodeDisabledBlack,
+                color: colors.darkmodeDisabledText,
+                cursor: 'auto',
+              },
+              loading: {
+                backgroundColor: colors.darkmodeDisabledBlack,
+                color: colors.darkmodeDisabledText,
+                cursor: 'auto',
+              },
+            }}
+            whileTap={
+              formFilled != 'false' &&
+              formFilled != 'loading' && {
+                opacity: 0.4,
+                transition: { duration: 0.1 },
+              }
             }
-          }
-          className={buttonStyle()}
-          // formFilled={formFilled}
-          onClick={() =>
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            handleSignUpButton()
-          }
-        >
-          Sign up!
-          {formFilled === 'loading' && <LoadingAnimation />}
-        </motion.div>
+            className={buttonStyle()}
+            style={{ width: '20%', minWidth: '60px' }}
+            onClick={() =>
+              formFilled != 'false' &&
+              formFilled != 'loading' &&
+              handleSignUpButton()
+            }
+          >
+            Sign up!
+            {formFilled === 'loading' && <LoadingAnimation />}
+          </motion.div>
+        </div>
         {error}
       </AnimationWrapper>
     );
@@ -601,6 +634,13 @@ export default function SplashScreen({}) {
       padding: 2,
       display: 'flex',
       justifyContent: 'flex-start',
+      fontSize: '0.8em',
+    });
+
+    const checkboxAndSignInButtonContainer = css({
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     });
 
     return (
@@ -651,53 +691,57 @@ export default function SplashScreen({}) {
             }}
           />
         </div>
-        <div className={keepMeSignedInContainer()}>
-          <input
-            type="checkbox"
-            name="keepMeSignedIn"
-            checked={keepMeSignedIn}
-            onClick={toggleKeepMeSignedIn}
-          />
-          <label for="keepMeSignedIn">&nbsp;Keep me signed in</label>
-        </div>
-        <motion.div
-          animate={formFilled}
-          variants={{
-            true: {
-              backgroundColor: colors.samBlue,
-              color: colors.darkmodeHighWhite,
-              cursor: 'pointer',
-            },
-            false: {
-              backgroundColor: colors.darkmodeDisabledBlack,
-              color: colors.darkmodeDisabledText,
-              cursor: 'auto',
-            },
-            loading: {
-              backgroundColor: colors.darkmodeDisabledBlack,
-              color: colors.darkmodeDisabledText,
-              cursor: 'auto',
-            },
-          }}
-          whileTap={
-            formFilled != 'false' &&
-            formFilled != 'loading' && {
-              opacity: 0.4,
-              transition: { duration: 0.1 },
+        <div className={checkboxAndSignInButtonContainer()}>
+          <div className={keepMeSignedInContainer()}>
+            <input
+              type="checkbox"
+              name="keepMeSignedIn"
+              checked={keepMeSignedIn}
+              onClick={toggleKeepMeSignedIn}
+            />
+            <label for="keepMeSignedIn">&nbsp;Keep me signed in</label>
+          </div>
+          <motion.div
+            animate={formFilled}
+            variants={{
+              true: {
+                backgroundColor: colors.samBlue,
+                color: colors.darkmodeHighWhite,
+                cursor: 'pointer',
+              },
+              false: {
+                backgroundColor: colors.darkmodeDisabledBlack,
+                color: colors.darkmodeDisabledText,
+                cursor: 'auto',
+              },
+              loading: {
+                backgroundColor: colors.darkmodeDisabledBlack,
+                color: colors.darkmodeDisabledText,
+                cursor: 'auto',
+              },
+            }}
+            whileTap={
+              formFilled != 'false' &&
+              formFilled != 'loading' && {
+                opacity: 0.4,
+                transition: { duration: 0.1 },
+              }
             }
-          }
-          className={buttonStyle()}
-          // formFilled={formFilled}
-          onClick={() =>
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            handleLoginButton()
-          }
-        >
-          Sign in
-          {formFilled === 'loading' && <LoadingAnimation />}
-        </motion.div>
+            className={buttonStyle()}
+            style={{ width: '20%', minWidth: '60px' }}
+            // formFilled={formFilled}
+            onClick={() =>
+              formFilled != 'false' &&
+              formFilled != 'loading' &&
+              handleLoginButton()
+            }
+          >
+            Sign in
+            {formFilled === 'loading' && <LoadingAnimation />}
+          </motion.div>
+        </div>
         {error}
+        <BackButton />
         <Separator>or</Separator>
         {signInOptions.map((option) => {
           return (

@@ -116,6 +116,7 @@ export default function FindFriendsPopUp() {
 
   useEffect(() => {
     // this makes it work when the token updates for some reason smh
+    console.log('friends ', foundFriends);
   }, [foundFriends]);
 
   let timeouts = [];
@@ -149,7 +150,6 @@ export default function FindFriendsPopUp() {
     if (value) {
       DAO.searchUsers(value, token)
         .then((res) => {
-          console.log(res);
           const users = res.data.filter((user) => user._id != userID);
           setFoundFriends(users);
         })

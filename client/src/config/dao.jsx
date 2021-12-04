@@ -210,9 +210,7 @@ privateRoute.interceptors.response.use(
             localStorage.removeItem(oldAccessToken);
             localStorage.setItem(access, refresh);
 
-            // ipcRenderer.send('refreshtoken:fromrenderer', { access, refresh });
-
-            const { port1, port2 } = new MessageChannel();
+            const { port1 } = new MessageChannel();
             ipcRenderer.postMessage(
               'refreshtoken:fromrenderer',
               { access, refresh },

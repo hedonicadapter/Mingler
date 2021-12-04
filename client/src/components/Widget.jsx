@@ -11,6 +11,7 @@ import SettingsPane from './SettingsPane';
 import WidgetFooter from './WidgetFooter';
 import { AuthProvider } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
+import MenuButton from './MenuButton';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
@@ -41,15 +42,15 @@ const MainPane = styled('div', {
 
 export default function Widget() {
   // clickthrough everything except className='clickable' (pointer-events: 'auto')
-  // const setIgnoreMouseEvents =
-  //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
-  // addEventListener('pointerover', function mousePolicy(event) {
-  //   mousePolicy._canClick =
-  //     event.target === document.documentElement
-  //       ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
-  //       : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
-  // });
-  // setIgnoreMouseEvents(true, { forward: true });
+  const setIgnoreMouseEvents =
+    require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
+  addEventListener('pointerover', function mousePolicy(event) {
+    mousePolicy._canClick =
+      event.target === document.documentElement
+        ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
+        : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
+  });
+  setIgnoreMouseEvents(true, { forward: true });
 
   const [visible, setVisible] = useState(true);
 
@@ -69,6 +70,7 @@ export default function Widget() {
   return (
     <MainPane visible={visible}>
       <AuthProvider>
+        <MenuButton />
         {/* <motion.div
           initial={{
             x: '120%',

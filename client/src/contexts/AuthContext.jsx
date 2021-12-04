@@ -121,17 +121,21 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const logoutGuest = async () => {
-    localStorage.removeItem('userID');
-    localStorage.removeItem('token');
-    setRecentUser({
-      userID: null,
-      email: null,
-      fingerprint: null,
-      guest: null,
-    });
+  const signOut = () => {
+    setUserID(null);
     setCurrentUser(null);
     setToken(null);
+
+    console.log('currentUser ', currentUser);
+
+    if (currentUser.guest) {
+      setRecentUser({
+        userID: null,
+        email: null,
+        fingerprint: null,
+        guest: null,
+      });
+    }
   };
 
   const signIn = async (email, password) => {
@@ -158,15 +162,10 @@ export function AuthProvider({ children }) {
       });
   };
 
-  const logout = async () => {
-    // store.get(recently signed out) -> show sign in form with user credentials if remembered
-    const logoutDB = async () => {
-      await app.currentUser.logOut();
-    };
-
-    logoutDB().then(() => {
-      setCurrentUser(null);
-    });
+  const signout = () => {
+    setUserID(null);
+    setCurrentUser(null);
+    setToken(null);
   };
 
   const storeToken = () => {
@@ -215,13 +214,13 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     token,
+    recentUser,
     setName,
-    logout,
+    signOut,
     signUpWithEmail,
     signInWithEmailAndPassword,
     signUpGuest,
     signInGuest,
-    logoutGuest,
     signIn,
     storeToken,
   };
