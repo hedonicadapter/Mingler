@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const RefreshToken = require('./RefreshToken');
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -79,6 +80,20 @@ UserSchema.methods.getSignedToken = function () {
   });
 };
 
+UserSchema.methods.getRefreshToken = async function () {
+  const refreshToken = jwt.sign({ id: this._id }, process.env.JWT_SECRET);
+
+  return await RefreshToken.findOneAndUpdate(
+    { user: this._id },
+    { user: this._id, refreshToken, created: new Date() },
+    { upsert: true, new: true },
+    function (err, doc) {
+      if (err) return err;
+      return;
+    }
+  ).select({ _id: 0, refreshToken: 1 });
+};
+
 UserSchema.methods.getResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
 
@@ -103,13 +118,8 @@ User.collection.createIndex('email', {
   },
 });
 
-// User.collection.dropIndexes(function (err, results) {
-//   // Handle errors
-// });
 User.collection.createIndex({ friends: 1 }, { sparse: true });
 User.collection.createIndex({ friendRequests: 1 }, { sparse: true });
 User.collection.createIndex({ sentFriendRequests: 1 }, { sparse: true });
-
-// User.collection.createIndex({ username: 'text', status: 'text' });
 
 module.exports = User;

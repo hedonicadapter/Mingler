@@ -2,21 +2,21 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  login,
+  signIn,
   forgotPassword,
   resetPassword,
-  registerWithEmail,
-  registerGuest,
-  loginGuest,
+  signUpWithEmail,
+  signUpGuest,
+  signInGuest,
 } = require('../controllers/authController');
 
-router.route('/registerWithEmail').post(registerWithEmail);
+router.route('/signUpWithEmail').post(signUpWithEmail);
 
-router.route('/registerGuest').post(registerGuest);
+router.route('/signUpGuest').post(signUpGuest);
 
-router.route('/login').post(login);
+router.route('/signIn').post(signIn);
 
-router.route('/loginGuest').post(loginGuest);
+router.route('/signInGuest').post(signInGuest);
 
 router.route('/forgotPassword').post(forgotPassword);
 

@@ -4,8 +4,9 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
+const RefreshToken = require('../models/RefreshToken');
 
-exports.registerWithEmail = async (req, res, next) => {
+exports.signUpWithEmail = async (req, res, next) => {
   const { name, email, password, clientFingerprint } = req.body;
 
   if (!name) {
@@ -30,14 +31,11 @@ exports.registerWithEmail = async (req, res, next) => {
     );
   }
 
-  const salt = await bcrypt.genSalt(10);
-  const encryptedPassword = await bcrypt.hash(password, salt);
-
   try {
     const user = await User.create({
       username: name,
       email,
-      password: encryptedPassword,
+      password: password,
       clientFingerprint,
     });
 
@@ -48,7 +46,7 @@ exports.registerWithEmail = async (req, res, next) => {
   }
 };
 
-exports.registerGuest = async (req, res, next) => {
+exports.signUpGuest = async (req, res, next) => {
   const { username, clientFingerprint } = req.body;
 
   if (!clientFingerprint) {
@@ -77,8 +75,8 @@ exports.registerGuest = async (req, res, next) => {
   }
 };
 
-exports.login = async (req, res, next) => {
-  const { email, password, clientFingerPrint } = req.body;
+exports.signIn = async (req, res, next) => {
+  const { email, password, clientFingerprint } = req.body;
 
   if (!email || !password) {
     return next(new ErrorResponse('We need an email and a password.', 400));
@@ -110,7 +108,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.loginGuest = async (req, res, next) => {
+exports.signInGuest = async (req, res, next) => {
   const { guestID, clientFingerprint } = req.body;
 
   if (!guestID) {
@@ -212,19 +210,24 @@ exports.resetPassword = async (req, res, next) => {
 
 const sendToken = (user, statusCode, res) => {
   const token = user.getSignedToken();
-  if (user.guest) {
-    res.status(statusCode).json({
-      success: true,
-      token,
-      _id: user._id,
-      username: user.username,
-    });
-  } else {
-    res.status(statusCode).json({
-      success: true,
-      token,
-      _id: user._id,
-      username: user.username,
-    });
-  }
+  user.getRefreshToken().then(({ refreshToken }) => {
+    // Idk why I'm making this check but maybe I could assign roles this way? lmao
+    if (user.guest) {
+      res.status(statusCode).json({
+        success: true,
+        token,
+        refreshToken,
+        _id: user._id,
+        username: user.username,
+      });
+    } else {
+      res.status(statusCode).json({
+        success: true,
+        token,
+        refreshToken,
+        _id: user._id,
+        username: user.username,
+      });
+    }
+  });
 };

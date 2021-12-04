@@ -114,6 +114,10 @@ export default function FindFriendsPopUp() {
   const [searchValue, setSearchValue] = useState(null);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
 
+  useEffect(() => {
+    // this makes it work when the token updates for some reason smh
+  }, [foundFriends]);
+
   let timeouts = [];
 
   useEffect(() => {
@@ -129,6 +133,11 @@ export default function FindFriendsPopUp() {
 
   useEffect(() => {
     getSentFriendRequests();
+
+    ipcRenderer.on('refreshtoken:fromrenderer', (e, { access, refresh }) => {
+      console.log('ASS ', access);
+      setToken(access);
+    });
   }, []);
 
   ipcRenderer.once('initialValue', (event, value) => {
@@ -140,6 +149,7 @@ export default function FindFriendsPopUp() {
     if (value) {
       DAO.searchUsers(value, token)
         .then((res) => {
+          console.log(res);
           const users = res.data.filter((user) => user._id != userID);
           setFoundFriends(users);
         })

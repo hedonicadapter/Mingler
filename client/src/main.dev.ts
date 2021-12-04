@@ -189,6 +189,12 @@ const createWindow = async () => {
       });
   });
 
+  ipcMain.on('refreshtoken:fromrenderer', (e, tokens) => {
+    // ipcMain.emit('refreshtoken:frommain', tokens);
+    console.log('LAMAMAMA');
+    mainWindow?.webContents.send('refreshtoken:frommain', tokens);
+  });
+
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
     mainWindow.on('close', async function (e) {

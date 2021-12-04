@@ -57,13 +57,7 @@ const header = css({
   textAlign: 'center',
   paddingInline: 20,
 });
-const continueButtonStyle = css({
-  width: '84%',
-  textAlign: 'right',
-  padding: 6,
-  fontSize: '0.8em',
-  fontWeight: 700,
-});
+
 const buttonStyle = css({
   margin: 4,
   padding: 8,
@@ -72,6 +66,7 @@ const buttonStyle = css({
   borderRadius: 3,
   border: '1px solid black',
 });
+
 const inputStyle = css({
   WebkitAppearance: 'none',
   outline: 'none',
@@ -83,13 +78,54 @@ const inputStyle = css({
   borderRadius: 3,
 });
 
+const Separator = styled('h5', {
+  display: 'flex',
+  flexDirection: 'row',
+  paddingInline: '5%',
+  color: colors.darkmodeDisabledText,
+
+  '&:before': {
+    content: '',
+    flex: '1 1',
+    borderBottom: '1px solid ' + colors.darkmodeDisabledText,
+    margin: 'auto',
+    marginRight: '10px',
+  },
+  '&:after': {
+    content: '',
+    flex: '1 1',
+    borderBottom: '1px solid ' + colors.darkmodeDisabledText,
+    margin: 'auto',
+    marginLeft: '10px',
+  },
+});
+
+const availableButtonStyle = css({
+  color: colors.darkmodeMediumWhite,
+  backgroundColor: colors.samBlue,
+  cursor: 'pointer',
+});
+
+const unavailableButtonStyle = css({
+  color: colors.darkmodeDisabledText,
+  backgroundColor: colors.darkmodeDisabledBlack,
+  cursor: 'auto',
+});
+
 export default function SplashScreen({}) {
-  const { currentUser, loginGuest, registerGuest, registerWithEmail, login } =
-    useAuth();
+  const {
+    currentUser,
+    signInGuest,
+    signUpGuest,
+    signUpWithEmail,
+    signIn,
+    storeToken,
+    deleteToken,
+  } = useAuth();
   const [userName, setUserName] = useState(null);
   const [inputFocus, setInputFocus] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [slide, setSlide] = useState('init');
+  const [slide, setSlide] = useState('Init');
   // const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [showWelcome, setShowWelcome] = useLocalStorage('showWelcome');
   const [justRegistered, setJustRegistered] = useLocalStorage('justRegistered');
@@ -120,8 +156,8 @@ export default function SplashScreen({}) {
   const handleContinueClick = () => {
     setLoading(true);
 
-    registerGuest(userName).then(({ success, error }) => {
-      success && loginGuest();
+    signUpGuest(userName).then(({ success, error }) => {
+      success && signInGuest();
       console.log(error);
     });
   };
@@ -156,8 +192,8 @@ export default function SplashScreen({}) {
       setSlide(serviceSelection);
     };
 
-    const authServices = [
-      { title: 'init' },
+    const slides = [
+      { title: 'Init' },
       { title: 'Guest', available: true },
       { title: 'Discord', available: false },
       { title: 'Google', available: false },
@@ -168,60 +204,27 @@ export default function SplashScreen({}) {
     const BackButton = () => {
       const handleBackButton = () => {
         // const goBackToIndex =
-        //   authServices.findIndex((item) => item.title === slide) - 1;
+        //   slides.findIndex((item) => item.title === slide) - 1;
 
         // if (goBackToIndex > -1) {
-        //   setSlide(authServices[goBackToIndex].title);
+        //   setSlide(slides[goBackToIndex].title);
         // }
-        setSlide('init');
+        setSlide('Init');
       };
 
       return (
-        slide !== 'init' &&
-        slide !== 'Login' && <div onClick={handleBackButton}>&#60; Go back</div>
+        slide !== 'Init' &&
+        slide !== 'SignIn' && (
+          <div onClick={handleBackButton}>&#60; Go back</div>
+        )
       );
     };
 
     const ServiceSelector = () => {
-      const availableButtonStyle = css({
-        color: colors.darkmodeMediumWhite,
-        backgroundColor: colors.samBlue,
-
-        cursor: 'pointer',
-      });
-
-      const unavailableButtonStyle = css({
-        color: colors.darkmodeDisabledText,
-        backgroundColor: colors.darkmodeDisabledBlack,
-        cursor: 'auto',
-      });
-
-      const Separator = styled('h5', {
-        display: 'flex',
-        flexDirection: 'row',
-        paddingInline: '5%',
-        color: colors.darkmodeDisabledText,
-
-        '&:before': {
-          content: '',
-          flex: '1 1',
-          borderBottom: '1px solid ' + colors.darkmodeDisabledText,
-          margin: 'auto',
-          marginRight: '10px',
-        },
-        '&:after': {
-          content: '',
-          flex: '1 1',
-          borderBottom: '1px solid ' + colors.darkmodeDisabledText,
-          margin: 'auto',
-          marginLeft: '10px',
-        },
-      });
-
       return (
         <AnimationWrapper>
-          {authServices.map((service) => {
-            if (service.title !== 'init' && service.title !== 'Email') {
+          {slides.map((service) => {
+            if (service.title !== 'Init' && service.title !== 'Email') {
               return (
                 <>
                   <motion.div
@@ -253,7 +256,7 @@ export default function SplashScreen({}) {
               );
             }
           })}
-          <Separator>OR</Separator>
+          <Separator>or</Separator>
           <motion.div
             whileHover={{ color: colors.darkmodeHighWhite }}
             whileTap={{
@@ -272,15 +275,23 @@ export default function SplashScreen({}) {
     return (
       <div className={container()}>
         <BackButton />
-        {slide === 'init' && <ServiceSelector />}
+        {slide === 'Init' && <ServiceSelector />}
         {slide === 'Guest' && <GuestSlide />}
         {slide === 'Email' && <EmailSlide />}
-        {slide === 'Login' && <LoginSlide />}
+        {slide === 'SignIn' && <LoginSlide />}
       </div>
     );
   };
 
   const GuestSlide = () => {
+    const continueButtonStyle = css({
+      width: '84%',
+      textAlign: 'right',
+      padding: 6,
+      fontSize: '0.8em',
+      fontWeight: 700,
+    });
+
     return (
       <>
         <AnimationWrapper>
@@ -359,7 +370,7 @@ export default function SplashScreen({}) {
       if (evt.key === 'Enter') {
         if (formFilled === 'true') handleSignUpButton();
       } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
-        if (fieldName === 'email') {
+        if (fieldName === 'Email') {
           setEmail(evt.target.value);
         } else if (fieldName === 'password') {
           setPassword(evt.target.value);
@@ -379,7 +390,7 @@ export default function SplashScreen({}) {
     const handleSignUpButton = () => {
       setFormFilled('loading');
 
-      registerWithEmail(name, email, password).then(({ success, error }) => {
+      signUpWithEmail(name, email, password).then(({ success, error }) => {
         if (error) {
           setError(error);
           setFormFilled('true');
@@ -387,7 +398,7 @@ export default function SplashScreen({}) {
         if (success) {
           setJustRegistered({ email, password });
           setError(null);
-          setSlide('Login');
+          setSlide('SignIn');
         }
       });
     };
@@ -425,7 +436,7 @@ export default function SplashScreen({}) {
             type="email"
             value={email}
             onChange={handleEmailInput}
-            onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
+            onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'Email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
               color:
@@ -493,7 +504,7 @@ export default function SplashScreen({}) {
           onClick={() =>
             formFilled != 'false' &&
             formFilled != 'loading' &&
-            handleSignUpButton
+            handleSignUpButton()
           }
         >
           Sign up!
@@ -511,14 +522,14 @@ export default function SplashScreen({}) {
     const [passwordFieldFocused, setPasswordFieldFocused] = useState();
     const [formFilled, setFormFilled] = useState('false');
     const [error, setError] = useState(null);
+    const [keepMeSignedIn, setKeepMeSignedIn] = useState(true);
 
     useEffect(() => {
       if (justRegistered) {
         setEmail(justRegistered.email);
         setPassword(justRegistered.password);
       }
-      // if (email && password) handleLoginButton();
-    });
+    }, []);
 
     useEffect(() => {
       if (!email || !password) {
@@ -542,7 +553,7 @@ export default function SplashScreen({}) {
       if (evt.key === 'Enter') {
         if (formFilled === 'true') handleLoginButton();
       } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
-        if (fieldName === 'email') {
+        if (fieldName === 'Email') {
           setEmail(evt.target.value);
         } else if (fieldName === 'password') {
           setPassword(evt.target.value);
@@ -551,25 +562,46 @@ export default function SplashScreen({}) {
       }
     };
 
+    const handleLoginButton = () => {
+      setFormFilled('loading');
+
+      signIn(email, password).then(({ success, error }) => {
+        if (error) {
+          setError(error);
+          setFormFilled('true');
+        }
+        if (success) {
+          if (keepMeSignedIn) {
+            storeToken(email);
+          } else {
+            deleteToken(email);
+          }
+          setError(null);
+        }
+      });
+    };
+
+    const toggleKeepMeSignedIn = () => {
+      setKeepMeSignedIn(!keepMeSignedIn);
+    };
+
     const validator = () => {
       // if (name && email && password) {
       //   setFormFilled('true');
       // } else setFormFilled('false');
     };
 
-    const handleLoginButton = () => {
-      setFormFilled('loading');
+    const signInOptions = [
+      { title: 'Discord', available: false },
+      { title: 'Google', available: false },
+      { title: 'Facebook', available: false },
+    ];
 
-      login(email, password).then(({ success, error }) => {
-        if (error) {
-          setError(error);
-          setFormFilled('true');
-        }
-        if (success) {
-          setError(null);
-        }
-      });
-    };
+    const keepMeSignedInContainer = css({
+      padding: 2,
+      display: 'flex',
+      justifyContent: 'flex-start',
+    });
 
     return (
       <AnimationWrapper>
@@ -619,6 +651,15 @@ export default function SplashScreen({}) {
             }}
           />
         </div>
+        <div className={keepMeSignedInContainer()}>
+          <input
+            type="checkbox"
+            name="keepMeSignedIn"
+            checked={keepMeSignedIn}
+            onClick={toggleKeepMeSignedIn}
+          />
+          <label for="keepMeSignedIn">&nbsp;Keep me signed in</label>
+        </div>
         <motion.div
           animate={formFilled}
           variants={{
@@ -650,13 +691,42 @@ export default function SplashScreen({}) {
           onClick={() =>
             formFilled != 'false' &&
             formFilled != 'loading' &&
-            handleLoginButton
+            handleLoginButton()
           }
         >
           Sign in
           {formFilled === 'loading' && <LoadingAnimation />}
         </motion.div>
         {error}
+        <Separator>or</Separator>
+        {signInOptions.map((option) => {
+          return (
+            <>
+              <motion.div
+                whileHover={
+                  option.available && { color: colors.darkmodeHighWhite }
+                }
+                whileTap={
+                  option.available && {
+                    opacity: 0.4,
+                    transition: { duration: 0.1 },
+                  }
+                }
+                className={[
+                  buttonStyle(),
+                  option.available
+                    ? availableButtonStyle()
+                    : unavailableButtonStyle(),
+                ].join(' ')}
+                onClick={() =>
+                  option.available && handleoptionButtonClick(option.title)
+                }
+              >
+                {'Sign in with ' + option.title}
+              </motion.div>
+            </>
+          );
+        })}
       </AnimationWrapper>
     );
   };
@@ -713,30 +783,47 @@ export default function SplashScreen({}) {
       justifyContent: 'flex-start',
     });
 
-    const footerLink = css({
-      cursor: 'pointer',
-      color: colors.samBlue,
-    });
-
     const handleAlreadyAMemberButton = () => {
-      setSlide('Login');
+      setSlide('SignIn');
     };
 
     const handleNotAMemberButton = () => {
-      setSlide('init');
+      setSlide('Init');
+    };
+
+    const Prompt = ({
+      handleAlreadyAMemberButton,
+      handleNotAMemberButton,
+      children,
+    }) => {
+      const footerLink = css({
+        textDecoration: 'underline',
+        textDecorationColor: 'transparent',
+        cursor: 'pointer',
+        color: colors.samBlue,
+      });
+
+      return (
+        <motion.div
+          className={footerLink()}
+          whileHover={{
+            textDecorationColor: colors.samBlue,
+            transition: { duration: 0.15 },
+          }}
+          onClick={handleAlreadyAMemberButton || handleNotAMemberButton}
+        >
+          {children}
+        </motion.div>
+      );
     };
 
     const AlreadyAMember = () => {
       return (
         <>
           Already a member?&nbsp;
-          <motion.div
-            className={footerLink()}
-            whileHover={{ textDecoration: 'underline' }}
-            onClick={handleAlreadyAMemberButton}
-          >
+          <Prompt handleAlreadyAMemberButton={handleAlreadyAMemberButton}>
             Sign in
-          </motion.div>
+          </Prompt>
         </>
       );
     };
@@ -745,21 +832,17 @@ export default function SplashScreen({}) {
       return (
         <>
           Not a member yet?&nbsp;
-          <motion.div
-            className={footerLink()}
-            whileHover={{ textDecoration: 'underline' }}
-            onClick={handleNotAMemberButton}
-          >
+          <Prompt handleNotAMemberButton={handleNotAMemberButton}>
             Sign up!
-          </motion.div>
+          </Prompt>
         </>
       );
     };
 
     return (
       <motion.div className={footer()}>
-        {slide !== 'Login' && <AlreadyAMember />}
-        {slide === 'Login' && <NotAMember />}
+        {slide !== 'SignIn' && <AlreadyAMember />}
+        {slide === 'SignIn' && <NotAMember />}
       </motion.div>
     );
   };

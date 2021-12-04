@@ -9,7 +9,6 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
-import FindFriendsPopUp from './FindFriendsPopUp';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { socket } from '../config/socket';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
@@ -17,6 +16,7 @@ import { UserStatusProvider } from '../contexts/UserStatusContext';
 const electron = require('electron');
 const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
+const ipcRenderer = electron.ipcRenderer;
 
 const container = css({ backgroundColor: colors.darkmodeBlack });
 
@@ -65,6 +65,10 @@ export default function FriendsList() {
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
   );
+
+  ipcRenderer.on('refreshtoken:frommain', (e, data) => {
+    findFriendsWindow?.webContents.send('refreshtoken:fromrenderer', data);
+  });
 
   const getFriends = () => {
     DAO.getFriends(currentUser._id, token)
@@ -115,8 +119,6 @@ export default function FriendsList() {
 
   const toggleFindFriends = () => {
     if (!findFriendsOpen) {
-      // FindFriendsPopUp window
-
       findFriendsWindow.on('close', function () {
         setFindFriendsWindow(null);
       });

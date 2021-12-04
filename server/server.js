@@ -15,6 +15,7 @@ app.use(express.json());
 // Catches any request to /api/auth and redirects it to ./routes/auth
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/private', require('./routes/private'));
+app.use('/api/token', require('./routes/token'));
 
 app.use(errorHandler);
 // =========middleware end=========

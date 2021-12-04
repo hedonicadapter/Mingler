@@ -2,7 +2,8 @@ import * as electron from 'electron';
 const ipcRenderer = electron.ipcRenderer;
 import { io } from 'socket.io-client';
 
-const userID = localStorage.getItem('userID');
+const userID =
+  typeof window !== 'undefined' ? localStorage.getItem('userID') : null;
 
 const socket = io('ws://127.0.0.1:8080/user', {
   auth: {

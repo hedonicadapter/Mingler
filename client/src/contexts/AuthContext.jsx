@@ -54,8 +54,8 @@ export function AuthProvider({ children }) {
     refreshCustomUserData();
   }
 
-  const registerWithEmail = async (name, email, password) => {
-    return await DAO.registerWithEmail(name, email, password, clientFingerprint)
+  const signUpWithEmail = async (name, email, password) => {
+    return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
       .then((result) => {
         setToken(result.data.token);
 
@@ -66,14 +66,20 @@ export function AuthProvider({ children }) {
       });
   };
 
-  const loginWithEmailAndPassword = async (email, password) => {
-    console.log('logging in');
-    return await DAO.login(email, password)
+  const signInWithEmailAndPassword = async (email, password) => {
+    return await DAO.signIn(email, password)
       .then((result) => {
-        console.log('logging in2');
-        //   setRecentUser({ userID, email, fingerprint: clientFingerprint, guest: false });
-        // setCurrentUser(result.data);
-        // setToken(result.data.token);
+        setRecentUser({
+          userID: result.data._id,
+          email,
+          fingerprint: clientFingerprint,
+          guest: false,
+        });
+        setCurrentUser(result.data);
+        setToken(result.data.token);
+
+        // Access token refresh token pair
+        localStorage.setItem(result.data.token, result.data.refreshToken);
 
         return { success: true };
       })
@@ -82,8 +88,8 @@ export function AuthProvider({ children }) {
       });
   };
 
-  const registerGuest = async (username) => {
-    return await DAO.registerGuest(username, clientFingerprint)
+  const signUpGuest = async (username) => {
+    return await DAO.signUpGuest(username, clientFingerprint)
       .then((result) => {
         const id = result.data._id;
 
@@ -97,10 +103,10 @@ export function AuthProvider({ children }) {
       });
   };
 
-  const loginGuest = async () => {
+  const signInGuest = async () => {
     const userID = localStorage.getItem('userID');
 
-    return await DAO.loginGuest(userID, clientFingerprint).then((result) => {
+    return await DAO.signInGuest(userID, clientFingerprint).then((result) => {
       setRecentUser({
         userID,
         email: null,
@@ -109,6 +115,9 @@ export function AuthProvider({ children }) {
       });
       setCurrentUser(result.data);
       setToken(result.data.token);
+
+      // Access token refresh token pair
+      localStorage.setItem(result.data.token, result.data.refreshToken);
     });
   };
 
@@ -125,10 +134,10 @@ export function AuthProvider({ children }) {
     setToken(null);
   };
 
-  const login = async (email, password) => {
+  const signIn = async (email, password) => {
     //set current user in localstorage
 
-    return await DAO.login(email, password, clientFingerprint)
+    return await DAO.signIn(email, password, clientFingerprint)
       .then((result) => {
         setRecentUser({
           userID: result.data._id,
@@ -138,6 +147,9 @@ export function AuthProvider({ children }) {
         });
         setCurrentUser(result.data);
         setToken(result.data.token);
+
+        // Access token refresh token pair
+        localStorage.setItem(result.data.token, result.data.refreshToken);
 
         return { success: true };
       })
@@ -155,6 +167,14 @@ export function AuthProvider({ children }) {
     logoutDB().then(() => {
       setCurrentUser(null);
     });
+  };
+
+  const storeToken = () => {
+    return;
+  };
+
+  const deleteToken = () => {
+    return;
   };
 
   // Send ID to host
@@ -188,17 +208,22 @@ export function AuthProvider({ children }) {
     console.log('currentUser ', currentUser);
   }, [currentUser, loading]);
 
+  ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
+    setToken(access);
+  });
+
   const value = {
     currentUser,
     token,
     setName,
     logout,
-    registerWithEmail,
-    loginWithEmailAndPassword,
-    registerGuest,
-    loginGuest,
+    signUpWithEmail,
+    signInWithEmailAndPassword,
+    signUpGuest,
+    signInGuest,
     logoutGuest,
-    login,
+    signIn,
+    storeToken,
   };
 
   return (

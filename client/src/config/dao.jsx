@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { app } from './realmDB';
+import { ipcRenderer } from 'electron';
+import { signalTokenRefresh } from './socket';
 
 const auth = axios.create({
   baseURL: 'http://localhost:8080/api/auth/',
@@ -9,7 +11,7 @@ const auth = axios.create({
   },
 });
 
-const privateRoute = axios.create({
+export const privateRoute = axios.create({
   baseURL: 'http://localhost:8080/api/private/',
   withCredentials: true,
   headers: {
@@ -17,29 +19,41 @@ const privateRoute = axios.create({
   },
 });
 
+export const token = axios.create({
+  baseURL: 'http://localhost:8080/api/token/',
+  withCredentials: true,
+  headers: {
+    'Content-type': 'application/json',
+  },
+});
+
+function getOldRefreshToken(oldToken) {
+  return localStorage.getItem(oldToken);
+}
+
 class DAO {
-  registerWithEmail = (name, email, password, clientFingerprint) => {
+  signUpWithEmail = (name, email, password, clientFingerprint) => {
     const data = { name, email, password, clientFingerprint };
 
-    return auth.post('/registerWithEmail', data);
+    return auth.post('/signUpWithEmail', data);
   };
 
-  registerGuest = (username, clientFingerprint) => {
+  signUpGuest = (username, clientFingerprint) => {
     const data = { username, clientFingerprint };
 
-    return auth.post('/registerGuest', data);
+    return auth.post('/signUpGuest', data);
   };
 
-  loginGuest = (guestID, clientFingerprint) => {
+  signInGuest = (guestID, clientFingerprint) => {
     const data = { guestID, clientFingerprint };
 
-    return auth.post('/loginGuest', data);
+    return auth.post('/signInGuest', data);
   };
 
-  login = (email, password, clientFingerprint) => {
+  signIn = (email, password, clientFingerprint) => {
     const data = { email, password, clientFingerprint };
 
-    return auth.post('/login', data);
+    return auth.post('/signIn', data);
   };
 
   logout = () => {
@@ -61,6 +75,7 @@ class DAO {
   };
 
   searchUsers = (searchTerm, token) => {
+    console.log('TOKEN DAO ', token);
     const data = { searchTerm };
 
     return privateRoute.post('/searchUsers', data, {
@@ -92,7 +107,6 @@ class DAO {
 
   cancelFriendRequest = (toID, fromID, token) => {
     const data = { toID, fromID };
-    console.log('cancel friend request ', data);
 
     return privateRoute.post('/cancelFriendRequest', data, {
       headers: {
@@ -163,6 +177,66 @@ class DAO {
     });
   };
 }
+
+const getNewToken = async (refreshToken) => {
+  const data = { refreshToken };
+
+  return token.post('/refreshToken', data);
+};
+
+privateRoute.interceptors.response.use(
+  function (response) {
+    return response;
+  },
+  async function (error) {
+    const ogRequest = error.config;
+    if (401 === error.response.status && !ogRequest.retry) {
+      const oldAccessToken = ogRequest.headers.Authorization.replace(
+        /^Bearer\s+/,
+        ''
+      );
+
+      const refreshToken = localStorage.getItem(oldAccessToken);
+
+      // PRINTING THE SAME TOKEN OVER AND OVER
+      if (!refreshToken) return Promise.reject('409: No refresh token found.');
+
+      const og = await getNewToken(refreshToken)
+        .then((tokens) => {
+          const access = tokens.data.token;
+          const refresh = tokens.data.refreshToken;
+
+          if (access && refresh) {
+            localStorage.removeItem(oldAccessToken);
+            localStorage.setItem(access, refresh);
+
+            // ipcRenderer.send('refreshtoken:fromrenderer', { access, refresh });
+
+            const { port1, port2 } = new MessageChannel();
+            ipcRenderer.postMessage(
+              'refreshtoken:fromrenderer',
+              { access, refresh },
+              [port1]
+            );
+
+            ogRequest.headers.Authorization = 'Bearer ' + access;
+            ogRequest.retry = true;
+
+            return ogRequest;
+          }
+        })
+        .catch((e) => {
+          return Promise.reject(e);
+        });
+
+      if (og) {
+        axios(og);
+      } else return Promise.reject('No token returned.');
+    } else {
+      return Promise.reject(error);
+    }
+  }
+);
 
 export default new DAO();
 
