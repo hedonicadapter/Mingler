@@ -261,7 +261,7 @@ export default function FriendsList() {
     <UserStatusProvider>
       <div className={container()}>
         <AccordionItem
-          friend={friends.find((friend) => friend._id === currentUser._id)}
+          friend={friends.find((friend) => friend._id === currentUser?._id)}
           handleNameChange={handleNameChange}
         />
 

@@ -67,6 +67,28 @@ UserSchema.pre('save', async function (next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+
+  next();
+});
+
+UserSchema.post('save', async function (doc, next) {
+  try {
+    const selfFriend = await User.findOneAndUpdate(
+      { _id: this._id },
+      { $push: { friends: this._id } },
+      { new: true, safe: true, lean: true },
+      (err, doc) => {
+        if (err) next(err);
+      }
+    );
+
+    if (!selfFriend) {
+      next('Self befriending failed.');
+    }
+  } catch (e) {
+    next(e);
+  }
+
   next();
 });
 

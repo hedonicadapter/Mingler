@@ -151,6 +151,7 @@ export function AuthProvider({ children }) {
         });
         setCurrentUser(result.data);
         setToken(result.data.token);
+        setUserID(result.data._id);
 
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
