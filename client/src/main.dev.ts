@@ -131,7 +131,6 @@ const createWindow = async () => {
   mainWindow.webContents.once('dom-ready', () => {
     try {
       ipcMain.on('currentUser:signedIn', (event, userID) => {
-        console.log('ULTIMATE');
         const httpServer = createServer();
         const io = new Server(httpServer, {
           // path: '/auth',

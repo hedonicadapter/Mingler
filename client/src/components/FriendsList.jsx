@@ -53,7 +53,7 @@ const findFriendsWindowConfig = {
 
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
-  const { socket } = useClientSocket;
+  const { socket } = useClientSocket();
 
   const searchInputRef = useRef();
 
@@ -216,29 +216,37 @@ export default function FriendsList() {
     getFriends();
     getFriendRequests();
 
-    socket?.on('friendrequest:receive', () => {
-      getFriendRequests();
-    });
+    socket?.removeAllListeners('friendrequest:receive');
+    socket?.removeAllListeners('friendrequest:cancelreceive');
 
-    socket?.on('friendrequest:cancelreceive', () => {
-      getFriendRequests();
-    });
-  }, []);
+    if (socket) {
+      socket.on('friendrequest:receive', () => {
+        getFriendRequests();
+      });
+
+      socket.on('friendrequest:cancelreceive', () => {
+        getFriendRequests();
+      });
+    }
+  }, [socket]);
 
   useEffect(() => {
-    if (friends) {
+    console.log('socket ', socket);
+    if (friends && socket) {
+      console.log('SETTING ACTIVITY LISTENERS');
       setActivityListeners();
     }
-  }, [friends]);
+  }, [friends, socket]);
 
   useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
   const setActivityListeners = () => {
-    socket?.removeAllListeners('activity:receive');
+    socket.removeAllListeners('activity:receive');
 
-    socket?.once('activity:receive', (packet) => {
+    socket.once('activity:receive', (packet) => {
+      console.log('ACTIVITY RECIEVED');
       // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {

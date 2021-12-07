@@ -74,48 +74,46 @@ userIo.on('connection', async (socket) => {
       }
     ).select({ friends: 1 });
 
-    console.log(friends);
-    // const friendIDs = Object.values(result).map(function (item) {
-    //   return item.toString();
-    // });
+    const friendIDs = Object.values(friends.friends).map(function (item) {
+      return item.toString();
+    });
 
-    // socket.join(userID);
-    // console.log('friendIDs ', result);
-    // // Client's own UserID is also returned by findById
-    // // joinRooms(socket, friendIDs).then(() => {
-    // socket.on('activity:send', (packet) => {
-    //   // Since a client's friends joins a room by the client's ID on connection,
-    //   // anything emitted to the client's ID will be received by friends
-    //   userIo.in(friendIDs).emit('activity:receive', packet);
-    // });
+    socket.join(userID);
+    // Client's own UserID is also returned by findById
+    // joinRooms(socket, friendIDs).then(() => {
+    socket.on('activity:send', (packet) => {
+      // Since a client's friends joins a room by the client's ID on connection,
+      // anything emitted to the client's ID will be received by friends
+      userIo.in(friendIDs).emit('activity:receive', packet);
+    });
 
-    // // User wants to send time request to a friend
-    // socket.on('youtubetimerequest:send', (packet) => {
-    //   const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
-    //   // Time request is sent to friend
-    //   userIo.in(toID).emit('youtubetimerequest:receive', {
-    //     fromID: fromID,
-    //     YouTubeTitle: YouTubeTitle,
-    //     YouTubeURL: YouTubeURL,
-    //   });
-    // });
+    // User wants to send time request to a friend
+    socket.on('youtubetimerequest:send', (packet) => {
+      const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
+      // Time request is sent to friend
+      userIo.in(toID).emit('youtubetimerequest:receive', {
+        fromID: fromID,
+        YouTubeTitle: YouTubeTitle,
+        YouTubeURL: YouTubeURL,
+      });
+    });
 
-    // // Friend answers time request
-    // socket.on('youtubetimerequest:answer', (packet) => {
-    //   const { toID, time } = packet;
-    //   //By sending current youtube time back
-    //   userIo.in(toID).emit('youtubetime:receive', time);
-    // });
+    // Friend answers time request
+    socket.on('youtubetimerequest:answer', (packet) => {
+      const { toID, time } = packet;
+      //By sending current youtube time back
+      userIo.in(toID).emit('youtubetime:receive', time);
+    });
 
-    // socket.on('friendrequest:send', (packet) => {
-    //   const { toID } = packet;
-    //   userIo.in(toID).emit('friendrequest:receive');
-    // });
+    socket.on('friendrequest:send', (packet) => {
+      const { toID } = packet;
+      userIo.in(toID).emit('friendrequest:receive');
+    });
 
-    // socket.on('friendrequest:cancel', (packet) => {
-    //   const { toID } = packet;
-    //   userIo.in(toID).emit('friendrequest:cancelreceive');
-    // });
+    socket.on('friendrequest:cancel', (packet) => {
+      const { toID } = packet;
+      userIo.in(toID).emit('friendrequest:cancelreceive');
+    });
 
     userIo.on('disconnect', (reason) => {
       console.log('io disconnected: ', reason);

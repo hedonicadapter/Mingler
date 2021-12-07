@@ -113,7 +113,7 @@ export function ClientSocketProvider({ children }) {
 
   return (
     <ClientSocketContext.Provider value={value}>
-      {children}
+      {socket && children}
     </ClientSocketContext.Provider>
   );
 }
