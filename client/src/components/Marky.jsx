@@ -12,7 +12,7 @@ import colors from '../config/colors';
 import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
-import { sendYouTubeTimeRequest, socket } from '../config/socket';
+import { sendYouTubeTimeRequest } from '../config/socket';
 import { useStatus } from '../contexts/UserStatusContext';
 
 const shell = electron.shell;

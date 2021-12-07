@@ -129,69 +129,66 @@ const createWindow = async () => {
   });
 
   mainWindow.webContents.once('dom-ready', () => {
-    mainWindow?.webContents
-      .executeJavaScript('localStorage.getItem("userID");', true)
-      .then((result) => {
-        // ipcMain.on('toChromiumHost:userID', (evt, data) => {
+    try {
+      ipcMain.on('currentUser:signedIn', (event, userID) => {
+        console.log('ULTIMATE');
+        const httpServer = createServer();
+        const io = new Server(httpServer, {
+          // path: '/auth',
+          pingInterval: 10000,
+          pingTimeout: 5000,
+          cookie: false,
+        });
+
+        const authIo = io.of('/auth');
+
+        authIo.on('connection', (socket) => {
+          ipcMain.once('currentUser:signedOut', () => {
+            socket.disconnect();
+            httpServer.close();
+            console.log('Socket closed');
+          });
+
+          authIo.emit('fromAppToHost:userID', userID);
+
+          socket.on('fromHostToApp:data', (data) => {
+            console.log('from host: ', data);
+
+            // if data = time send time not chromiumhostdata
+            // Picked up by Marky which then opens a browser tab for the video with the correct time
+            if (data.time) {
+              mainWindow?.webContents.send(
+                'chromiumHostData:YouTubeTime',
+                data
+              );
+            } else {
+              mainWindow?.webContents.send('chromiumHostData', data);
+            }
+          });
+
+          ipcMain.on('getYouTubeTime', (event, packet) => {
+            const { YouTubeTitle, YouTubeURL } = packet;
+
+            socket.emit('getYouTubeTime', {
+              YouTubeTitle,
+              YouTubeURL,
+            });
+          });
+        });
+
+        authIo.on('disconnect', (reason) => {
+          console.log('Host socket dc reason: ', reason);
+        });
+
         const PORT = 8081;
-
-        try {
-          const httpServer = createServer();
-          const io = new Server(httpServer, {
-            // path: '/auth',
-            pingInterval: 10000,
-            pingTimeout: 5000,
-            cookie: false,
-          });
-
-          const authIo = io.of('/auth');
-
-          authIo.on('connection', (socket) => {
-            console.log('host socket connected');
-
-            console.log('sending to host: ', result);
-            authIo.emit('fromAppToHost:userID', result);
-
-            socket.on('fromHostToApp:data', (data) => {
-              console.log('from host: ', data);
-
-              // if data = time send time not chromiumhostdata
-              // Picked up by Marky which then opens a browser tab for the video with the correct time
-              if (data.time) {
-                mainWindow?.webContents.send(
-                  'chromiumHostData:YouTubeTime',
-                  data
-                );
-              } else {
-                mainWindow?.webContents.send('chromiumHostData', data);
-              }
-            });
-
-            ipcMain.on('getYouTubeTime', (event, packet) => {
-              const { YouTubeTitle, YouTubeURL } = packet;
-
-              socket.emit('getYouTubeTime', {
-                YouTubeTitle,
-                YouTubeURL,
-              });
-            });
-          });
-
-          authIo.on('disconnect', (reason) => {
-            console.log('Host socket dc reason: ', reason);
-          });
-
-          httpServer.listen(PORT);
-        } catch (exception) {
-          console.log('Creating host socket server exception: ', exception);
-        }
-        // });
+        httpServer.listen(PORT);
       });
+    } catch (exception) {
+      console.log('Creating host socket server exception: ', exception);
+    }
   });
 
   ipcMain.on('refreshtoken:fromrenderer', (e, tokens) => {
-    // ipcMain.emit('refreshtoken:frommain', tokens);
-    console.log('LAMAMAMA');
     mainWindow?.webContents.send('refreshtoken:frommain', tokens);
   });
 

@@ -1,11 +1,11 @@
 import { ipcRenderer } from 'electron';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, createContext } from 'react';
 
 import { assert } from 'console';
 import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-import { app, anonCredentials } from '../config/realmDB';
+import { app } from '../config/realmDB';
 import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -15,7 +15,7 @@ const Store = require('electron-store');
 
 const store = new Store();
 
-const AuthContext = React.createContext();
+const AuthContext = createContext();
 
 // ============ Client fingerprint ============
 // Used to authenticate guest users
@@ -81,6 +81,8 @@ export function AuthProvider({ children }) {
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
 
+        ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
         return { success: true };
       })
       .catch((e) => {
@@ -118,6 +120,8 @@ export function AuthProvider({ children }) {
 
       // Access token refresh token pair
       localStorage.setItem(result.data.token, result.data.refreshToken);
+
+      ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
     });
   };
 
@@ -167,6 +171,7 @@ export function AuthProvider({ children }) {
     setUserID(null);
     setCurrentUser(null);
     setToken(null);
+    ipcRenderer.send('currentUser:signedOut');
   };
 
   const storeToken = () => {
@@ -175,11 +180,6 @@ export function AuthProvider({ children }) {
 
   const deleteToken = () => {
     return;
-  };
-
-  // Send ID to host
-  const sendUserIDToChromiumHost = () => {
-    io.sockets.emit('native:userID', currentUser._id);
   };
 
   // useEffect(() => {
@@ -193,10 +193,9 @@ export function AuthProvider({ children }) {
   // }, [recentUser]);
 
   useEffect(() => {
-    console.log('token', token);
-    console.log('currentUser', currentUser);
-    if (token && currentUser) setLoading(false);
-    else setLoading(true);
+    if (token && currentUser) {
+      setLoading(false);
+    } else setLoading(true);
   }, [token, currentUser]);
 
   // Finished logging in

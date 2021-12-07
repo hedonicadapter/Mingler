@@ -9,7 +9,7 @@ const socket = io('ws://127.0.0.1:8080/user', {
   auth: {
     token: 'test',
   },
-  query: {
+  query: userID && {
     userID: userID?.replace(/['"]+/g, ''),
   },
 });

@@ -57,66 +57,70 @@ async function joinRooms(socket, rooms) {
   return await socket.join(rooms);
 }
 
-userIo.on('connection', (socket) => {
+userIo.on('connection', async (socket) => {
   // Get the client's mongoDB ID
   const userID = socket.handshake.query.userID;
 
   if (userID) {
-    // Get friend IDs (array of IDs of mongoDB user objects)
-    // by the client's user ID (reference to mongoDB user object)
-    User.findById(userID, 'friends', { lean: true }, function (err, result) {
-      if (err) {
-        console.log('userIo on connection error: ', err);
-        return err;
+    const friends = await User.findById(
+      userID,
+      { _id: 0 },
+      { lean: true },
+      function (err, result) {
+        if (err) {
+          console.log('userIo on connection error: ', err);
+          return err;
+        }
       }
-      const friendIDs = Object.values(result).map(function (item) {
-        return item.toString();
-      });
+    ).select({ friends: 1 });
 
-      // Client's own UserID is returned by findById
-      joinRooms(socket, friendIDs).then(() => {
-        socket.on('activity:send', (packet) => {
-          // Since a client's friends joins a room by the client's ID on connection,
-          // anything emitted to the client's ID will be received by friends
-          userIo
-            .in(socket.handshake.query.userID)
-            .emit('activity:receive', packet);
-        });
+    console.log(friends);
+    // const friendIDs = Object.values(result).map(function (item) {
+    //   return item.toString();
+    // });
 
-        // User wants to send time request to a friend
-        socket.on('youtubetimerequest:send', (packet) => {
-          const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
-          // Time request is sent to friend
-          userIo.in(toID).emit('youtubetimerequest:receive', {
-            fromID: fromID,
-            YouTubeTitle: YouTubeTitle,
-            YouTubeURL: YouTubeURL,
-          });
-        });
+    // socket.join(userID);
+    // console.log('friendIDs ', result);
+    // // Client's own UserID is also returned by findById
+    // // joinRooms(socket, friendIDs).then(() => {
+    // socket.on('activity:send', (packet) => {
+    //   // Since a client's friends joins a room by the client's ID on connection,
+    //   // anything emitted to the client's ID will be received by friends
+    //   userIo.in(friendIDs).emit('activity:receive', packet);
+    // });
 
-        // Friend answers time request
-        socket.on('youtubetimerequest:answer', (packet) => {
-          const { toID, time } = packet;
-          //By sending current youtube time back
-          userIo.in(toID).emit('youtubetime:receive', time);
-        });
+    // // User wants to send time request to a friend
+    // socket.on('youtubetimerequest:send', (packet) => {
+    //   const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
+    //   // Time request is sent to friend
+    //   userIo.in(toID).emit('youtubetimerequest:receive', {
+    //     fromID: fromID,
+    //     YouTubeTitle: YouTubeTitle,
+    //     YouTubeURL: YouTubeURL,
+    //   });
+    // });
 
-        socket.on('friendrequest:send', (packet) => {
-          const { toID } = packet;
-          userIo.in(toID).emit('friendrequest:receive');
-        });
+    // // Friend answers time request
+    // socket.on('youtubetimerequest:answer', (packet) => {
+    //   const { toID, time } = packet;
+    //   //By sending current youtube time back
+    //   userIo.in(toID).emit('youtubetime:receive', time);
+    // });
 
-        socket.on('friendrequest:cancel', (packet) => {
-          const { toID } = packet;
-          userIo.in(toID).emit('friendrequest:cancelreceive');
-        });
-      });
-    });
+    // socket.on('friendrequest:send', (packet) => {
+    //   const { toID } = packet;
+    //   userIo.in(toID).emit('friendrequest:receive');
+    // });
+
+    // socket.on('friendrequest:cancel', (packet) => {
+    //   const { toID } = packet;
+    //   userIo.in(toID).emit('friendrequest:cancelreceive');
+    // });
 
     userIo.on('disconnect', (reason) => {
       console.log('io disconnected: ', reason);
     });
-  }
+  } else console.error('No userID in handshake');
 });
 // =========socket end=========
 

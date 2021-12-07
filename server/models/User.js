@@ -72,6 +72,8 @@ UserSchema.pre('save', async function (next) {
 });
 
 UserSchema.post('save', async function (doc, next) {
+  if (!this.isNew) return next();
+
   try {
     const selfFriend = await User.findOneAndUpdate(
       { _id: this._id },
