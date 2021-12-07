@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect, createContext } from 'react';
 import { io } from 'socket.io-client';
 
 import DAO from '../config/DAO';
+import { useAuth } from './AuthContext';
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
 const ClientSocketContext = createContext();
@@ -11,18 +12,18 @@ export function useClientSocket() {
 }
 
 export function ClientSocketProvider({ children }) {
-  const [userID, setUserID] = useState('userID');
-  const [socket, setSocket] = useState(
-    io('ws://127.0.0.1:8080/user', {
-      auth: {
-        token: 'test',
-      },
-      query: userID && {
-        userID: userID?.replace(/['"]+/g, ''),
-      },
-    })
-  );
+  const { currentUser } = useAuth();
 
+  const socket = io('ws://127.0.0.1:8080/user', {
+    auth: {
+      token: 'test',
+    },
+    query: currentUser && {
+      userID: currentUser._id?.replace(/['"]+/g, ''),
+    },
+  });
+
+  // Deprecated I think lol
   const sendActivityToLocalStorage = (packet) => {
     // Each packet contains the ID it was sent from, and an activity wrapped in a data object
     const userID = packet?.userID;
@@ -70,8 +71,8 @@ export function ClientSocketProvider({ children }) {
     console.log(attempt);
   });
 
-  const sendActivity = (data, userID) => {
-    const packet = { data, userID };
+  const sendActivity = (data) => {
+    const packet = { data, userID: currentUser._id };
 
     socket.emit('activity:send', packet);
   };
@@ -88,14 +89,14 @@ export function ClientSocketProvider({ children }) {
     socket.emit('youtubetimerequest:answer', packet);
   };
 
-  const sendFriendRequest = (toID, fromID) => {
-    const packet = { toID, fromID };
+  const sendFriendRequest = (toID) => {
+    const packet = { toID, fromID: currentUser._id };
 
     socket.emit('friendrequest:send', packet);
   };
 
-  const cancelFriendRequest = (toID, fromID) => {
-    const packet = { toID, fromID };
+  const cancelFriendRequest = (toID) => {
+    const packet = { toID, fromID: currentUser._id };
 
     socket.emit('friendrequest:cancel', packet);
   };

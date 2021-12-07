@@ -10,8 +10,8 @@ import colors from '../config/colors';
 import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
-import { socket } from '../config/socket';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
+import { useClientSocket } from '../contexts/ClientSocketContext';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -53,6 +53,7 @@ const findFriendsWindowConfig = {
 
 export default function FriendsList() {
   const { currentUser, token } = useAuth();
+  const { socket } = useClientSocket;
 
   const searchInputRef = useRef();
 
@@ -215,11 +216,11 @@ export default function FriendsList() {
     getFriends();
     getFriendRequests();
 
-    socket.on('friendrequest:receive', () => {
+    socket?.on('friendrequest:receive', () => {
       getFriendRequests();
     });
 
-    socket.on('friendrequest:cancelreceive', () => {
+    socket?.on('friendrequest:cancelreceive', () => {
       getFriendRequests();
     });
   }, []);
@@ -235,9 +236,9 @@ export default function FriendsList() {
   }, [searchInputRef?.current]);
 
   const setActivityListeners = () => {
-    socket.removeAllListeners('activity:receive');
+    socket?.removeAllListeners('activity:receive');
 
-    socket.once('activity:receive', (packet) => {
+    socket?.once('activity:receive', (packet) => {
       // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {

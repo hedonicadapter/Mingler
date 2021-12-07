@@ -12,8 +12,8 @@ import colors from '../config/colors';
 import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
-import { sendYouTubeTimeRequest } from '../config/socket';
 import { useStatus } from '../contexts/UserStatusContext';
+import { useClientSocket } from '../contexts/ClientSocketContext';
 
 const shell = electron.shell;
 const ipcRenderer = electron.ipcRenderer;
@@ -109,8 +109,10 @@ export default function Marky({
   markyToReplaceWithYouTubeVideo,
   marKey,
 }) {
-  const marqueeRef = useRef();
   const { currentUser, token } = useAuth();
+  const { sendYouTubeTimeRequest } = useClientSocket();
+
+  const marqueeRef = useRef();
   const { setAccessToken, setRefreshToken } = useStatus();
 
   const [playMarquee, setPlayMarquee] = useState(false);

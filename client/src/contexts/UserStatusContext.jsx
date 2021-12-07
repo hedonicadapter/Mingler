@@ -7,7 +7,7 @@ import { useAuth } from './AuthContext';
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
 import DAO from '../config/DAO';
 import { useLocalStorage } from '../helpers/localStorageManager';
-const socket = require('../config/socket');
+import { useClientSocket } from './ClientSocketContext';
 
 const { ipcRenderer } = require('electron');
 
@@ -23,11 +23,13 @@ export function useStatus() {
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
 export function UserStatusProvider({ children }) {
   const { currentUser, token } = useAuth();
+  const { sendActivity } = useClientSocket();
+
   const [accessToken, setAccessToken] = useLocalStorage('access_token');
   const [refreshToken, setRefreshToken] = useLocalStorage('refresh_token');
 
   ipcRenderer.on('chromiumHostData', function (event, data) {
-    socket.sendActivity(
+    sendActivity(
       {
         //Either tabdata or youtube data is sent, never both
         TabTitle: data?.TabTitle,
@@ -56,7 +58,7 @@ export function UserStatusProvider({ children }) {
         activeWindow !== 'Snap Assist' &&
         activeWindow !== 'Spotify Free'
       ) {
-        socket.sendActivity(
+        sendActivity(
           { WindowTitle: activeWindow, Date: new Date() },
           currentUser._id
         );
@@ -97,7 +99,7 @@ export function UserStatusProvider({ children }) {
         let trackInfo = JSON.parse(processedData.replaceAll("'", '"'));
 
         if (trackInfo) {
-          socket.sendActivity(
+          sendActivity(
             {
               Artists: trackInfo.artists,
               TrackTitle: trackInfo.name,

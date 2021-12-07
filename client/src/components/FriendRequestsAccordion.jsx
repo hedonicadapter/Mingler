@@ -8,7 +8,6 @@ import UserItem from './UserItem';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
-import { cancelFriendRequest } from '../config/socket';
 
 const generalPadding = 12;
 

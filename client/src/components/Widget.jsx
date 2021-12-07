@@ -12,6 +12,7 @@ import WidgetFooter from './WidgetFooter';
 import { AuthProvider } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import MenuButton from './MenuButton';
+import { ClientSocketProvider } from '../contexts/ClientSocketContext';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
@@ -70,8 +71,9 @@ export default function Widget() {
   return (
     <MainPane visible={visible}>
       <AuthProvider>
-        <MenuButton />
-        {/* <motion.div
+        <ClientSocketProvider>
+          <MenuButton />
+          {/* <motion.div
           initial={{
             x: '120%',
             opacity: 0,
@@ -82,9 +84,10 @@ export default function Widget() {
           }}
           transition={{ duration: 0.5 }}
         > */}
-        <FriendsList />
-        <WidgetFooter />
-        {/* </motion.div> */}
+          <FriendsList />
+          <WidgetFooter />
+          {/* </motion.div> */}
+        </ClientSocketProvider>
       </AuthProvider>
     </MainPane>
   );

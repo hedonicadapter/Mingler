@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { app } from './realmDB';
 import { ipcRenderer } from 'electron';
-import { signalTokenRefresh } from './socket';
 
 const auth = axios.create({
   baseURL: 'http://localhost:8080/api/auth/',

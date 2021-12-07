@@ -9,7 +9,7 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
-import { sendFriendRequest, cancelFriendRequest } from '../config/socket';
+import { useClientSocket } from '../contexts/ClientSocketContext';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -108,6 +108,8 @@ const FrameButtons = () => {
 };
 
 export default function FindFriendsPopUp() {
+  const { sendFriendRequest, cancelFriendRequest } = useClientSocket();
+
   const [userID, setUserID] = useLocalStorage('userID');
   const [token, setToken] = useLocalStorage('token');
   const [foundFriends, setFoundFriends] = useState(null);
