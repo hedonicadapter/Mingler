@@ -13,15 +13,49 @@ export function useClientSocket() {
 
 export function ClientSocketProvider({ children }) {
   const { currentUser } = useAuth();
+  const [socket, setSocket] = useState(null);
 
-  const socket = io('ws://127.0.0.1:8080/user', {
-    auth: {
-      token: 'test',
-    },
-    query: currentUser && {
-      userID: currentUser._id?.replace(/['"]+/g, ''),
-    },
-  });
+  useEffect(() => {
+    const newSocket = io('ws://127.0.0.1:8080/user', {
+      auth: {
+        token: 'test',
+      },
+      query: currentUser && {
+        userID: currentUser._id?.replace(/['"]+/g, ''),
+      },
+    });
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!socket) return;
+    console.log('NEW SOCKET ALERT');
+    socket.on('connect', () => {
+      console.log('Client socket connected');
+    });
+    // User receives yt time request, and sends get request to ipcMain,
+    // which forwards the request through the host to chromium to get the time
+    // Packet contains url and tab title to find the right tab
+    socket.on('youtubetimerequest:receive', (packet) => {
+      ipcRenderer.send('getYouTubeTime', packet);
+    });
+
+    socket.io.on('error', (error) => {
+      console.log(error);
+    });
+    socket.io.on('reconnect', (attempt) => {
+      console.log(attempt);
+    });
+
+    return () => {
+      socket.io.off('error');
+      socket.io.off('reconnect');
+      socket.off('youtubetimerequest:receive');
+      socket.off('connect');
+    };
+  }, [socket]);
 
   // Deprecated I think lol
   const sendActivityToLocalStorage = (packet) => {
@@ -52,24 +86,6 @@ export function ClientSocketProvider({ children }) {
     latestActivityParsed.pop();
     localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
   };
-
-  socket.on('connect', () => {
-    console.log('Client socket connected');
-  });
-
-  // User receives yt time request, and sends get request to ipcMain,
-  // which forwards the request through the host to chromium to get the time
-  // Packet contains url and tab title to find the right tab
-  socket.on('youtubetimerequest:receive', (packet) => {
-    ipcRenderer.send('getYouTubeTime', packet);
-  });
-
-  socket.io.on('error', (error) => {
-    console.log(error);
-  });
-  socket.io.on('reconnect', (attempt) => {
-    console.log(attempt);
-  });
 
   const sendActivity = (data) => {
     const packet = { data, userID: currentUser._id };

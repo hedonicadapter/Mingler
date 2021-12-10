@@ -9,7 +9,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
 import colors from '../config/colors';
-import { db } from '../config/firebase';
 import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
 import { useStatus } from '../contexts/UserStatusContext';

@@ -215,38 +215,76 @@ export default function FriendsList() {
   useEffect(() => {
     getFriends();
     getFriendRequests();
-
-    socket?.removeAllListeners('friendrequest:receive');
-    socket?.removeAllListeners('friendrequest:cancelreceive');
-
-    if (socket) {
-      socket.on('friendrequest:receive', () => {
-        getFriendRequests();
-      });
-
-      socket.on('friendrequest:cancelreceive', () => {
-        getFriendRequests();
-      });
-    }
   }, [socket]);
 
   useEffect(() => {
-    console.log('socket ', socket);
-    if (friends && socket) {
-      console.log('SETTING ACTIVITY LISTENERS');
+    if (!socket) return;
+
+    setFriendRequestListeners();
+
+    if (friends) {
+      setConversationListeners();
       setActivityListeners();
     }
-  }, [friends, socket]);
+
+    return () => {
+      socket.removeAllListeners('friendrequest:receive');
+      socket.removeAllListeners('friendrequest:cancelreceive');
+      socket.removeAllListeners('message:receive');
+      socket.removeAllListeners('activity:receive');
+    };
+  }, [socket, friends]);
+
+  // useEffect(() => {
+  //   if (friends && socket) {
+  //     setActivityListeners();
+  //   }
+  // }, [friends, socket]);
 
   useEffect(() => {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
+  const setFriendRequestListeners = () => {
+    socket.removeAllListeners('friendrequest:receive');
+    socket.removeAllListeners('friendrequest:cancelreceive');
+
+    socket.once('friendrequest:receive', () => {
+      getFriendRequests();
+    });
+
+    socket.once('friendrequest:cancelreceive', () => {
+      getFriendRequests();
+    });
+  };
+
+  const setConversationListeners = () => {
+    socket.removeAllListeners('message:receive');
+
+    socket.once('message:receive', ({ fromID, message }) => {
+      setFriends((prevState) => {
+        return prevState.map((friend) => {
+          if (friend._id === fromID) {
+            friend.sharehubConversation.push({
+              fromID,
+              message,
+              received: new Date(),
+            });
+
+            return {
+              ...friend,
+            };
+          }
+          return friend;
+        });
+      });
+    });
+  };
+
   const setActivityListeners = () => {
-    socket.removeAllListeners('activity:receive');
+    socket.removeAllListeners('friendrequest:cancelreceive');
 
     socket.once('activity:receive', (packet) => {
-      console.log('ACTIVITY RECIEVED');
       // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {

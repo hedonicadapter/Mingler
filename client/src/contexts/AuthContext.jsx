@@ -224,7 +224,18 @@ export function AuthProvider({ children }) {
     signIn,
     storeToken,
   };
-
+  const DummyInputComponent = () => {
+    const [test, setTest] = useState(null);
+    return (
+      <>
+        <input
+          type="text"
+          value={test || ''}
+          onChange={(e) => setTest(e.target.value)}
+        />
+      </>
+    );
+  };
   return (
     <AuthContext.Provider value={value}>
       <AnimatePresence>
@@ -237,10 +248,11 @@ export function AuthProvider({ children }) {
             duration={0.1}
           >
             <SplashScreen />
+            {/* <DummyInputComponent /> */}
           </motion.div>
         ) : (
           !loading && (
-            <motion.div
+            <div
               // key={1}
               // initial={{ x: '120%' }}
               // animate={{ x: '0%' }}
@@ -253,7 +265,7 @@ export function AuthProvider({ children }) {
               }}
             >
               {children}
-            </motion.div>
+            </div>
           )
         )}
         {/* <motion.div

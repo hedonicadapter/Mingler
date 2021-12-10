@@ -11,6 +11,7 @@ import colors from '../config/colors';
 import Marky from './Marky';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { useAuth } from '../contexts/AuthContext';
+import { useClientSocket } from '../contexts/ClientSocketContext';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
@@ -39,10 +40,12 @@ const connectChatClientPopUpConfig = {
   },
 };
 
-const ChatBox = () => {
-  const [inputText, setInputText] = useState(false);
+const ChatBox = ({ receiver, sharehubConversation }) => {
+  const { socket } = useClientSocket();
+  const { currentUser, token } = useAuth();
 
-  const [chatClientSelection, setChatClientSelection] = useState(null);
+  const [inputText, setInputText] = useState(false);
+  const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
 
   const chatContainer = css({
@@ -86,8 +89,6 @@ const ChatBox = () => {
     const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
     const [connectChatClientPopUpWindow, setConnectChatClientPopupWindow] =
       useState(new BrowserWindow(connectChatClientPopUpConfig));
-
-    const { currentUser, token } = useAuth();
 
     const connectButtonContainer = css({
       flex: 1,
@@ -215,10 +216,20 @@ const ChatBox = () => {
       height: 22,
     });
 
+    const handleSendButton = () => {
+      if (!inputText || !receiver) return;
+      socket.emit('message:send', {
+        toID: receiver,
+        fromID: currentUser._id,
+        message: inputText,
+      });
+    };
+
     return (
       <motion.div
         className={iconContainer()}
-        whileHover={{ cursor: 'pointer' }}
+        whileHover={{ cursor: inputText ? 'pointer' : 'auto' }}
+        onClick={handleSendButton}
       >
         <MdSend
           color={inputText ? colors.samBlue : colors.darkmodeBlack}
@@ -227,10 +238,13 @@ const ChatBox = () => {
       </motion.div>
     );
   };
-
   return (
     <div className={chatContainer()}>
-      <div className={messageArea()}></div>
+      <div className={messageArea()}>
+        {/* {sharehubConversation?.map((conversationObject) => {
+          return conversationObject.fromID, ' ', conversationObject.message;
+        })} */}
+      </div>
       <div className={inputContainer()}>
         {chatClientSelection === 'ShareHub' ? (
           <textarea
@@ -250,7 +264,13 @@ const ChatBox = () => {
   );
 };
 
-export default function CardBody({ activity, userID, expanded, chatVisible }) {
+export default function CardBody({
+  activity,
+  userID,
+  expanded,
+  chatVisible,
+  sharehubConversation,
+}) {
   return (
     <>
       <div className={flipper()}>
@@ -265,7 +285,12 @@ export default function CardBody({ activity, userID, expanded, chatVisible }) {
               />
             </motion.div>
           ))}
-          {chatVisible && <ChatBox />}
+          {chatVisible && (
+            <ChatBox
+              receiver={userID}
+              sharehubConversation={sharehubConversation}
+            />
+          )}
         </motion.ul>
       </div>
     </>

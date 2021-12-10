@@ -51,6 +51,7 @@ const UserSchema = new mongoose.Schema({
       unique: true,
     },
   ],
+  sharehubConversation: { type: Array },
   guest: { type: Boolean, default: false },
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },
@@ -61,6 +62,8 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('save', async function (next) {
+  this.wasNew = this.isNew;
+
   if (!this.isModified('password')) {
     next();
   }
@@ -72,7 +75,7 @@ UserSchema.pre('save', async function (next) {
 });
 
 UserSchema.post('save', async function (doc, next) {
-  if (!this.isNew) return next();
+  if (!this.wasNew) return next();
 
   try {
     const selfFriend = await User.findOneAndUpdate(

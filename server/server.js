@@ -87,6 +87,11 @@ userIo.on('connection', async (socket) => {
       userIo.in(friendIDs).emit('activity:receive', packet);
     });
 
+    socket.on('message:send', ({ toID, fromID, message }) => {
+      console.log(toID, fromID, message);
+      userIo.to(toID).emit('message:receive', { fromID, message });
+    });
+
     // User wants to send time request to a friend
     socket.on('youtubetimerequest:send', (packet) => {
       const { toID, fromID, YouTubeTitle, YouTubeURL } = packet;
