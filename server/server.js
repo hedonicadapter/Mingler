@@ -88,7 +88,6 @@ userIo.on('connection', async (socket) => {
     });
 
     socket.on('message:send', ({ toID, fromID, message }) => {
-      console.log(toID, fromID, message);
       userIo.to(toID).emit('message:receive', { fromID, message });
     });
 

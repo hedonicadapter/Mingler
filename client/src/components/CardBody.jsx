@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { css } from '@stitches/react';
-import Avatar from 'react-avatar';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import ReactPlayer from 'react-player/youtube';
+import TextareaAutosize from 'react-textarea-autosize';
 
 import { MdSend } from 'react-icons/md';
 
@@ -18,6 +18,7 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const app = electron.remote.app;
 
 const flipper = css({
+  height: '100%',
   backgroundColor: colors.darkmodeLightBlack,
   // marginTop: -16, // the Flipper component has some inherent top margin
   // marginLeft: -25,
@@ -44,9 +45,21 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
   const { socket } = useClientSocket();
   const { currentUser, token } = useAuth();
 
-  const [inputText, setInputText] = useState(false);
+  const [inputText, setInputText] = useState(null);
   const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
+
+  const inputBoxRef = useRef();
+
+  const ScrollAnchor = () => {
+    const anchorRef = useRef();
+
+    useEffect(
+      () => anchorRef.current?.scrollIntoView({ behavior: 'smooth' }),
+      [anchorRef]
+    );
+    return <div ref={anchorRef}></div>;
+  };
 
   const chatContainer = css({
     borderRadius: '5px',
@@ -59,8 +72,20 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
     zIndex: 200,
   });
   const messageArea = css({
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    marginRight: -8,
     flex: 1,
     height: 300,
+    marginBottom: 8,
+
+    scrollSnapType: 'y proximity',
+
+    '&> div > div:last-child': {
+      scrollSnapAlign: 'end',
+    },
+    // display: 'flex',
+    // flexDirection: 'column-reverse',
   });
   const inputContainer = css({
     borderTop: '1px solid #121212',
@@ -223,6 +248,8 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
         fromID: currentUser._id,
         message: inputText,
       });
+      setInputText('');
+      inputBoxRef.current?.focus();
     };
 
     return (
@@ -238,20 +265,88 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
       </motion.div>
     );
   };
+
+  const ConversationBubble = ({ fromID, message, received, sent }) => {
+    const sentByMe = fromID === currentUser._id;
+
+    const bubbleContainer = css({
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: '100%',
+      padding: 4,
+    });
+    const bubble = css({
+      backgroundColor: sentByMe ? colors.nudeBloo : colors.darkmodeMediumWhite,
+      borderRadius: '15px',
+      marginRight: 8,
+    });
+    const conversationText = css({
+      margin: 0,
+      padding: 10,
+      maxWidth: '100%',
+      wordWrap: 'break-all',
+      whiteSpace: 'break-spaces',
+      textOverflow: ' ',
+
+      fontSize: '0.8em',
+    });
+    const receivedTime = css({
+      color: colors.darkmodeDisabledWhite,
+      padding: 8,
+      fontSize: '0.6em',
+    });
+
+    return (
+      <div className={bubbleContainer()}>
+        {sentByMe ? (
+          <>
+            <div className={receivedTime()}>
+              {received.toLocaleTimeString('en-US', { timeStyle: 'short' })}
+            </div>
+            <div className={bubble()}>
+              <p className={conversationText()}>{message}</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={bubble()}>
+              <p className={conversationText()}>{message}</p>
+            </div>
+            <div className={receivedTime()}>
+              {received.toLocaleTimeString('en-US', { timeStyle: 'short' })}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={chatContainer()}>
       <div className={messageArea()}>
-        {/* {sharehubConversation?.map((conversationObject) => {
-          return conversationObject.fromID, ' ', conversationObject.message;
-        })} */}
+        {sharehubConversation?.map((conversationObject) => {
+          return (
+            <ConversationBubble
+              fromID={conversationObject.fromID}
+              message={conversationObject.message}
+              received={conversationObject.received}
+            />
+          );
+        })}
+        <ScrollAnchor />
       </div>
       <div className={inputContainer()}>
         {chatClientSelection === 'ShareHub' ? (
-          <textarea
+          <TextareaAutosize
+            ref={inputBoxRef}
+            maxRows={10}
             autoFocus
             placeholder="Aa"
             rows={1}
             className={inputBox()}
+            value={inputText}
             onChange={handleInput}
           />
         ) : (
