@@ -5,6 +5,8 @@ const crypto = require('crypto');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
 const { spotifyApi } = require('../config/spotify');
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
@@ -261,6 +263,47 @@ exports.getSentFriendRequests = async (req, res, next) => {
     );
   } catch (e) {
     next(e);
+  }
+};
+
+exports.sendMessage = async (req, res, next) => {
+  const { toID, fromID, message, sent, received } = req.body;
+
+  const messageObject = { fromID, message, sent, received };
+
+  const session = await Conversation.startSession();
+
+  try {
+    const transactionResults = await session.withTransaction(async () => {
+      const conversationDoc = await Conversation.findOneAndUpdate(
+        { users: mongoose.Types.ObjectId(toID) },
+        { lean: true, upsert: true, session }
+      );
+
+      if (!conversationDoc) await session.abortTransaction();
+
+      await new Message(messageObject).save({ session }).then((messageDoc) => {
+        conversationDoc.messages.push(messageDoc._id); // how to upsert
+
+        messageDoc.save({ session });
+      });
+    });
+
+    if (transactionResults) {
+      session.commitTransaction();
+      return res.status(201).json({
+        status: 'Success',
+        data: transactionResults,
+      });
+    } else {
+      return next(new ErrorResponse('Unable to send message.', 500));
+    }
+  } catch (e) {
+    await session.abortTransaction();
+    await session.endSession();
+    next(e);
+  } finally {
+    await session.endSession();
   }
 };
 

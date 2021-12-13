@@ -324,15 +324,21 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
   };
 
   return (
-    <div className={chatContainer()}>
+    <motion.div className={chatContainer()}>
       <div className={messageArea()}>
         {sharehubConversation?.map((conversationObject) => {
           return (
-            <ConversationBubble
-              fromID={conversationObject.fromID}
-              message={conversationObject.message}
-              received={conversationObject.received}
-            />
+            <motion.div
+              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <ConversationBubble
+                fromID={conversationObject.fromID}
+                message={conversationObject.message}
+                received={conversationObject.received}
+              />
+            </motion.div>
           );
         })}
         <ScrollAnchor />
@@ -355,7 +361,7 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
         <Dropdown />
         <SendButton />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -380,12 +386,21 @@ export default function CardBody({
               />
             </motion.div>
           ))}
-          {chatVisible && (
-            <ChatBox
-              receiver={userID}
-              sharehubConversation={sharehubConversation}
-            />
-          )}
+          <AnimatePresence>
+            {chatVisible && (
+              <motion.div
+                initial={{ opacity: 0, y: -800 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -800 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ChatBox
+                  receiver={userID}
+                  sharehubConversation={sharehubConversation}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.ul>
       </div>
     </>

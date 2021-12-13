@@ -51,7 +51,7 @@ const UserSchema = new mongoose.Schema({
       unique: true,
     },
   ],
-  sharehubConversation: { type: Array },
+  conversations: [{ type: mongoose.Types.ObjectId, ref: 'Conversation' }],
   guest: { type: Boolean, default: false },
   status: { type: String, default: 'offline' },
   previousStatus: { type: String, default: 'online' },

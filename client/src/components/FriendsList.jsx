@@ -265,7 +265,7 @@ export default function FriendsList() {
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === fromID) {
-            friend.sharehubConversation.push({
+            friend.sharehubConversations.push({
               fromID,
               message,
               received: new Date(),
