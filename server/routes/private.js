@@ -29,7 +29,7 @@ router.route('/getFriendRequests').post(protect, getFriendRequests);
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
 router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
 
-router.route('/sendMessage').post(sendMessage);
+router.route('/sendMessage').post(protect, sendMessage);
 
 router.route('/createSpotifyURL').post(protect, createSpotifyURL);
 router.route('/authorizeSpotify').post(protect, authorizeSpotify);

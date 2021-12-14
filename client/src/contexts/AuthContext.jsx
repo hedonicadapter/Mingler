@@ -159,7 +159,7 @@ export function AuthProvider({ children }) {
 
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
-
+        console.log(result.data.token);
         return { success: true };
       })
       .catch((e) => {

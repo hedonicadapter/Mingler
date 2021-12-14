@@ -272,25 +272,24 @@ exports.sendMessage = async (req, res, next) => {
   const messageObject = { fromID, message, sent, received };
 
   const session = await Conversation.startSession();
-
   try {
     const transactionResults = await session.withTransaction(async () => {
       const conversationDoc = await Conversation.findOneAndUpdate(
         { users: mongoose.Types.ObjectId(toID) },
-        { lean: true, upsert: true, session }
+        { $setOnInsert: { users: [fromID, toID] } },
+        { upsert: true, new: true, session }
       );
 
-      if (!conversationDoc) await session.abortTransaction();
+      const messageDoc = await new Message(messageObject).save({ session });
 
-      await new Message(messageObject).save({ session }).then((messageDoc) => {
-        conversationDoc.messages.push(messageDoc._id); // how to upsert
+      conversationDoc.messages
+        ? conversationDoc.messages.push(messageDoc._id)
+        : (conversationDoc.messages = [messageDoc._id]); // how to upsert
 
-        messageDoc.save({ session });
-      });
+      await conversationDoc.save({ session });
     });
 
     if (transactionResults) {
-      session.commitTransaction();
       return res.status(201).json({
         status: 'Success',
         data: transactionResults,
@@ -299,8 +298,6 @@ exports.sendMessage = async (req, res, next) => {
       return next(new ErrorResponse('Unable to send message.', 500));
     }
   } catch (e) {
-    await session.abortTransaction();
-    await session.endSession();
     next(e);
   } finally {
     await session.endSession();
