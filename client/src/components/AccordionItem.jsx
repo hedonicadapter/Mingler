@@ -79,7 +79,7 @@ export default function AccordionItem({ friend, handleNameChange }) {
               <CardBody
                 activity={friend?.activity}
                 userID={friend?._id}
-                sharehubConversation={friend?.sharehubConversation}
+                conversations={friend?.conversations}
                 markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
                 setMarkyToReplaceWithYouTubeVideo={
                   setMarkyToReplaceWithYouTubeVideo

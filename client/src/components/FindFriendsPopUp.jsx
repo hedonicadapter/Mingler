@@ -9,7 +9,6 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
-import { useClientSocket } from '../contexts/ClientSocketContext';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -108,8 +107,6 @@ const FrameButtons = () => {
 };
 
 export default function FindFriendsPopUp() {
-  const { sendFriendRequest, cancelFriendRequest } = useClientSocket();
-
   const [userID, setUserID] = useLocalStorage('userID');
   const [token, setToken] = useLocalStorage('token');
   const [foundFriends, setFoundFriends] = useState(null);
@@ -138,7 +135,6 @@ export default function FindFriendsPopUp() {
     getSentFriendRequests();
 
     ipcRenderer.on('refreshtoken:fromrenderer', (e, { access, refresh }) => {
-      console.log('ASS ', access);
       setToken(access);
     });
   }, []);
@@ -152,6 +148,7 @@ export default function FindFriendsPopUp() {
     if (value) {
       DAO.searchUsers(value, token)
         .then((res) => {
+          console.log(res);
           const users = res.data.filter((user) => user._id != userID);
           setFoundFriends(users);
         })
@@ -177,7 +174,7 @@ export default function FindFriendsPopUp() {
     DAO.sendFriendRequest(toID, userID, token)
       .then((res) => {
         setSentFriendRequests((oldValue) => [...oldValue, toID]);
-        sendFriendRequest(toID, userID);
+        ipcRenderer.send('sendfriendrequest:fromrenderer', { toID });
       })
       .catch((e) => {
         console.log(e);
@@ -192,7 +189,7 @@ export default function FindFriendsPopUp() {
         );
 
         setSentFriendRequests(updatedRequests);
-        cancelFriendRequest(toID, userID);
+        ipcRenderer.send('cancelfriendrequest:fromrenderer', { toID });
       })
       .catch((e) => {
         console.log(e);

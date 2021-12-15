@@ -45,7 +45,12 @@ exports.getFriends = async (req, res, next) => {
             return next(new ErrorResponse('Could not find friends.', 404));
           res.send(friends);
         }
-      );
+      ).populate({
+        path: 'conversations',
+        match: { users: mongoose.Types.ObjectId(userID) },
+        select: '_id users',
+        populate: { path: 'messages', options: { limit: 6 } },
+      });
     });
   } catch (e) {
     next(e);
@@ -266,27 +271,80 @@ exports.getSentFriendRequests = async (req, res, next) => {
   }
 };
 
-exports.sendMessage = async (req, res, next) => {
-  const { toID, fromID, message, sent, received } = req.body;
+// exports.getConversations = async (req, res, next) => {
+//   const { userID } = req.body;
 
-  const messageObject = { fromID, message, sent, received };
+//   try {
+//     await User.findById(userID, 'conversations', function (err, result) {
+//       if (err) return next(new ErrorResponse('Database Error'), 500);
+//       return res.send(result);
+//     }).populate({
+//       path: 'conversations',
+//       select: '_id users',
+//       populate: { path: 'messages', options: { limit: 6 } },
+//     });
+//   } catch (e) {
+//     next(e);
+//   }
+// };
+
+exports.getMessages = async (req, res, next) => {
+  const { conversationID, skip } = req.body;
+
+  try {
+    await Conversation.findById(
+      conversationID,
+      'messages -_id',
+      function (err, result) {
+        if (err) return next(new ErrorResponse('Database Error'), 500);
+        return res.send(result);
+      }
+    ).populate({
+      path: 'messages',
+      options: { limit: 6, skip: skip },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.sendMessage = async (req, res, next) => {
+  const { toID, fromID, message } = req.body;
+
+  const messageObject = { fromID, message };
 
   const session = await Conversation.startSession();
   try {
     const transactionResults = await session.withTransaction(async () => {
+      // If DMing themselves
+      const toMyself = fromID === toID;
+
+      // Upsert conversation document
       const conversationDoc = await Conversation.findOneAndUpdate(
-        { users: mongoose.Types.ObjectId(toID) },
-        { $setOnInsert: { users: [fromID, toID] } },
+        {
+          users: mongoose.Types.ObjectId(fromID),
+          users: mongoose.Types.ObjectId(toID),
+        },
+        { $setOnInsert: { users: toMyself ? [fromID] : [fromID, toID] } },
         { upsert: true, new: true, session }
       );
 
+      // Create message object
       const messageDoc = await new Message(messageObject).save({ session });
 
+      // Push message object into above conversation document
       conversationDoc.messages
         ? conversationDoc.messages.push(messageDoc._id)
         : (conversationDoc.messages = [messageDoc._id]); // how to upsert
 
       await conversationDoc.save({ session });
+
+      // Put conversation document in user documents
+      await User.updateMany(
+        { _id: { $in: [toID, fromID] } },
+        { $addToSet: { conversations: conversationDoc._id } },
+        { session }
+      );
     });
 
     if (transactionResults) {

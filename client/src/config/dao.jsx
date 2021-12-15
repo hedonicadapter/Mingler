@@ -134,6 +134,16 @@ class DAO {
     });
   };
 
+  sendMessage = (toID, fromID, message, token) => {
+    const data = { toID, fromID, message };
+
+    return privateRoute.post('/sendMessage', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   createSpotifyURL = (token) => {
     return privateRoute.post('/createSpotifyURL', null, {
       headers: {

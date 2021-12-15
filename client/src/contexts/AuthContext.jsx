@@ -130,8 +130,6 @@ export function AuthProvider({ children }) {
     setCurrentUser(null);
     setToken(null);
 
-    console.log('currentUser ', currentUser);
-
     if (currentUser.guest) {
       setRecentUser({
         userID: null,

@@ -78,9 +78,10 @@ export default function FriendsList() {
           object.key = index;
         });
         setFriends(res.data);
+        console.log(res.data);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
         //show some error component
       });
   };
@@ -119,6 +120,7 @@ export default function FriendsList() {
   };
 
   const toggleFindFriends = () => {
+    // ipcRenderer.send('findFriendsWindow:toggle');
     if (!findFriendsOpen) {
       findFriendsWindow.on('close', function () {
         setFindFriendsWindow(null);
@@ -245,6 +247,10 @@ export default function FriendsList() {
     if (!friends.length) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
+  useEffect(() => {
+    return () => findFriendsWindow?.close();
+  }, []);
+
   const setFriendRequestListeners = () => {
     socket.removeAllListeners('friendrequest:receive');
     socket.removeAllListeners('friendrequest:cancelreceive');
@@ -262,19 +268,20 @@ export default function FriendsList() {
     socket.removeAllListeners('message:receive');
 
     socket.once('message:receive', ({ fromID, message }) => {
+      console.error('fix this');
       setFriends((prevState) => {
         return prevState.map((friend) => {
-          if (friend._id === fromID) {
-            friend.sharehubConversations.push({
-              fromID,
-              message,
-              received: new Date(),
-            });
+          // if (friend._id === fromID) {
+          //   friend.sharehubConversations.push({
+          //     fromID,
+          //     message,
+          //     received: new Date(),
+          //   });
 
-            return {
-              ...friend,
-            };
-          }
+          //   return {
+          //     ...friend,
+          //   };
+          // }
           return friend;
         });
       });

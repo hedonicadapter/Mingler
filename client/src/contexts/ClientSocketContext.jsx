@@ -16,6 +16,15 @@ export function ClientSocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    ipcRenderer.on('sendfriendrequest:frommain', ({ toID }) => {
+      sendFriendRequest(toID);
+    });
+    ipcRenderer.on('cancelfriendrequest:frommain', ({ toID }) => {
+      cancelFriendRequest(toID);
+    });
+  }, []);
+
+  useEffect(() => {
     const newSocket = io('ws://127.0.0.1:8080/user', {
       auth: {
         token: 'test',

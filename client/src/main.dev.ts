@@ -41,6 +41,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let findFriendsWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -66,6 +67,45 @@ const installExtensions = async () => {
     )
     .catch(console.log);
 };
+
+// const createFindFriendsWindow = async () => {
+//   findFriendsWindow = new BrowserWindow({
+//     show: false,
+//     // frame: false,
+//     // transparent: true,
+//     width: 560,
+//     webPreferences: {
+//       nodeIntegration: true,
+//       enableRemoteModule: true,
+//     },
+//   });
+
+//   findFriendsWindow.loadURL(`file://${__dirname}/index.html#findfriends`);
+
+//   findFriendsWindow.webContents.on('ready-to-show', () => {
+//     console.log('READY TO SHOW');
+//     if (!findFriendsWindow) {
+//       throw new Error('"findFriendsWindow" is not defined');
+//     }
+//     findFriendsWindow.show();
+//     findFriendsWindow.focus();
+
+//     ipcMain.on('findFriendsWindow:toggle', () => {
+//       console.log('YOOOOOO');
+//       if (findFriendsWindow?.isVisible()) {
+//         console.log('ISVISIBLE');
+//         findFriendsWindow.show();
+//         findFriendsWindow.focus();
+//       } else {
+//         console.log('ISINVISIBLE');
+//         findFriendsWindow.hide();
+//         findFriendsWindow.blur();
+//       }
+//     });
+//   });
+
+//   findFriendsWindow.webContents.once('dom-ready', () => {});
+// };
 
 const createWindow = async () => {
   if (
@@ -187,6 +227,13 @@ const createWindow = async () => {
     }
   });
 
+  ipcMain.on('sendfriendrequest:fromrenderer', async (event, data) => {
+    mainWindow?.webContents.send('sendfriendrequest:frommain', data);
+  });
+  ipcMain.on('cancelfriendrequest:fromrenderer', async (event, data) => {
+    mainWindow?.webContents.send('cancelfriendrequest:frommain', data);
+  });
+
   ipcMain.on('refreshtoken:fromrenderer', (e, tokens) => {
     mainWindow?.webContents.send('refreshtoken:frommain', tokens);
   });
@@ -242,7 +289,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  // new AppUpdater();
 };
 
 /**
@@ -276,6 +323,7 @@ const hideWidget = () => {
 
 app.whenReady().then(() => {
   createWindow();
+  // createFindFriendsWindow();
 
   const shortcut = globalShortcut.register('CommandOrControl+q', () => {
     toggleWidget();

@@ -12,6 +12,7 @@ import Marky from './Marky';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
+import DAO from '../config/DAO';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
@@ -41,7 +42,8 @@ const connectChatClientPopUpConfig = {
   },
 };
 
-const ChatBox = ({ receiver, sharehubConversation }) => {
+const ChatBox = ({ receiver, conversations }) => {
+  console.log('conversations ', conversations);
   const { socket } = useClientSocket();
   const { currentUser, token } = useAuth();
 
@@ -248,8 +250,15 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
         fromID: currentUser._id,
         message: inputText,
       });
-      setInputText('');
-      inputBoxRef.current?.focus();
+      DAO.sendMessage(receiver, currentUser._id, inputText, token)
+        .then((res) => {
+          setInputText('');
+          inputBoxRef.current?.focus();
+        })
+        .catch((e) => {
+          console.error(e);
+          inputBoxRef.current?.focus();
+        });
     };
 
     return (
@@ -266,7 +275,7 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
     );
   };
 
-  const ConversationBubble = ({ fromID, message, received, sent }) => {
+  const ConversationBubble = ({ fromID, message, sent }) => {
     const sentByMe = fromID === currentUser._id;
 
     const bubbleContainer = css({
@@ -292,7 +301,7 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
 
       fontSize: '0.8em',
     });
-    const receivedTime = css({
+    const sentTime = css({
       color: colors.darkmodeDisabledWhite,
       padding: 8,
       fontSize: '0.6em',
@@ -302,8 +311,10 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
       <div className={bubbleContainer()}>
         {sentByMe ? (
           <>
-            <div className={receivedTime()}>
-              {received.toLocaleTimeString('en-US', { timeStyle: 'short' })}
+            <div className={sentTime()}>
+              {new Date(sent).toLocaleTimeString('en-US', {
+                timeStyle: 'short',
+              })}
             </div>
             <div className={bubble()}>
               <p className={conversationText()}>{message}</p>
@@ -314,8 +325,10 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
             <div className={bubble()}>
               <p className={conversationText()}>{message}</p>
             </div>
-            <div className={receivedTime()}>
-              {received.toLocaleTimeString('en-US', { timeStyle: 'short' })}
+            <div className={sentTime()}>
+              {new Date(sent).toLocaleTimeString('en-US', {
+                timeStyle: 'short',
+              })}
             </div>
           </>
         )}
@@ -326,21 +339,23 @@ const ChatBox = ({ receiver, sharehubConversation }) => {
   return (
     <motion.div className={chatContainer()}>
       <div className={messageArea()}>
-        {sharehubConversation?.map((conversationObject) => {
-          return (
-            <motion.div
-              animate={{ opacity: 1 }}
-              initial={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <ConversationBubble
-                fromID={conversationObject.fromID}
-                message={conversationObject.message}
-                received={conversationObject.received}
-              />
-            </motion.div>
-          );
-        })}
+        {conversations[0]?.users?.includes(receiver) &&
+          conversations[0]?.messages?.map((message) => {
+            console.log('wtf ', message);
+            return (
+              <motion.div
+                animate={{ opacity: 1 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ConversationBubble
+                  fromID={message.fromID}
+                  message={message.message}
+                  sent={message.createdAt}
+                />
+              </motion.div>
+            );
+          })}
         <ScrollAnchor />
       </div>
       <div className={inputContainer()}>
@@ -370,7 +385,7 @@ export default function CardBody({
   userID,
   expanded,
   chatVisible,
-  sharehubConversation,
+  conversations,
 }) {
   return (
     <>
@@ -394,10 +409,7 @@ export default function CardBody({
                 exit={{ opacity: 0, y: -800 }}
                 transition={{ duration: 0.15 }}
               >
-                <ChatBox
-                  receiver={userID}
-                  sharehubConversation={sharehubConversation}
-                />
+                <ChatBox receiver={userID} conversations={conversations} />
               </motion.div>
             )}
           </AnimatePresence>

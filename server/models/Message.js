@@ -14,12 +14,6 @@ const MessageSchema = new mongoose.Schema(
       type: String,
       required: [true, 'No message content.'],
     },
-    sent: {
-      type: Date,
-    },
-    received: {
-      type: Date,
-    },
   },
   { timestamps: true }
 );
