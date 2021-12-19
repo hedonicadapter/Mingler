@@ -134,6 +134,16 @@ class DAO {
     });
   };
 
+  getMessages = (conversationID, skip, token) => {
+    const data = { conversationID, skip };
+
+    return privateRoute.post('/getMessages', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   sendMessage = (toID, fromID, message, token) => {
     const data = { toID, fromID, message };
 

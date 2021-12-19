@@ -13,6 +13,7 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import { useAuth } from '../contexts/AuthContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import DAO from '../config/DAO';
+import { ScrollAnchor } from './reusables/ScrollAnchor';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
@@ -43,25 +44,17 @@ const connectChatClientPopUpConfig = {
 };
 
 const ChatBox = ({ receiver, conversations }) => {
-  console.log('conversations ', conversations);
   const { socket } = useClientSocket();
   const { currentUser, token } = useAuth();
 
+  const [nativeConversations, setNativeConversations] = useState(
+    conversations[0]
+  );
   const [inputText, setInputText] = useState(null);
   const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
 
   const inputBoxRef = useRef();
-
-  const ScrollAnchor = () => {
-    const anchorRef = useRef();
-
-    useEffect(
-      () => anchorRef.current?.scrollIntoView({ behavior: 'smooth' }),
-      [anchorRef]
-    );
-    return <div ref={anchorRef}></div>;
-  };
 
   const chatContainer = css({
     borderRadius: '5px',
@@ -149,7 +142,7 @@ const ChatBox = ({ receiver, conversations }) => {
             chosenClient,
             email: currentUser?.email,
             token,
-            userID: currentUser._id,
+            userID: currentUser?._id,
           });
 
           connectChatClientPopUpWindow.show();
@@ -234,31 +227,58 @@ const ChatBox = ({ receiver, conversations }) => {
     );
   };
 
+  const sendMessage = () => {
+    if (!inputText || !receiver) return;
+    socket.emit('message:send', {
+      toID: receiver,
+      fromID: currentUser._id,
+      message: inputText,
+    });
+
+    setNativeConversations((prevState) => {
+      const newMessage = {
+        fromID: currentUser._id,
+        message: inputText,
+        createdAt: new Date(),
+      };
+
+      if (prevState?.messages) {
+        prevState.messages.push(newMessage);
+      } else {
+        prevState.messages = [newMessage];
+      }
+      return prevState;
+    });
+
+    DAO.sendMessage(receiver, currentUser._id, inputText, token)
+      .then((res) => {
+        setInputText('');
+        inputBoxRef.current?.focus();
+      })
+      .catch((e) => {
+        console.error(e);
+        inputBoxRef.current?.focus();
+      });
+  };
+
+  const handleInputKeyUp = (evt) => {
+    if (evt.key === 'Enter') {
+      sendMessage();
+    }
+  };
+
   const SendButton = () => {
     const iconContainer = css({
       marginTop: 8,
     });
+
     const sendIcon = css({
       width: 22,
       height: 22,
     });
 
     const handleSendButton = () => {
-      if (!inputText || !receiver) return;
-      socket.emit('message:send', {
-        toID: receiver,
-        fromID: currentUser._id,
-        message: inputText,
-      });
-      DAO.sendMessage(receiver, currentUser._id, inputText, token)
-        .then((res) => {
-          setInputText('');
-          inputBoxRef.current?.focus();
-        })
-        .catch((e) => {
-          console.error(e);
-          inputBoxRef.current?.focus();
-        });
+      sendMessage();
     };
 
     return (
@@ -276,7 +296,7 @@ const ChatBox = ({ receiver, conversations }) => {
   };
 
   const ConversationBubble = ({ fromID, message, sent }) => {
-    const sentByMe = fromID === currentUser._id;
+    const sentByMe = fromID === currentUser?._id;
 
     const bubbleContainer = css({
       display: 'flex',
@@ -336,26 +356,49 @@ const ChatBox = ({ receiver, conversations }) => {
     );
   };
 
+  const handleMessageAreaScroll = (evt) => {
+    if (evt.target.scrollTop === 0) {
+      const skip = nativeConversations?.messages.length;
+      DAO.getMessages(nativeConversations?._id, skip)
+        .then((res) => {
+          if (!res.data.messages) return;
+
+          setNativeConversations((prevState) => {
+            if (prevState?.messages) {
+              res.data.messages.forEach((message) => {
+                prevState.messages.push(message);
+              });
+            } else {
+              prevState.messages = [res.data.messages];
+            }
+            console.log(prevState);
+            return prevState;
+          });
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
+  };
+
   return (
     <motion.div className={chatContainer()}>
-      <div className={messageArea()}>
-        {conversations[0]?.users?.includes(receiver) &&
-          conversations[0]?.messages?.map((message) => {
-            console.log('wtf ', message);
-            return (
-              <motion.div
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <ConversationBubble
-                  fromID={message.fromID}
-                  message={message.message}
-                  sent={message.createdAt}
-                />
-              </motion.div>
-            );
-          })}
+      <div className={messageArea()} onScroll={handleMessageAreaScroll}>
+        {nativeConversations?.messages?.map((message) => {
+          return (
+            <motion.div
+              animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <ConversationBubble
+                fromID={message.fromID}
+                message={message.message}
+                sent={message.createdAt}
+              />
+            </motion.div>
+          );
+        })}
         <ScrollAnchor />
       </div>
       <div className={inputContainer()}>
@@ -369,6 +412,7 @@ const ChatBox = ({ receiver, conversations }) => {
             className={inputBox()}
             value={inputText}
             onChange={handleInput}
+            onKeyUp={handleInputKeyUp}
           />
         ) : (
           <ConnectButton />

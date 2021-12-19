@@ -23,7 +23,7 @@ router.route('/').get(protect, getPrivateData);
 
 router.route('/searchUsers').post(protect, searchUsers);
 
-router.route('/getFriends').post(protect, getFriends);
+router.route('/getFriends').post(getFriends);
 
 router.route('/sendFriendRequest').post(protect, sendFriendRequest);
 router.route('/acceptFriendRequest').post(protect, acceptFriendRequest);

@@ -7,7 +7,6 @@ import { motion } from 'framer-motion';
 import AccordionItem from './AccordionItem';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
-import { getObjectByProp } from '../helpers/arrayTools';
 import DAO from '../config/dao';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
@@ -74,11 +73,17 @@ export default function FriendsList() {
   const getFriends = () => {
     DAO.getFriends(currentUser._id, token)
       .then((res) => {
-        res.data.forEach((object, index) => {
+        res.data?.friends.forEach((object, index) => {
           object.key = index;
         });
-        setFriends(res.data);
-        console.log(res.data);
+
+        const friendIDs = res.data.friends.map((friend) => {
+          return friend._id;
+        });
+
+        setFriends(res.data?.friends);
+
+        console.log(res.data.friends);
       })
       .catch((e) => {
         console.error(e);
@@ -326,6 +331,11 @@ export default function FriendsList() {
           onChange={handleSearchInput}
           className={searchInputStyle()}
           ref={searchInputRef}
+          onKeyUp={(evt) => {
+            if (evt.key === 'Enter') {
+              toggleFindFriends();
+            }
+          }}
           onBlur={() => {
             if (!friends.length) {
               setSearchInputFocus(true);

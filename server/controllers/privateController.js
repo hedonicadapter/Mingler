@@ -19,7 +19,7 @@ exports.getFriends = async (req, res, next) => {
   const { userID } = req.body;
 
   try {
-    User.findById(userID, 'friends', function (err, result) {
+    User.findById(userID, 'friends conversations', function (err, result) {
       if (err) return next(new ErrorResponse('Could not find friends.', 404));
       if (!result) return next(new ErrorResponse('Invalid body.', 400));
       if (!result.friends) {
@@ -43,14 +43,35 @@ exports.getFriends = async (req, res, next) => {
         function (err, friends) {
           if (err)
             return next(new ErrorResponse('Could not find friends.', 404));
-          res.send(friends);
+
+          result.conversations.forEach((conversation) => {
+            friends.forEach((friend) => {
+              if (
+                conversation?.users.every((user) => user._id === friend._id)
+              ) {
+              } else if (conversation?.users.includes(friend._id)) {
+                friends[
+                  friends.findIndex((obj) => obj._id === friend._id)
+                ].conversations = [conversation];
+              }
+            });
+          });
+          res.send({ friends });
         }
-      ).populate({
-        path: 'conversations',
-        match: { users: mongoose.Types.ObjectId(userID) },
-        select: '_id users',
-        populate: { path: 'messages', options: { limit: 6 } },
-      });
+      );
+      // .populate({
+      //   path: 'conversations',
+      //   match: { users: mongoose.Types.ObjectId(userID) },
+      //   select: '_id users',
+      //   populate: { path: 'messages', options: { limit: 6 } },
+      // });
+    }).populate({
+      path: 'conversations',
+      select: '_id users',
+      populate: {
+        path: 'messages',
+        options: { sort: { createdAt: -1 }, limit: 6 },
+      },
     });
   } catch (e) {
     next(e);
@@ -147,9 +168,14 @@ exports.acceptFriendRequest = async (req, res, next) => {
 
   try {
     const transactionResults = await session.withTransaction(async () => {
-      const newFriend = await User.findOneAndUpdate(
+      const newFriend1 = await User.findOneAndUpdate(
         { _id: userID },
         { $push: { friends: fromID } },
+        { session, new: true, safe: true, lean: true }
+      );
+      const newFriend2 = await User.findOneAndUpdate(
+        { _id: fromID },
+        { $push: { friends: userID } },
         { session, new: true, safe: true, lean: true }
       );
 
@@ -165,16 +191,18 @@ exports.acceptFriendRequest = async (req, res, next) => {
         { session, new: true, safe: true, lean: true }
       );
 
-      if (!newFriend) {
-        console.log('Aborting accept request transaction, check newFriend.');
+      if (!newFriend1 || !newFriend2) {
+        console.error(
+          'Aborting accept request transaction, check newFriend1 or 2.'
+        );
         await session.abortTransaction();
       }
       if (!send) {
-        console.log('Aborting accept request transaction, check send.');
+        console.error('Aborting accept request transaction, check send.');
         await session.abortTransaction();
       }
       if (!sent) {
-        console.log('Aborting accept request transaction, check sent.');
+        console.error('Aborting accept request transaction, check sent.');
         await session.abortTransaction();
       }
     });
@@ -301,7 +329,7 @@ exports.getMessages = async (req, res, next) => {
       }
     ).populate({
       path: 'messages',
-      options: { limit: 6, skip: skip },
+      options: { sort: { createdAt: -1 }, limit: 6, skip: skip },
     });
   } catch (e) {
     next(e);
@@ -325,7 +353,7 @@ exports.sendMessage = async (req, res, next) => {
           users: mongoose.Types.ObjectId(fromID),
           users: mongoose.Types.ObjectId(toID),
         },
-        { $setOnInsert: { users: toMyself ? [fromID] : [fromID, toID] } },
+        { $setOnInsert: { users: [fromID, toID], toMyself } },
         { upsert: true, new: true, session }
       );
 

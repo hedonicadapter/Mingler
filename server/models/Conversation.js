@@ -12,9 +12,9 @@ const ConversationSchema = new mongoose.Schema({
       type: mongoose.Types.ObjectId,
       ref: 'User',
       required: [true, 'Conversations require one or more user IDs.'],
-      unique: [true, 'User already exists in this conversation.'],
     },
   ],
+  toMyself: { type: Boolean, default: false },
 });
 
 const Conversation = mongoose.model('Conversation', ConversationSchema);
