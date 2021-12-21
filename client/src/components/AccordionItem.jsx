@@ -12,7 +12,12 @@ const header = css({
   paddingBottom: 0,
 });
 
-export default function AccordionItem({ friend, handleNameChange }) {
+export default function AccordionItem({
+  friend,
+  handleNameChange,
+  setFriends,
+}) {
+  console.log('setFriends accordionItem ', setFriends);
   const [expanded, setExpanded] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =

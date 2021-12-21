@@ -11,6 +11,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import MenuButton from './MenuButton';
 import { ClientSocketProvider } from '../contexts/ClientSocketContext';
+import { FriendsProvider } from '../contexts/FriendsContext';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
@@ -68,9 +69,11 @@ export default function Widget() {
     <Memoized>
       <AuthProvider>
         <ClientSocketProvider>
-          <MenuButton />
-          <FriendsList />
-          <WidgetFooter />
+          <FriendsProvider>
+            <MenuButton />
+            <FriendsList />
+            <WidgetFooter />
+          </FriendsProvider>
         </ClientSocketProvider>
       </AuthProvider>
     </Memoized>
