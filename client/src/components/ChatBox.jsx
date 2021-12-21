@@ -111,19 +111,16 @@ const inputBox = css({
 });
 
 export const ChatBox = ({ receiver, conversations }) => {
-  console.log('setFriends chatbox ', setFriends);
   const { socket } = useClientSocket();
   const { currentUser, token } = useAuth();
   const { setFriends } = useFriends();
 
-  useEffect(() => {
-    console.log('conversations ', conversations);
-  }, [conversations]);
+  console.log(token);
 
   const anchorRef = useRef();
 
   const [nativeConversations, setNativeConversations] = useState();
-  const [inputText, setInputText] = useState(null);
+  const [inputText, setInputText] = useState('');
   const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
   const [scrollTop, setScrollTop] = useState(null);
@@ -171,7 +168,6 @@ export const ChatBox = ({ receiver, conversations }) => {
         onClick={toggleChatClientDropdown}
         className={chatClientDropdown()}
         value={chatClientSelection}
-        defaultValue={defaultChatClient}
         onChange={handleChatClientSelection}
       >
         <option
@@ -315,9 +311,10 @@ export const ChatBox = ({ receiver, conversations }) => {
   return (
     <motion.div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
-        {conversations[0]?.messages?.map((message) => {
+        {conversations[0]?.messages?.map((message, index) => {
           return (
             <motion.div
+              key={index}
               animate={{ opacity: 1 }}
               initial={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
