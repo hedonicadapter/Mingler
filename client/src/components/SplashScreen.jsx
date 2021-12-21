@@ -126,7 +126,7 @@ export default function SplashScreen({}) {
     storeToken,
     deleteToken,
   } = useAuth();
-  const [userName, setUserName] = useState(null);
+  const [userName, setUserName] = useState('');
   const [inputFocus, setInputFocus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [slide, setSlide] = useState('Init');
@@ -231,12 +231,12 @@ export default function SplashScreen({}) {
     };
 
     const slides = [
-      { title: 'Init' },
-      { title: 'Guest', available: true },
-      { title: 'Discord', available: false },
-      { title: 'Google', available: false },
-      { title: 'Facebook', available: false },
-      { title: 'Email' },
+      { key: 0, title: 'Init' },
+      { key: 1, title: 'Guest', available: true },
+      { key: 2, title: 'Discord', available: false },
+      { key: 3, title: 'Google', available: false },
+      { key: 4, title: 'Facebook', available: false },
+      { key: 5, title: 'Email' },
     ];
 
     const ServiceSelector = () => {
@@ -245,37 +245,35 @@ export default function SplashScreen({}) {
           {slides.map((service) => {
             if (service.title !== 'Init' && service.title !== 'Email') {
               return (
-                <>
-                  <motion.div
-                    whileHover={
-                      service.available && { color: colors.darkmodeHighWhite }
+                <motion.div
+                  key={service.key}
+                  whileHover={
+                    service.available && { color: colors.darkmodeHighWhite }
+                  }
+                  whileTap={
+                    service.available && {
+                      opacity: 0.4,
+                      transition: { duration: 0.1 },
                     }
-                    whileTap={
-                      service.available && {
-                        opacity: 0.4,
-                        transition: { duration: 0.1 },
-                      }
-                    }
-                    className={[
-                      buttonStyle(),
-                      service.available
-                        ? availableButtonStyle()
-                        : unavailableButtonStyle(),
-                    ].join(' ')}
-                    style={{
-                      backgroundColor:
-                        service.title === 'Guest' && colors.nudeBloo,
-                    }}
-                    onClick={() =>
-                      service.available &&
-                      handleServiceButtonClick(service.title)
-                    }
-                  >
-                    {service.title === 'Guest'
-                      ? 'Continue as guest '
-                      : 'Sign up with ' + service.title}
-                  </motion.div>
-                </>
+                  }
+                  className={[
+                    buttonStyle(),
+                    service.available
+                      ? availableButtonStyle()
+                      : unavailableButtonStyle(),
+                  ].join(' ')}
+                  style={{
+                    backgroundColor:
+                      service.title === 'Guest' && colors.nudeBloo,
+                  }}
+                  onClick={() =>
+                    service.available && handleServiceButtonClick(service.title)
+                  }
+                >
+                  {service.title === 'Guest'
+                    ? 'Continue as guest '
+                    : 'Sign up with ' + service.title}
+                </motion.div>
               );
             }
           })}
@@ -357,8 +355,8 @@ export default function SplashScreen({}) {
   };
 
   const EmailSlide = () => {
-    const [name, setName] = useState(null);
-    const [email, setEmail] = useState(null);
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState(null);
     const [nameFieldFocused, setNameFieldFocused] = useState();
     const [emailFieldFocused, setEmailFieldFocused] = useState();
@@ -549,8 +547,8 @@ export default function SplashScreen({}) {
   };
 
   const LoginSlide = () => {
-    const [email, setEmail] = useState(null);
-    const [password, setPassword] = useState(null);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [emailFieldFocused, setEmailFieldFocused] = useState();
     const [passwordFieldFocused, setPasswordFieldFocused] = useState();
     const [formFilled, setFormFilled] = useState('false');
@@ -625,9 +623,9 @@ export default function SplashScreen({}) {
     };
 
     const signInOptions = [
-      { title: 'Discord', available: false },
-      { title: 'Google', available: false },
-      { title: 'Facebook', available: false },
+      { key: 0, title: 'Discord', available: false },
+      { key: 1, title: 'Google', available: false },
+      { key: 2, title: 'Facebook', available: false },
     ];
 
     const keepMeSignedInContainer = css({
@@ -692,14 +690,17 @@ export default function SplashScreen({}) {
           />
         </div>
         <div className={checkboxAndSignInButtonContainer()}>
-          <div className={keepMeSignedInContainer()}>
+          <div
+            onClick={toggleKeepMeSignedIn}
+            className={keepMeSignedInContainer()}
+          >
             <input
               type="checkbox"
               name="keepMeSignedIn"
               checked={keepMeSignedIn}
-              onClick={toggleKeepMeSignedIn}
+              onChange={() => {}}
             />
-            <label for="keepMeSignedIn">&nbsp;Keep me signed in</label>
+            <label htmlFor="keepMeSignedIn">&nbsp;Keep me signed in</label>
           </div>
           <motion.div
             animate={formFilled}
@@ -745,30 +746,29 @@ export default function SplashScreen({}) {
         <Separator>or</Separator>
         {signInOptions.map((option) => {
           return (
-            <>
-              <motion.div
-                whileHover={
-                  option.available && { color: colors.darkmodeHighWhite }
+            <motion.div
+              key={option.key}
+              whileHover={
+                option.available && { color: colors.darkmodeHighWhite }
+              }
+              whileTap={
+                option.available && {
+                  opacity: 0.4,
+                  transition: { duration: 0.1 },
                 }
-                whileTap={
-                  option.available && {
-                    opacity: 0.4,
-                    transition: { duration: 0.1 },
-                  }
-                }
-                className={[
-                  buttonStyle(),
-                  option.available
-                    ? availableButtonStyle()
-                    : unavailableButtonStyle(),
-                ].join(' ')}
-                onClick={() =>
-                  option.available && handleoptionButtonClick(option.title)
-                }
-              >
-                {'Sign in with ' + option.title}
-              </motion.div>
-            </>
+              }
+              className={[
+                buttonStyle(),
+                option.available
+                  ? availableButtonStyle()
+                  : unavailableButtonStyle(),
+              ].join(' ')}
+              onClick={() =>
+                option.available && handleoptionButtonClick(option.title)
+              }
+            >
+              {'Sign in with ' + option.title}
+            </motion.div>
           );
         })}
       </AnimationWrapper>

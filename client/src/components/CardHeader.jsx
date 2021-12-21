@@ -32,8 +32,6 @@ const text = css({
   fontSize: '1.2em',
 });
 
-const avatar = css({});
-
 const statusIndicatorContainer = css({
   position: 'absolute',
   // marginTop: -25,
@@ -135,7 +133,7 @@ const AvatarContainer = ({ expanded, name }) => {
         originY: expanded ? -0.1 : 0,
       }}
     >
-      <Avatar round className={avatar()} name={name} size="50" />
+      <Avatar round name={name} size="50" />
     </motion.div>
   );
 };

@@ -23,7 +23,7 @@ const buttonVariants = {
   },
 };
 
-const MarkyDiv = styled('motion.div', {
+const MarkyDiv = styled('div', {
   zIndex: 50,
   flexDirection: 'row',
   display: 'flex',
@@ -228,7 +228,7 @@ export default function Marky({
   };
 
   return (
-    <MarkyDiv layout markyType={markyType} onClick={() => handleClick()}>
+    <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
 
       <div

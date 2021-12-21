@@ -62,10 +62,6 @@ export default function FriendsList() {
     friendRequests,
   } = useFriends();
 
-  useEffect(() => {
-    console.log(friends);
-  }, [friends]);
-
   const searchInputRef = useRef();
 
   const [findFriendsOpen, setFindFriendsOpen] = useState(false);
@@ -176,7 +172,9 @@ export default function FriendsList() {
         {searchValue
           ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
           : friends.length
-          ? friends.map((friend) => <AccordionItem friend={friend} />)
+          ? friends.map((friend, index) => (
+              <AccordionItem key={index} friend={friend} />
+            ))
           : null}
       </div>
     </UserStatusProvider>
