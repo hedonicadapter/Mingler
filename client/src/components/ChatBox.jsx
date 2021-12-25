@@ -273,7 +273,7 @@ export const ChatBox = ({ receiver, conversations }) => {
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
       const skip = conversations[0].messages.length;
-      DAO.getMessages(conversations[0]._id, skip)
+      DAO.getMessages(conversations[0]._id, skip, token)
         .then((res) => {
           console.log('scrolled ', skip, ' ', conversations[0]._id);
           if (!res.data.messages) return;
