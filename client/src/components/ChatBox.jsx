@@ -58,12 +58,12 @@ const ConnectButton = () => {
   };
 
   return (
-    <motion.div
+    <div
       className={connectButtonContainer()}
       onClick={() => connectChatClientPopUp(chatClientSelection)}
     >
       Connect
-    </motion.div>
+    </div>
   );
 };
 
@@ -197,7 +197,7 @@ export const ChatBox = ({ receiver, conversations }) => {
   };
 
   const sendMessage = () => {
-    if (!inputText || !receiver) return;
+    if (!inputText || !receiver || inputText === '') return;
     socket.emit('message:send', {
       toID: receiver,
       fromID: currentUser._id,
@@ -228,6 +228,7 @@ export const ChatBox = ({ receiver, conversations }) => {
       .then((res) => {
         setInputText('');
         inputBoxRef.current?.focus();
+        anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
       })
       .catch((e) => {
         console.error(e);
@@ -236,9 +237,19 @@ export const ChatBox = ({ receiver, conversations }) => {
   };
 
   const handleInputKeyUp = (evt) => {
-    if (evt.key === 'Enter') {
-      sendMessage();
-    }
+    // console.log('keys: ', evt.key);
+
+    console.log('key pressed: ', evt.key);
+    console.log('shiftKey: ', evt.shiftKey);
+    // if (evt.key === 'Enter' && evt.key !== 'Shift') {
+    //   sendMessage();
+    // }
+  };
+
+  const handleInputKeyDown = (evt) => {
+    // if (evt.key === 'Enter' && !evt.key === 'Shift') {
+    //   evt.preventDefault();
+    // }
   };
 
   const SendButton = () => {
@@ -309,7 +320,7 @@ export const ChatBox = ({ receiver, conversations }) => {
   }, [anchorRef]);
 
   return (
-    <motion.div className={chatContainer()}>
+    <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
         {conversations[0]?.messages?.map((message, index) => {
           return (
@@ -341,6 +352,7 @@ export const ChatBox = ({ receiver, conversations }) => {
             value={inputText}
             onChange={handleInput}
             onKeyUp={handleInputKeyUp}
+            onKeyDown={handleInputKeyDown}
           />
         ) : (
           <ConnectButton />
@@ -348,6 +360,6 @@ export const ChatBox = ({ receiver, conversations }) => {
         <Dropdown />
         <SendButton />
       </div>
-    </motion.div>
+    </div>
   );
 };

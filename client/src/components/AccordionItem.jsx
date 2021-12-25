@@ -61,6 +61,7 @@ export default function AccordionItem({
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
           handleNameChange={handleNameChange}
           toggleChat={toggleChat}
+          chatVisible={chatVisible}
         />
       </motion.header>
       <AnimatePresence initial={false}>

@@ -34,7 +34,7 @@ const Memoized = React.memo(({ children }) => {
 
   return (
     <motion.div
-      animate={visible ? 'show' : 'hide'}
+      animate={visible ? 'show' : 'show'}
       variants={{
         show: {
           pointerEvents: 'auto',
