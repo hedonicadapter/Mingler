@@ -14,10 +14,9 @@ const header = css({
 
 export default function AccordionItem({
   friend,
+  isWidgetHeader,
   handleNameChange,
-  setFriends,
 }) {
-  console.log('setFriends accordionItem ', setFriends);
   const [expanded, setExpanded] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
@@ -48,7 +47,7 @@ export default function AccordionItem({
         whileHover={{
           backgroundColor: 'rgba(36,36,36,1)', //used to be rgba(241,235,232,1)
         }}
-        transition={{ duration: 0.15 }}
+        transition={{ duration: 0.1 }}
         onClick={() => toggleExpansion()}
         className={header()}
       >
@@ -62,6 +61,7 @@ export default function AccordionItem({
           handleNameChange={handleNameChange}
           toggleChat={toggleChat}
           chatVisible={chatVisible}
+          isWidgetHeader={isWidgetHeader}
         />
       </motion.header>
       <AnimatePresence initial={false}>

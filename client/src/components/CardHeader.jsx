@@ -130,7 +130,11 @@ const OnlineStatusIndicator = ({ expanded }) => {
   );
 };
 
-const AvatarContainer = ({ expanded, name }) => {
+const AvatarContainer = ({ expanded, name, isWidgetHeader }) => {
+  const handleProfilePictureClick = (evt) => {
+    evt.stopPropagation();
+  };
+
   return (
     <motion.div
       animate={{
@@ -138,13 +142,27 @@ const AvatarContainer = ({ expanded, name }) => {
         originX: expanded ? -0.5 : 0,
         originY: expanded ? -0.1 : 0,
       }}
+      whileHover={
+        isWidgetHeader && {
+          outlineColor: 'rgba(0,0,0,1)',
+          cursor: 'pointer',
+        }
+      }
+      whileTap={isWidgetHeader && { opacity: 0.5 }}
+      onClick={isWidgetHeader && handleProfilePictureClick}
+      style={
+        isWidgetHeader && {
+          outline: '4px solid rgba(0,0,0,0)',
+        }
+      }
     >
-      <Avatar round name={name} size="50" />
+      <Avatar name={name} size="45" />
     </motion.div>
   );
 };
 
 export default function CardHeader({
+  isWidgetHeader,
   name,
   handleNameChange,
   expanded,
@@ -200,7 +218,11 @@ export default function CardHeader({
     <motion.div className={container()}>
       {/* <MenuButton /> */}
       <OnlineStatusIndicator expanded={expanded} />
-      <AvatarContainer expanded={expanded} name={name} />
+      <AvatarContainer
+        expanded={expanded}
+        name={name}
+        isWidgetHeader={isWidgetHeader}
+      />
       <div
         style={{
           display: 'flex',
@@ -273,9 +295,11 @@ export default function CardHeader({
             )}
           </AnimatePresence>
         </div>
-        <div style={{ paddingRight: 45 }} onClick={(e) => toggleChat(e)}>
-          <RiWechat2Fill className={messageIcon()} />
-        </div>
+        {!isWidgetHeader && (
+          <div style={{ paddingRight: 45 }} onClick={(e) => toggleChat(e)}>
+            <RiWechat2Fill className={messageIcon()} />
+          </div>
+        )}
       </div>
     </motion.div>
   );
