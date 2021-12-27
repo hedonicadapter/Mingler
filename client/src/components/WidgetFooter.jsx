@@ -3,6 +3,10 @@ import { css } from '@stitches/react';
 
 import colors from '../config/colors';
 
+const electron = require('electron');
+const app = electron.remote.app;
+const BrowserWindow = electron.remote.BrowserWindow;
+
 const container = css({
   backgroundColor: colors.darkmodeBlack,
   flex: 1,
@@ -12,14 +16,55 @@ const container = css({
   justifyContent: 'flex-end',
 });
 const button = css({
+  color: colors.darkmodeMediumWhite,
   alignSelf: 'flex-end',
 });
 
+const settingsWindowConfig = {
+  show: false,
+  frame: false,
+  transparent: true,
+  width: 560,
+  webPreferences: {
+    nodeIntegration: true,
+    enableRemoteModule: true,
+  },
+};
+
 export default function WidgetFooter(props) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsWindow, setSettingsWindow] = useState(
+    new BrowserWindow(settingsWindowConfig)
+  );
+
+  const toggleSettings = () => {
+    if (!settingsOpen) {
+      settingsWindow.on('close', function () {
+        setSettingsWindow(null);
+      });
+      settingsWindow.on('closed', function () {
+        setSettingsWindow(new BrowserWindow(settingsWindowConfig));
+        setSettingsOpen(false);
+      });
+      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
+
+      settingsWindow.once('ready-to-show', () => {
+        // settingsWindow.webContents.send('initialValue', searchValue);
+
+        settingsWindow.show();
+        setSettingsOpen(true);
+      });
+    } else settingsWindow.focus();
+  };
+
+  const handleSettingsButton = () => {
+    toggleSettings();
+  };
+
   return (
     <footer className={container()}>
-      <div className={button()}>
-        <button onClick={() => console.log('toggled settings')}>⚙</button>
+      <div className={button()} onClick={handleSettingsButton}>
+        settings ⚙
       </div>
     </footer>
   );

@@ -12,7 +12,6 @@ import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
-import { useSelector } from 'react-redux';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -53,14 +52,13 @@ const findFriendsWindowConfig = {
 };
 
 export default function FriendsList() {
-  const settings = useSelector((state) => state);
-
   const { currentUser, token } = useAuth();
   const { socket } = useClientSocket();
   const {
     friends,
     getFriends,
     findFriends,
+    filteredFriends,
     getFriendRequests,
     friendRequests,
   } = useFriends();
@@ -174,7 +172,7 @@ export default function FriendsList() {
         />
 
         {searchValue
-          ? filteredFriends.map((friend) => <AccordionItem friend={friend} />)
+          ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
           : friends.length
           ? friends.map((friend, index) => (
               <AccordionItem key={index} friend={friend} />

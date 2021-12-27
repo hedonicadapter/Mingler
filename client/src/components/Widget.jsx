@@ -5,7 +5,6 @@ import './Widget.css';
 
 import colors from '../config/colors';
 import FriendsList from './FriendsList';
-import SettingsPane from './SettingsPane';
 import WidgetFooter from './WidgetFooter';
 import { AuthProvider } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';

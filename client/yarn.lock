@@ -5088,14 +5088,6 @@
     "tar" "^6.0.5"
     "yargs" "^16.0.0"
 
-"electron-redux@^1.5.4":
-  "integrity" "sha512-7fM7OLVR34prk/ZlIv3yRbB4XCZPPQJ9ZfYLPmWPvKIONe2qm1e0on+cMLGgwzREapQrzCmc1VAxs8WNbWgncg=="
-  "resolved" "https://registry.npmjs.org/electron-redux/-/electron-redux-1.5.4.tgz"
-  "version" "1.5.4"
-  dependencies:
-    "debug" "^4.1.1"
-    "redux" "^4.0.1"
-
 "electron-store@^8.0.0":
   "integrity" "sha512-ZgRPUZkfrrjWSqxZeaxu7lEvmYf6tgl49dLMqxXGnEmliSiwv3u4rJPG+mH3fBQP9PBqgSh4TCuxHZImMMUgWg=="
   "resolved" "https://registry.npmjs.org/electron-store/-/electron-store-8.0.0.tgz"
@@ -11138,7 +11130,7 @@
   "resolved" "https://registry.npmjs.org/redux-thunk/-/redux-thunk-2.4.1.tgz"
   "version" "2.4.1"
 
-"redux@^4", "redux@^4.0.0", "redux@^4.0.1", "redux@^4.1.2":
+"redux@^4", "redux@^4.0.0", "redux@^4.1.2":
   "integrity" "sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw=="
   "resolved" "https://registry.npmjs.org/redux/-/redux-4.1.2.tgz"
   "version" "4.1.2"

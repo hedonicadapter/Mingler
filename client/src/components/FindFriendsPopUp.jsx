@@ -9,6 +9,7 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
+import { FrameButtons } from './reusables/FrameButtons';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -61,51 +62,6 @@ const searchResultsStyle = css({
   overflow: 'auto',
 });
 
-const FrameButtons = () => {
-  const color = 'white';
-
-  const hoverAnimation = {
-    opacity: 0.5,
-    transition: { duration: 0.1 },
-  };
-
-  const tapAnimation = {
-    opacity: 0.3,
-    transition: {
-      duration: 0.1,
-    },
-  };
-
-  const handleMinimize = () => {
-    BrowserWindow.getFocusedWindow().minimize();
-  };
-
-  const handleClose = () => {
-    BrowserWindow.getFocusedWindow().close();
-  };
-
-  return (
-    <>
-      <motion.span
-        className="undraggable"
-        whileHover={hoverAnimation}
-        whileTap={tapAnimation}
-        onClick={() => handleMinimize()}
-      >
-        <VscChromeMinimize color={color} />
-      </motion.span>
-      <motion.span
-        className="undraggable"
-        whileHover={hoverAnimation}
-        whileTap={tapAnimation}
-        onClick={() => handleClose()}
-      >
-        <IoIosClose color={color} />
-      </motion.span>
-    </>
-  );
-};
-
 export default function FindFriendsPopUp() {
   const [userID, setUserID] = useLocalStorage('userID');
   const [token, setToken] = useLocalStorage('token');
@@ -148,7 +104,6 @@ export default function FindFriendsPopUp() {
     if (value) {
       DAO.searchUsers(value, token)
         .then((res) => {
-          console.log(res);
           const users = res.data.filter((user) => user._id != userID);
           setFoundFriends(users);
         })

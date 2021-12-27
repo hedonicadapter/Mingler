@@ -5,6 +5,7 @@ import { HashRouter, Route } from 'react-router-dom';
 import App from './App';
 import ConnectChatClientPopup from './components/ConnectChatClientPopup';
 import FindFriendsPopUp from './components/FindFriendsPopUp';
+import SettingsWindow from './components/settingsWindow';
 import { configuredStore } from './mainState/store';
 
 const store = configuredStore();
@@ -14,6 +15,7 @@ render(
     <HashRouter>
       <Route path="/" exact component={App} />
       <Route path="/findfriends" exact component={FindFriendsPopUp} />
+      <Route path="/settings" exact component={SettingsWindow} />
       <Route
         path="/connectChatClient"
         exact
