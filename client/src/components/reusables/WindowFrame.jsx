@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 
 import { VscChromeMinimize } from 'react-icons/vsc';
 import { IoIosClose } from 'react-icons/io';
+import colors from '../../config/colors';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 
-export const FrameButtons = () => {
+const FrameButtons = () => {
   const color = 'white';
 
   const hoverAnimation = {
@@ -49,6 +50,37 @@ export const FrameButtons = () => {
       >
         <IoIosClose color={color} />
       </motion.span>
+    </>
+  );
+};
+
+const frame = css({
+  display: 'block',
+  flexGrow: 0,
+  flexShrink: 1,
+  flexBasis: 'auto',
+  alignSelf: 'right',
+  order: '0',
+  backgroundColor: colors.depressedWhite,
+});
+
+const body = css({
+  display: 'block',
+  flexGrow: 1,
+  flexShrink: 1,
+  flexBasis: 'auto',
+  alignSelf: 'auto',
+  order: 0,
+  backgroundColor: 'white',
+});
+
+export const WindowFrame = ({ children }) => {
+  return (
+    <>
+      <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
+        <FrameButtons />
+      </div>
+      <div className={[body(), 'undraggable'].join(' ')}>{children}</div>
     </>
   );
 };

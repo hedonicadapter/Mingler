@@ -9,7 +9,7 @@ import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
-import { FrameButtons } from './reusables/FrameButtons';
+import { WindowFrame } from './reusables/WindowFrame';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -22,24 +22,6 @@ const container = css({
   justifyContent: 'normal',
   alignItems: 'stretch',
   alignContent: 'normal',
-});
-const frame = css({
-  display: 'block',
-  flexGrow: 0,
-  flexShrink: 1,
-  flexBasis: 'auto',
-  alignSelf: 'right',
-  order: '0',
-  backgroundColor: colors.depressedWhite,
-});
-const body = css({
-  display: 'block',
-  flexGrow: 1,
-  flexShrink: 1,
-  flexBasis: 'auto',
-  alignSelf: 'auto',
-  order: 0,
-  backgroundColor: 'white',
 });
 
 const searchInputStyle = css({
@@ -159,10 +141,7 @@ export default function FindFriendsPopUp() {
 
   return (
     <div className={container()} onKeyDown={handleEscapeKey}>
-      <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
-        <FrameButtons />
-      </div>
-      <div className={[body(), 'undraggable'].join(' ')}>
+      <WindowFrame>
         <input
           className={[searchInputStyle(), 'undraggable', 'clickable'].join(' ')}
           placeholder="Find friends..."
@@ -183,7 +162,7 @@ export default function FindFriendsPopUp() {
               />
             ))}
         </div>
-      </div>
+      </WindowFrame>
     </div>
   );
 }

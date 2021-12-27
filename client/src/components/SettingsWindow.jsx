@@ -12,7 +12,7 @@ import colors from '../config/colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import ActionCreators from '../mainState/action-creators/ActionCreators';
-import { FrameButtons } from './reusables/FrameButtons';
+import { WindowFrame } from './reusables/WindowFrame';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -40,7 +40,7 @@ export default function SettingsWindow() {
 
   return (
     <div className={container()} onKeyDown={handleEscapeKey}>
-      <FrameButtons />
+      <WindowFrame />
       LALALALALA
     </div>
   );
