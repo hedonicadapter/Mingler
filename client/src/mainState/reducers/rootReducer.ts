@@ -1,12 +1,11 @@
 import { combineReducers } from 'redux';
-// import { connectRouter } from 'connected-react-router';
+import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
+import settingsReducer from '../features/settingsSlice';
 
-import settingsReducer from './settingsReducer';
-
-export default function createRootReducer(history: History) {
+export default function createRootReducer(history: History): any {
   return combineReducers({
-    // router: connectRouter(history),
+    router: connectRouter(history),
     settings: settingsReducer,
   });
 }

@@ -9,6 +9,8 @@ import { app } from '../config/realmDB';
 import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCurrentUserMain } from '../mainState/features/settingsSlice';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
 const Store = require('electron-store');
@@ -34,6 +36,9 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
+  const settingsState = useSelector((state) => state.settings.currentUser);
+  const dispatch = useDispatch();
+
   const [currentUser, setCurrentUser] = useState(null);
   const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
@@ -69,6 +74,7 @@ export function AuthProvider({ children }) {
   const signInWithEmailAndPassword = async (email, password) => {
     return await DAO.signIn(email, password)
       .then((result) => {
+        dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,
           email,
@@ -109,6 +115,7 @@ export function AuthProvider({ children }) {
     const userID = localStorage.getItem('userID');
 
     return await DAO.signInGuest(userID, clientFingerprint).then((result) => {
+      dispatch(setCurrentUserMain(result.data));
       setRecentUser({
         userID,
         email: null,
@@ -145,6 +152,7 @@ export function AuthProvider({ children }) {
 
     return await DAO.signIn(email, password, clientFingerprint)
       .then((result) => {
+        dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,
           email,

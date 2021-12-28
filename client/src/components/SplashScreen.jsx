@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import MenuButton from './MenuButton';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import { setCurrentUser } from '../mainState/features/settingsSlice';
 
 const StyledInput = styled('input', {
   WebkitAppearance: 'none',
@@ -582,7 +583,7 @@ export default function SplashScreen({}) {
 
     const handleBackspaceAndEnter = (evt, fieldName) => {
       if (evt.key === 'Enter') {
-        if (formFilled === 'true') handleLoginButton();
+        if (formFilled === 'true') handleSignInButton();
       } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
         if (fieldName === 'Email') {
           setEmail(evt.target.value);
@@ -593,7 +594,7 @@ export default function SplashScreen({}) {
       }
     };
 
-    const handleLoginButton = () => {
+    const handleSignInButton = () => {
       setFormFilled('loading');
 
       signIn(email, password).then(({ success, error }) => {
@@ -734,7 +735,7 @@ export default function SplashScreen({}) {
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
-              handleLoginButton()
+              handleSignInButton()
             }
           >
             Sign in

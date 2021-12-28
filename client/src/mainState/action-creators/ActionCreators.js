@@ -1,9 +1,9 @@
 class ActionCreators {
-  depositMoney = (amount) => {
+  setUser = (user) => {
     return (dispatch) => {
       dispatch({
-        type: 'deposit',
-        payload: amount,
+        type: 'setUser',
+        payload: user,
       });
     };
   };

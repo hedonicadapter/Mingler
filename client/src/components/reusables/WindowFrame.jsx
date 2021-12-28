@@ -9,21 +9,22 @@ import colors from '../../config/colors';
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 
+const frameColor = colors.depressedWhite;
+const buttonColor = 'white';
+
+const hoverAnimation = {
+  opacity: 0.5,
+  transition: { duration: 0.1 },
+};
+
+const tapAnimation = {
+  opacity: 0.3,
+  transition: {
+    duration: 0.1,
+  },
+};
+
 const FrameButtons = () => {
-  const color = 'white';
-
-  const hoverAnimation = {
-    opacity: 0.5,
-    transition: { duration: 0.1 },
-  };
-
-  const tapAnimation = {
-    opacity: 0.3,
-    transition: {
-      duration: 0.1,
-    },
-  };
-
   const handleMinimize = () => {
     BrowserWindow.getFocusedWindow().minimize();
   };
@@ -40,7 +41,7 @@ const FrameButtons = () => {
         whileTap={tapAnimation}
         onClick={() => handleMinimize()}
       >
-        <VscChromeMinimize color={color} />
+        <VscChromeMinimize color={buttonColor} />
       </motion.span>
       <motion.span
         className="undraggable"
@@ -48,7 +49,7 @@ const FrameButtons = () => {
         whileTap={tapAnimation}
         onClick={() => handleClose()}
       >
-        <IoIosClose color={color} />
+        <IoIosClose color={buttonColor} />
       </motion.span>
     </>
   );
@@ -61,7 +62,7 @@ const frame = css({
   flexBasis: 'auto',
   alignSelf: 'right',
   order: '0',
-  backgroundColor: colors.depressedWhite,
+  backgroundColor: frameColor,
 });
 
 const body = css({
@@ -71,7 +72,6 @@ const body = css({
   flexBasis: 'auto',
   alignSelf: 'auto',
   order: 0,
-  backgroundColor: 'white',
 });
 
 export const WindowFrame = ({ children }) => {
@@ -80,7 +80,9 @@ export const WindowFrame = ({ children }) => {
       <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
         <FrameButtons />
       </div>
-      <div className={[body(), 'undraggable'].join(' ')}>{children}</div>
+      <div className={[body(), 'undraggable', 'clickable'].join(' ')}>
+        {children}
+      </div>
     </>
   );
 };
