@@ -1,35 +1,62 @@
 import { configureStore, getDefaultMiddleware, Action } from '@reduxjs/toolkit';
 import { createHashHistory } from 'history';
-// import { routerMiddleware } from 'connected-react-router';
-// import { createLogger } from 'redux-logger';
+import { routerMiddleware } from 'connected-react-router';
+import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
 import createRootReducer from './reducers/rootReducer';
+// import { persistState } from 'redux-devtools';
+
+import {
+  forwardToRenderer,
+  forwardToMain,
+  triggerAlias,
+  replayActionMain,
+  replayActionRenderer,
+} from 'electron-redux';
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
 
-// const router = routerMiddleware(history);
-// const middleware = [...getDefaultMiddleware(), router];
-
 const excludeLoggerEnvs = ['test', 'production'];
-// const shouldIncludeLogger = !excludeLoggerEnvs.includes(
-//   process.env.NODE_ENV || ''
-// );
+const shouldIncludeLogger = !excludeLoggerEnvs.includes(
+  process.env.NODE_ENV || ''
+);
 
-// if (shouldIncludeLogger) {
-//   const logger = createLogger({
-//     level: 'info',
-//     collapsed: true,
-//   });
-//   middleware.push(logger);
-// }
+export const configuredStore = (
+  initialState?: RootState,
+  scope: string = 'main'
+) => {
+  const router = routerMiddleware(history);
+  const middleware = [router];
 
-export const configuredStore = (initialState?: RootState) => {
-  // Create Store
+  if (shouldIncludeLogger) {
+    const logger = createLogger({
+      level: scope === 'main' ? undefined : 'info',
+      collapsed: true,
+    });
+    middleware.push(logger);
+  }
+
+  const rendererStore = (getDefaultMiddleware: any) => [
+    forwardToMain,
+    ...middleware,
+    ...getDefaultMiddleware(),
+    // DevTools.instrument(),
+    // persistState(window.location.href.match(
+    //   /[?&]debug_session=([^&]+)\b/
+    // ))
+  ];
+  const mainStore = (getDefaultMiddleware: any) => [
+    triggerAlias,
+    ...middleware,
+    ...getDefaultMiddleware(),
+    forwardToRenderer,
+  ];
+
   const store = configureStore({
     reducer: rootReducer,
-    // ...middleware,
+    middleware: scope === 'renderer' ? rendererStore : mainStore,
     preloadedState: initialState,
   });
 
@@ -40,22 +67,15 @@ export const configuredStore = (initialState?: RootState) => {
       () => store.replaceReducer(require('./reducers/rootReducer').default)
     );
   }
+
+  if (scope === 'main') {
+    replayActionMain(store);
+  } else {
+    replayActionRenderer(store);
+  }
+
   return store;
 };
-export type Store = ReturnType<typeof configuredStore>;
+// export type Store = ReturnType<typeof configuredStore>;
 export type AppThunk = ThunkAction<void, RootState, unknown, Action<string>>;
-
-// const initialState = getInitialStateRenderer();
-
-// const store = createStore(
-//   reducers,
-//   initialState,
-//   applyMiddleware(
-//     forwardToMain //goes first
-//     // ...otherMiddleware
-//   )
-// );
-
-// replayActionRenderer(store);
-
-// export default store;
+// export const store = configuredStore();

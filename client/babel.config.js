@@ -26,6 +26,7 @@ module.exports = (api) => {
       [require('@babel/preset-react'), { development }],
     ],
     plugins: [
+      ['@babel/plugin-proposal-private-methods', { loose: true }],
       // Stage 0
       require('@babel/plugin-proposal-function-bind'),
 

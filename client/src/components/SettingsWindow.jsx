@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { WindowFrame } from './reusables/WindowFrame';
 import AccordionSetting from './AccordionSetting';
 import Avatar from 'react-avatar';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -66,7 +67,7 @@ const AccountSettingsContent = ({ name }) => {
 export default function SettingsWindow() {
   const [content, setContent] = useState('General');
 
-  const settingsState = useSelector((state) => state);
+  const settingsState = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { getInitialStateRenderer } from 'electron-redux';
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
@@ -6,9 +7,11 @@ import App from './App';
 import ConnectChatClientPopup from './components/ConnectChatClientPopup';
 import FindFriendsPopUp from './components/FindFriendsPopUp';
 import SettingsWindow from './components/settingsWindow';
-import { configuredStore } from './mainState/store';
+import configureStore from './mainState/newStore';
+// import { configureStore } from './mainState/';
 
-const store = configuredStore();
+const initialState = getInitialStateRenderer();
+const store = configureStore(initialState, 'renderer');
 
 render(
   <Provider store={store}>

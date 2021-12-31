@@ -13,7 +13,11 @@ export const settingsSlice = createSlice({
   initialState,
   reducers: {
     setCurrentUserMain: (state, action: PayloadAction<Array<any>>) => {
+      // let newArr = state;
+      // newArr.currentUser = action.payload;
+      // return newArr;
       state.currentUser = action.payload;
+      return state;
     },
   },
 });
@@ -21,3 +25,5 @@ export const settingsSlice = createSlice({
 export const { setCurrentUserMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
+
+export const getCurrentUser = (state: SettingsState) => state;

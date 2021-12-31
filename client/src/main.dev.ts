@@ -24,8 +24,13 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import installExtension, {
+  REACT_DEVELOPER_TOOLS,
+  REDUX_DEVTOOLS,
+} from 'electron-devtools-installer';
 
 import dao from './config/dao';
+import configureStore from './mainState/newStore';
 
 var Positioner = require('electron-positioner');
 const Store = require('electron-store');
@@ -55,6 +60,16 @@ if (
   require('electron-debug')();
 }
 
+app.whenReady().then(() => {
+  installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS], {
+    loadExtensionOptions: {
+      allowFileAccess: true,
+    },
+  })
+    .then((name) => console.log(`Added Extension:  ${name}`))
+    .catch((err) => console.log('An error occurred: ', err));
+});
+
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
@@ -63,7 +78,7 @@ const installExtensions = async () => {
   return installer
     .default(
       extensions.map((name) => installer[name]),
-      forceDownload
+      { forceDownload, loadExtensionOptions: { allowFileAccess: true } }
     )
     .catch(console.log);
 };
@@ -112,7 +127,7 @@ const createWindow = async () => {
     process.env.NODE_ENV === 'development' ||
     process.env.DEBUG_PROD === 'true'
   ) {
-    await installExtensions();
+    // await installExtensions();
   }
 
   const RESOURCES_PATH = app.isPackaged
@@ -322,6 +337,11 @@ const hideWidget = () => {
 };
 
 app.whenReady().then(() => {
+  try {
+    const store = configureStore();
+  } catch (e) {
+    console.error('MAIN STORE ERROR: ', e);
+  }
   createWindow();
   // createFindFriendsWindow();
 

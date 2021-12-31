@@ -21,6 +21,7 @@ const button = css({
 });
 
 const settingsWindowConfig = {
+  title: 'Settings',
   show: false,
   frame: false,
   transparent: true,
@@ -31,7 +32,7 @@ const settingsWindowConfig = {
   },
 };
 
-export default function WidgetFooter(props) {
+export default function WidgetFooter() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
@@ -49,6 +50,7 @@ export default function WidgetFooter(props) {
       settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
 
       settingsWindow.once('ready-to-show', () => {
+        settingsWindow.setTitle('Settings');
         // settingsWindow.webContents.send('initialValue', searchValue);
 
         settingsWindow.show();

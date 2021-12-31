@@ -10,6 +10,7 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
 import { WindowFrame } from './reusables/WindowFrame';
+import { useSelector } from 'react-redux';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
