@@ -11,14 +11,18 @@ import { motion } from 'framer-motion';
 import MenuButton from './MenuButton';
 import { ClientSocketProvider } from '../contexts/ClientSocketContext';
 import { FriendsProvider } from '../contexts/FriendsContext';
+import { UserStatusProvider } from '../contexts/UserStatusContext';
+import { connect } from 'react-redux';
+import { compose } from '@reduxjs/toolkit';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
 
-const Memoized = React.memo(({ children }) => {
+const Pane = ({ children }) => {
   const [visible, setVisible] = useState(true);
 
   const toggleMainPane = () => {
+    console.log('visible');
     setVisible(!visible);
   };
 
@@ -33,7 +37,8 @@ const Memoized = React.memo(({ children }) => {
 
   return (
     <motion.div
-      animate={visible ? 'show' : 'show'}
+      onContextMenu={(e) => e.preventDefault()}
+      animate={visible ? 'show' : 'hide'}
       variants={{
         show: {
           pointerEvents: 'auto',
@@ -50,31 +55,36 @@ const Memoized = React.memo(({ children }) => {
       {children}
     </motion.div>
   );
-});
+};
+
+const mapStateToProps = (state, ownProps) => {};
+const Memoized = React.memo(connect(mapStateToProps)(Pane));
 
 export default function Widget() {
   // clickthrough everything except className='clickable' (pointer-events: 'auto')
-  // const setIgnoreMouseEvents =
-  //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
-  // addEventListener('pointerover', function mousePolicy(event) {
-  //   mousePolicy._canClick =
-  //     event.target === document.documentElement
-  //       ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
-  //       : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
-  // });
-  // setIgnoreMouseEvents(true, { forward: true });
+  const setIgnoreMouseEvents =
+    require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
+  addEventListener('pointerover', function mousePolicy(event) {
+    mousePolicy._canClick =
+      event.target === document.documentElement
+        ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
+        : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
+  });
+  setIgnoreMouseEvents(true, { forward: true });
 
   return (
-    <Memoized>
-      <AuthProvider>
-        <ClientSocketProvider>
-          <FriendsProvider>
+    <AuthProvider>
+      <ClientSocketProvider>
+        <FriendsProvider>
+          <UserStatusProvider>
+            {/* <Memoized> */}
             <MenuButton />
             <FriendsList />
             <WidgetFooter />
-          </FriendsProvider>
-        </ClientSocketProvider>
-      </AuthProvider>
-    </Memoized>
+            {/* </Memoized> */}
+          </UserStatusProvider>
+        </FriendsProvider>
+      </ClientSocketProvider>
+    </AuthProvider>
   );
 }

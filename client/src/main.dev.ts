@@ -33,9 +33,8 @@ import dao from './config/dao';
 import configureStore from './mainState/newStore';
 
 var Positioner = require('electron-positioner');
-const Store = require('electron-store');
 
-Store.initRenderer();
+global.state = {};
 
 export default class AppUpdater {
   constructor() {
@@ -59,16 +58,6 @@ if (
 ) {
   require('electron-debug')();
 }
-
-app.whenReady().then(() => {
-  installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS], {
-    loadExtensionOptions: {
-      allowFileAccess: true,
-    },
-  })
-    .then((name) => console.log(`Added Extension:  ${name}`))
-    .catch((err) => console.log('An error occurred: ', err));
-});
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -127,7 +116,7 @@ const createWindow = async () => {
     process.env.NODE_ENV === 'development' ||
     process.env.DEBUG_PROD === 'true'
   ) {
-    // await installExtensions();
+    await installExtensions();
   }
 
   const RESOURCES_PATH = app.isPackaged
@@ -302,6 +291,14 @@ const createWindow = async () => {
     shell.openExternal(url);
   });
 
+  const shortcut = globalShortcut.register('CommandOrControl+q', () => {
+    toggleWidget();
+  });
+  if (!shortcut) {
+    console.error('registration failed');
+  }
+  // console.log(globalShortcut.isRegistered('CommandOrControl+q'));
+
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   // new AppUpdater();
@@ -337,21 +334,31 @@ const hideWidget = () => {
 };
 
 app.whenReady().then(() => {
-  try {
-    const store = configureStore();
-  } catch (e) {
-    console.error('MAIN STORE ERROR: ', e);
-  }
-  createWindow();
-  // createFindFriendsWindow();
+  installExtension([REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS], {
+    loadExtensionOptions: {
+      allowFileAccess: true,
+    },
+  })
+    .then((name) => {
+      console.log(`Added Extension:  ${name}`);
+      try {
+        const store = configureStore(null, global.state, 'main');
 
-  const shortcut = globalShortcut.register('CommandOrControl+q', () => {
-    toggleWidget();
-  });
-  if (!shortcut) {
-    console.log('registration failed');
-  }
-  console.log(globalShortcut.isRegistered('CommandOrControl+q'));
+        store.subscribe(() => {
+          global.state = store.getState();
+          // console.log('STAAAATE ', store.getState());
+
+          // persist store changes
+          // TODO: should this be blocking / wait? _.throttle?
+        });
+      } catch (e) {
+        console.error('MAIN STORE ERROR: ', e);
+      } finally {
+        createWindow();
+        // createFindFriendsWindow();
+      }
+    })
+    .catch((err) => console.log('An error occurred: ', err));
 });
 
 app.on('browser-window-blur', (evt, win) => {

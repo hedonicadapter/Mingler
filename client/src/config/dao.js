@@ -30,7 +30,7 @@ function getOldRefreshToken(oldToken) {
   return localStorage.getItem(oldToken);
 }
 
-class DAO {
+export class DAO {
   signUpWithEmail = (name, email, password, clientFingerprint) => {
     const data = { name, email, password, clientFingerprint };
 
@@ -268,4 +268,3 @@ export default new DAO();
 
 // TODO:
 // OnlineFriends and stuff
-// Search

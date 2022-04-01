@@ -1,11 +1,12 @@
 import { createStore, applyMiddleware, compose } from 'redux';
-// import { persistState } from 'redux-devtools';
 import thunk from 'redux-thunk';
 import promise from 'redux-promise';
 import { createLogger } from 'redux-logger';
-import { createHashHistory } from 'history';
+import { createBrowserHistory, createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
+import { persistState } from '@redux-devtools/core';
 import createRootReducer from './reducers/rootReducer';
+import settingsReducer from './features/settingsSlice';
 
 import {
   forwardToMain,
@@ -14,38 +15,46 @@ import {
   replayActionMain,
   replayActionRenderer,
 } from 'electron-redux';
-import DevTools from '../../renderer/main/components/DevTools';
+import devtools from './devtools';
 
 /**
  * @param  {Object} initialState
  * @param  {String} [scope='main|renderer']
  * @return {Object} store
  */
-export default function configureStore(initialState?: any, scope = 'main') {
+export default function configureStore(
+  history?: any,
+  initialState?: any,
+  scope = 'main'
+) {
+  const excludeLoggerEnvs = ['test', 'production'];
+  const shouldIncludeLogger = !excludeLoggerEnvs.includes(
+    process.env.NODE_ENV || ''
+  );
+
   const logger = createLogger({
     level: scope === 'main' ? undefined : 'info',
     collapsed: true,
   });
-  const history = scope === 'renderer' ? createHashHistory() : null;
   const router = scope === 'renderer' ? routerMiddleware(history) : null;
 
-  let middleware = [router];
+  let middleware = [];
 
-  if (!process.env.NODE_ENV) {
+  if (shouldIncludeLogger) {
     middleware.push(logger);
   }
   if (scope === 'renderer') {
-    middleware = [forwardToMain, router];
+    middleware = [forwardToMain, router, ...middleware];
   }
 
   if (scope === 'main') {
-    middleware = [triggerAlias, forwardToRenderer];
+    middleware = [triggerAlias, ...middleware, forwardToRenderer];
   }
 
   const enhanced = [applyMiddleware(...middleware)];
 
   if (/*! process.env.NODE_ENV && */ scope === 'renderer') {
-    // enhanced.push(DevTools.instrument());
+    // enhanced.push(devtools.instrument());
     // enhanced.push(
     //   persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
     // );
@@ -53,21 +62,19 @@ export default function configureStore(initialState?: any, scope = 'main') {
 
   const rootReducer = createRootReducer(history, scope);
   const enhancer = compose(...enhanced);
-  const store = initialState
-    ? createStore(rootReducer, initialState, enhancer)
-    : createStore(rootReducer, enhancer);
+  const store = createStore(rootReducer, initialState, enhancer);
 
   if (!process.env.NODE_ENV && module.hot) {
     module.hot.accept('./reducers/rootReducer', () => {
-      store.replaceReducer(require('./educers/rootReducer').default);
+      store.replaceReducer(createRootReducer(history, scope));
     });
   }
 
   if (scope === 'main') {
     replayActionMain(store);
-    store.subscribe(() => {});
   } else {
     replayActionRenderer(store);
+
     store.subscribe(() => {});
   }
 

@@ -61,6 +61,20 @@ a {
   width: fit-content;
 }
 
+input[type='text'],
+textarea {
+  -webkit-appearance: none;
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+textArea {
+  resize: none;
+}
+::-webkit-resizer {
+  display: none;
+}
+
 /* a:hover {
   opacity: 1;
   text-decoration: none;

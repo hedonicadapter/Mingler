@@ -463,3 +463,24 @@ exports.saveMessengerCredentials = async (req, res, next) => {
   //   next(e);
   // }
 };
+
+exports.setUsername = async (req, res, next) => {
+  const { userID, newUsername } = req.body;
+
+  try {
+    const user = await User.findById(userID, function (err, result) {
+      if (err) return next(new ErrorResponse('Database Error'), 500);
+    });
+
+    user.username = newUsername;
+
+    user
+      .save()
+      .then((user) => {
+        return res.send(user.username);
+      })
+      .catch((e) => next(e));
+  } catch (e) {
+    next(e);
+  }
+};

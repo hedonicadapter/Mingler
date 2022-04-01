@@ -1,30 +1,18 @@
 import { getInitialStateRenderer } from 'electron-redux';
 import React from 'react';
 import { render } from 'react-dom';
-import { Provider } from 'react-redux';
-import { HashRouter, Route } from 'react-router-dom';
+import { Provider, ReactReduxContext } from 'react-redux';
 import App from './App';
-import ConnectChatClientPopup from './components/ConnectChatClientPopup';
-import FindFriendsPopUp from './components/FindFriendsPopUp';
-import SettingsWindow from './components/settingsWindow';
 import configureStore from './mainState/newStore';
-// import { configureStore } from './mainState/';
+import { createBrowserHistory, createHashHistory } from 'history';
 
 const initialState = getInitialStateRenderer();
-const store = configureStore(initialState, 'renderer');
+const history = createHashHistory();
+const store = configureStore(history, initialState, 'renderer');
 
 render(
-  <Provider store={store}>
-    <HashRouter>
-      <Route path="/" exact component={App} />
-      <Route path="/findfriends" exact component={FindFriendsPopUp} />
-      <Route path="/settings" exact component={SettingsWindow} />
-      <Route
-        path="/connectChatClient"
-        exact
-        component={ConnectChatClientPopup}
-      />
-    </HashRouter>
+  <Provider store={store} context={ReactReduxContext}>
+    <App history={history} context={ReactReduxContext} />
   </Provider>,
   document.getElementById('root')
 );

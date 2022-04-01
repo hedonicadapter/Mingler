@@ -10,12 +10,12 @@ import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCurrentUserMain } from '../mainState/features/settingsSlice';
+import {
+  setCurrentUserMain,
+  setTokenMain,
+} from '../mainState/features/settingsSlice';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
-const Store = require('electron-store');
-
-const store = new Store();
 
 const AuthContext = createContext();
 
@@ -63,6 +63,7 @@ export function AuthProvider({ children }) {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
       .then((result) => {
         setToken(result.data.token);
+        dispatch(setTokenMain(result.data.token));
 
         return { success: true };
       })
@@ -83,6 +84,7 @@ export function AuthProvider({ children }) {
         });
         setCurrentUser(result.data);
         setToken(result.data.token);
+        dispatch(setTokenMain(result.data.token));
 
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
@@ -124,6 +126,7 @@ export function AuthProvider({ children }) {
       });
       setCurrentUser(result.data);
       setToken(result.data.token);
+      dispatch(setTokenMain(result.data.token));
 
       // Access token refresh token pair
       localStorage.setItem(result.data.token, result.data.refreshToken);
@@ -136,6 +139,7 @@ export function AuthProvider({ children }) {
     setUserID(null);
     setCurrentUser(null);
     setToken(null);
+    dispatch(setTokenMain(null));
 
     if (currentUser.guest) {
       setRecentUser({
@@ -161,6 +165,7 @@ export function AuthProvider({ children }) {
         });
         setCurrentUser(result.data);
         setToken(result.data.token);
+        dispatch(setTokenMain(result.data.token));
         setUserID(result.data._id);
 
         // Access token refresh token pair
@@ -177,6 +182,7 @@ export function AuthProvider({ children }) {
     setUserID(null);
     setCurrentUser(null);
     setToken(null);
+    dispatch(setTokenMain(null));
     ipcRenderer.send('currentUser:signedOut');
   };
 
@@ -215,6 +221,7 @@ export function AuthProvider({ children }) {
 
   ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
     setToken(access);
+    dispatch(setTokenMain(access));
   });
 
   const value = {

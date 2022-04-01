@@ -10,7 +10,8 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
 import { WindowFrame } from './reusables/WindowFrame';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getSettings } from '../mainState/features/settingsSlice';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -51,6 +52,11 @@ export default function FindFriendsPopUp() {
   const [foundFriends, setFoundFriends] = useState(null);
   const [searchValue, setSearchValue] = useState(null);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
+  const settingsState = useSelector(getSettings);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    console.log('store ', settingsState);
+  }, [settingsState]);
 
   useEffect(() => {
     // this makes it work when the token updates for some reason smh

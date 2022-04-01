@@ -47,11 +47,11 @@ export default function WidgetFooter() {
         setSettingsWindow(new BrowserWindow(settingsWindowConfig));
         setSettingsOpen(false);
       });
-      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
+      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/busta`);
 
       settingsWindow.once('ready-to-show', () => {
         settingsWindow.setTitle('Settings');
-        // settingsWindow.webContents.send('initialValue', searchValue);
+        // settingsWindow.webContents.send('focus', searchValue);
 
         settingsWindow.show();
         setSettingsOpen(true);

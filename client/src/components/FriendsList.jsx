@@ -9,23 +9,22 @@ import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import DAO from '../config/dao';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
-import { UserStatusProvider } from '../contexts/UserStatusContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
+import { useSelector } from 'react-redux';
+import { getSettings } from '../mainState/features/settingsSlice';
 
 const electron = require('electron');
 const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
 const ipcRenderer = electron.ipcRenderer;
 
-const container = css({ backgroundColor: colors.darkmodeBlack });
+const container = css({
+  backgroundColor: colors.darkmodeBlack,
+  pointerEvents: 'auto',
+});
 
 const searchInputStyle = css({
-  WebkitAppearance: 'none',
-  outline: 'none',
-  border: 'none',
-  backgroundColor: 'transparent',
-
   fontSize: '1.0em',
   fontWeight: 600,
 
@@ -52,6 +51,13 @@ const findFriendsWindowConfig = {
 };
 
 export default function FriendsList() {
+  // const currentUserMain = useSelector(getSettings);
+  const currentUserMain = useSelector((state) => state);
+
+  useEffect(() => {
+    console.log('currentUserMain ', currentUserMain);
+  }, [currentUserMain]);
+
   const { currentUser, token } = useAuth();
   const { socket } = useClientSocket();
   const {
@@ -130,55 +136,61 @@ export default function FriendsList() {
   }, []);
 
   return (
-    <UserStatusProvider>
-      <div className={container()}>
-        <AccordionItem
-          friend={friends?.find((friend) => friend._id === currentUser?._id)}
-          isWidgetHeader={true}
-          handleNameChange={handleNameChange}
-        />
+    <div className={container()}>
+      <AccordionItem
+        username={currentUserMain?.username}
+        friend={friends?.find((friend) => friend._id === currentUser?._id)}
+        isWidgetHeader={true}
+        handleNameChange={handleNameChange}
+      />
 
-        <input
-          placeholder="Search... 🔍"
-          type="text"
-          value={searchValue || ''}
-          onChange={handleSearchInput}
-          className={searchInputStyle()}
-          ref={searchInputRef}
-          onKeyUp={(evt) => {
-            if (evt.key === 'Enter') {
-              toggleFindFriends();
-            }
-          }}
-          onBlur={() => {
-            if (friends.length <= 0) {
-              setSearchInputFocus(true);
-              searchInputRef?.current?.focus();
-            }
-          }}
-          focus={searchInputFocus}
-        />
+      <input
+        placeholder="Search... 🔍"
+        type="text"
+        value={searchValue || ''}
+        onChange={handleSearchInput}
+        className={searchInputStyle()}
+        ref={searchInputRef}
+        onKeyUp={(evt) => {
+          if (evt.key === 'Enter') {
+            toggleFindFriends();
+          }
+        }}
+        onBlur={() => {
+          if (friends.length <= 0) {
+            setSearchInputFocus(true);
+            searchInputRef?.current?.focus();
+          }
+        }}
+        focus={searchInputFocus}
+      />
 
-        {searchValue && (
-          <div onClick={handleFindButtonClick} className={findButton()}>
-            Find '{searchValue}'
-          </div>
-        )}
+      {searchValue && (
+        <div onClick={handleFindButtonClick} className={findButton()}>
+          Find '{searchValue}'
+        </div>
+      )}
 
-        <FriendRequestsAccordion
-          friendRequests={friendRequests}
-          getFriends={getFriends} // To refresh friends list after accepting a friend request
-          getFriendRequests={getFriendRequests} // Same thing here
-        />
+      <FriendRequestsAccordion
+        friendRequests={friendRequests}
+        getFriends={getFriends} // To refresh friends list after accepting a friend request
+        getFriendRequests={getFriendRequests} // Same thing here
+      />
 
-        {searchValue
-          ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
-          : friends.length
-          ? friends.map((friend, index) => (
-              <AccordionItem key={index} friend={friend} />
-            ))
-          : null}
+      <div
+        style={{ color: colors.darkmodeHighWhite }}
+        onClick={() => console.log(currentUserMain)}
+      >
+        CLICK FOR STATE
       </div>
-    </UserStatusProvider>
+
+      {searchValue
+        ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
+        : friends.length
+        ? friends.map((friend, index) => (
+            <AccordionItem key={index} friend={friend} />
+          ))
+        : null}
+    </div>
   );
 }

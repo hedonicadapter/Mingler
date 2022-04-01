@@ -7,21 +7,14 @@ export default function createRootReducer(
   history: History,
   scope: string = 'main'
 ): any {
-  let reducers =
-    scope == 'renderer'
-      ? {
-          router: connectRouter(history),
-          settings: settingsReducer,
-        }
-      : {
-          settings: settingsReducer,
-        };
-
-  if (scope === 'renderer') {
-    reducers = {
-      ...reducers,
-    };
+  if (scope === 'main') {
+    return combineReducers({ settings: settingsReducer });
   }
 
-  return combineReducers({ ...reducers });
+  if (scope === 'renderer') {
+    return combineReducers({
+      router: connectRouter(history),
+      settings: settingsReducer,
+    });
+  }
 }

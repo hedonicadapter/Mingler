@@ -13,6 +13,7 @@ const header = css({
 });
 
 export default function AccordionItem({
+  username,
   friend,
   isWidgetHeader,
   handleNameChange,
@@ -53,7 +54,7 @@ export default function AccordionItem({
       >
         <CardHeader
           key={friend?.key}
-          name={friend?.username}
+          name={username ? username : friend?.username}
           mainActivity={friend?.activity?.[0]}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}

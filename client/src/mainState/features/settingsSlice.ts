@@ -17,13 +17,20 @@ export const settingsSlice = createSlice({
       // newArr.currentUser = action.payload;
       // return newArr;
       state.currentUser = action.payload;
-      return state;
+    },
+    setUsernameMain: (state, action: PayloadAction<Array<any>>) => {
+      state.currentUser.username = action.payload;
+    },
+    setTokenMain: (state, action: PayloadAction<Array<any>>) => {
+      state.currentUser.token = action.payload;
     },
   },
 });
 
 export const { setCurrentUserMain } = settingsSlice.actions;
+export const { setUsernameMain } = settingsSlice.actions;
+export const { setTokenMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 
-export const getCurrentUser = (state: SettingsState) => state;
+export const getSettings = (state: SettingsState) => state;
