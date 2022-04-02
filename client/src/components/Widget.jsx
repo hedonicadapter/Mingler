@@ -22,11 +22,11 @@ const Pane = ({ children }) => {
   const [visible, setVisible] = useState(true);
 
   const toggleMainPane = () => {
-    console.log('visible');
     setVisible(!visible);
   };
 
-  ipc.removeAllListeners();
+  // this single line of code cost me months, I think it removes the listeners required for electron store
+  // ipc.removeAllListeners();
 
   ipc.on('globalShortcut', (evt, args) => {
     toggleMainPane();
@@ -77,11 +77,11 @@ export default function Widget() {
       <ClientSocketProvider>
         <FriendsProvider>
           <UserStatusProvider>
-            {/* <Memoized> */}
-            <MenuButton />
-            <FriendsList />
-            <WidgetFooter />
-            {/* </Memoized> */}
+            <Memoized>
+              <MenuButton />
+              <FriendsList />
+              <WidgetFooter />
+            </Memoized>
           </UserStatusProvider>
         </FriendsProvider>
       </ClientSocketProvider>

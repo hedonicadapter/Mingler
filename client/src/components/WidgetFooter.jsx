@@ -16,6 +16,7 @@ const container = css({
   justifyContent: 'flex-end',
 });
 const button = css({
+  pointerEvents: 'auto',
   color: colors.darkmodeMediumWhite,
   alignSelf: 'flex-end',
 });
@@ -47,7 +48,7 @@ export default function WidgetFooter() {
         setSettingsWindow(new BrowserWindow(settingsWindowConfig));
         setSettingsOpen(false);
       });
-      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/busta`);
+      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
 
       settingsWindow.once('ready-to-show', () => {
         settingsWindow.setTitle('Settings');
