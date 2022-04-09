@@ -1,12 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import promise from 'redux-promise';
 import { createLogger } from 'redux-logger';
-import { createBrowserHistory, createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
-import { persistState } from '@redux-devtools/core';
 import createRootReducer from './reducers/rootReducer';
-import settingsReducer from './features/settingsSlice';
 
 import {
   forwardToMain,

@@ -34,3 +34,5 @@ export const { setTokenMain } = settingsSlice.actions;
 export default settingsSlice.reducer;
 
 export const getSettings = (state: SettingsState) => state;
+export const getCurrentUser = (state: SettingsState) =>
+  state.settings.currentUser;

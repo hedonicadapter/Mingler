@@ -51,14 +51,9 @@ const findFriendsWindowConfig = {
 };
 
 export default function FriendsList() {
-  // const currentUserMain = useSelector(getSettings);
-  const currentUserMain = useSelector((state) => state);
-
-  useEffect(() => {
-    console.log('currentUserMain ', currentUserMain);
-  }, [currentUserMain]);
-
-  const { currentUser, token } = useAuth();
+  // const currentUser = useSelector((state) => state.settings.currentUser);
+  const stater = useSelector((state) => state);
+  const { token, currentUser } = useAuth();
   const { socket } = useClientSocket();
   const {
     friends,
@@ -138,7 +133,7 @@ export default function FriendsList() {
   return (
     <div className={container()}>
       <AccordionItem
-        username={currentUserMain?.username}
+        username={currentUser?.username}
         friend={friends?.find((friend) => friend._id === currentUser?._id)}
         isWidgetHeader={true}
         handleNameChange={handleNameChange}
@@ -179,7 +174,7 @@ export default function FriendsList() {
 
       <div
         style={{ color: colors.darkmodeHighWhite }}
-        onClick={() => console.log(currentUserMain)}
+        onClick={() => console.log(stater)}
       >
         CLICK FOR STATE
       </div>

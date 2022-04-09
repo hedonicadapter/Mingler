@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
-
+import { connect } from 'react-redux';
 import { assert } from 'console';
 import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
@@ -35,11 +35,11 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({ children }) {
-  const settingsState = useSelector((state) => state.settings.currentUser);
+export function authAndy({ children }) {
+  const currentUser = useSelector((state) => state.settings.currentUser);
   const dispatch = useDispatch();
 
-  const [currentUser, setCurrentUser] = useState(null);
+  // const [currentUser, setCurrentUser] = useState(settingsState.currentUser);
   const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useLocalStorage('token');
@@ -82,7 +82,7 @@ export function AuthProvider({ children }) {
           fingerprint: clientFingerprint,
           guest: false,
         });
-        setCurrentUser(result.data);
+        // setCurrentUser(result.data);
         setToken(result.data.token);
         dispatch(setTokenMain(result.data.token));
 
@@ -124,7 +124,7 @@ export function AuthProvider({ children }) {
         fingerprint: clientFingerprint,
         guest: true,
       });
-      setCurrentUser(result.data);
+      // setCurrentUser(result.data);
       setToken(result.data.token);
       dispatch(setTokenMain(result.data.token));
 
@@ -137,8 +137,9 @@ export function AuthProvider({ children }) {
 
   const signOut = () => {
     setUserID(null);
-    setCurrentUser(null);
+    // setCurrentUser(null);
     setToken(null);
+    dispatch(setCurrentUserMain(null));
     dispatch(setTokenMain(null));
 
     if (currentUser.guest) {
@@ -163,7 +164,7 @@ export function AuthProvider({ children }) {
           fingerprint: clientFingerprint,
           guest: false,
         });
-        setCurrentUser(result.data);
+        // setCurrentUser(result.data);
         setToken(result.data.token);
         dispatch(setTokenMain(result.data.token));
         setUserID(result.data._id);
@@ -180,8 +181,9 @@ export function AuthProvider({ children }) {
 
   const signout = () => {
     setUserID(null);
-    setCurrentUser(null);
+    // setCurrentUser(null);
     setToken(null);
+    dispatch(setCurrentUserMain(null));
     dispatch(setTokenMain(null));
     ipcRenderer.send('currentUser:signedOut');
   };
@@ -206,17 +208,23 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (token && currentUser) {
+      console.log('TOKEN AND CURRENTUSERLENGTH');
       setLoading(false);
     } else setLoading(true);
+
+    if (token) {
+      console.log('tokenized');
+    }
+    if (currentUser) {
+      console.log('currentUserized');
+    }
   }, [token, currentUser]);
 
   // Finished logging in
   useEffect(() => {
-    if (currentUser && loading) {
+    if (currentUser.length && loading) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
     }
-
-    console.log('currentUser ', currentUser);
   }, [currentUser, loading]);
 
   ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
@@ -252,7 +260,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={value}>
       <AnimatePresence>
-        {!currentUser ? (
+        {!currentUser._id ? (
           <motion.div
             key={0}
             initial={{ opacity: 0, x: '120%' }}
@@ -294,3 +302,7 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+const mapStateToProps = (state, ownProps) => {
+  return state;
+};
+export const AuthProvider = connect(mapStateToProps)(authAndy);

@@ -135,13 +135,6 @@ export default function SettingsContent() {
     settingsState.settings.currentUser.username
   );
 
-  useEffect(() => {
-    console.log('store ', settingsState);
-  }, [settingsState]);
-  useEffect(() => {
-    console.log(content);
-  }, [content]);
-
   const handleEscapeKey = (evt) => {
     if (evt.keyCode === 27) {
       BrowserWindow.getFocusedWindow().close();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as electron from 'electron';
 
 import './Widget.css';
@@ -12,33 +12,44 @@ import MenuButton from './MenuButton';
 import { ClientSocketProvider } from '../contexts/ClientSocketContext';
 import { FriendsProvider } from '../contexts/FriendsContext';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
-import { connect } from 'react-redux';
-import { compose } from '@reduxjs/toolkit';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  appVisibleFalse,
+  appVisibleTrue,
+  getApp,
+  toggleAppVisible,
+} from '../mainState/features/appSlice';
 
 const ipc = electron.ipcRenderer;
 ipc.setMaxListeners(2);
 
 const Pane = ({ children }) => {
-  const [visible, setVisible] = useState(true);
-
-  const toggleMainPane = () => {
-    setVisible(!visible);
-  };
-
-  // this single line of code cost me months, I think it removes the listeners required for electron store
-  // ipc.removeAllListeners();
+  const appState = useSelector(getApp);
+  const dispatch = useDispatch();
+  // DONT ipc.removeallListeners() bc it ruins the electron store
+  ipc.removeAllListeners('globalShortcut');
+  ipc.removeAllListeners('hideWidget');
 
   ipc.on('globalShortcut', (evt, args) => {
-    toggleMainPane();
+    dispatch(toggleAppVisible());
   });
   ipc.on('hideWidget', (evt, args) => {
-    setVisible(false);
+    if (!appState?.app.settingsFocused) {
+      dispatch(appVisibleFalse());
+    }
   });
+
+  //If settings window is open and focused, toggle the main app
+  useEffect(() => {
+    if (appState.app.settingsOpen && appState.app.settingsFocused) {
+      dispatch(appVisibleTrue());
+    }
+  }, [appState]);
 
   return (
     <motion.div
       onContextMenu={(e) => e.preventDefault()}
-      animate={visible ? 'show' : 'hide'}
+      animate={appState?.app?.appVisible ? 'show' : 'hide'}
       variants={{
         show: {
           pointerEvents: 'auto',
@@ -57,8 +68,7 @@ const Pane = ({ children }) => {
   );
 };
 
-const mapStateToProps = (state, ownProps) => {};
-const Memoized = React.memo(connect(mapStateToProps)(Pane));
+const Memoized = React.memo(Pane);
 
 export default function Widget() {
   // clickthrough everything except className='clickable' (pointer-events: 'auto')

@@ -115,8 +115,6 @@ export const ChatBox = ({ receiver, conversations }) => {
   const { currentUser, token } = useAuth();
   const { setFriends } = useFriends();
 
-  console.log(token);
-
   const anchorRef = useRef();
 
   const [nativeConversations, setNativeConversations] = useState();

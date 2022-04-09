@@ -8,7 +8,6 @@ import colors from '../config/colors';
 import Marky from './Marky';
 import { ChatBox } from './ChatBox';
 import { useLocalStorage } from '../helpers/localStorageManager';
-import { useAuth } from '../contexts/AuthContext';
 import DAO from '../config/DAO';
 
 const electron = require('electron');
