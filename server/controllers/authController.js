@@ -219,6 +219,7 @@ const sendToken = (user, statusCode, res) => {
         refreshToken,
         _id: user._id,
         username: user.username,
+        email: user.email,
       });
     } else {
       res.status(statusCode).json({
@@ -227,6 +228,7 @@ const sendToken = (user, statusCode, res) => {
         refreshToken,
         _id: user._id,
         username: user.username,
+        email: user.email,
       });
     }
   });

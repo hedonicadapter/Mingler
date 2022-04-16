@@ -156,7 +156,11 @@ const AvatarContainer = ({ expanded, name, isWidgetHeader }) => {
         }
       }
     >
-      <Avatar name={name} size="45" />
+      <Avatar
+        name={name}
+        size="45"
+        // src={currentUser.profilePicture}
+      />
     </motion.div>
   );
 };

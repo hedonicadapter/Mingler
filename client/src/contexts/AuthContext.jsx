@@ -11,6 +11,7 @@ import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  getCurrentUser,
   setCurrentUserMain,
   setTokenMain,
 } from '../mainState/features/settingsSlice';
@@ -36,7 +37,7 @@ export function useAuth() {
 }
 
 export function authAndy({ children }) {
-  const currentUser = useSelector((state) => state.settings.currentUser);
+  const currentUser = useSelector((state) => getCurrentUser(state));
   const dispatch = useDispatch();
 
   // const [currentUser, setCurrentUser] = useState(settingsState.currentUser);
@@ -64,32 +65,6 @@ export function authAndy({ children }) {
       .then((result) => {
         setToken(result.data.token);
         dispatch(setTokenMain(result.data.token));
-
-        return { success: true };
-      })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
-  };
-
-  const signInWithEmailAndPassword = async (email, password) => {
-    return await DAO.signIn(email, password)
-      .then((result) => {
-        dispatch(setCurrentUserMain(result.data));
-        setRecentUser({
-          userID: result.data._id,
-          email,
-          fingerprint: clientFingerprint,
-          guest: false,
-        });
-        // setCurrentUser(result.data);
-        setToken(result.data.token);
-        dispatch(setTokenMain(result.data.token));
-
-        // Access token refresh token pair
-        localStorage.setItem(result.data.token, result.data.refreshToken);
-
-        ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
         return { success: true };
       })
@@ -157,6 +132,7 @@ export function authAndy({ children }) {
 
     return await DAO.signIn(email, password, clientFingerprint)
       .then((result) => {
+        console.log('venice penice ', result.data);
         dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,
@@ -171,7 +147,9 @@ export function authAndy({ children }) {
 
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
-        console.log(result.data.token);
+
+        ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
         return { success: true };
       })
       .catch((e) => {
@@ -239,7 +217,6 @@ export function authAndy({ children }) {
     setName,
     signOut,
     signUpWithEmail,
-    signInWithEmailAndPassword,
     signUpGuest,
     signInGuest,
     signIn,

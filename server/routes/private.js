@@ -18,6 +18,8 @@ const {
   createSpotifyURL,
   saveMessengerCredentials,
   setUsername,
+  setEmail,
+  setProfilePicture,
 } = require('../controllers/privateController');
 
 router.route('/').get(protect, getPrivateData);
@@ -44,5 +46,7 @@ router
   .post(protect, saveMessengerCredentials);
 
 router.route('/setUsername').post(protect, setUsername);
+router.route('/setEmail').post(protect, setEmail);
+router.route('/setProfilePicture').post(protect, setProfilePicture);
 
 module.exports = router;

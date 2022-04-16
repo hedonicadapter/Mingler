@@ -484,3 +484,45 @@ exports.setUsername = async (req, res, next) => {
     next(e);
   }
 };
+
+exports.setEmail = async (req, res, next) => {
+  const { userID, newEmail } = req.body;
+
+  try {
+    const user = await User.findById(userID, function (err, result) {
+      if (err) return next(new ErrorResponse('Database Error'), 500);
+    });
+
+    user.email = newEmail;
+
+    user
+      .save()
+      .then((user) => {
+        return res.send(user.email);
+      })
+      .catch((e) => next(e));
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.setProfilePicture = async (req, res, next) => {
+  const { userID, profilePicture } = req.body;
+
+  try {
+    const user = await User.findById(userID, function (err, result) {
+      if (err) return next(new ErrorResponse('Database Error'), 500);
+    });
+    var newProfilePicture = Buffer.from(profilePicture, 'base64');
+    user.profilePicture = newProfilePicture;
+
+    user
+      .save()
+      .then((user) => {
+        return res.send(user.profilePicture);
+      })
+      .catch((e) => next(e));
+  } catch (e) {
+    next(e);
+  }
+};

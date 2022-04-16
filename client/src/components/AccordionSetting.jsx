@@ -25,17 +25,22 @@ const body = css({
   width: '100%',
 });
 
-export default function AccordionSetting({ setting }) {
-  const [expanded, setExpanded] = useState(false);
+export default function AccordionSetting({
+  setting,
+  expanded,
+  setExpanded,
+  index,
+}) {
+  const isExpanded = index === expanded;
 
   const toggleExpansion = () => {
-    setExpanded(!expanded);
+    setExpanded(isExpanded ? false : index);
   };
 
   return (
     <div className={container()}>
       <motion.header
-        animate={expanded ? 'expanded' : 'notExpanded'}
+        animate={isExpanded ? 'expanded' : 'notExpanded'}
         variants={{
           expanded: {
             color: colors.darkmodeHighWhite,
@@ -59,7 +64,7 @@ export default function AccordionSetting({ setting }) {
       </motion.header>
       <div className={bodyContainer()}>
         <AnimatePresence initial={false}>
-          {expanded && (
+          {isExpanded && (
             <motion.section
               initial="collapsed"
               animate="open"

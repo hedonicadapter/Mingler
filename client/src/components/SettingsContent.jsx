@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import { VscChromeMinimize } from 'react-icons/vsc';
@@ -14,10 +14,14 @@ import { WindowFrame } from './reusables/WindowFrame';
 import AccordionSetting from './AccordionSetting';
 import Avatar from 'react-avatar';
 import {
+  getCurrentUser,
   getSettings,
+  setProfilePictureMain,
   setUsernameMain,
+  setEmailMain,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
+import { getBase64 } from '../helpers/fileManager';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -71,7 +75,7 @@ const avatarContainer = css({
     backgroundColor: colors.darkmodeFocused,
   },
 });
-const nameInput = css({
+const genericInput = css({
   padding: 6,
   margin: 6,
   transition: 'background-color 0.15s ease',
@@ -83,12 +87,45 @@ const nameInput = css({
   },
 });
 
-const AccountSettingsContent = ({ username, handleNameChange }) => {
-  const [profilePicture, setProfilePicture] = useState(null);
+const AccountSettingsContent = ({
+  username,
+  email,
+  handleNameChange,
+  handleEmailChange,
+}) => {
+  const currentUser = useSelector((state) => getCurrentUser(state));
+  const dispatch = useDispatch();
+
+  const image = useRef(undefined);
+
+  useEffect(() => {
+    console.log('pp ', currentUser.profilePicture);
+  }, [currentUser]);
 
   const handleFileUpload = (evt) => {
     const files = Array.from(evt.target.files);
-    if (files[0]) setProfilePicture(files[0].path);
+
+    if (files[0]) {
+      getBase64(files[0])
+        .then((profilePicture) => {
+          settingsDao
+            .setProfilePicture(
+              currentUser._id,
+              profilePicture,
+              currentUser.token
+            )
+            .then((res) => {
+              const blob = new Blob([res.data]);
+              const url = URL.createObjectURL(blob);
+
+              dispatch(setProfilePictureMain(url));
+
+              image.current.src = url;
+            })
+            .catch((e) => console.error(e));
+        })
+        .catch((e) => console.error(e));
+    }
   };
 
   return (
@@ -103,7 +140,13 @@ const AccountSettingsContent = ({ username, handleNameChange }) => {
           htmlFor="file-upload"
           className="custom-file-upload"
         >
-          <Avatar name={username} size="60" src={profilePicture} />
+          <Avatar name={username} size="60" src={currentUser.profilePicture} />
+          {/* <img
+            ref={image}
+            width={40}
+            height={40}
+            src={currentUser.profilePicture}
+          /> */}
         </motion.label>
         <input
           onChange={handleFileUpload}
@@ -113,15 +156,26 @@ const AccountSettingsContent = ({ username, handleNameChange }) => {
           style={{ opacity: 0, position: 'absolute', zIndex: -1 }}
         />
       </motion.div>
-
-      <TextareaAutosize
-        spellCheck="false"
-        placeholder="Username"
-        maxLength={25}
-        value={username || ''}
-        className={nameInput()}
-        onChange={handleNameChange}
-      />
+      <div style={{ flexDirection: 'row' }}>
+        <TextareaAutosize
+          spellCheck="false"
+          placeholder="Username"
+          maxLength={25}
+          maxRows={1}
+          value={username || ''}
+          className={genericInput()}
+          onChange={handleNameChange}
+        />
+        <TextareaAutosize
+          spellCheck="false"
+          placeholder="Email"
+          maxLength={25}
+          maxRows={1}
+          value={email || ''}
+          className={genericInput()}
+          onChange={handleEmailChange}
+        />
+      </div>
     </div>
   );
 };
@@ -130,10 +184,12 @@ export default function SettingsContent() {
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 
+  const [expanded, setExpanded] = useState(false);
   const [content, setContent] = useState('General');
   const [username, setUsername] = useState(
     settingsState.settings.currentUser.username
   );
+  const [email, setEmail] = useState(settingsState.settings.currentUser.email);
 
   const handleEscapeKey = (evt) => {
     if (evt.keyCode === 27) {
@@ -158,6 +214,23 @@ export default function SettingsContent() {
     setUsername(evt.target.value);
   };
 
+  const handleEmailChange = (evt) => {
+    let newEmail = evt.target.value;
+
+    settingsDao
+      .setEmail(
+        settingsState.settings.currentUser._id,
+        newEmail,
+        settingsState.settings.currentUser.token
+      )
+      .then((res) => {
+        dispatch(setEmailMain(res.data));
+      })
+      .catch((e) => console.error(e));
+
+    setEmail(evt.target.value);
+  };
+
   return (
     <div className={container()} onKeyDown={handleEscapeKey}>
       <WindowFrame>
@@ -167,7 +240,13 @@ export default function SettingsContent() {
             {settings.map((setting, index) => {
               return (
                 <div onClick={() => setContent(setting.title)}>
-                  <AccordionSetting setting={setting} key={index} />
+                  <AccordionSetting
+                    setting={setting}
+                    key={index}
+                    index={index}
+                    expanded={expanded}
+                    setExpanded={setExpanded}
+                  />
                 </div>
               );
             })}
@@ -177,7 +256,9 @@ export default function SettingsContent() {
             {content === 'Account' && (
               <AccountSettingsContent
                 handleNameChange={handleNameChange}
+                handleEmailChange={handleEmailChange}
                 username={username}
+                email={email}
               />
             )}
           </div>

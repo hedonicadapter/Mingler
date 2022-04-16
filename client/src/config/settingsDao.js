@@ -10,6 +10,30 @@ class settingsDAO extends DAO {
       },
     });
   };
+  setEmail = (userID, newEmail, token) => {
+    const data = { userID, newEmail };
+
+    return privateRoute.post(`/setEmail`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+  setProfilePicture = (userID, profilePicture, token) => {
+    const data = { userID, profilePicture };
+
+    return privateRoute.post(`/setProfilePicture`, data, {
+      responseType: 'arraybuffer',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      onUploadProgress: (progressEvent) => {
+        console.log(
+          Math.round((progressEvent.loaded / progressEvent.total) * 100 + '%')
+        );
+      },
+    });
+  };
 }
 
 export default new settingsDAO();

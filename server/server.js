@@ -4,6 +4,7 @@ require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const errorHandler = require('./middleware/error');
 const ErrorResponse = require('./utils/errorResponse');
+var bodyParser = require('body-parser');
 
 connectDB();
 
@@ -11,6 +12,8 @@ const app = express();
 
 // =========middleware start=========
 app.use(express.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // Catches any request to /api/auth and redirects it to ./routes/auth
 app.use('/api/auth', require('./routes/auth'));

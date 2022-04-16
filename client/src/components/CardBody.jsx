@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@stitches/react';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import { Flipper, Flipped } from 'react-flip-toolkit';
