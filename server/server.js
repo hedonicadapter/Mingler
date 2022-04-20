@@ -4,6 +4,8 @@ require('dotenv').config({ path: './config.env' });
 const express = require('express');
 const errorHandler = require('./middleware/error');
 const ErrorResponse = require('./utils/errorResponse');
+const multer = require('multer');
+
 var bodyParser = require('body-parser');
 
 connectDB();

@@ -106,25 +106,26 @@ const AccountSettingsContent = ({
     const files = Array.from(evt.target.files);
 
     if (files[0]) {
-      getBase64(files[0])
-        .then((profilePicture) => {
-          settingsDao
-            .setProfilePicture(
-              currentUser._id,
-              profilePicture,
-              currentUser.token
-            )
-            .then((res) => {
-              const blob = new Blob([res.data]);
-              const url = URL.createObjectURL(blob);
+      // getBase64(files[0])
+      // .then((profilePicture) => {
+      let formData = new FormData();
+      formData.append('userID', currentUser._id);
+      formData.append('profilePicture', files[0], 'profilePicture');
 
-              dispatch(setProfilePictureMain(url));
+      settingsDao
+        .setProfilePicture(formData, currentUser.token)
+        .then((res) => {
+          console.log('data ', res.data);
+          // const blob = new Blob([res.data]);
+          // const url = URL.createObjectURL(blob);
 
-              image.current.src = url;
-            })
-            .catch((e) => console.error(e));
+          // dispatch(setProfilePictureMain(url));
+
+          // image.current.src = url;
         })
         .catch((e) => console.error(e));
+      // })
+      // .catch((e) => console.error(e));
     }
   };
 
@@ -141,12 +142,12 @@ const AccountSettingsContent = ({
           className="custom-file-upload"
         >
           <Avatar name={username} size="60" src={currentUser.profilePicture} />
-          {/* <img
+          <img
             ref={image}
             width={40}
             height={40}
             src={currentUser.profilePicture}
-          /> */}
+          />
         </motion.label>
         <input
           onChange={handleFileUpload}

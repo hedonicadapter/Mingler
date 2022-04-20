@@ -19,11 +19,10 @@ class settingsDAO extends DAO {
       },
     });
   };
-  setProfilePicture = (userID, profilePicture, token) => {
-    const data = { userID, profilePicture };
+  setProfilePicture = (formData, token) => {
+    // const data = { userID, profilePicture };
 
-    return privateRoute.post(`/setProfilePicture`, data, {
-      responseType: 'arraybuffer',
+    return privateRoute.post(`/setProfilePicture`, formData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
