@@ -48,6 +48,6 @@ router
 
 router.route('/setUsername').post(protect, setUsername);
 router.route('/setEmail').post(protect, setEmail);
-router.route('/setProfilePicture').post(protect, upload, setProfilePicture);
+router.route('/setProfilePicture').post(upload, setProfilePicture);
 
 module.exports = router;

@@ -7,6 +7,7 @@ const sendEmail = require('../utils/sendEmail');
 const { spotifyApi } = require('../config/spotify');
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
+const fs = require('fs');
 
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
@@ -507,26 +508,25 @@ exports.setEmail = async (req, res, next) => {
 };
 
 exports.setProfilePicture = async (req, res, next) => {
-  // upload.single('profilePicture')(req, res, () => {
-  console.log('zzz ', req.file);
-  const { userID, profilePicture } = req.body;
+  const { userID } = req.body;
 
   try {
-    res.send(req.file);
-    // const user = await User.findById(userID, function (err, result) {
-    //   if (err) return next(new ErrorResponse('Database Error'), 500);
-    // });
-    // var newProfilePicture = Buffer.from(profilePicture, 'base64');
-    // user.profilePicture = newProfilePicture;
+    const newProfilePicture = fs.readFileSync(req.file.path);
+    const newProfilePictureBuffer = newProfilePicture.toString('base64');
 
-    // user
-    //   .save()
-    //   .then((user) => {
-    //     return res.send(user.profilePicture);
-    //   })
-    //   .catch((e) => next(e));
+    const user = await User.findById(userID, function (err, result) {
+      if (err) return next(new ErrorResponse('Database Error'), 500);
+    });
+
+    user.profilePicture = Buffer.from(newProfilePictureBuffer, 'base64');
+
+    user
+      .save()
+      .then((user) => {
+        return res.send(user.profilePicture);
+      })
+      .catch((e) => next(e));
   } catch (e) {
     next(e);
   }
-  // });
 };

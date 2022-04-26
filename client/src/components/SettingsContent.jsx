@@ -103,14 +103,14 @@ const AccountSettingsContent = ({
   }, [currentUser]);
 
   const handleFileUpload = (evt) => {
-    const files = Array.from(evt.target.files);
+    const file = Array.from(evt.target.files)[0];
 
-    if (files[0]) {
+    if (file) {
       // getBase64(files[0])
       // .then((profilePicture) => {
       let formData = new FormData();
       formData.append('userID', currentUser._id);
-      formData.append('profilePicture', files[0], 'profilePicture');
+      formData.append('profilePicture', file, file.name);
 
       settingsDao
         .setProfilePicture(formData, currentUser.token)
