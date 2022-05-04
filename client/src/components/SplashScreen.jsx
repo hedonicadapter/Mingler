@@ -548,10 +548,11 @@ export default function SplashScreen({}) {
   };
 
   const LoginSlide = () => {
+    const emailInput = useRef(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [emailFieldFocused, setEmailFieldFocused] = useState();
-    const [passwordFieldFocused, setPasswordFieldFocused] = useState();
+    const [emailFieldFocused, setEmailFieldFocused] = useState(true);
+    const [passwordFieldFocused, setPasswordFieldFocused] = useState(false);
     const [formFilled, setFormFilled] = useState('false');
     const [error, setError] = useState(null);
     const [keepMeSignedIn, setKeepMeSignedIn] = useState(true);
@@ -562,6 +563,10 @@ export default function SplashScreen({}) {
         setPassword(justRegistered.password);
       }
     }, []);
+
+    useEffect(() => {
+      emailInput?.current?.focus(); //this and autoFocus not working
+    }, [emailInput]);
 
     useEffect(() => {
       if (!email || !password) {
@@ -648,8 +653,10 @@ export default function SplashScreen({}) {
           style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
         >
           <input
+            ref={emailInput}
+            autoFocus={true}
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Email adress"
+            placeholder="Email address"
             type="email"
             value={email}
             onChange={handleEmailInput}

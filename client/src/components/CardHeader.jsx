@@ -130,7 +130,12 @@ const OnlineStatusIndicator = ({ expanded }) => {
   );
 };
 
-const AvatarContainer = ({ expanded, name, isWidgetHeader }) => {
+const AvatarContainer = ({
+  expanded,
+  name,
+  isWidgetHeader,
+  profilePicture,
+}) => {
   const handleProfilePictureClick = (evt) => {
     evt.stopPropagation();
   };
@@ -156,11 +161,7 @@ const AvatarContainer = ({ expanded, name, isWidgetHeader }) => {
         }
       }
     >
-      <Avatar
-        name={name}
-        size="45"
-        // src={currentUser.profilePicture}
-      />
+      <Avatar name={name} size="45" src={profilePicture} />
     </motion.div>
   );
 };
@@ -168,6 +169,7 @@ const AvatarContainer = ({ expanded, name, isWidgetHeader }) => {
 export default function CardHeader({
   isWidgetHeader,
   name,
+  profilePicture,
   handleNameChange,
   expanded,
   mainActivity,
@@ -225,6 +227,7 @@ export default function CardHeader({
       <AvatarContainer
         expanded={expanded}
         name={name}
+        profilePicture={profilePicture}
         isWidgetHeader={isWidgetHeader}
       />
       <div

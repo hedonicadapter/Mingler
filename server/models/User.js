@@ -31,8 +31,8 @@ const UserSchema = new mongoose.Schema({
     select: false,
   },
   profilePicture: {
-    data: Buffer,
-    contentType: String,
+    image: { type: Buffer },
+    mimetype: { type: String },
   },
   friends: [
     {

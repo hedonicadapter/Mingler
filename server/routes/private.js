@@ -20,6 +20,7 @@ const {
   setUsername,
   setEmail,
   setProfilePicture,
+  getUser,
 } = require('../controllers/privateController');
 const upload = require('../middleware/upload');
 
@@ -49,5 +50,7 @@ router
 router.route('/setUsername').post(protect, setUsername);
 router.route('/setEmail').post(protect, setEmail);
 router.route('/setProfilePicture').post(upload, setProfilePicture);
+
+router.route('/getUser').post(getUser);
 
 module.exports = router;

@@ -20,53 +20,51 @@ exports.getFriends = async (req, res, next) => {
   const { userID } = req.body;
 
   try {
-    User.findById(userID, 'friends conversations', function (err, result) {
-      if (err) return next(new ErrorResponse('Could not find friends.', 404));
-      if (!result) return next(new ErrorResponse('Invalid body.', 400));
-      if (!result.friends) {
-        return res.status(201).json({
-          status: 'Success',
-          message: 'No friends',
-          data: null,
-        });
-      }
-
-      User.find(
-        { _id: { $in: result.friends } },
-        {
-          guest: 0,
-          previousStatus: 0,
-          clientFingerprint: 0,
-          created: 0,
-          resetPasswordToken: 0,
-          resetPasswordExpire: 0,
-        },
-        function (err, friends) {
-          if (err)
-            return next(new ErrorResponse('Could not find friends.', 404));
-
-          result.conversations.forEach((conversation) => {
-            friends.forEach((friend) => {
-              if (
-                conversation?.users.every((user) => user._id === friend._id)
-              ) {
-              } else if (conversation?.users.includes(friend._id)) {
-                friends[
-                  friends.findIndex((obj) => obj._id === friend._id)
-                ].conversations = [conversation];
-              }
-            });
+    User.findById(
+      userID,
+      'friends conversations profilePicture',
+      function (err, result) {
+        if (err) return next(new ErrorResponse('Could not find friends.', 404));
+        if (!result) return next(new ErrorResponse('Invalid body.', 400));
+        if (!result.friends) {
+          return res.status(201).json({
+            status: 'Success',
+            message: 'No friends',
+            data: null,
           });
-          res.send({ friends });
         }
-      );
-      // .populate({
-      //   path: 'conversations',
-      //   match: { users: mongoose.Types.ObjectId(userID) },
-      //   select: '_id users',
-      //   populate: { path: 'messages', options: { limit: 6 } },
-      // });
-    }).populate({
+
+        User.find(
+          { _id: { $in: result.friends } },
+          {
+            guest: 0,
+            previousStatus: 0,
+            clientFingerprint: 0,
+            created: 0,
+            resetPasswordToken: 0,
+            resetPasswordExpire: 0,
+          },
+          function (err, friends) {
+            if (err)
+              return next(new ErrorResponse('Could not find friends.', 404));
+
+            result.conversations.forEach((conversation) => {
+              friends.forEach((friend) => {
+                if (
+                  conversation?.users.every((user) => user._id === friend._id)
+                ) {
+                } else if (conversation?.users.includes(friend._id)) {
+                  friends[
+                    friends.findIndex((obj) => obj._id === friend._id)
+                  ].conversations = [conversation];
+                }
+              });
+            });
+            res.send({ friends });
+          }
+        );
+      }
+    ).populate({
       path: 'conversations',
       select: '_id users',
       populate: {
@@ -74,6 +72,24 @@ exports.getFriends = async (req, res, next) => {
         options: { sort: { createdAt: -1 }, limit: 6 },
       },
     });
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.getUser = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    User.findOne(
+      { email },
+      'friends conversations profilePicture',
+      function (err, result) {
+        if (err) return next(new ErrorResponse('Could not find friends.', 404));
+        if (!result) return next(new ErrorResponse('Invalid body.', 400));
+        return res.send(result);
+      }
+    );
   } catch (e) {
     next(e);
   }
@@ -511,18 +527,28 @@ exports.setProfilePicture = async (req, res, next) => {
   const { userID } = req.body;
 
   try {
-    const newProfilePicture = fs.readFileSync(req.file.path);
-    const newProfilePictureBuffer = newProfilePicture.toString('base64');
-
     const user = await User.findById(userID, function (err, result) {
       if (err) return next(new ErrorResponse('Database Error'), 500);
     });
 
-    user.profilePicture = Buffer.from(newProfilePictureBuffer, 'base64');
+    const mimetype = req.file.mimetype;
+    const newProfilePictureFile = fs.readFileSync(req.file.path);
+    const newProfilePictureBase64 = newProfilePictureFile.toString('base64');
+    const newProfilePictureBuffer = Buffer.from(
+      newProfilePictureBase64,
+      'base64'
+    );
+
+    const newProfilePicture = {
+      image: newProfilePictureBuffer,
+      mimetype,
+    };
+
+    user.profilePicture = newProfilePicture;
 
     user
       .save()
-      .then((user) => {
+      .then(() => {
         return res.send(user.profilePicture);
       })
       .catch((e) => next(e));

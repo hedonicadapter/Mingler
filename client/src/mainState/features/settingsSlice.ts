@@ -1,5 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { arrayBufferToBase64 } from '../../helpers/fileManager';
+import {
+  arrayBufferToBase64,
+  profilePictureToJSXImg,
+} from '../../helpers/fileManager';
 
 interface SettingsState {
   currentUser: Array<any>;
@@ -14,10 +17,13 @@ export const settingsSlice = createSlice({
   initialState,
   reducers: {
     setCurrentUserMain: (state, action: PayloadAction<Array<any>>) => {
-      // let newArr = state;
-      // newArr.currentUser = action.payload;
-      // return newArr;
-      state.currentUser = action.payload;
+      let data = action.payload;
+
+      if (data.profilePicture) {
+        data.profilePicture = profilePictureToJSXImg(data.profilePicture);
+      }
+
+      state.currentUser = data;
     },
     setUsernameMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.username = action.payload;
@@ -29,8 +35,7 @@ export const settingsSlice = createSlice({
       state.currentUser.token = action.payload;
     },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
-      var newProfilePicture = action.payload;
-      state.currentUser.profilePicture = newProfilePicture;
+      state.currentUser.profilePicture = profilePictureToJSXImg(action.payload);
     },
   },
 });

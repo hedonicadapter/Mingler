@@ -92,40 +92,23 @@ const AccountSettingsContent = ({
   email,
   handleNameChange,
   handleEmailChange,
+  dispatch,
+  settingsState,
 }) => {
-  const currentUser = useSelector((state) => getCurrentUser(state));
-  const dispatch = useDispatch();
-
-  const image = useRef(undefined);
-
-  useEffect(() => {
-    console.log('pp ', currentUser.profilePicture);
-  }, [currentUser]);
-
   const handleFileUpload = (evt) => {
     const file = Array.from(evt.target.files)[0];
 
     if (file) {
-      // getBase64(files[0])
-      // .then((profilePicture) => {
       let formData = new FormData();
-      formData.append('userID', currentUser._id);
+      formData.append('userID', settingsState.settings.currentUser._id);
       formData.append('profilePicture', file, file.name);
 
       settingsDao
-        .setProfilePicture(formData, currentUser.token)
+        .setProfilePicture(formData, settingsState.settings.currentUser.token)
         .then((res) => {
-          console.log('data ', res.data);
-          // const blob = new Blob([res.data]);
-          // const url = URL.createObjectURL(blob);
-
-          // dispatch(setProfilePictureMain(url));
-
-          // image.current.src = url;
+          dispatch(setProfilePictureMain(res.data));
         })
         .catch((e) => console.error(e));
-      // })
-      // .catch((e) => console.error(e));
     }
   };
 
@@ -141,12 +124,10 @@ const AccountSettingsContent = ({
           htmlFor="file-upload"
           className="custom-file-upload"
         >
-          <Avatar name={username} size="60" src={currentUser.profilePicture} />
-          <img
-            ref={image}
-            width={40}
-            height={40}
-            src={currentUser.profilePicture}
+          <Avatar
+            name={username}
+            size="60"
+            src={settingsState.settings.currentUser.profilePicture}
           />
         </motion.label>
         <input
@@ -260,6 +241,8 @@ export default function SettingsContent() {
                 handleEmailChange={handleEmailChange}
                 username={username}
                 email={email}
+                dispatch={dispatch}
+                settingsState={settingsState}
               />
             )}
           </div>

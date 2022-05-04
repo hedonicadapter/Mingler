@@ -23,3 +23,9 @@ export function arrayBufferToBase64(buffer) {
   }
   return window.btoa(binary);
 }
+
+export function profilePictureToJSXImg(profilePicture) {
+  let buffer = Buffer.from(profilePicture.image).toString('base64');
+
+  return `data:${profilePicture?.mimetype};base64,${buffer}`;
+}

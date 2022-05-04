@@ -132,7 +132,6 @@ export function authAndy({ children }) {
 
     return await DAO.signIn(email, password, clientFingerprint)
       .then((result) => {
-        console.log('venice penice ', result.data);
         dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,

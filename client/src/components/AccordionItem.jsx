@@ -55,6 +55,7 @@ export default function AccordionItem({
         <CardHeader
           key={friend?.key}
           name={username ? username : friend?.username}
+          profilePicture={friend?.profilePicture}
           mainActivity={friend?.activity?.[0]}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}

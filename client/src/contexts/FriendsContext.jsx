@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
 
 import DAO from '../config/DAO';
+import { profilePictureToJSXImg } from '../helpers/fileManager';
 import { useAuth } from './AuthContext';
 import { useClientSocket } from './ClientSocketContext';
 
@@ -46,19 +47,19 @@ export function FriendsProvider({ children }) {
       .then((res) => {
         res.data?.friends.forEach((object, index) => {
           object.key = index;
-        });
 
-        const friendIDs = res.data.friends.map((friend) => {
-          return friend._id;
+          // format profile picture objects to JSX img elements
+          if (object.profilePicture) {
+            object.profilePicture = profilePictureToJSXImg(
+              object.profilePicture
+            );
+          }
         });
 
         setFriends(res.data?.friends);
-
-        console.log(res.data.friends);
       })
       .catch((e) => {
         console.error(e);
-        //show some error component
       });
   };
 
@@ -73,7 +74,6 @@ export function FriendsProvider({ children }) {
       })
       .catch((e) => {
         console.log(e);
-        //show some error component
       });
   };
 

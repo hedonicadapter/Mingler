@@ -123,6 +123,10 @@ export default function FriendsList() {
   // }, [friends, socket]);
 
   useEffect(() => {
+    console.log(friends);
+  }, [friends]);
+
+  useEffect(() => {
     if (friends <= 0) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
