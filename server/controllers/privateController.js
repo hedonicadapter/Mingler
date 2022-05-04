@@ -8,6 +8,9 @@ const { spotifyApi } = require('../config/spotify');
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const fs = require('fs');
+const { promisify } = require('util');
+
+const unlinkAsync = promisify(fs.unlink);
 
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
@@ -554,5 +557,7 @@ exports.setProfilePicture = async (req, res, next) => {
       .catch((e) => next(e));
   } catch (e) {
     next(e);
+  } finally {
+    await unlinkAsync(req.file.path);
   }
 };
