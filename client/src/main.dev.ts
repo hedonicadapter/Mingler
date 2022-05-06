@@ -32,9 +32,10 @@ import installExtension, {
 import dao from './config/dao';
 import configureStore from './mainState/newStore';
 
-var Positioner = require('electron-positioner');
+const storage = require('node-persist');
+storage.init({ dir: './mainState/persist' });
 
-global.state = {};
+var Positioner = require('electron-positioner');
 
 export default class AppUpdater {
   constructor() {
@@ -339,16 +340,20 @@ app.whenReady().then(() => {
       allowFileAccess: true,
     },
   })
-    .then((name) => {
+    .then(async (name) => {
       console.log(`Added Extension:  ${name}`);
       try {
-        const store = configureStore(null, global.state, 'main');
+        const store = configureStore(
+          null,
+          await storage.getItem('store'),
+          'main'
+        );
 
         store.subscribe(() => {
           global.state = store.getState();
-          // console.log('STAAAATE ', store.getState());
 
           // persist store changes
+          storage.setItem('store', global.state);
           // TODO: should this be blocking / wait? _.throttle?
         });
       } catch (e) {

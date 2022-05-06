@@ -26,10 +26,6 @@ export const token = axios.create({
   },
 });
 
-function getOldRefreshToken(oldToken) {
-  return localStorage.getItem(oldToken);
-}
-
 export class DAO {
   signUpWithEmail = (name, email, password, clientFingerprint) => {
     const data = { name, email, password, clientFingerprint };
@@ -217,7 +213,6 @@ privateRoute.interceptors.response.use(
 
       const refreshToken = localStorage.getItem(oldAccessToken);
 
-      // PRINTING THE SAME TOKEN OVER AND OVER
       if (!refreshToken) return Promise.reject('409: No refresh token found.');
 
       const og = await getNewToken(refreshToken)
@@ -256,15 +251,6 @@ privateRoute.interceptors.response.use(
 );
 
 export default new DAO();
-
-// Get friends' IDs of current user by current user's ID
-
-// Get activities of each friend by their IDs ordered by date
-// Set name of current user
-
-// Set active window
-
-// Set active track
 
 // TODO:
 // OnlineFriends and stuff

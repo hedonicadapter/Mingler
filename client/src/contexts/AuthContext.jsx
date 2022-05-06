@@ -40,8 +40,6 @@ export function authAndy({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const dispatch = useDispatch();
 
-  // const [currentUser, setCurrentUser] = useState(settingsState.currentUser);
-  const [userID, setUserID] = useLocalStorage('userID');
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useLocalStorage('token');
   const [recentUser, setRecentUser] = useLocalStorage(
@@ -99,20 +97,19 @@ export function authAndy({ children }) {
         fingerprint: clientFingerprint,
         guest: true,
       });
-      // setCurrentUser(result.data);
+
       setToken(result.data.token);
       dispatch(setTokenMain(result.data.token));
 
       // Access token refresh token pair
       localStorage.setItem(result.data.token, result.data.refreshToken);
 
-      ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+      //for the socket in main
+      ipcRenderer.send('currentUser:signedIn', result.data._id);
     });
   };
 
   const signOut = () => {
-    setUserID(null);
-    // setCurrentUser(null);
     setToken(null);
     dispatch(setCurrentUserMain(null));
     dispatch(setTokenMain(null));
@@ -139,10 +136,9 @@ export function authAndy({ children }) {
           fingerprint: clientFingerprint,
           guest: false,
         });
-        // setCurrentUser(result.data);
+
         setToken(result.data.token);
         dispatch(setTokenMain(result.data.token));
-        setUserID(result.data._id);
 
         // Access token refresh token pair
         localStorage.setItem(result.data.token, result.data.refreshToken);
@@ -157,8 +153,6 @@ export function authAndy({ children }) {
   };
 
   const signout = () => {
-    setUserID(null);
-    // setCurrentUser(null);
     setToken(null);
     dispatch(setCurrentUserMain(null));
     dispatch(setTokenMain(null));
@@ -188,13 +182,6 @@ export function authAndy({ children }) {
       console.log('TOKEN AND CURRENTUSERLENGTH');
       setLoading(false);
     } else setLoading(true);
-
-    if (token) {
-      console.log('tokenized');
-    }
-    if (currentUser) {
-      console.log('currentUserized');
-    }
   }, [token, currentUser]);
 
   // Finished logging in
@@ -207,6 +194,8 @@ export function authAndy({ children }) {
   ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
     setToken(access);
     dispatch(setTokenMain(access));
+
+    localStorage.setItem(access, refresh);
   });
 
   const value = {
@@ -220,19 +209,9 @@ export function authAndy({ children }) {
     signInGuest,
     signIn,
     storeToken,
+    deleteToken,
   };
-  const DummyInputComponent = () => {
-    const [test, setTest] = useState(null);
-    return (
-      <>
-        <input
-          type="text"
-          value={test || ''}
-          onChange={(e) => setTest(e.target.value)}
-        />
-      </>
-    );
-  };
+
   return (
     <AuthContext.Provider value={value}>
       <AnimatePresence>
@@ -245,7 +224,6 @@ export function authAndy({ children }) {
             duration={0.1}
           >
             <SplashScreen />
-            {/* <DummyInputComponent /> */}
           </motion.div>
         ) : (
           !loading && (

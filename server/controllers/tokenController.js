@@ -4,34 +4,27 @@ const ErrorResponse = require('../utils/errorResponse');
 const RefreshToken = require('../models/RefreshToken');
 
 exports.refreshToken = async (req, res, next) => {
-  // console.log('body: ', req.body);
-  // console.log('headers: ', req.headers);
   const { refreshToken } = req.body;
 
   try {
-    const tokenExists = await RefreshToken.findOne(
-      { refreshToken },
-      async function (e, token) {
-        if (e) return next(e);
-        if (!token) {
-          return next(new ErrorResponse('Invalid refresh token', 400));
-        }
-
-        const user = await User.findOne({
-          _id: mongoose.Types.ObjectId(token.user),
-        });
-
-        if (!user) {
-          return next(
-            new ErrorResponse('No user with that refresh token', 401)
-          );
-        }
-
-        sendToken(user, 200, res);
-
-        return;
+    await RefreshToken.findOne({ refreshToken }, async function (e, token) {
+      if (e) return next(e);
+      if (!token) {
+        return next(new ErrorResponse('Invalid refresh token', 400));
       }
-    );
+
+      const user = await User.findOne({
+        _id: mongoose.Types.ObjectId(token.user),
+      });
+
+      if (!user) {
+        return next(new ErrorResponse('No user with that refresh token', 401));
+      }
+
+      sendToken(user, 200, res);
+
+      return;
+    });
     return;
   } catch (e) {
     next(e);

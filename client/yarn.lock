@@ -9378,6 +9378,11 @@
     "uuid" "^8.3.0"
     "which" "^2.0.2"
 
+"node-persist@^3.1.0":
+  "integrity" "sha512-/j+fd/u71wNgKf3V2bx4tnDm+3GvLnlCuvf2MXbJ3wern+67IAb6zN9Leu1tCWPlPNZ+v1hLSibVukkPK2HqJw=="
+  "resolved" "https://registry.npmjs.org/node-persist/-/node-persist-3.1.0.tgz"
+  "version" "3.1.0"
+
 "node-pre-gyp@^0.11.0":
   "integrity" "sha512-TwWAOZb0j7e9eGaf9esRx3ZcLaE5tQ2lvYy1pb5IAaG1a2e2Kv5Lms1Y4hpj+ciXJRofIxxlt5haeQ/2ANeE0Q=="
   "resolved" "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.11.0.tgz"
