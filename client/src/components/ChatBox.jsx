@@ -5,7 +5,6 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { MdSend } from 'react-icons/md';
 
 import colors from '../config/colors';
-import { useAuth } from '../contexts/AuthContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import DAO from '../config/DAO';
 import { ConversationBubble } from './ConversationBubble';
@@ -47,7 +46,7 @@ const ConnectButton = () => {
         connectChatClientPopUpWindow.webContents.send('chosenClient', {
           chosenClient,
           email: currentUser?.email,
-          token,
+          accessToken: currentUser?.accessToken,
           userID: currentUser?._id,
         });
 
@@ -111,8 +110,10 @@ const inputBox = css({
 });
 
 export const ChatBox = ({ receiver, conversations }) => {
+  const currentUser = useSelector((state) => getCurrentUser(state));
+  const dispatch = useDispatch();
+
   const { socket } = useClientSocket();
-  const { currentUser, token } = useAuth();
   const { setFriends } = useFriends();
 
   const anchorRef = useRef();
@@ -198,12 +199,12 @@ export const ChatBox = ({ receiver, conversations }) => {
     if (!inputText || !receiver || inputText === '') return;
     socket.emit('message:send', {
       toID: receiver,
-      fromID: currentUser._id,
+      fromID: currentUser?._id,
       message: inputText,
     });
 
     const newMessage = {
-      fromID: currentUser._id,
+      fromID: currentUser?._id,
       message: inputText,
       createdAt: new Date(),
     };
@@ -222,7 +223,12 @@ export const ChatBox = ({ receiver, conversations }) => {
       )
     );
 
-    DAO.sendMessage(receiver, currentUser._id, inputText, token)
+    DAO.sendMessage(
+      receiver,
+      currentUser?._id,
+      inputText,
+      currentUser?.accessToken
+    )
       .then((res) => {
         setInputText('');
         inputBoxRef.current?.focus();
@@ -282,7 +288,7 @@ export const ChatBox = ({ receiver, conversations }) => {
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
       const skip = conversations[0].messages.length;
-      DAO.getMessages(conversations[0]._id, skip, token)
+      DAO.getMessages(conversations[0]._id, skip, currentUser?.accessToken)
         .then((res) => {
           console.log('scrolled ', skip, ' ', conversations[0]._id);
           if (!res.data.messages) return;

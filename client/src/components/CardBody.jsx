@@ -46,7 +46,6 @@ export default function CardBody({
   conversations,
   setFriends,
 }) {
-  console.log('setFriends cardBody ', setFriends);
   return (
     <>
       <div className={flipper()}>

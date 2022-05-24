@@ -3,20 +3,19 @@ const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 
 exports.protect = async (req, res, next) => {
-  let token;
-
+  let accessToken;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     // Bearer 3t0832thwg0wghw08t3fa
-    token = req.headers.authorization.split(' ')[1];
+    accessToken = req.headers.authorization.split(' ')[1];
   }
 
-  if (!token) return next(new ErrorResponse('Route unauthorized.', 401));
+  if (!accessToken) return next(new ErrorResponse('Route unauthorized.', 401));
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.id);
 

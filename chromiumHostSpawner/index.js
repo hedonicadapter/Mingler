@@ -31,7 +31,7 @@ const io = require('socket.io-client');
 
 const socket = io('ws://127.0.0.1:8081/auth', {
   // auth: {
-  //   token: 'test',
+  //   accessToken: 'test',
   // },
   // transports: ['websocket'],
   // origins: 'localhost:* http://localhost:* http://www.localhost:*',

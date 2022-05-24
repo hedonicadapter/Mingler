@@ -51,6 +51,12 @@ export class DAO {
     return auth.post('/signIn', data);
   };
 
+  signInRememberedUser = (refreshToken) => {
+    const data = { refreshToken };
+
+    return auth.post('/signInRememberedUser', data);
+  };
+
   logout = () => {
     return;
   };
@@ -70,7 +76,6 @@ export class DAO {
   };
 
   searchUsers = (searchTerm, token) => {
-    console.log('TOKEN DAO ', token);
     const data = { searchTerm };
 
     return privateRoute.post('/searchUsers', data, {
@@ -192,8 +197,7 @@ export class DAO {
     });
   };
 }
-
-const getNewToken = async (refreshToken) => {
+const getNewToken = (refreshToken) => {
   const data = { refreshToken };
 
   return token.post('/refreshToken', data);
@@ -203,7 +207,7 @@ privateRoute.interceptors.response.use(
   function (response) {
     return response;
   },
-  async function (error) {
+  function (error) {
     const ogRequest = error.config;
     if (401 === error.response.status && !ogRequest.retry) {
       const oldAccessToken = ogRequest.headers.Authorization.replace(
@@ -211,39 +215,48 @@ privateRoute.interceptors.response.use(
         ''
       );
 
-      const refreshToken = localStorage.getItem(oldAccessToken);
+      ipcRenderer
+        .invoke('getTokens')
+        .then(async ({ accessToken, refreshToken }) => {
+          if (!refreshToken)
+            return Promise.reject('409: No refresh token found.');
 
-      if (!refreshToken) return Promise.reject('409: No refresh token found.');
+          await getNewToken(refreshToken)
+            .then((tokens) => {
+              const access = tokens.data.token;
+              const refresh = tokens.data.refreshToken;
+              if (!access || !refresh) {
+                return Promise.reject('Failed to receive new tokens.');
+              }
+              const { port1 } = new MessageChannel();
+              ipcRenderer.postMessage(
+                'refreshtoken:fromrenderer',
+                { access, refresh },
+                [port1]
+              );
+              ogRequest.headers.Authorization = 'Bearer ' + access;
+              ogRequest.retry = true;
 
-      const og = await getNewToken(refreshToken)
-        .then((tokens) => {
-          const access = tokens.data.token;
-          const refresh = tokens.data.refreshToken;
+              return axios(ogRequest)
+                .then()
+                .catch((e) => Promise.reject(e));
+            })
+            .catch((e) => console.log(e));
 
-          if (access && refresh) {
-            localStorage.removeItem(oldAccessToken);
-            localStorage.setItem(access, refresh);
-
-            const { port1 } = new MessageChannel();
-            ipcRenderer.postMessage(
-              'refreshtoken:fromrenderer',
-              { access, refresh },
-              [port1]
-            );
-
-            ogRequest.headers.Authorization = 'Bearer ' + access;
-            ogRequest.retry = true;
-
-            return ogRequest;
-          }
-        })
-        .catch((e) => {
-          return Promise.reject(e);
+          //     // axios(ogRequest)
+          //     //   .then()
+          //     //   .catch((e) => Promise.reject(e));
+          //     // try {
+          //     //   await axios(ogRequest);
+          //     // } catch (e) {
+          //     //   console.log('eeee');
+          //     //   return Promise.reject(e);
+          //     // }
+          //   })
+          //   .catch((e) => {
+          //     return Promise.reject(e);
+          //   });
         });
-
-      if (og) {
-        axios(og);
-      } else return Promise.reject('No token returned.');
     } else {
       return Promise.reject(error);
     }

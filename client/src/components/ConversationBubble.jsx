@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { css } from '@stitches/react';
 
 import colors from '../config/colors';
-import { useAuth } from '../contexts/AuthContext';
+import { useSelector } from 'react-redux';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 
 const conversationText = css({
   margin: 0,
@@ -21,7 +22,8 @@ const sentTime = css({
 });
 
 export const ConversationBubble = ({ fromID, message, sent }) => {
-  const { currentUser } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
+
   const sentByMe = fromID === currentUser?._id;
 
   const bubbleContainer = css({

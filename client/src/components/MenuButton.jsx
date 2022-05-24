@@ -5,6 +5,8 @@ import { GoPrimitiveDot } from 'react-icons/go';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 
 const StyledInput = styled('input', {
   marginLeft: '3%',
@@ -46,7 +48,9 @@ const menuButtonStyle = css({
 });
 
 export default function MenuButton() {
-  const { signOut, currentUser } = useAuth();
+  const { signOut } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
+
   const [menuVisibility, setMenuVisibility] = useState(false);
   const toggleMenu = () => {
     setMenuVisibility(!menuVisibility);

@@ -6,10 +6,7 @@ import { RiArrowDropUpLine, RiSpotifyLine } from 'react-icons/ri';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
-import { useAuth } from '../contexts/AuthContext';
-
 import colors from '../config/colors';
-import SpotifyPopUp from './SpotifyPopUp';
 import DAO from '../config/DAO';
 import { useStatus } from '../contexts/UserStatusContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
@@ -108,7 +105,6 @@ export default function Marky({
   markyToReplaceWithYouTubeVideo,
   marKey,
 }) {
-  const { currentUser, token } = useAuth();
   const { sendYouTubeTimeRequest } = useClientSocket();
 
   const marqueeRef = useRef();

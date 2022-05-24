@@ -186,13 +186,14 @@ const createWindow = async () => {
 
         const authIo = io.of('/auth');
 
-        authIo.on('connection', (socket) => {
-          ipcMain.once('currentUser:signedOut', () => {
-            socket.disconnect();
-            httpServer.close();
-            console.log('Socket closed');
-          });
+        ipcMain.on('currentUser:signedOut', () => {
+          console.log('SIGNED OUT');
+          // socket.disconnect();
+          httpServer.close();
+          console.log('Socket closed');
+        });
 
+        authIo.on('connection', (socket) => {
           authIo.emit('fromAppToHost:userID', userID);
 
           socket.on('fromHostToApp:data', (data) => {
@@ -346,14 +347,33 @@ app.whenReady().then(() => {
         const store = configureStore(
           null,
           await storage.getItem('store'),
+          // global.state,
           'main'
         );
 
+        ipcMain.handle('getTokens', async () => {
+          const currentUser = store.getState()?.settings?.currentUser;
+
+          return {
+            accessToken: currentUser?.accessToken,
+            refreshToken: currentUser?.refreshToken,
+          };
+        });
+
         store.subscribe(() => {
           global.state = store.getState();
-
           // persist store changes
-          storage.setItem('store', global.state);
+          storage.setItem('store', {
+            settings: {
+              currentUser: {
+                _id: global.state?.settings?.currentUser?._id,
+                accessToken: global.state?.settings?.currentUser?.accessToken,
+                refreshToken: global.state?.settings?.currentUser?.refreshToken,
+                keepMeSignedIn:
+                  global.state?.settings?.currentUser?.keepMeSignedIn,
+              },
+            },
+          });
           // TODO: should this be blocking / wait? _.throttle?
         });
       } catch (e) {

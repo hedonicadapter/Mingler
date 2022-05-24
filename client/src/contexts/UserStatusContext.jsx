@@ -2,12 +2,15 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 var path = require('path');
 const execFile = require('child_process').execFile;
 
-import { useAuth } from './AuthContext';
-
 import { getAccessToken, refreshAccessToken } from '../config/spotify';
 import DAO from '../config/DAO';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { useClientSocket } from './ClientSocketContext';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getCurrentUser,
+  setAccessTokenMain,
+} from '../mainState/features/settingsSlice';
 
 const { ipcRenderer } = require('electron');
 
@@ -22,11 +25,10 @@ export function useStatus() {
 //
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
 export function UserStatusProvider({ children }) {
-  const { currentUser, token } = useAuth();
-  const { sendActivity } = useClientSocket();
+  const currentUser = useSelector((state) => getCurrentUser(state));
+  const dispatch = useDispatch();
 
-  const [accessToken, setAccessToken] = useLocalStorage('access_token');
-  const [refreshToken, setRefreshToken] = useLocalStorage('refresh_token');
+  const { sendActivity } = useClientSocket();
 
   ipcRenderer.on('chromiumHostData', function (event, data) {
     sendActivity(
@@ -48,6 +50,8 @@ export function UserStatusProvider({ children }) {
     process = execFile('python', [exePath]);
 
     process.stdout.on('data', function (data) {
+      if (!currentUser) return;
+
       let activeWindow = data.toString().trim();
 
       // Second comparison doesn't work for some reason
@@ -79,13 +83,13 @@ export function UserStatusProvider({ children }) {
   const activeTrackListener = () => {
     trackProcess?.kill();
 
-    if (accessToken) {
+    if (currentUser?.accessToken) {
       var exePath = path.resolve(
         __dirname,
         '../scripts/ActiveTrackListener.py'
       );
 
-      trackProcess = execFile('python', [exePath, accessToken]);
+      trackProcess = execFile('python', [exePath, currentUser?.accessToken]);
 
       trackProcess.stdout.on('data', function (data) {
         if (data === '401' && refreshRetryLimit < 2) {
@@ -122,9 +126,10 @@ export function UserStatusProvider({ children }) {
   };
 
   const refreshSpotify = () => {
-    DAO.refreshSpotify(refreshToken, token)
+    DAO.refreshSpotify(currentUser?.refreshToken, currentUser?.accessToken)
       .then((result) => {
-        setAccessToken(result.data.body.access_token);
+        console.log('DAO REFRESHSPOTIFY LALALA ');
+        dispatch(setAccessTokenMain(result.data.body.access_token));
       })
       .catch((e) => {
         console.log('Refreshing spotify auth error ', e);
@@ -136,26 +141,23 @@ export function UserStatusProvider({ children }) {
   };
 
   useEffect(() => {
-    if (accessToken) {
+    if (currentUser?.accessToken) {
       activeTrackListener();
-    }
-  }, [accessToken]);
 
-  useEffect(() => {
-    if (refreshToken && token) {
-      refreshSpotify();
+      if (currentUser?.refreshToken) {
+        refreshSpotify();
+      }
     }
-  }, [refreshToken, token]);
+  }, [currentUser]);
+
+  useEffect(() => {}, [currentUser]);
 
   useEffect(() => {
     activeWindowListener();
     // return exitListeners();
   }, []);
 
-  const value = {
-    setAccessToken,
-    setRefreshToken,
-  };
+  const value = {};
 
   return (
     <UserStatusContext.Provider value={value}>

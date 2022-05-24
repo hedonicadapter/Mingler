@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import MenuButton from './MenuButton';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
-import { setCurrentUser } from '../mainState/features/settingsSlice';
 
 const StyledInput = styled('input', {
   WebkitAppearance: 'none',
@@ -117,16 +116,8 @@ const unavailableButtonStyle = css({
 });
 
 export default function SplashScreen({}) {
-  const {
-    currentUser,
-    recentUser,
-    signInGuest,
-    signUpGuest,
-    signUpWithEmail,
-    signIn,
-    storeToken,
-    deleteToken,
-  } = useAuth();
+  const { recentUser, signInGuest, signUpGuest, signUpWithEmail, signIn } =
+    useAuth();
   const [userName, setUserName] = useState('');
   const [inputFocus, setInputFocus] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -602,17 +593,12 @@ export default function SplashScreen({}) {
     const handleSignInButton = () => {
       setFormFilled('loading');
 
-      signIn(email, password).then(({ success, error }) => {
+      signIn(email, password, keepMeSignedIn).then(({ success, error }) => {
         if (error) {
           setError(error);
           setFormFilled('true');
         }
         if (success) {
-          if (keepMeSignedIn) {
-            storeToken(email);
-          } else {
-            deleteToken(email);
-          }
           setError(null);
         }
       });

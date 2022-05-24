@@ -1,9 +1,10 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
+import { useSelector } from 'react-redux';
 
 import DAO from '../config/DAO';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
-import { useAuth } from './AuthContext';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 import { useClientSocket } from './ClientSocketContext';
 
 const FriendsContext = createContext();
@@ -12,7 +13,7 @@ export function useFriends() {
 }
 
 export function FriendsProvider({ children }) {
-  const { currentUser, token } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
   const { socket } = useClientSocket();
 
   const [friends, setFriends] = useState([]);
@@ -20,19 +21,21 @@ export function FriendsProvider({ children }) {
   const [filteredFriends, setFilteredFriends] = useState([]);
 
   useEffect(() => {
+    if (!currentUser?.accessToken) return;
+
     getFriends();
     getFriendRequests();
-  }, [socket]);
+  }, [currentUser, socket]);
 
   useEffect(() => {
     if (!socket) return;
 
     setFriendRequestListeners();
 
-    if (friends) {
-      setConversationListeners();
-      setActivityListeners();
-    }
+    if (!friends) return;
+
+    setConversationListeners();
+    setActivityListeners();
 
     return () => {
       socket.removeAllListeners('friendrequest:receive');
@@ -43,7 +46,7 @@ export function FriendsProvider({ children }) {
   }, [socket, friends]);
 
   const getFriends = () => {
-    DAO.getFriends(currentUser._id, token)
+    DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
         res.data?.friends.forEach((object, index) => {
           object.key = index;
@@ -59,12 +62,12 @@ export function FriendsProvider({ children }) {
         setFriends(res.data?.friends);
       })
       .catch((e) => {
-        console.error(e);
+        console.log(e);
       });
   };
 
   const getFriendRequests = () => {
-    DAO.getFriendRequests(currentUser._id, token)
+    DAO.getFriendRequests(currentUser?._id, currentUser?.accessToken)
       .then((res) => {
         res.data.friendRequests.forEach((object, index) => {
           object.key = index;

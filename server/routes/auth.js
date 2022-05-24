@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   signIn,
+  signInRememberedUser,
   forgotPassword,
   resetPassword,
   signUpWithEmail,
@@ -15,6 +16,8 @@ router.route('/signUpWithEmail').post(signUpWithEmail);
 router.route('/signUpGuest').post(signUpGuest);
 
 router.route('/signIn').post(signIn);
+
+router.route('/signInRememberedUser').post(signInRememberedUser);
 
 router.route('/signInGuest').post(signInGuest);
 

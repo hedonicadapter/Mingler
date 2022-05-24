@@ -32,13 +32,13 @@ exports.refreshToken = async (req, res, next) => {
 };
 
 const sendToken = (user, statusCode, res) => {
-  const token = user.getSignedToken();
+  const accessToken = user.getSignedToken();
   user.getRefreshToken().then(({ refreshToken }) => {
     // Idk why I'm making this check but maybe I could assign roles this way? lmao
     if (user.guest) {
       res.status(statusCode).json({
         success: true,
-        token,
+        accessToken,
         refreshToken,
         _id: user._id,
         username: user.username,
@@ -46,7 +46,7 @@ const sendToken = (user, statusCode, res) => {
     } else {
       res.status(statusCode).json({
         success: true,
-        token,
+        accessToken,
         refreshToken,
         _id: user._id,
         username: user.username,

@@ -5,14 +5,16 @@ import '../App.global.css';
 import { motion } from 'framer-motion';
 
 import AccordionItem from './AccordionItem';
-import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import DAO from '../config/dao';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
 import { useSelector } from 'react-redux';
-import { getSettings } from '../mainState/features/settingsSlice';
+import {
+  getCurrentUser,
+  getSettings,
+} from '../mainState/features/settingsSlice';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -51,9 +53,7 @@ const findFriendsWindowConfig = {
 };
 
 export default function FriendsList() {
-  // const currentUser = useSelector((state) => state.settings.currentUser);
-  const stater = useSelector((state) => state);
-  const { token, currentUser } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
   const { socket } = useClientSocket();
   const {
     friends,
@@ -123,10 +123,6 @@ export default function FriendsList() {
   // }, [friends, socket]);
 
   useEffect(() => {
-    console.log(friends);
-  }, [friends]);
-
-  useEffect(() => {
     if (friends <= 0) searchInputRef?.current?.focus();
   }, [searchInputRef?.current]);
 
@@ -161,7 +157,7 @@ export default function FriendsList() {
             searchInputRef?.current?.focus();
           }
         }}
-        focus={searchInputFocus}
+        // focus={searchInputFocus}
       />
 
       {searchValue && (
@@ -175,13 +171,6 @@ export default function FriendsList() {
         getFriends={getFriends} // To refresh friends list after accepting a friend request
         getFriendRequests={getFriendRequests} // Same thing here
       />
-
-      <div
-        style={{ color: colors.darkmodeHighWhite }}
-        onClick={() => console.log(stater)}
-      >
-        CLICK FOR STATE
-      </div>
 
       {searchValue
         ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)

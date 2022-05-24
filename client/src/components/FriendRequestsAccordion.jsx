@@ -5,9 +5,10 @@ import { css } from '@stitches/react';
 
 import colors from '../config/colors';
 import UserItem from './UserItem';
-import { useAuth } from '../contexts/AuthContext';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
+import { useSelector } from 'react-redux';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 
 const generalPadding = 12;
 
@@ -28,7 +29,7 @@ export default function FriendRequestsAccordion({
   getFriends,
   getFriendRequests,
 }) {
-  const { currentUser, token } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
 
   const [expanded, setExpanded] = useState(false);
 
@@ -41,7 +42,7 @@ export default function FriendRequestsAccordion({
   };
 
   const handleAcceptRequestButton = (fromID) => {
-    DAO.acceptFriendRequest(fromID, currentUser._id, token)
+    DAO.acceptFriendRequest(fromID, currentUser._id, currentUser.accessToken)
       .then((res) => {
         // Refresh friends list
         getFriends();
@@ -53,7 +54,7 @@ export default function FriendRequestsAccordion({
   };
 
   const handleRejectRequestButton = (toID) => {
-    DAO.cancelFriendRequest(currentUser._id, toID, token)
+    DAO.cancelFriendRequest(currentUser._id, toID, currentUser.accessToken)
       .then((res) => {
         // Refresh
         getFriendRequests();

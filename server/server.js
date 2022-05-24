@@ -36,10 +36,10 @@ const userIo = io.of('/user');
 
 userIo.use((socket, next) => {
   // Get the client's mongodb _id
-  const token = socket.handshake.auth.token;
+  const accessToken = socket.handshake.auth.accessToken;
 
-  if (token) {
-    socket.user = validateToken(token);
+  if (accessToken) {
+    socket.user = validateAccessToken(accessToken);
 
     next();
   } else {
@@ -54,7 +54,7 @@ async function getFriendIDsByClientID(userID) {
   });
 }
 
-function validateToken(token) {
+function validateAccessToken(accessToken) {
   return true;
 }
 
@@ -63,6 +63,7 @@ async function joinRooms(socket, rooms) {
 }
 
 userIo.on('connection', async (socket) => {
+  console.log('userIo connected');
   // Get the client's mongoDB ID
   const userID = socket.handshake.query.userID;
 
@@ -85,7 +86,6 @@ userIo.on('connection', async (socket) => {
 
     socket.join(userID);
     // Client's own UserID is also returned by findById
-    // joinRooms(socket, friendIDs).then(() => {
     socket.on('activity:send', (packet) => {
       // Since a client's friends joins a room by the client's ID on connection,
       // anything emitted to the client's ID will be received by friends

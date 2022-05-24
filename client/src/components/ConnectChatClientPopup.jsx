@@ -10,6 +10,11 @@ const fs = require('fs');
 
 import messengerLogo from '../../assets/icons/messenger_logo.png';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getCurrentUser,
+  setAccessTokenMain,
+} from '../mainState/features/settingsSlice';
 
 // TODO:
 // use a proper redirect uri
@@ -23,15 +28,18 @@ export default function ConnectChatClientPopup() {
   // the connect button motion component.
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
-  const [token, setToken] = useState(null);
   const [_id, set_id] = useState(null);
 
+  const currentUser = useSelector((state) => getCurrentUser(state));
+
+  const dispatch = useDispatch();
+
   ipcRenderer.once('chosenClient', (event, value) => {
-    const { chosenClient, email, token, userID } = value;
+    const { chosenClient, email, accessToken, userID } = value;
 
     setChosenClient(chosenClient);
     setEmailOrPhone(email);
-    setToken(token);
+    dispatch(setAccessTokenMain(accessToken));
     set_id(userID);
   });
 
@@ -119,7 +127,7 @@ export default function ConnectChatClientPopup() {
         }
 
         DAO.saveMessengerCredentials(
-          token,
+          currentUser?.accessToken,
           'appstate.json',
           JSON.stringify(api.getAppState())
         ).then((res) => {

@@ -3,6 +3,8 @@ import {
   arrayBufferToBase64,
   profilePictureToJSXImg,
 } from '../../helpers/fileManager';
+import { upsertArray } from '../../helpers/arrayTools';
+import produce from 'immer';
 
 interface SettingsState {
   currentUser: Array<any>;
@@ -19,23 +21,36 @@ export const settingsSlice = createSlice({
     setCurrentUserMain: (state, action: PayloadAction<Array<any>>) => {
       let data = action.payload;
 
+      if (!data) {
+        state.currentUser = null;
+        return;
+      }
+
       if (data.profilePicture) {
         data.profilePicture = profilePictureToJSXImg(data.profilePicture);
       }
 
-      state.currentUser = data;
+      state.currentUser = produce(state.currentUser, (draft) => {
+        return { ...draft, ...data };
+      });
     },
-    setUsernameMain: (state, action: PayloadAction<Array<any>>) => {
+    setUsernameMain: (state, action: PayloadAction<string>) => {
       state.currentUser.username = action.payload;
     },
-    setEmailMain: (state, action: PayloadAction<Array<any>>) => {
+    setEmailMain: (state, action: PayloadAction<string>) => {
       state.currentUser.email = action.payload;
     },
-    setTokenMain: (state, action: PayloadAction<Array<any>>) => {
-      state.currentUser.token = action.payload;
+    setAccessTokenMain: (state, action: PayloadAction<string>) => {
+      state.currentUser.accessToken = action.payload;
+    },
+    setRefreshTokenMain: (state, action: PayloadAction<string>) => {
+      state.currentUser.refreshToken = action.payload;
     },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.profilePicture = profilePictureToJSXImg(action.payload);
+    },
+    setKeepMeSignedInMain: (state, action: PayloadAction<Array<any>>) => {
+      state.currentUser.keepMeSignedIn = action.payload;
     },
   },
 });
@@ -43,8 +58,10 @@ export const settingsSlice = createSlice({
 export const { setCurrentUserMain } = settingsSlice.actions;
 export const { setUsernameMain } = settingsSlice.actions;
 export const { setEmailMain } = settingsSlice.actions;
-export const { setTokenMain } = settingsSlice.actions;
+export const { setAccessTokenMain } = settingsSlice.actions;
+export const { setRefreshTokenMain } = settingsSlice.actions;
 export const { setProfilePictureMain } = settingsSlice.actions;
+export const { setKeepMeSignedInMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 

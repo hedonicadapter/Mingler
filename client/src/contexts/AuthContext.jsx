@@ -13,7 +13,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getCurrentUser,
   setCurrentUserMain,
-  setTokenMain,
+  setKeepMeSignedInMain,
+  setAccessTokenMain,
+  setRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
@@ -40,8 +42,7 @@ export function authAndy({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const dispatch = useDispatch();
 
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useLocalStorage('token');
+  const [signedIn, setSignedIn] = useState(false);
   const [recentUser, setRecentUser] = useLocalStorage(
     'mostRecentRememberedUser'
   );
@@ -61,8 +62,9 @@ export function authAndy({ children }) {
   const signUpWithEmail = async (name, email, password) => {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
       .then((result) => {
-        setToken(result.data.token);
-        dispatch(setTokenMain(result.data.token));
+        dispatch(setAccessTokenMain(result.data.accessToken));
+        dispatch(setRefreshTokenMain(result.data.refreshToken));
+        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
 
         return { success: true };
       })
@@ -98,21 +100,23 @@ export function authAndy({ children }) {
         guest: true,
       });
 
-      setToken(result.data.token);
-      dispatch(setTokenMain(result.data.token));
+      dispatch(setAccessTokenMain(result.data.accessToken));
+      dispatch(setRefreshTokenMain(result.data.refreshToken));
 
       // Access token refresh token pair
-      localStorage.setItem(result.data.token, result.data.refreshToken);
+      // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
 
       //for the socket in main
       ipcRenderer.send('currentUser:signedIn', result.data._id);
+
+      setSignedIn(true);
     });
   };
 
   const signOut = () => {
-    setToken(null);
+    setSignedIn(false);
     dispatch(setCurrentUserMain(null));
-    dispatch(setTokenMain(null));
+    ipcRenderer.send('currentUser:signedOut');
 
     if (currentUser.guest) {
       setRecentUser({
@@ -124,11 +128,15 @@ export function authAndy({ children }) {
     }
   };
 
-  const signIn = async (email, password) => {
-    //set current user in localstorage
-
+  const signIn = async (email, password, keepMeSignedIn) => {
     return await DAO.signIn(email, password, clientFingerprint)
       .then((result) => {
+        let tokens = {
+          accessToken: result.data.accessToken,
+          refreshToken: result.data.refreshToken,
+        };
+        console.log('signin ', result.data);
+
         dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,
@@ -137,13 +145,21 @@ export function authAndy({ children }) {
           guest: false,
         });
 
-        setToken(result.data.token);
-        dispatch(setTokenMain(result.data.token));
+        dispatch(setAccessTokenMain(tokens.accessToken));
+        dispatch(setRefreshTokenMain(tokens.refreshToken));
 
         // Access token refresh token pair
-        localStorage.setItem(result.data.token, result.data.refreshToken);
+        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
 
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
+        if (keepMeSignedIn) {
+          dispatch(setKeepMeSignedInMain(tokens));
+        } else {
+          dispatch(setKeepMeSignedInMain(null));
+        }
+
+        setSignedIn(true);
 
         return { success: true };
       })
@@ -152,19 +168,33 @@ export function authAndy({ children }) {
       });
   };
 
-  const signout = () => {
-    setToken(null);
-    dispatch(setCurrentUserMain(null));
-    dispatch(setTokenMain(null));
-    ipcRenderer.send('currentUser:signedOut');
-  };
+  const signInRememberedUser = async () => {
+    return await DAO.signInRememberedUser(currentUser?.refreshToken)
+      .then((result) => {
+        console.log('remembered ', result.data.accessToken);
+        dispatch(setCurrentUserMain(result.data));
+        setRecentUser({
+          userID: result.data._id,
+          email,
+          fingerprint: clientFingerprint,
+          guest: false,
+        });
 
-  const storeToken = () => {
-    return;
-  };
+        dispatch(setAccessTokenMain(result.data.accessToken));
+        dispatch(setRefreshTokenMain(result.data.refreshToken));
 
-  const deleteToken = () => {
-    return;
+        // Access token refresh token pair
+        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
+
+        ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
+        setSignedIn(true);
+
+        return { success: true };
+      })
+      .catch((e) => {
+        return { error: e.response };
+      });
   };
 
   // useEffect(() => {
@@ -178,29 +208,40 @@ export function authAndy({ children }) {
   // }, [recentUser]);
 
   useEffect(() => {
-    if (token && currentUser) {
-      console.log('TOKEN AND CURRENTUSERLENGTH');
-      setLoading(false);
-    } else setLoading(true);
-  }, [token, currentUser]);
+    if (
+      !signedIn &&
+      currentUser &&
+      currentUser.keepMeSignedIn &&
+      currentUser.refreshToken
+    ) {
+      console.log(
+        'boutta sign in remembered user ',
+        currentUser?.keepMeSignedIn
+      );
+      signInRememberedUser()
+        .then(() => {
+          setSignedIn(true);
+        })
+        .catch((e) => {
+          setSignedIn(false);
+          console.log(e);
+        });
+    }
+  }, []);
 
   // Finished logging in
   useEffect(() => {
-    if (currentUser.length && loading) {
+    if (currentUser?.length && signedIn) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
     }
-  }, [currentUser, loading]);
+  }, [currentUser, signedIn]);
 
   ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
-    setToken(access);
-    dispatch(setTokenMain(access));
-
-    localStorage.setItem(access, refresh);
+    dispatch(setAccessTokenMain(access));
+    dispatch(setRefreshTokenMain(refresh));
   });
 
   const value = {
-    currentUser,
-    token,
     recentUser,
     setName,
     signOut,
@@ -208,14 +249,12 @@ export function authAndy({ children }) {
     signUpGuest,
     signInGuest,
     signIn,
-    storeToken,
-    deleteToken,
   };
 
   return (
     <AuthContext.Provider value={value}>
       <AnimatePresence>
-        {!currentUser._id ? (
+        {!signedIn ? (
           <motion.div
             key={0}
             initial={{ opacity: 0, x: '120%' }}
@@ -226,13 +265,8 @@ export function authAndy({ children }) {
             <SplashScreen />
           </motion.div>
         ) : (
-          !loading && (
+          currentUser && (
             <div
-              // key={1}
-              // initial={{ x: '120%' }}
-              // animate={{ x: '0%' }}
-              // exit={{ x: '120%' }}
-              // duration={0.1}
               style={{
                 height: '100vh',
                 display: 'flex',
@@ -243,15 +277,6 @@ export function authAndy({ children }) {
             </div>
           )
         )}
-        {/* <motion.div
-          key={0}
-          initial={{ opacity: 0, x: '120%' }}
-          animate={{ opacity: 1, x: '0%' }}
-          exit={{ opacity: 0, x: '120%' }}
-          duration={0.1}
-        >
-          <SplashScreen />
-        </motion.div> */}
       </AnimatePresence>
     </AuthContext.Provider>
   );

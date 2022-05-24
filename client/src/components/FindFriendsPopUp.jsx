@@ -6,12 +6,15 @@ import { BsCircle } from 'react-icons/bs';
 import { IoIosClose } from 'react-icons/io';
 
 import UserItem from './UserItem';
-import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
 import { WindowFrame } from './reusables/WindowFrame';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSettings } from '../mainState/features/settingsSlice';
+import {
+  getCurrentUser,
+  setAccessTokenMain,
+  setRefreshTokenMain,
+} from '../mainState/features/settingsSlice';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -47,19 +50,16 @@ const searchResultsStyle = css({
 });
 
 export default function FindFriendsPopUp() {
-  const [userID, setUserID] = useLocalStorage('userID');
-  const [token, setToken] = useLocalStorage('token');
   const [foundFriends, setFoundFriends] = useState(null);
   const [searchValue, setSearchValue] = useState(null);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
-  const settingsState = useSelector(getSettings);
+
+  const currentUser = useSelector((state) => getCurrentUser(state));
+
   const dispatch = useDispatch();
-  useEffect(() => {
-    console.log('store ', settingsState);
-  }, [settingsState]);
 
   useEffect(() => {
-    // this makes it work when the token updates for some reason smh
+    // this seems to make it work when the token updates for some reason smh
     console.log('friends ', foundFriends);
   }, [foundFriends]);
 
@@ -80,7 +80,8 @@ export default function FindFriendsPopUp() {
     getSentFriendRequests();
 
     ipcRenderer.on('refreshtoken:fromrenderer', (e, { access, refresh }) => {
-      setToken(access);
+      dispatch(setAccessTokenMain(access));
+      dispatch(setRefreshTokenMain(refresh));
     });
   }, []);
 
@@ -91,9 +92,9 @@ export default function FindFriendsPopUp() {
 
   const search = (value) => {
     if (value) {
-      DAO.searchUsers(value, token)
+      DAO.searchUsers(value, currentUser.accessToken)
         .then((res) => {
-          const users = res.data.filter((user) => user._id != userID);
+          const users = res.data.filter((user) => user._id != currentUser._id);
           setFoundFriends(users);
         })
         .catch((e) => console.log(e));
@@ -101,7 +102,7 @@ export default function FindFriendsPopUp() {
   };
 
   const getSentFriendRequests = () => {
-    DAO.getSentFriendRequests(userID, token)
+    DAO.getSentFriendRequests(currentUser._id, currentUser.accessToken)
       .then((res) => {
         setSentFriendRequests(res.data.sentFriendRequests || 'none');
       })
@@ -115,7 +116,7 @@ export default function FindFriendsPopUp() {
   };
 
   const handleSendRequestButton = (toID) => {
-    DAO.sendFriendRequest(toID, userID, token)
+    DAO.sendFriendRequest(toID, currentUser._id, currentUser.accessToken)
       .then((res) => {
         setSentFriendRequests((oldValue) => [...oldValue, toID]);
         ipcRenderer.send('sendfriendrequest:fromrenderer', { toID });
@@ -126,7 +127,7 @@ export default function FindFriendsPopUp() {
   };
 
   const handleCancelRequestButton = (toID) => {
-    DAO.cancelFriendRequest(toID, userID, token)
+    DAO.cancelFriendRequest(toID, currentUser._id, currentUser.accessToken)
       .then((res) => {
         const updatedRequests = sentFriendRequests.filter(
           (item) => item !== toID

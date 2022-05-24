@@ -75,6 +75,33 @@ exports.signUpGuest = async (req, res, next) => {
   }
 };
 
+exports.signInRememberedUser = async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  try {
+    await RefreshToken.findOne({ refreshToken }, async function (e, token) {
+      if (e) return next(e);
+      if (!token) {
+        return next(new ErrorResponse('Invalid refresh token yerrr', 400));
+      }
+
+      const user = await User.findOne({
+        _id: mongoose.Types.ObjectId(token.user),
+      });
+
+      if (!user) {
+        return next(new ErrorResponse('No user with that refresh token', 401));
+      }
+
+      sendToken(user, 200, res);
+
+      return;
+    });
+    return;
+  } catch (e) {
+    next(e);
+  }
+};
 exports.signIn = async (req, res, next) => {
   const { email, password, clientFingerprint } = req.body;
 
@@ -209,13 +236,13 @@ exports.resetPassword = async (req, res, next) => {
 };
 
 const sendToken = (user, statusCode, res) => {
-  const token = user.getSignedToken();
+  const accessToken = user.getSignedToken();
   user.getRefreshToken().then(({ refreshToken }) => {
     // Idk why I'm making this check but maybe I could assign roles this way? lmao
     if (user.guest) {
       res.status(statusCode).json({
         success: true,
-        token,
+        accessToken,
         refreshToken,
         _id: user._id,
         username: user.username,
@@ -225,7 +252,7 @@ const sendToken = (user, statusCode, res) => {
     } else {
       res.status(statusCode).json({
         success: true,
-        token,
+        accessToken,
         refreshToken,
         _id: user._id,
         username: user.username,

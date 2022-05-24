@@ -104,7 +104,10 @@ const AccountSettingsContent = ({
       formData.append('profilePicture', file, file.name);
 
       settingsDao
-        .setProfilePicture(formData, settingsState.settings.currentUser.token)
+        .setProfilePicture(
+          formData,
+          settingsState.settings.currentUser.accessToken
+        )
         .then((res) => {
           dispatch(setProfilePictureMain(res.data));
         })
@@ -186,7 +189,7 @@ export default function SettingsContent() {
       .setUsername(
         settingsState.settings.currentUser._id,
         newUsername,
-        settingsState.settings.currentUser.token
+        settingsState.settings.currentUser.accessToken
       )
       .then((res) => {
         dispatch(setUsernameMain(res.data));
@@ -203,7 +206,7 @@ export default function SettingsContent() {
       .setEmail(
         settingsState.settings.currentUser._id,
         newEmail,
-        settingsState.settings.currentUser.token
+        settingsState.settings.currentUser.accessToken
       )
       .then((res) => {
         dispatch(setEmailMain(res.data));

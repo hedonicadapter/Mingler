@@ -1,9 +1,10 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
+import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
 
 import DAO from '../config/DAO';
-import { useAuth } from './AuthContext';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
 const ClientSocketContext = createContext();
@@ -12,7 +13,7 @@ export function useClientSocket() {
 }
 
 export function ClientSocketProvider({ children }) {
-  const { currentUser } = useAuth();
+  const currentUser = useSelector((state) => getCurrentUser(state));
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export function ClientSocketProvider({ children }) {
   useEffect(() => {
     const newSocket = io('ws://127.0.0.1:8080/user', {
       auth: {
-        token: 'test',
+        accessToken: currentUser && currentUser.accessToken,
       },
       query: currentUser && {
         userID: currentUser._id?.replace(/['"]+/g, ''),
@@ -40,7 +41,7 @@ export function ClientSocketProvider({ children }) {
 
   useEffect(() => {
     if (!socket) return;
-    console.log('NEW SOCKET ALERT');
+
     socket.on('connect', () => {
       console.log('Client socket connected');
     });
