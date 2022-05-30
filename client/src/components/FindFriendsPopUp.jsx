@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getCurrentUser,
   setAccessTokenMain,
+  setCurrentUserMain,
   setRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 
@@ -79,9 +80,10 @@ export default function FindFriendsPopUp() {
   useEffect(() => {
     getSentFriendRequests();
 
-    ipcRenderer.on('refreshtoken:fromrenderer', (e, { access, refresh }) => {
-      dispatch(setAccessTokenMain(access));
-      dispatch(setRefreshTokenMain(refresh));
+    ipcRenderer.on('refreshtoken:fromrenderer', (e, { currentUser }) => {
+      // dispatch(setAccessTokenMain(access));
+      // dispatch(setRefreshTokenMain(refresh));
+      dispatch(setCurrentUserMain(currentUser));
     });
   }, []);
 

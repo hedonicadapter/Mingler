@@ -224,18 +224,16 @@ privateRoute.interceptors.response.use(
           await getNewToken(refreshToken)
             .then((tokens) => {
               const access = tokens.data.token;
-              const refresh = tokens.data.refreshToken;
-              if (!access || !refresh) {
-                return Promise.reject('Failed to receive new tokens.');
-              }
+
+              ogRequest.headers.Authorization = 'Bearer ' + access;
+              ogRequest.retry = true;
+
               const { port1 } = new MessageChannel();
               ipcRenderer.postMessage(
                 'refreshtoken:fromrenderer',
-                { access, refresh },
+                { currentUser: tokens.data },
                 [port1]
               );
-              ogRequest.headers.Authorization = 'Bearer ' + access;
-              ogRequest.retry = true;
 
               return axios(ogRequest)
                 .then()

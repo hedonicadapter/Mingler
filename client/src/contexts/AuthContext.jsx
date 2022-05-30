@@ -14,8 +14,6 @@ import {
   getCurrentUser,
   setCurrentUserMain,
   setKeepMeSignedInMain,
-  setAccessTokenMain,
-  setRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
@@ -62,9 +60,7 @@ export function authAndy({ children }) {
   const signUpWithEmail = async (name, email, password) => {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
       .then((result) => {
-        dispatch(setAccessTokenMain(result.data.accessToken));
-        dispatch(setRefreshTokenMain(result.data.refreshToken));
-        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
+        dispatch(setCurrentUserMain(result.data));
 
         return { success: true };
       })
@@ -100,12 +96,6 @@ export function authAndy({ children }) {
         guest: true,
       });
 
-      dispatch(setAccessTokenMain(result.data.accessToken));
-      dispatch(setRefreshTokenMain(result.data.refreshToken));
-
-      // Access token refresh token pair
-      // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
-
       //for the socket in main
       ipcRenderer.send('currentUser:signedIn', result.data._id);
 
@@ -135,7 +125,6 @@ export function authAndy({ children }) {
           accessToken: result.data.accessToken,
           refreshToken: result.data.refreshToken,
         };
-        console.log('signin ', result.data);
 
         dispatch(setCurrentUserMain(result.data));
         setRecentUser({
@@ -144,12 +133,6 @@ export function authAndy({ children }) {
           fingerprint: clientFingerprint,
           guest: false,
         });
-
-        dispatch(setAccessTokenMain(tokens.accessToken));
-        dispatch(setRefreshTokenMain(tokens.refreshToken));
-
-        // Access token refresh token pair
-        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
 
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
@@ -168,32 +151,24 @@ export function authAndy({ children }) {
       });
   };
 
-  const signInRememberedUser = async () => {
-    return await DAO.signInRememberedUser(currentUser?.refreshToken)
+  const signInRememberedUser = async (refreshToken) => {
+    await DAO.signInRememberedUser(refreshToken)
       .then((result) => {
-        console.log('remembered ', result.data.accessToken);
         dispatch(setCurrentUserMain(result.data));
         setRecentUser({
           userID: result.data._id,
-          email,
+          email: result.data.email,
           fingerprint: clientFingerprint,
           guest: false,
         });
 
-        dispatch(setAccessTokenMain(result.data.accessToken));
-        dispatch(setRefreshTokenMain(result.data.refreshToken));
-
-        // Access token refresh token pair
-        // localStorage.setItem(result.data.accessToken, result.data.refreshToken);
-
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
         setSignedIn(true);
-
-        return { success: true };
       })
       .catch((e) => {
-        return { error: e.response };
+        setSignedIn(false);
+        console.log(e);
       });
   };
 
@@ -214,32 +189,25 @@ export function authAndy({ children }) {
       currentUser.keepMeSignedIn &&
       currentUser.refreshToken
     ) {
-      console.log(
-        'boutta sign in remembered user ',
-        currentUser?.keepMeSignedIn
-      );
-      signInRememberedUser()
-        .then(() => {
-          setSignedIn(true);
-        })
-        .catch((e) => {
-          setSignedIn(false);
-          console.log(e);
-        });
+      signInRememberedUser(currentUser?.refreshToken);
     }
   }, []);
 
   // Finished logging in
   useEffect(() => {
+    console.log('currentUser', Boolean(currentUser));
+    console.log('signedIn ', signedIn);
+
     if (currentUser?.length && signedIn) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
     }
   }, [currentUser, signedIn]);
 
-  ipcRenderer.on('refreshtoken:frommain', (e, { access, refresh }) => {
-    dispatch(setAccessTokenMain(access));
-    dispatch(setRefreshTokenMain(refresh));
-  });
+  useEffect(() => {
+    ipcRenderer.on('refreshtoken:frommain', (e, { currentUser }) => {
+      dispatch(setCurrentUserMain(currentUser));
+    });
+  }, []);
 
   const value = {
     recentUser,

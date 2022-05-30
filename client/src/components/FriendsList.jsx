@@ -73,8 +73,11 @@ export default function FriendsList() {
     new BrowserWindow(findFriendsWindowConfig)
   );
 
-  ipcRenderer.on('refreshtoken:frommain', (e, data) => {
-    findFriendsWindow?.webContents.send('refreshtoken:fromrenderer', data);
+  ipcRenderer.on('refreshtoken:frommain', (e, currentUser) => {
+    findFriendsWindow?.webContents.send(
+      'refreshtoken:fromrenderer',
+      currentUser
+    );
   });
 
   const handleSearchInput = (evt) => {

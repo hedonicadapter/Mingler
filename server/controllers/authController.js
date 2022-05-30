@@ -82,7 +82,7 @@ exports.signInRememberedUser = async (req, res, next) => {
     await RefreshToken.findOne({ refreshToken }, async function (e, token) {
       if (e) return next(e);
       if (!token) {
-        return next(new ErrorResponse('Invalid refresh token yerrr', 400));
+        return next(new ErrorResponse('Invalid refresh token', 400));
       }
 
       const user = await User.findOne({
