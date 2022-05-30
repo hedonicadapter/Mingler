@@ -26,7 +26,7 @@ export const settingsSlice = createSlice({
         return;
       }
 
-      if (data.profilePicture) {
+      if (Object.keys(data.profilePicture).length != 0) {
         data.profilePicture = profilePictureToJSXImg(data.profilePicture);
       }
 

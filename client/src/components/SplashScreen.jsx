@@ -115,11 +115,28 @@ const unavailableButtonStyle = css({
   cursor: 'auto',
 });
 
+const formFilledVariants = {
+  true: {
+    backgroundColor: colors.samBlue,
+    color: colors.darkmodeHighWhite,
+    cursor: 'pointer',
+  },
+  false: {
+    backgroundColor: colors.darkmodeDisabledBlack,
+    color: colors.darkmodeDisabledText,
+    cursor: 'auto',
+  },
+  loading: {
+    backgroundColor: colors.darkmodeDisabledBlack,
+    color: colors.darkmodeDisabledText,
+    cursor: 'auto',
+  },
+};
+
 export default function SplashScreen({}) {
   const { recentUser, signInGuest, signUpGuest, signUpWithEmail, signIn } =
     useAuth();
-  const [userName, setUserName] = useState('');
-  const [inputFocus, setInputFocus] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [slide, setSlide] = useState('Init');
   // const [showSuccessScreen, setShowSuccessScreen] = useState(false);
@@ -142,23 +159,6 @@ export default function SplashScreen({}) {
       localStorage.setItem('newUser', false);
     };
   }, []);
-
-  const inputFocusToggle = (evt) => {
-    setInputFocus(!inputFocus);
-  };
-
-  const handleNameChange = (evt) => {
-    setUserName(evt.target.value);
-  };
-
-  const handleContinueClick = () => {
-    setLoading(true);
-
-    signUpGuest(userName).then(({ success, error }) => {
-      success && signInGuest();
-      console.log(error);
-    });
-  };
 
   const AnimationWrapper = ({ children }) => {
     return (
@@ -297,52 +297,111 @@ export default function SplashScreen({}) {
   };
 
   const GuestSlide = () => {
-    const continueButtonStyle = css({
-      width: '84%',
-      textAlign: 'right',
-      padding: 6,
-      fontSize: '0.8em',
-      fontWeight: 700,
+    const [name, setName] = useState('');
+    const [nameFieldFocused, setNameFieldFocused] = useState(true);
+    const [formFilled, setFormFilled] = useState('false');
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+      if (!name) {
+        setFormFilled('false');
+      } else if (name) setFormFilled('true');
+    }, [name]);
+
+    const handleNameInput = (evt) => {
+      setName(evt.target.value);
+      validator();
+    };
+
+    const handleBackspaceAndEnter = (evt, fieldName) => {
+      if (evt.key === 'Enter') {
+        if (formFilled === 'true') handleContinueButton();
+      } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
+        setName(evt.target.value);
+        validator();
+      }
+    };
+
+    const validator = () => {
+      // if (name) {
+      //   setFormFilled('true');
+      // } else setFormFilled('false');
+    };
+
+    const handleContinueButton = () => {
+      setFormFilled('loading');
+
+      signUpGuest(name).then(({ success, _id, error }) => {
+        if (error) {
+          setError(error);
+          setFormFilled('true');
+        }
+        if (success) {
+          setError(null);
+          signInGuest(_id);
+        }
+      });
+    };
+
+    const buttonsContainer = css({
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
     });
 
     return (
-      <>
-        <AnimationWrapper>
-          <p>What do we call you?</p>
-
-          <StyledInput
-            onKeyUp={(event) => {
-              if (event.key === 'Enter') {
-                userName && handleContinueClick();
-              }
+      <AnimationWrapper>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+        >
+          <input
+            disabled={formFilled === 'loading' ? true : false}
+            placeholder="Name"
+            type="name"
+            value={name}
+            onChange={handleNameInput}
+            onKeyUp={(evt) => handleBackspaceAndEnter(evt)}
+            className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+            style={{
+              color:
+                nameFieldFocused && name
+                  ? colors.darkmodeHighWhite
+                  : colors.darkmodeMediumWhite,
             }}
-            placeholder="..."
-            ref={inputRef}
+            autoFocus={true}
+            onFocus={() => {
+              setNameFieldFocused(true);
+            }}
             onBlur={() => {
-              setInputFocus(true);
-              inputRef?.current?.focus();
+              setNameFieldFocused(false);
             }}
-            onChange={handleNameChange}
-            focus={inputFocus}
-            value={userName}
-            type="text"
-            spellCheck={false}
           />
-          <motion.div
-            animate={userName ? 'show' : 'hide'}
-            variants={{
-              show: { color: 'rgba(41,41,41)' },
-              hide: { color: 'rgba(241,235,232)' },
-            }}
-            transition={{ duration: 0.25 }}
-            onClick={() => userName && handleContinueClick()}
-            className={continueButtonStyle()}
-          >
-            {loading ? <div className="dotter" /> : 'continue'}
-          </motion.div>
+        </div>
+        <div className={buttonsContainer()}>
           <BackButton />
-        </AnimationWrapper>
-      </>
+          <motion.div
+            animate={formFilled}
+            variants={formFilledVariants}
+            whileTap={
+              formFilled != 'false' &&
+              formFilled != 'loading' && {
+                opacity: 0.4,
+                transition: { duration: 0.1 },
+              }
+            }
+            className={buttonStyle()}
+            style={{ width: '20%', minWidth: '60px' }}
+            onClick={() =>
+              formFilled != 'false' &&
+              formFilled != 'loading' &&
+              handleContinueButton()
+            }
+          >
+            {formFilled === 'loading' && <LoadingAnimation />}
+          </motion.div>
+        </div>
+        {error}
+      </AnimationWrapper>
     );
   };
 
@@ -365,19 +424,16 @@ export default function SplashScreen({}) {
     const handleNameInput = (evt) => {
       setName(evt.target.value);
       validator();
-      return;
     };
 
     const handleEmailInput = (evt) => {
       setEmail(evt.target.value);
       validator();
-      return;
     };
 
     const handlePasswordInput = (evt) => {
       setPassword(evt.target.value);
       validator();
-      return;
     };
 
     const handleBackspaceAndEnter = (evt, fieldName) => {
@@ -497,23 +553,7 @@ export default function SplashScreen({}) {
           <BackButton />
           <motion.div
             animate={formFilled}
-            variants={{
-              true: {
-                backgroundColor: colors.samBlue,
-                color: colors.darkmodeHighWhite,
-                cursor: 'pointer',
-              },
-              false: {
-                backgroundColor: colors.darkmodeDisabledBlack,
-                color: colors.darkmodeDisabledText,
-                cursor: 'auto',
-              },
-              loading: {
-                backgroundColor: colors.darkmodeDisabledBlack,
-                color: colors.darkmodeDisabledText,
-                cursor: 'auto',
-              },
-            }}
+            variants={formFilledVariants}
             whileTap={
               formFilled != 'false' &&
               formFilled != 'loading' && {
@@ -698,23 +738,7 @@ export default function SplashScreen({}) {
           </div>
           <motion.div
             animate={formFilled}
-            variants={{
-              true: {
-                backgroundColor: colors.samBlue,
-                color: colors.darkmodeHighWhite,
-                cursor: 'pointer',
-              },
-              false: {
-                backgroundColor: colors.darkmodeDisabledBlack,
-                color: colors.darkmodeDisabledText,
-                cursor: 'auto',
-              },
-              loading: {
-                backgroundColor: colors.darkmodeDisabledBlack,
-                color: colors.darkmodeDisabledText,
-                cursor: 'auto',
-              },
-            }}
+            variants={formFilledVariants}
             whileTap={
               formFilled != 'false' &&
               formFilled != 'loading' && {

@@ -72,35 +72,35 @@ export function authAndy({ children }) {
   const signUpGuest = async (username) => {
     return await DAO.signUpGuest(username, clientFingerprint)
       .then((result) => {
-        const id = result.data._id;
-
-        localStorage.setItem('userID', id);
+        console.log('signup guest ', result.data);
+        dispatch(setCurrentUserMain(result.data));
 
         //set fingerprint
-        return { success: true };
+        return { success: true, _id: result.data._id };
       })
       .catch((e) => {
         return { error: e.response.data.error };
       });
   };
 
-  const signInGuest = async () => {
-    const userID = localStorage.getItem('userID');
+  const signInGuest = async (userID = currentUser?._id) => {
+    return await DAO.signInGuest(userID, clientFingerprint)
+      .then((result) => {
+        console.log('signin guest ', result.data);
+        dispatch(setCurrentUserMain(result.data));
+        setRecentUser({
+          userID,
+          email: null,
+          fingerprint: clientFingerprint,
+          guest: true,
+        });
 
-    return await DAO.signInGuest(userID, clientFingerprint).then((result) => {
-      dispatch(setCurrentUserMain(result.data));
-      setRecentUser({
-        userID,
-        email: null,
-        fingerprint: clientFingerprint,
-        guest: true,
-      });
+        //for the socket in main
+        ipcRenderer.send('currentUser:signedIn', result.data._id);
 
-      //for the socket in main
-      ipcRenderer.send('currentUser:signedIn', result.data._id);
-
-      setSignedIn(true);
-    });
+        setSignedIn(true);
+      })
+      .catch((e) => console.log);
   };
 
   const signOut = () => {
@@ -190,14 +190,18 @@ export function authAndy({ children }) {
       currentUser.refreshToken
     ) {
       signInRememberedUser(currentUser?.refreshToken);
+    } else if (
+      !signedIn &&
+      currentUser &&
+      currentUser.guest &&
+      currentUser.refreshToken
+    ) {
+      signInGuest(currentUser._id);
     }
   }, []);
 
   // Finished logging in
   useEffect(() => {
-    console.log('currentUser', Boolean(currentUser));
-    console.log('signedIn ', signedIn);
-
     if (currentUser?.length && signedIn) {
       ipcRenderer.send('toChromiumHost:userID', currentUser._id);
     }

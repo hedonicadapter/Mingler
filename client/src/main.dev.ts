@@ -240,8 +240,8 @@ const createWindow = async () => {
     mainWindow?.webContents.send('cancelfriendrequest:frommain', data);
   });
 
-  ipcMain.on('refreshtoken:fromrenderer', (e, tokens) => {
-    mainWindow?.webContents.send('refreshtoken:frommain', tokens);
+  ipcMain.on('refreshtoken:fromrenderer', (e, currentUser) => {
+    mainWindow?.webContents.send('refreshtoken:frommain', currentUser);
   });
 
   //go offline on close
@@ -371,6 +371,7 @@ app.whenReady().then(() => {
                 refreshToken: global.state?.settings?.currentUser?.refreshToken,
                 keepMeSignedIn:
                   global.state?.settings?.currentUser?.keepMeSignedIn,
+                guest: global.state?.settings?.currentUser?.guest,
               },
             },
           });
