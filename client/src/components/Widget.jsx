@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import * as electron from 'electron';
 
 import './Widget.css';
 
@@ -14,32 +13,16 @@ import { FriendsProvider } from '../contexts/FriendsContext';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  appVisibleFalse,
   appVisibleTrue,
   getApp,
   toggleAppVisible,
 } from '../mainState/features/appSlice';
 
-const ipc = electron.ipcRenderer;
-ipc.setMaxListeners(2);
-
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
-  // DONT ipc.removeallListeners() bc it ruins the electron store
-  ipc.removeAllListeners('globalShortcut');
-  ipc.removeAllListeners('hideWidget');
 
-  ipc.on('globalShortcut', (evt, args) => {
-    dispatch(toggleAppVisible());
-  });
-  ipc.on('hideWidget', (evt, args) => {
-    if (!appState?.app.settingsFocused) {
-      dispatch(appVisibleFalse());
-    }
-  });
-
-  //If settings window is open and focused, toggle the main app
+  // If settings window is open and focused, toggle the main app
   useEffect(() => {
     if (appState.app.settingsOpen && appState.app.settingsFocused) {
       dispatch(appVisibleTrue());

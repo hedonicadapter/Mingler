@@ -107,7 +107,6 @@ export function ClientSocketProvider({ children }) {
 
   const sendActivity = (data) => {
     const packet = { data, userID: currentUser._id };
-    console.log(socket);
     socket.emit('activity:send', packet);
   };
 

@@ -172,6 +172,28 @@ const createWindow = async () => {
       mainWindow.show();
       mainWindow.focus();
     }
+
+    mainWindow.on('blur', () => {
+      if (mainWindow.webContents.isDevToolsFocused()) {
+        return; //ignore
+      } else {
+        store?.dispatch({
+          type: 'appVisibleFalse',
+          payload: {},
+        });
+      }
+    });
+
+    mainWindow.on('focus', () => {
+      if (mainWindow.webContents.isDevToolsFocused()) {
+        return; //ignore
+      } else {
+        store?.dispatch({
+          type: 'appVisibleTrue',
+          payload: {},
+        });
+      }
+    });
   });
 
   mainWindow.webContents.once('dom-ready', () => {
@@ -319,21 +341,14 @@ app.on('window-all-closed', () => {
   }
 });
 
-let showing = false;
-
 const toggleWidget = () => {
-  if (showing) {
-    mainWindow?.webContents.send('globalShortcut');
-    mainWindow?.focus();
+  let appVisible = store?.getState()?.app?.appVisible;
 
-    showing = !showing;
-  } else if (!showing) {
-    mainWindow?.blur(); //activates onblur event further down
+  if (appVisible) {
+    mainWindow?.blur();
+  } else if (!appVisible) {
+    mainWindow?.focus(); //activates onblur event further down
   }
-};
-const hideWidget = () => {
-  mainWindow?.webContents.send('hideWidget');
-  showing = !showing;
 };
 
 app.whenReady().then(() => {
@@ -387,14 +402,6 @@ app.whenReady().then(() => {
       }
     })
     .catch((err) => console.log('An error occurred: ', err));
-});
-
-app.on('browser-window-blur', (evt, win) => {
-  if (win.webContents.isDevToolsFocused()) {
-    return; //ignore
-  } else {
-    hideWidget();
-  }
 });
 
 app.on('activate', () => {

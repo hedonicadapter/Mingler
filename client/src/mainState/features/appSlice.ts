@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAliasedAction } from 'electron-redux';
 
 interface AppState {
   appVisible: Boolean;
@@ -16,31 +17,43 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    toggleAppVisible: (state, action: PayloadAction<null>) => {
-      state.appVisible = !state.appVisible;
-    },
-    appVisibleTrue: (state, action: PayloadAction<null>) => {
+    // toggleAppVisible: (state) => {
+    //   console.log('YOOOOOOOOOO');
+    //   state.appVisible = !state.appVisible;
+    // },
+    appVisibleTrue: (state) => {
       state.appVisible = true;
     },
-    appVisibleFalse: (state, action: PayloadAction<null>) => {
+    appVisibleFalse: (state) => {
       state.appVisible = false;
     },
-    settingsOpenTrue: (state, action: PayloadAction<null>) => {
+    settingsOpenTrue: (state) => {
       state.settingsOpen = true;
     },
-    settingsOpenFalse: (state, action: PayloadAction<null>) => {
+    settingsOpenFalse: (state) => {
       state.settingsOpen = false;
     },
-    settingsFocusedTrue: (state, action: PayloadAction<null>) => {
+    settingsFocusedTrue: (state) => {
       state.settingsFocused = true;
     },
-    settingsFocusedFalse: (state, action: PayloadAction<null>) => {
+    settingsFocusedFalse: (state) => {
       state.settingsFocused = false;
+    },
+  },
+  extraReducers: {
+    toggleAppVisible: (state) => {
+      state.appVisible = !state.appVisible;
+    },
+    appVisibleTrue: (state) => {
+      state.appVisible = true;
+    },
+    appVisibleFalse: (state) => {
+      state.appVisible = false;
     },
   },
 });
 
-export const { toggleAppVisible } = appSlice.actions;
+// export const { toggleAppVisible } = appSlice.actions;
 export const { appVisibleTrue } = appSlice.actions;
 export const { appVisibleFalse } = appSlice.actions;
 export const { settingsFocusedTrue } = appSlice.actions;

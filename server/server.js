@@ -30,15 +30,11 @@ const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log('server running on ' + PORT));
 
 // =========socket start=========
-const io = require('socket.io')(server, {
-  pingInterval: 10,
-  pingTimeout: 4000,
-});
+const io = require('socket.io')(server);
 
 const userIo = io.of('/user');
 
 userIo.use((socket, next) => {
-  // Get the client's mongodb _id
   const accessToken = socket.handshake.auth.accessToken;
 
   if (accessToken) {
