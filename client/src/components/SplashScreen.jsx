@@ -9,6 +9,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import MenuButton from './MenuButton';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import {
+  getSettings,
+  turnOffShowWelcomeMain,
+} from '../mainState/features/settingsSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const StyledInput = styled('input', {
   WebkitAppearance: 'none',
@@ -134,14 +139,15 @@ const formFilledVariants = {
 };
 
 export default function SplashScreen({}) {
-  const { recentUser, signInGuest, signUpGuest, signUpWithEmail, signIn } =
+  const { currentUser, signInGuest, signUpGuest, signUpWithEmail, signIn } =
     useAuth();
 
   const [loading, setLoading] = useState(false);
   const [slide, setSlide] = useState('Init');
   // const [showSuccessScreen, setShowSuccessScreen] = useState(false);
-  const [showWelcome, setShowWelcome] = useLocalStorage('showWelcome');
   const [justRegistered, setJustRegistered] = useLocalStorage('justRegistered');
+  const appSettings = useSelector(getSettings);
+  const dispatch = useDispatch();
 
   const inputRef = useRef();
 
@@ -153,10 +159,11 @@ export default function SplashScreen({}) {
   // so an experienced user is not met with
   // the same welcome screen
   useEffect(() => {
-    if (recentUser) setSlide('SignIn');
+    if (currentUser) setSlide('SignIn');
 
     return () => {
-      localStorage.setItem('newUser', false);
+      // turn off welcome splash/header when user gets past splash screen for the first time
+      dispatch(turnOffShowWelcomeMain());
     };
   }, []);
 
@@ -291,7 +298,7 @@ export default function SplashScreen({}) {
         {slide === 'Init' && <ServiceSelector />}
         {slide === 'Guest' && <GuestSlide />}
         {slide === 'Email' && <EmailSlide />}
-        {slide === 'SignIn' && <LoginSlide />}
+        {slide === 'SignIn' && <SigninSlide />}
       </div>
     );
   };
@@ -578,9 +585,9 @@ export default function SplashScreen({}) {
     );
   };
 
-  const LoginSlide = () => {
+  const SigninSlide = () => {
     const emailInput = useRef(null);
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(currentUser.email || '');
     const [password, setPassword] = useState('');
     const [emailFieldFocused, setEmailFieldFocused] = useState(true);
     const [passwordFieldFocused, setPasswordFieldFocused] = useState(false);
@@ -593,6 +600,9 @@ export default function SplashScreen({}) {
         setEmail(justRegistered.email);
         setPassword(justRegistered.password);
       }
+
+      // Surely it's ok to just store the password client-side momentarily
+      return () => setJustRegistered(null);
     }, []);
 
     useEffect(() => {
@@ -823,7 +833,7 @@ export default function SplashScreen({}) {
   const Header = () => {
     return (
       <div className={header()}>
-        {showWelcome ? (
+        {appSettings.showWelcome ? (
           <h2>
             Welcome to <h1>ShareHub!</h1>
           </h2>

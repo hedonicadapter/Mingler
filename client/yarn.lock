@@ -1132,6 +1132,14 @@
   "resolved" "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   "version" "0.2.3"
 
+"@cloudcmd/create-element@^2.0.0":
+  "integrity" "sha512-5b74qCgwEUx+GxzXC9Gwamgh4Rx5ouLSrCW+QbaBHWpxA5s1sw5i6MbSODfuts1MSX5RoaZjJAjNY5y3et1iXw=="
+  "resolved" "https://registry.npmjs.org/@cloudcmd/create-element/-/create-element-2.0.2.tgz"
+  "version" "2.0.2"
+  dependencies:
+    "currify" "^4.0.0"
+    "fullstore" "^3.0.0"
+
 "@cnakazawa/watch@^1.0.3":
   "integrity" "sha512-v9kIhKwjeZThiWrLmj0y17CWoyddASLj9O2yvbZkbvw/N3rWOYy9zkV66ursAoVr0mV15bL8g0c4QZUE6cdDoQ=="
   "resolved" "https://registry.npmjs.org/@cnakazawa/watch/-/watch-1.0.4.tgz"
@@ -4506,6 +4514,11 @@
   dependencies:
     "array-find-index" "^1.0.1"
 
+"currify@^4.0.0":
+  "integrity" "sha512-ABfH28PWp5oqqp31cLXJQdeMqoFNej9rJOu84wKhN3jPCH7FAZg3zY1MVI27PTFoqfPlxOyhGmh9PzOVv+yN2g=="
+  "resolved" "https://registry.npmjs.org/currify/-/currify-4.0.0.tgz"
+  "version" "4.0.0"
+
 "d@^1.0.1", "d@1":
   "integrity" "sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA=="
   "resolved" "https://registry.npmjs.org/d/-/d-1.0.1.tgz"
@@ -6418,6 +6431,11 @@
   "integrity" "sha1-FQStJSMVjKpA20onh8sBQRmU6k8="
   "resolved" "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   "version" "1.0.0"
+
+"fullstore@^3.0.0":
+  "integrity" "sha512-EEIdG+HWpyygWRwSLIZy+x4u0xtghjHNfhQb0mI5825Mmjq6oFESFUY0hoZigEgd3KH8GX+ZOCK9wgmOiS7VBQ=="
+  "resolved" "https://registry.npmjs.org/fullstore/-/fullstore-3.0.0.tgz"
+  "version" "3.0.0"
 
 "function-bind@^1.1.1":
   "integrity" "sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A=="
@@ -12007,6 +12025,15 @@
     "ansi-styles" "^4.0.0"
     "astral-regex" "^2.0.0"
     "is-fullwidth-code-point" "^3.0.0"
+
+"smalltalk@^4.0.7":
+  "integrity" "sha512-aYZLc6qegvJzbUK68Ay4/TnXRkiSKfXH7XTjiBR5DQrUSvtMA/j/y5Y6CiI23pYZifYzlm8oBQW3l1WoPf6J8w=="
+  "resolved" "https://registry.npmjs.org/smalltalk/-/smalltalk-4.0.7.tgz"
+  "version" "4.0.7"
+  dependencies:
+    "@cloudcmd/create-element" "^2.0.0"
+    "currify" "^4.0.0"
+    "fullstore" "^3.0.0"
 
 "snapdragon-node@^2.0.1":
   "integrity" "sha512-O27l4xaMYt/RSQ5TR3vpWCAB5Kb/czIcqUFOM/C4fYcLnbZUc1PkjTAMjof2pBWaSTwOUd6qUHcFGVGj7aIwnw=="

@@ -58,13 +58,19 @@ export default function MenuButton() {
 
   const handleSignoutButton = () => {
     if (currentUser.guest) {
-      if (
-        window.confirm(
-          "Since you're a guest, this will delete your account. Do you really want to proceed?"
-        )
-      ) {
-        signOut();
+      if (window.confirm("Since you're a guest, your account wil be lost.")) {
+        if (window.confirm('Are you sure? you will lose your account.')) {
+          signOut();
+        }
       }
+
+      // not supported in electron, and third party libraries have styling issues
+      // let confirmed = window.prompt(
+      //   "Since you're a guest, this will delete your account. To confirm, please type 'I understand' and press confirm."
+      // );
+      // if (confirmed === 'I understand') {
+      //   signOut();
+      // }
     } else {
       if (window.confirm('Log out?')) {
         signOut();

@@ -239,26 +239,16 @@ const sendToken = (user, statusCode, res) => {
   const accessToken = user.getSignedToken();
   user.getRefreshToken().then(({ refreshToken }) => {
     // Idk why I'm making this check but maybe I could assign roles this way? lmao
-    if (user.guest) {
-      res.status(statusCode).json({
-        success: true,
-        accessToken,
-        refreshToken,
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        profilePicture: user?.profilePicture,
-      });
-    } else {
-      res.status(statusCode).json({
-        success: true,
-        accessToken,
-        refreshToken,
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        profilePicture: user?.profilePicture,
-      });
-    }
+
+    res.status(statusCode).json({
+      success: true,
+      accessToken,
+      refreshToken,
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      profilePicture: user?.profilePicture,
+      guest: user.guest,
+    });
   });
 };

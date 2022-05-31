@@ -41,9 +41,6 @@ export function authAndy({ children }) {
   const dispatch = useDispatch();
 
   const [signedIn, setSignedIn] = useState(false);
-  const [recentUser, setRecentUser] = useLocalStorage(
-    'mostRecentRememberedUser'
-  );
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
 
@@ -72,7 +69,6 @@ export function authAndy({ children }) {
   const signUpGuest = async (username) => {
     return await DAO.signUpGuest(username, clientFingerprint)
       .then((result) => {
-        console.log('signup guest ', result.data);
         dispatch(setCurrentUserMain(result.data));
 
         //set fingerprint
@@ -86,14 +82,7 @@ export function authAndy({ children }) {
   const signInGuest = async (userID = currentUser?._id) => {
     return await DAO.signInGuest(userID, clientFingerprint)
       .then((result) => {
-        console.log('signin guest ', result.data);
         dispatch(setCurrentUserMain(result.data));
-        setRecentUser({
-          userID,
-          email: null,
-          fingerprint: clientFingerprint,
-          guest: true,
-        });
 
         //for the socket in main
         ipcRenderer.send('currentUser:signedIn', result.data._id);
@@ -107,15 +96,6 @@ export function authAndy({ children }) {
     setSignedIn(false);
     dispatch(setCurrentUserMain(null));
     ipcRenderer.send('currentUser:signedOut');
-
-    if (currentUser.guest) {
-      setRecentUser({
-        userID: null,
-        email: null,
-        fingerprint: null,
-        guest: null,
-      });
-    }
   };
 
   const signIn = async (email, password, keepMeSignedIn) => {
@@ -127,12 +107,6 @@ export function authAndy({ children }) {
         };
 
         dispatch(setCurrentUserMain(result.data));
-        setRecentUser({
-          userID: result.data._id,
-          email,
-          fingerprint: clientFingerprint,
-          guest: false,
-        });
 
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
@@ -155,12 +129,6 @@ export function authAndy({ children }) {
     await DAO.signInRememberedUser(refreshToken)
       .then((result) => {
         dispatch(setCurrentUserMain(result.data));
-        setRecentUser({
-          userID: result.data._id,
-          email: result.data.email,
-          fingerprint: clientFingerprint,
-          guest: false,
-        });
 
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
@@ -171,16 +139,6 @@ export function authAndy({ children }) {
         console.log(e);
       });
   };
-
-  // useEffect(() => {
-  //   const mostRecent = recentUser?.[0];
-
-  //   if (mostRecent) {
-  //     if (mostRecent.guest) loginGuest();
-  //     else if (!mostRecent.guest)
-  //       console.log('log in with recent non guest user');
-  //   } else console.log('show sign in or sign up screen');
-  // }, [recentUser]);
 
   useEffect(() => {
     if (
@@ -214,7 +172,6 @@ export function authAndy({ children }) {
   }, []);
 
   const value = {
-    recentUser,
     setName,
     signOut,
     signUpWithEmail,

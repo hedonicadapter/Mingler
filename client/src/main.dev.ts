@@ -45,6 +45,7 @@ export default class AppUpdater {
   }
 }
 
+let store;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
 
@@ -344,7 +345,7 @@ app.whenReady().then(() => {
     .then(async (name) => {
       console.log(`Added Extension:  ${name}`);
       try {
-        const store = configureStore(
+        store = configureStore(
           null,
           await storage.getItem('store'),
           // global.state,
@@ -373,6 +374,7 @@ app.whenReady().then(() => {
                   global.state?.settings?.currentUser?.keepMeSignedIn,
                 guest: global.state?.settings?.currentUser?.guest,
               },
+              showWelcome: global.state?.settings?.showWelcome,
             },
           });
           // TODO: should this be blocking / wait? _.throttle?

@@ -8,10 +8,12 @@ import produce from 'immer';
 
 interface SettingsState {
   currentUser: Array<any>;
+  showWelcome: Boolean;
 }
 
 const initialState: SettingsState = {
   currentUser: [],
+  showWelcome: true, //Used to show welcome splash screen or header on first launch
 };
 
 export const settingsSlice = createSlice({
@@ -26,7 +28,7 @@ export const settingsSlice = createSlice({
         return;
       }
 
-      if (Object.keys(data.profilePicture).length != 0) {
+      if (data.profilePicture && Object.keys(data.profilePicture).length != 0) {
         data.profilePicture = profilePictureToJSXImg(data.profilePicture);
       }
 
@@ -52,6 +54,9 @@ export const settingsSlice = createSlice({
     setKeepMeSignedInMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.keepMeSignedIn = action.payload;
     },
+    turnOffShowWelcomeMain: (state) => {
+      state.showWelcome = false;
+    },
   },
 });
 
@@ -62,9 +67,10 @@ export const { setAccessTokenMain } = settingsSlice.actions;
 export const { setRefreshTokenMain } = settingsSlice.actions;
 export const { setProfilePictureMain } = settingsSlice.actions;
 export const { setKeepMeSignedInMain } = settingsSlice.actions;
+export const { turnOffShowWelcomeMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 
-export const getSettings = (state: SettingsState) => state;
+export const getSettings = (state: SettingsState) => state.settings;
 export const getCurrentUser = (state: SettingsState) =>
   state.settings.currentUser;
