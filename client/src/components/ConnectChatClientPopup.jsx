@@ -133,7 +133,6 @@ export default function ConnectChatClientPopup() {
         ).then((res) => {
           setError(null);
           setFormFilled('true');
-          console.log(res);
         });
       });
     } catch (e) {

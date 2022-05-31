@@ -30,7 +30,10 @@ const PORT = process.env.PORT || 8080;
 const server = app.listen(PORT, () => console.log('server running on ' + PORT));
 
 // =========socket start=========
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+  pingInterval: 10,
+  pingTimeout: 4000,
+});
 
 const userIo = io.of('/user');
 
@@ -122,6 +125,13 @@ userIo.on('connection', async (socket) => {
     socket.on('friendrequest:cancel', (packet) => {
       const { toID } = packet;
       userIo.in(toID).emit('friendrequest:cancelreceive');
+    });
+
+    socket.on('disconnecting', (reason) => {
+      console.log('socket disconnecting: ', reason);
+    });
+    socket.on('disconnect', (reason) => {
+      console.log('socket disconnected: ', reason);
     });
 
     userIo.on('disconnect', (reason) => {

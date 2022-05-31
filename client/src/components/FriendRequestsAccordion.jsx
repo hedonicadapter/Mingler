@@ -32,8 +32,13 @@ export default function FriendRequestsAccordion({
   const currentUser = useSelector((state) => getCurrentUser(state));
 
   const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState(null);
 
   const hasRequests = friendRequests?.length > 0;
+
+  useEffect(() => {
+    setTimeout(() => setError(null), 3000);
+  }, [error]);
 
   const toggleExpansion = () => {
     if (hasRequests) {
@@ -47,9 +52,11 @@ export default function FriendRequestsAccordion({
         // Refresh friends list
         getFriends();
         getFriendRequests();
+        setError(null);
       })
       .catch((e) => {
-        console.log(e);
+        setError(e);
+        console.error(e);
       });
   };
 
@@ -58,9 +65,11 @@ export default function FriendRequestsAccordion({
       .then((res) => {
         // Refresh
         getFriendRequests();
+        setError(null);
       })
       .catch((e) => {
-        console.log(e);
+        setError(e);
+        console.error(e);
       });
   };
 

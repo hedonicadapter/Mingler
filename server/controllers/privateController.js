@@ -457,7 +457,7 @@ exports.refreshSpotify = async (req, res, next) => {
       return res.send(data);
     },
     function (e) {
-      console.log('Could not refresh access token', e);
+      // console.log('Could not refresh access token', e);
       next(e);
     }
   );

@@ -1,1 +1,1 @@
-{"key":"store","value":{"settings":{"currentUser":{},"showWelcome":false}}}
+{"key":"store","value":{"settings":{"currentUser":{"_id":"629604dde592ca0b70fc274d","accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOTYwNGRkZTU5MmNhMGI3MGZjMjc0ZCIsImlhdCI6MTY1Mzk5ODgxMywiZXhwIjoxNjUzOTk5MTEzfQ.aSf4qIxfBVXmC9YePjoJ0pBP1QNdBN2T02lBoyTiFrM","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyOTYwNGRkZTU5MmNhMGI3MGZjMjc0ZCIsImlhdCI6MTY1Mzk5ODgxM30.JapEs8jpMKTCwG0Svwb_LKijIVgQkv--gpT9lDvTRF0","guest":true},"showWelcome":false}}}

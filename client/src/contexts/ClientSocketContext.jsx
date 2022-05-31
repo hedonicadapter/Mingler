@@ -36,7 +36,7 @@ export function ClientSocketProvider({ children }) {
     });
     setSocket(newSocket);
 
-    return () => newSocket.close();
+    if (!currentUser || !currentUser._id) socket.close();
   }, [currentUser]);
 
   useEffect(() => {
@@ -57,6 +57,14 @@ export function ClientSocketProvider({ children }) {
     });
     socket.io.on('reconnect', (attempt) => {
       console.log(attempt);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('disconnected ', reason);
+    });
+
+    socket.on('connect_error', () => {
+      console.log('connect_error');
     });
 
     return () => {
@@ -99,7 +107,7 @@ export function ClientSocketProvider({ children }) {
 
   const sendActivity = (data) => {
     const packet = { data, userID: currentUser._id };
-
+    console.log(socket);
     socket.emit('activity:send', packet);
   };
 

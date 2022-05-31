@@ -20,7 +20,7 @@ const refreshAccessToken = () => {
       spotifyApi.setAccessToken(data.body['access_token']);
     },
     function (e) {
-      console.log('Could not refresh access token', e);
+      // console.log('Could not refresh access token', e);
     }
   );
 };

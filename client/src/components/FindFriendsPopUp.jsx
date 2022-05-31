@@ -55,7 +55,7 @@ export default function FindFriendsPopUp() {
   const [searchValue, setSearchValue] = useState(null);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
 
-  const currentUser = useSelector((state) => getCurrentUser(state));
+  const currentUser = useSelector(getCurrentUser);
 
   const dispatch = useDispatch();
 

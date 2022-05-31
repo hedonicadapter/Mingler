@@ -25,7 +25,7 @@ export function useStatus() {
 //
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
 export function UserStatusProvider({ children }) {
-  const currentUser = useSelector((state) => getCurrentUser(state));
+  const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   const { sendActivity } = useClientSocket();

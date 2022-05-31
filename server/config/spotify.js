@@ -23,7 +23,7 @@ const refresh = (expires_in) => {
       refresh(expires_in);
     },
     function (e) {
-      console.log('Could not refresh access token', e);
+      // console.log('Could not refresh access token', e);
     }
   );
 };

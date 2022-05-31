@@ -587,7 +587,7 @@ export default function SplashScreen({}) {
 
   const SigninSlide = () => {
     const emailInput = useRef(null);
-    const [email, setEmail] = useState(currentUser.email || '');
+    const [email, setEmail] = useState(currentUser?.email || '');
     const [password, setPassword] = useState('');
     const [emailFieldFocused, setEmailFieldFocused] = useState(true);
     const [passwordFieldFocused, setPasswordFieldFocused] = useState(false);

@@ -1,23 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// export const setMostRecentUser = (
-//   userID = '',
-//   email = '',
-//   fingerprint = '',
-//   guest
-// ) => {
-//   let recentUsers =
-//     window.localStorage.getObject('mostRecentRememberedUser') || [];
-
-//   recentUsers.unshift({ userID, email, fingerprint, guest });
-
-//   window.localStorage.setObject('mostRecentRememberedUser', recentUsers);
-// };
-
-// export const getMostRecentUser = () => {
-//   return window.localStorage.getObject('mostRecentRememberedUser')?.[0];
-// };
-
 function parseValue(value) {
   try {
     return JSON.parse(value);
@@ -37,32 +19,32 @@ export const useLocalStorage = (key, initialValue) => {
     else return initialValue;
   });
 
-  const customSetValue = (newValue) => {
-    if (key === 'mostRecentRememberedUser') {
-      const { userID } = newValue;
+  // const customSetValue = (newValue) => {
+  //   if (key === 'mostRecentRememberedUser') {
+  //     const { userID } = newValue;
 
-      let recentUsers = value || [];
+  //     let recentUsers = value || [];
 
-      // Check if user exists
-      const indexOfReturningUser = recentUsers.findIndex(
-        (object) => object.userID
-      );
+  //     // Check if user exists
+  //     const indexOfReturningUser = recentUsers.findIndex(
+  //       (object) => object.userID
+  //     );
 
-      // If user exists, delete from array
-      if (indexOfReturningUser) {
-        recentUsers = recentUsers.splice(indexOfReturningUser, 1);
-      }
+  //     // If user exists, delete from array
+  //     if (indexOfReturningUser) {
+  //       recentUsers = recentUsers.splice(indexOfReturningUser, 1);
+  //     }
 
-      // And add to the top of the array
-      recentUsers.unshift(newValue);
+  //     // And add to the top of the array
+  //     recentUsers.unshift(newValue);
 
-      setValue(recentUsers);
-    } else setValue(newValue);
-  };
+  //     setValue(recentUsers);
+  //   } else setValue(newValue);
+  // };
 
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
 
-  return [value, customSetValue];
+  return [value, setValue];
 };

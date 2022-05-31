@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 
 import AccordionItem from './AccordionItem';
 import colors from '../config/colors';
-import DAO from '../config/dao';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
@@ -53,7 +52,7 @@ const findFriendsWindowConfig = {
 };
 
 export default function FriendsList() {
-  const currentUser = useSelector((state) => getCurrentUser(state));
+  const currentUser = useSelector(getCurrentUser);
   const { socket } = useClientSocket();
   const {
     friends,
