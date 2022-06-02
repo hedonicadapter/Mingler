@@ -100,14 +100,11 @@ const AccountSettingsContent = ({
 
     if (file) {
       let formData = new FormData();
-      formData.append('userID', settingsState.settings.currentUser._id);
+      formData.append('userID', settingsState.currentUser._id);
       formData.append('profilePicture', file, file.name);
 
       settingsDao
-        .setProfilePicture(
-          formData,
-          settingsState.settings.currentUser.accessToken
-        )
+        .setProfilePicture(formData, settingsState.currentUser.accessToken)
         .then((res) => {
           dispatch(setProfilePictureMain(res.data));
         })
@@ -130,7 +127,7 @@ const AccountSettingsContent = ({
           <Avatar
             name={username}
             size="60"
-            src={settingsState.settings.currentUser.profilePicture}
+            src={settingsState.currentUser.profilePicture}
           />
         </motion.label>
         <input
@@ -171,10 +168,8 @@ export default function SettingsContent() {
 
   const [expanded, setExpanded] = useState(false);
   const [content, setContent] = useState('General');
-  const [username, setUsername] = useState(
-    settingsState.settings.currentUser.username
-  );
-  const [email, setEmail] = useState(settingsState.settings.currentUser.email);
+  const [username, setUsername] = useState(settingsState.currentUser.username);
+  const [email, setEmail] = useState(settingsState.currentUser.email);
 
   const handleEscapeKey = (evt) => {
     if (evt.keyCode === 27) {
@@ -187,9 +182,9 @@ export default function SettingsContent() {
 
     settingsDao
       .setUsername(
-        settingsState.settings.currentUser._id,
+        settingsState.currentUser._id,
         newUsername,
-        settingsState.settings.currentUser.accessToken
+        settingsState.currentUser.accessToken
       )
       .then((res) => {
         dispatch(setUsernameMain(res.data));
@@ -204,9 +199,9 @@ export default function SettingsContent() {
 
     settingsDao
       .setEmail(
-        settingsState.settings.currentUser._id,
+        settingsState.currentUser._id,
         newEmail,
-        settingsState.settings.currentUser.accessToken
+        settingsState.currentUser.accessToken
       )
       .then((res) => {
         dispatch(setEmailMain(res.data));

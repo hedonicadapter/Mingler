@@ -8,33 +8,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 
-const StyledInput = styled('input', {
-  marginLeft: '3%',
-  width: '58vw',
-
-  backgroundColor: 'transparent',
-  color: colors.darkmodeHighWhite,
-  border: 'none',
-  outline: 'none',
-  padding: '5px',
-  paddingLeft: '6px',
-
-  fontSize: '1.2em',
-  fontWeight: 'initial',
-
-  variants: {
-    focus: {
-      true: {
-        backgroundColor: colors.darkmodeDisabledBlack,
-        borderRadius: 1,
-      },
-      false: {
-        backgroundColor: 'transparent',
-      },
-    },
-  },
-});
-
 const container = css({ position: 'absolute', top: 0, right: 0, margin: 10 });
 const menuButtonStyle = css({
   position: 'absolute',

@@ -16,7 +16,7 @@ const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
 
 const container = css({
-  backgroundColor: colors.darkmodeBlack,
+  backgroundColor: 'transparent',
   flex: 1,
   height: '100%',
   display: 'flex',

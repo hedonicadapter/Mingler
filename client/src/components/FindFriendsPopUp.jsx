@@ -34,7 +34,7 @@ const searchInputStyle = css({
   WebkitAppearance: 'none',
   outline: 'none',
   border: 'none',
-  backgroundColor: 'transparent',
+  backgroundColor: colors.offWhite,
 
   fontSize: '1.0em',
   fontWeight: 600,

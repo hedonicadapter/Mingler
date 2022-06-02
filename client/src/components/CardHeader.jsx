@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 import {
   RiChatSmile2Fill,
@@ -18,7 +18,7 @@ const container = css({
   backgroundColor: 'transparent',
   flexDirection: 'row',
   display: 'flex',
-  paddingLeft: 35,
+  paddingLeft: 46,
   paddingTop: 10,
   paddingBottom: 10,
   // marginTop: 10,
@@ -45,7 +45,6 @@ const text = css({
 
 const statusIndicatorContainer = css({
   position: 'absolute',
-  // marginTop: -25,
 });
 
 const nameAndActivityPadding = css({
@@ -61,46 +60,15 @@ const markyContainer = css({
 
 const OfflineIndicatorAndBackground = styled('div', {
   position: 'absolute',
-  top: -4,
-  left: '-72px',
-  width: '12px',
-  height: '12px',
+  // top: -4,
+  marginTop: 15,
+  left: '-70px',
+  width: '14px',
+  height: '14px',
   borderRadius: '50%',
-  clipPath: 'inset(-325% -4000% -350% -580%)',
+  clipPath: 'inset(-325% -100vmax -800% -420%)',
   zIndex: -1,
-  boxShadow: '0 0 0 9999px rgb(18,18,18)', // used to be colors.classyWhite
-});
-
-const StyledInput = styled('input', {
-  width: '54vw',
-  backgroundColor: 'transparent',
-
-  color: colors.darkmodeBlack,
-
-  border: 'none',
-  outline: 'none',
-  paddingBottom: '4px',
-
-  fontSize: '1.6em',
-  fontWeight: 'initial',
-
-  variants: {
-    focus: {
-      focus: {
-        backgroundColor: colors.darkmodeDisabledBlack,
-        borderRadius: 1,
-      },
-      blur: {
-        backgroundColor: 'transparent',
-      },
-      enter: {
-        backgroundColor: colors.darkmodePressed,
-      },
-      leave: {
-        backgroundColor: 'transparent',
-      },
-    },
-  },
+  boxShadow: '0 0 0 9999px ' + colors.offWhite, // used to be colors.classyWhite
 });
 
 const OnlineStatusIndicator = ({ expanded }) => {
@@ -149,7 +117,7 @@ const AvatarContainer = ({
       }}
       whileHover={
         isWidgetHeader && {
-          outlineColor: 'rgba(0,0,0,1)',
+          backgroundColor: colors.offWhitePressed,
           cursor: 'pointer',
         }
       }
@@ -157,11 +125,17 @@ const AvatarContainer = ({
       onClick={isWidgetHeader && handleProfilePictureClick}
       style={
         isWidgetHeader && {
-          outline: '4px solid rgba(0,0,0,0)',
+          borderRadius: '50%',
+          backgroundColor: 'transparent',
         }
       }
     >
-      <Avatar name={name} size="45" src={profilePicture} />
+      <Avatar
+        name={name}
+        size={isWidgetHeader ? '56' : '48'}
+        src={profilePicture}
+        round
+      />
     </motion.div>
   );
 };
@@ -223,7 +197,7 @@ export default function CardHeader({
   return (
     <motion.div className={container()}>
       {/* <MenuButton /> */}
-      <OnlineStatusIndicator expanded={expanded} />
+      {/* <OnlineStatusIndicator expanded={expanded} /> */}
       <AvatarContainer
         expanded={expanded}
         name={name}
@@ -276,31 +250,27 @@ export default function CardHeader({
 
             {/* <div className={statusIndicatorContainer()}>
             {user.offline && <OfflineIndicatorAndBackground />}
-            <OfflineIndicatorAndBackground />
           </div> */}
+            <div className={statusIndicatorContainer()}>
+              <OfflineIndicatorAndBackground />
+            </div>
           </div>
-          <AnimatePresence>
-            {!expanded && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className={markyContainer()}
-              >
-                <Marky
-                  {...mainActivity}
-                  setMarkyToReplaceWithYouTubeVideo={
-                    setMarkyToReplaceWithYouTubeVideo
-                  }
-                  markyToReplaceWithYouTubeVideo={
-                    markyToReplaceWithYouTubeVideo
-                  }
-                  marKey={1}
-                  expanded={expanded}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div
+            animate={expanded ? 'true' : 'false'}
+            variants={{ true: { opacity: 0 }, false: { opacity: 1 } }}
+            transition={{ duration: 0.15 }}
+            className={markyContainer()}
+          >
+            <Marky
+              {...mainActivity}
+              setMarkyToReplaceWithYouTubeVideo={
+                setMarkyToReplaceWithYouTubeVideo
+              }
+              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+              marKey={1}
+              expanded={expanded}
+            />
+          </motion.div>
         </div>
         {!isWidgetHeader && (
           <div style={{ paddingRight: 45 }} onClick={(e) => toggleChat(e)}>

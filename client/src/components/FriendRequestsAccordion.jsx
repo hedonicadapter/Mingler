@@ -78,14 +78,14 @@ export default function FriendRequestsAccordion({
       <motion.header
         // user.offline ? 'transparent'
         style={{
-          backgroundColor: expanded ? 'rgba(36,36,36,1)' : 'rgba(18,18,18, 1)',
+          backgroundColor: expanded ? colors.offWhitePressed : colors.offWhite,
           color: hasRequests
             ? colors.darkmodeMediumWhite
             : colors.darkmodeDisabledWhite,
           fontWeight: hasRequests ? 'normal' : '700',
         }}
         whileHover={{
-          backgroundColor: 'rgba(36,36,36,1)',
+          cursor: hasRequests ? 'pointer' : 'auto',
         }}
         transition={{ duration: 0.15 }}
         onClick={() => toggleExpansion()}

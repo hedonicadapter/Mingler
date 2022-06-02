@@ -17,10 +17,6 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
-    // toggleAppVisible: (state) => {
-    //   console.log('YOOOOOOOOOO');
-    //   state.appVisible = !state.appVisible;
-    // },
     appVisibleTrue: (state) => {
       state.appVisible = true;
     },
@@ -53,7 +49,6 @@ export const appSlice = createSlice({
   },
 });
 
-// export const { toggleAppVisible } = appSlice.actions;
 export const { appVisibleTrue } = appSlice.actions;
 export const { appVisibleFalse } = appSlice.actions;
 export const { settingsFocusedTrue } = appSlice.actions;

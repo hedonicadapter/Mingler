@@ -21,7 +21,7 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const ipcRenderer = electron.ipcRenderer;
 
 const container = css({
-  backgroundColor: colors.darkmodeBlack,
+  backgroundColor: 'transparent',
   pointerEvents: 'auto',
 });
 
@@ -36,7 +36,7 @@ const searchInputStyle = css({
 });
 
 const findButton = css({
-  backgroundColor: colors.darkmodeBlack,
+  backgroundColor: 'transparent',
   padding: 10,
 });
 

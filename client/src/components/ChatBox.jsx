@@ -9,6 +9,8 @@ import { useClientSocket } from '../contexts/ClientSocketContext';
 import DAO from '../config/DAO';
 import { ConversationBubble } from './ConversationBubble';
 import { useFriends } from '../contexts/FriendsContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
 
 const ConnectButton = () => {
   const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
@@ -110,7 +112,7 @@ const inputBox = css({
 });
 
 export const ChatBox = ({ receiver, conversations }) => {
-  const currentUser = useSelector((state) => getCurrentUser(state));
+  const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   const { socket } = useClientSocket();

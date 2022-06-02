@@ -154,7 +154,7 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.setAlwaysOnTop(true, 'status');
+  // mainWindow.setAlwaysOnTop(true, 'status');
   var positioner = new Positioner(mainWindow);
   positioner.move('rightCenter');
 
@@ -170,7 +170,6 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
-      mainWindow.focus();
     }
 
     mainWindow.on('blur', () => {

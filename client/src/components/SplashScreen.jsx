@@ -15,40 +15,6 @@ import {
 } from '../mainState/features/settingsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
-const StyledInput = styled('input', {
-  WebkitAppearance: 'none',
-  outline: 'none',
-  border: 'none',
-
-  backgroundColor: colors.depressedWhite,
-  padding: 10,
-  // borderRadius: '50% / 10%',
-  position: 'relative',
-  // width: '200px',
-  // height: '150px',
-  // margin: '20px 10px',
-  borderRadius: '40% / 15%',
-  // width: '40%',
-
-  '&::before': {
-    position: 'absolute',
-    width: '120%',
-    top: '10%',
-    bottom: '10%',
-    background: 'inherit',
-    borderRadius: '30% / 45%',
-  },
-
-  variants: {
-    focus: {
-      true: {},
-      false: {
-        backgroundColor: 'transparent',
-      },
-    },
-  },
-});
-
 const container = css({
   pointerEvents: 'auto',
   backgroundColor: colors.darkmodeBlack,
