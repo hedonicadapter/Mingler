@@ -43,7 +43,7 @@ export default function AccordionSetting({
         animate={isExpanded ? 'expanded' : 'notExpanded'}
         variants={{
           expanded: {
-            color: colors.darkmodeHighWhite,
+            color: colors.darkmodeBlack,
             backgroundColor: colors.darkmodeBlack,
           },
           notExpanded: {
@@ -52,7 +52,7 @@ export default function AccordionSetting({
           },
         }}
         whileHover={{
-          color: colors.darkmodeHighWhite,
+          color: colors.darkmodeLightBlack,
           cursor: 'pointer',
         }}
         whileTap={{ opacity: 0.8 }}

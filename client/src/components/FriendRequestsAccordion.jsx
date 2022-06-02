@@ -80,8 +80,8 @@ export default function FriendRequestsAccordion({
         style={{
           backgroundColor: expanded ? colors.offWhitePressed : colors.offWhite,
           color: hasRequests
-            ? colors.darkmodeMediumWhite
-            : colors.darkmodeDisabledWhite,
+            ? colors.darkmodeLightBlack
+            : colors.darkmodeDisabledBlack,
           fontWeight: hasRequests ? 'normal' : '700',
         }}
         whileHover={{
@@ -101,8 +101,8 @@ export default function FriendRequestsAccordion({
             animate="open"
             exit="collapsed"
             variants={{
-              open: { height: 'auto', color: 'rgba(0,0,0,1)' },
-              collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
+              open: { height: 'auto', color: colors.darkmodeBlack },
+              collapsed: { height: 0, color: 'transparent' },
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >

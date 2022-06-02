@@ -25,7 +25,7 @@ const MarkyDiv = styled('div', {
   flexDirection: 'row',
   display: 'flex',
   transition: 'color .25s ease',
-  color: colors.darkmodeHighWhite,
+  color: colors.darkmodeBlack,
   variants: {
     markyType: {
       Window: { cursor: 'default' },
@@ -230,9 +230,7 @@ export default function Marky({
         ref={marqueeRef}
         className={activityText()}
         style={{
-          color: expanded
-            ? colors.darkmodeHighWhite
-            : colors.darkmodeMediumWhite,
+          color: expanded ? colors.darkmodeBlack : colors.darkmodeLightBlack,
         }}
       >
         <motion.div

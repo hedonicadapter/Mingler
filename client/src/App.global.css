@@ -18,7 +18,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   transition: all ease-in 0.15s;
   position: relative;
-  color: rgba(255, 255, 255, 0.87);
+  color: rgba(18, 18, 18, 0.86);
   /* font-family: 'Segoe UI', Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
     'Bitstream Vera Sans', 'Trebuchet MS', Verdana, 'Verdana Ref', sans serif; */
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;

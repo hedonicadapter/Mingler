@@ -1,6 +1,6 @@
 export default {
-  offWhite: 'rgba(253,245,241,100)',
-  offWhitePressed: 'rgba(196,196,196,20)',
+  offWhite: 'rgba(253,245,241,1)',
+  offWhitePressed: 'rgba(196,196,196,0.2)',
 
   classyWhite: '#fdf5f1',
   depressedWhite: '#f1ebe8',
@@ -18,8 +18,8 @@ export default {
   //  DARK MODE STANDARD COLORS:
   //  https://material.io/design/color/dark-theme.html
 
-  darkmodeBlack: '#121212',
-  darkmodeLightBlack: '#242424',
+  darkmodeBlack: 'rgba(18,18,18,0.86)',
+  darkmodeLightBlack: 'rgba(14,14,14,0.86)',
 
   darkmodeHighWhite: 'rgba(255,255,255,0.87)',
   darkmodeMediumWhite: 'rgba(255,255,255,0.60)',

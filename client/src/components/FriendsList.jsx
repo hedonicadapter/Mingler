@@ -168,11 +168,13 @@ export default function FriendsList() {
         </div>
       )}
 
-      <FriendRequestsAccordion
-        friendRequests={friendRequests}
-        getFriends={getFriends} // To refresh friends list after accepting a friend request
-        getFriendRequests={getFriendRequests} // Same thing here
-      />
+      {friendRequests?.length > 0 && (
+        <FriendRequestsAccordion
+          friendRequests={friendRequests}
+          getFriends={getFriends} // To refresh friends list after accepting a friend request
+          getFriendRequests={getFriendRequests} // Same thing here
+        />
+      )}
 
       {searchValue
         ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)

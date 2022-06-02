@@ -226,8 +226,8 @@ export default function CardHeader({
                 className={text()}
                 style={{
                   color: expanded
-                    ? colors.darkmodeMediumWhite
-                    : colors.darkmodeHighWhite,
+                    ? colors.darkmodeLightBlack
+                    : colors.darkmodeBlack,
                 }}
               >
                 {name}
