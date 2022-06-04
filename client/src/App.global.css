@@ -12,16 +12,23 @@ body,
 [data-reactroot] {
   height: 100% !important;
 }
-
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/assets/Helvetica.ttf');
+}
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  /* -webkit-font-smoothing: antialiased; */
+  /* -moz-osx-font-smoothing: grayscale; */
   transition: all ease-in 0.15s;
   position: relative;
   color: rgba(18, 18, 18, 0.86);
-  /* font-family: 'Segoe UI', Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
-    'Bitstream Vera Sans', 'Trebuchet MS', Verdana, 'Verdana Ref', sans serif; */
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica';
+  /* 'Segoe UI'; */
+  /* , Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
+    'Bitstream Vera Sans', 'Trebuchet MS', Verdana; */
+  /* 'Verdana Ref', sans serif; */
+  /* font-family: Helvetica Neue, Helvetica, Arial, sans-serif; */
   overflow-y: hidden;
   overflow-x: hidden;
   margin: auto;

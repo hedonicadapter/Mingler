@@ -102,7 +102,7 @@ export default function FriendRequestsAccordion({
             exit="collapsed"
             variants={{
               open: { height: 'auto', color: colors.darkmodeBlack },
-              collapsed: { height: 0, color: 'transparent' },
+              collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >

@@ -3,72 +3,33 @@ import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
 import { motion } from 'framer-motion';
 
-import {
-  RiChatSmile2Fill,
-  RiChatSmileFill,
-  RiWechat2Fill,
-} from 'react-icons/ri';
-
 import colors from '../config/colors';
 import Marky from './Marky';
-import MenuButton from './MenuButton';
-
-const container = css({
-  width: '100%',
-  backgroundColor: 'transparent',
-  flexDirection: 'row',
-  display: 'flex',
-  paddingLeft: 46,
-  paddingTop: 10,
-  paddingBottom: 10,
-  // marginTop: 10,
-  // borderTop: '1.5px solid',
-  // borderTopColor: colors.darkmodeBlack,
-});
 
 const nameAndActivityContainer = css({
-  // flexDirection: 'column',
-  display: 'flex',
-  flexDirection: 'column',
-  paddingRight: 10,
+  marginLeft: '20px',
+  paddingRight: '20px',
 });
 const nameContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
+  // paddingLeft: '4px',
 });
 
 const text = css({
-  paddingLeft: '7px',
-  fontSize: '1.2em',
+  fontSize: '1.1em',
+  textTransform: 'capitalize',
+  fontWeight: 'lighter',
 });
 
 const statusIndicatorContainer = css({
   position: 'absolute',
 });
 
-const nameAndActivityPadding = css({
-  paddingLeft: 2,
-});
-
 const markyContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  padding: 5,
-  paddingLeft: 6,
-});
-
-const OfflineIndicatorAndBackground = styled('div', {
-  position: 'absolute',
-  // top: -4,
-  marginTop: 15,
-  left: '-70px',
-  width: '14px',
-  height: '14px',
-  borderRadius: '50%',
-  clipPath: 'inset(-325% -100vmax -800% -420%)',
-  zIndex: -1,
-  boxShadow: '0 0 0 9999px ' + colors.offWhite, // used to be colors.classyWhite
+  // display: 'flex',
+  // flexDirection: 'row',
+  // padding: 4,
+  paddingTop: 8,
+  paddingLeft: 5,
 });
 
 const OnlineStatusIndicator = ({ expanded }) => {
@@ -111,9 +72,9 @@ const AvatarContainer = ({
   return (
     <motion.div
       animate={{
-        scale: expanded ? 0.6 : 1,
+        scale: expanded ? 0.8 : 1,
         originX: expanded ? -0.5 : 0,
-        originY: expanded ? -0.1 : 0,
+        originY: expanded ? -0.6 : 0,
       }}
       whileHover={
         isWidgetHeader && {
@@ -132,7 +93,7 @@ const AvatarContainer = ({
     >
       <Avatar
         name={name}
-        size={isWidgetHeader ? '56' : '48'}
+        size={isWidgetHeader ? '68' : '58'}
         src={profilePicture}
         round
       />
@@ -151,6 +112,7 @@ export default function CardHeader({
   markyToReplaceWithYouTubeVideo,
   toggleChat,
   chatVisible,
+  cardHovered,
 }) {
   const el = useRef(undefined);
   const [refresh, setRefresh] = useState(true);
@@ -179,47 +141,29 @@ export default function CardHeader({
     setRefresh(!refresh);
   };
 
-  const messageIcon = css({
-    height: 36,
-    width: 36,
-    transition: 'color 0.1s ease',
-
-    color: expanded
-      ? chatVisible
-        ? colors.darkmodeMediumWhite
-        : colors.darkmodeBlack
-      : colors.darkmodeBlack,
-    '&:hover': {
-      color: colors.darkmodeHighWhite,
-    },
-  });
-
   return (
-    <motion.div className={container()}>
-      {/* <MenuButton /> */}
-      {/* <OnlineStatusIndicator expanded={expanded} /> */}
-      <AvatarContainer
-        expanded={expanded}
-        name={name}
-        profilePicture={profilePicture}
-        isWidgetHeader={isWidgetHeader}
-      />
+    <>
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          width: '100%',
-          alignItems: expanded ? 'start' : 'center',
+          margin: 'auto',
         }}
       >
+        {/* <OnlineStatusIndicator expanded={expanded} /> */}
+        <div style={{ float: 'left', paddingRight: '16px' }}>
+          <AvatarContainer
+            expanded={expanded}
+            name={name}
+            profilePicture={profilePicture}
+            isWidgetHeader={isWidgetHeader}
+          />
+        </div>
         <div className={nameAndActivityContainer()}>
           <div className={nameContainer()}>
             <motion.div
               animate={{
-                scale: expanded ? 0.9 : 1,
-                originX: expanded ? -0.8 : 0,
-                originY: expanded ? 0.5 : 0,
+                scale: expanded ? 0.8 : 1,
+                originX: expanded ? -0.1 : 0,
+                originY: expanded ? -0.4 : 0,
               }}
             >
               <div
@@ -248,12 +192,34 @@ export default function CardHeader({
             /> */}
             </motion.div>
 
-            {/* <div className={statusIndicatorContainer()}>
-            {user.offline && <OfflineIndicatorAndBackground />}
-          </div> */}
-            <div className={statusIndicatorContainer()}>
-              <OfflineIndicatorAndBackground />
-            </div>
+            {!isWidgetHeader && (
+              <div className={statusIndicatorContainer()}>
+                <motion.div
+                  // style={{
+                  //   left: 13,
+                  //   marginTop: 16,
+                  //   position: 'absolute',
+                  // }}
+                  animate={{
+                    x: expanded ? -6 : 0,
+                    y: expanded ? -12 : 0,
+                  }}
+                  style={{
+                    position: 'absolute',
+                    // top: -4,
+                    marginTop: 38,
+                    left: '-88px',
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    // clipPath: 'inset(-325% -100vmax -500% -420%)',
+                    // clipPath: 'inset(-25% -20% -20% -20%)',
+                    zIndex: -1,
+                    // boxShadow: '0 0 0 9999px ' + colors.offWhite, // used to be colors.classyWhite
+                  }}
+                />
+              </div>
+            )}
           </div>
           <motion.div
             animate={expanded ? 'true' : 'false'}
@@ -272,12 +238,7 @@ export default function CardHeader({
             />
           </motion.div>
         </div>
-        {!isWidgetHeader && (
-          <div style={{ paddingRight: 45 }} onClick={(e) => toggleChat(e)}>
-            <RiWechat2Fill className={messageIcon()} />
-          </div>
-        )}
       </div>
-    </motion.div>
+    </>
   );
 }

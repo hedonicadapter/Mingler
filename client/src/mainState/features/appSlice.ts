@@ -5,12 +5,14 @@ interface AppState {
   appVisible: Boolean;
   settingsOpen: Boolean;
   settingsFocused: Boolean;
+  windowWidth: number;
 }
 
 const initialState: AppState = {
   appVisible: true,
   settingsOpen: false,
   settingsFocused: false,
+  windowWidth: 430,
 };
 
 export const appSlice = createSlice({
@@ -38,13 +40,17 @@ export const appSlice = createSlice({
   },
   extraReducers: {
     toggleAppVisible: (state) => {
-      state.appVisible = !state.appVisible;
+      // state.appVisible = !state.appVisible;
     },
     appVisibleTrue: (state) => {
-      state.appVisible = true;
+      // state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      state.appVisible = false;
+      // state.appVisible = false;
+    },
+    setWindowWidth: (state, action: PayloadAction<string>) => {
+      console.log('PAYLOAD ', action.payload);
+      state.windowWidth = action.payload;
     },
   },
 });

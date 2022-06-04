@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@stitches/react';
 
 import '../App.global.css';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import AccordionItem from './AccordionItem';
 import colors from '../config/colors';
@@ -10,10 +10,8 @@ import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
 import { useSelector } from 'react-redux';
-import {
-  getCurrentUser,
-  getSettings,
-} from '../mainState/features/settingsSlice';
+import { getCurrentUser } from '../mainState/features/settingsSlice';
+import WidgetFooter from './WidgetFooter';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -21,23 +19,12 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const ipcRenderer = electron.ipcRenderer;
 
 const container = css({
-  backgroundColor: 'transparent',
+  display: 'flex',
+  // flexDirection: 'column',
+  flexFlow: 'column',
+  height: '100vh',
   pointerEvents: 'auto',
-});
-
-const searchInputStyle = css({
-  fontSize: '1.0em',
-  fontWeight: 600,
-
-  // width: '100%',
-  margin: 15,
-  marginLeft: 20,
-  marginRight: 20,
-});
-
-const findButton = css({
   backgroundColor: 'transparent',
-  padding: 10,
 });
 
 const findFriendsWindowConfig = {
@@ -63,11 +50,8 @@ export default function FriendsList() {
     friendRequests,
   } = useFriends();
 
-  const searchInputRef = useRef();
-
   const [findFriendsOpen, setFindFriendsOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(null);
-  const [searchInputFocus, setSearchInputFocus] = useState(null);
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
   );
@@ -84,10 +68,6 @@ export default function FriendsList() {
     setSearchValue(searchTerm);
 
     findFriends(searchTerm);
-  };
-
-  const handleFindButtonClick = () => {
-    toggleFindFriends();
   };
 
   const toggleFindFriends = () => {
@@ -125,64 +105,42 @@ export default function FriendsList() {
   // }, [friends, socket]);
 
   useEffect(() => {
-    if (friends <= 0) searchInputRef?.current?.focus();
-  }, [searchInputRef?.current]);
-
-  useEffect(() => {
     return () => findFriendsWindow?.close();
   }, []);
 
   return (
-    <div className={container()}>
-      <AccordionItem
-        username={currentUser?.username}
-        friend={friends?.find((friend) => friend._id === currentUser?._id)}
-        isWidgetHeader={true}
-        handleNameChange={handleNameChange}
-      />
-
-      <input
-        placeholder="Search... 🔍"
-        type="text"
-        value={searchValue || ''}
-        onChange={handleSearchInput}
-        className={searchInputStyle()}
-        ref={searchInputRef}
-        onKeyUp={(evt) => {
-          if (evt.key === 'Enter') {
-            toggleFindFriends();
-          }
-        }}
-        onBlur={() => {
-          if (friends.length <= 0) {
-            setSearchInputFocus(true);
-            searchInputRef?.current?.focus();
-          }
-        }}
-        // focus={searchInputFocus}
-      />
-
-      {searchValue && (
-        <div onClick={handleFindButtonClick} className={findButton()}>
-          Find '{searchValue}'
-        </div>
-      )}
-
-      {friendRequests?.length > 0 && (
-        <FriendRequestsAccordion
-          friendRequests={friendRequests}
-          getFriends={getFriends} // To refresh friends list after accepting a friend request
-          getFriendRequests={getFriendRequests} // Same thing here
+    <div className={container()} spellcheck="false">
+      <div style={{ flex: '0 1 auto' }}>
+        <AccordionItem
+          username={currentUser?.username}
+          friend={friends?.find((friend) => friend._id === currentUser?._id)}
+          isWidgetHeader={true}
+          handleNameChange={handleNameChange}
         />
-      )}
 
-      {searchValue
-        ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
-        : friends.length
-        ? friends.map((friend, index) => (
-            <AccordionItem key={index} friend={friend} />
-          ))
-        : null}
+        {friendRequests?.length > 0 && (
+          <FriendRequestsAccordion
+            friendRequests={friendRequests}
+            getFriends={getFriends} // To refresh friends list after accepting a friend request
+            getFriendRequests={getFriendRequests} // Same thing here
+          />
+        )}
+
+        {searchValue
+          ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
+          : friends.length
+          ? friends.map((friend, index) => (
+              <AccordionItem key={index} friend={friend} />
+            ))
+          : null}
+      </div>
+      <div style={{ flex: '1 1 auto', backgroundColor: colors.offWhite }}></div>
+      <WidgetFooter
+        handleSearchInput={handleSearchInput}
+        toggleFindFriends={toggleFindFriends}
+        searchValue={searchValue}
+        friends={friends}
+      />
     </div>
   );
 }

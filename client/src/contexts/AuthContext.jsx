@@ -190,6 +190,7 @@ export function authAndy({ children }) {
             animate={{ opacity: 1, x: '0%' }}
             exit={{ opacity: 0, x: '120%' }}
             duration={0.1}
+            style={{ height: '100%' }}
           >
             <SplashScreen />
           </motion.div>
@@ -197,7 +198,7 @@ export function authAndy({ children }) {
           currentUser && (
             <div
               style={{
-                height: '100vh',
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
               }}

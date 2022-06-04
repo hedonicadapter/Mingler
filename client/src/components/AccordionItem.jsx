@@ -3,14 +3,37 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
+import { IoChatbubblesOutline } from 'react-icons/io5';
+
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
+import Marky from './Marky';
 
 const header = css({
   zIndex: 5,
-  paddingBottom: 0,
 });
+
+const CardSeparator = ({ cardHovered, expanded }) => {
+  const separator = css({
+    position: 'absolute',
+    height: '2px',
+    width: '100%',
+    backgroundColor: colors.offWhiteHovered,
+    transition: 'opacity 0.15s ease',
+    filter: 'blur(1px)',
+    zIndex: 50,
+  });
+
+  return (
+    <div
+      className={separator()}
+      style={{
+        opacity: cardHovered ? (expanded ? 0 : 1) : 0,
+      }}
+    />
+  );
+};
 
 export default function AccordionItem({
   username,
@@ -19,6 +42,7 @@ export default function AccordionItem({
   handleNameChange,
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [cardHovered, setCardHovered] = useState();
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
@@ -36,18 +60,57 @@ export default function AccordionItem({
     }
   };
 
+  const messageIcon = css({
+    transform: 'scaleX(-1)',
+    height: 26,
+    width: 26,
+    transition: 'color 0.15s ease',
+    transition: 'opacity 0.15s ease',
+
+    color: expanded
+      ? chatVisible
+        ? colors.darkmodeLightBlack
+        : colors.darkmodeBlack
+      : colors.darkmodeBlack,
+
+    opacity: cardHovered ? 1 : 0,
+    '&:hover': {
+      color: colors.darkmodeBlack,
+    },
+    '&:active': {
+      color: colors.offWhitePressed,
+    },
+  });
+
   return (
     <>
       <motion.header
         // user.offline ? 'transparent'
-        // style={{
-        //   backgroundColor: expanded
-        //     ? colors.offWhite //used to be rgba(241,235,232,1)
-        //     : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
-        // }}
+        style={{
+          // margin: 'auto',
+          position: 'relative',
+          // display: 'flex',
+          // flexDirection: 'row',
+          // height: '120px',
+          // height: expanded ? '120px' : '90px',
+          // paddingTop: '55px',
+          // paddingBottom: '55px',
+          height: 84,
+          backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
+          WebkitMask: isWidgetHeader
+            ? 'none'
+            : 'radial-gradient(circle 8px at 36px 50%,transparent 95%,#fff)',
+          // backgroundColor: expanded
+          //   ? colors.offWhite //used to be rgba(241,235,232,1)
+          //   : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
+          paddingLeft: isWidgetHeader ? 26 : 54,
+          paddingTop: isWidgetHeader ? 35 : 28,
+        }}
         transition={{ duration: 0.1 }}
         onClick={() => toggleExpansion()}
         className={header()}
+        onMouseEnter={() => setCardHovered(true)}
+        onMouseLeave={() => setCardHovered(false)}
       >
         <CardHeader
           key={friend?.key}
@@ -61,8 +124,27 @@ export default function AccordionItem({
           toggleChat={toggleChat}
           chatVisible={chatVisible}
           isWidgetHeader={isWidgetHeader}
+          cardHovered={cardHovered}
         />
+
+        {!isWidgetHeader && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 15,
+              top: '25%',
+              bottom: '75%',
+              float: 'right',
+              verticalAlign: 'middle',
+              lineHeight: '100%',
+            }}
+            onClick={(e) => toggleChat(e)}
+          >
+            <IoChatbubblesOutline className={messageIcon()} />
+          </div>
+        )}
       </motion.header>
+      <CardSeparator cardHovered={cardHovered} expanded={expanded} />
       <AnimatePresence initial={'collapsed'}>
         {expanded && (
           <motion.section
@@ -71,7 +153,7 @@ export default function AccordionItem({
             exit="collapsed"
             variants={{
               open: { height: 'auto', color: colors.offWhite },
-              collapsed: { height: 0, color: 'transparent' },
+              collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >

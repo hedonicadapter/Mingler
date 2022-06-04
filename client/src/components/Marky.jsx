@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as electron from 'electron';
 import { css, styled } from '@stitches/react';
-import { BiPlanet, BiWindows } from 'react-icons/bi';
+import { BiPlanet } from 'react-icons/bi';
+import { RiWindow2Fill } from 'react-icons/ri';
 import { RiArrowDropUpLine, RiSpotifyLine } from 'react-icons/ri';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
@@ -52,10 +53,11 @@ const MarkyDiv = styled('div', {
 });
 const activityText = css({
   // width: '80vw',
+  fontSize: '0.9em',
+
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  fontSize: '0.9em',
 });
 const closeText = css({
   // float: 'right',
@@ -64,9 +66,9 @@ const closeText = css({
   color: colors.darkmodeDisabledText,
 });
 const activityIconStyle = css({
-  width: 16,
-  height: 16,
-  paddingRight: 8,
+  width: '19px; !important',
+  height: '19px; !important',
+  paddingRight: 5,
 });
 const closeIconStyle = css({
   float: 'right',
@@ -110,9 +112,8 @@ export default function Marky({
   const marqueeRef = useRef();
   const { setAccessToken, setRefreshToken } = useStatus();
 
-  const [playMarquee, setPlayMarquee] = useState(false);
   const [markyType, setMarkyType] = useState(null);
-  const [marqueeWidth, setMarqueeWidth] = useState(0);
+  const [marqueeWidth, setMarqueeWidth] = useState();
 
   useEffect(() => {
     // marKey of this specific Marky changes when the
@@ -132,13 +133,15 @@ export default function Marky({
   }, [marKey]);
 
   useEffect(() => {
-    marqueeRef.current
-      ? setMarqueeWidth(
-          // Width of overflowing text
-          marqueeRef.current.scrollWidth - marqueeRef.current.offsetWidth
-        )
-      : setMarqueeWidth(0);
-  }, [marqueeRef.current, WindowTitle, TabTitle, YouTubeTitle]);
+    if (marqueeRef.current) {
+      setMarqueeWidth(
+        // Width of overflowing text
+        marqueeRef.current.scrollWidth - marqueeRef.current.offsetWidth
+      );
+    } else {
+      setMarqueeWidth(0);
+    }
+  }, [marqueeRef, WindowTitle, TabTitle, YouTubeTitle]);
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
@@ -172,7 +175,7 @@ export default function Marky({
 
   const ActivityIcon = () => {
     if (WindowTitle) {
-      return <BiWindows className={activityIconStyle()} />;
+      return <RiWindow2Fill className={activityIconStyle()} />;
     }
 
     if (TrackTitle) {
@@ -225,7 +228,6 @@ export default function Marky({
   return (
     <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
-
       <div
         ref={marqueeRef}
         className={activityText()}
@@ -234,6 +236,14 @@ export default function Marky({
         }}
       >
         <motion.div
+          style={{
+            // width: '80px',
+            // textOverflow: 'ellipsis',
+            // whiteSpace: 'nowrap',
+            // overflow: 'hidden',
+            zIndex: 50,
+          }}
+          onMouseOver={() => console.log('hello')} //makes it work for some reason
           whileHover={{
             x: [0, -marqueeWidth],
             transition: {

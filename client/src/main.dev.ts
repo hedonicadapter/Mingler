@@ -135,12 +135,9 @@ const createWindow = async () => {
     frame: false,
     transparent: true,
     show: false,
-    // resizable: false,
-    // width: width / 4,
     height: height,
-    minWidth: 360,
-    // x: 0,
-    // y: height,
+    minWidth: 430,
+    width: 430,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -148,9 +145,19 @@ const createWindow = async () => {
     },
   });
 
+  var persistWidth;
   mainWindow.on('will-resize', async function (e, details) {
     if (details.y != 0) {
       e.preventDefault();
+    }
+    if (details.width) {
+      clearTimeout(persistWidth);
+      persistWidth = setTimeout(() => {
+        store?.dispatch({
+          type: 'setWindowWidth',
+          payload: details.width,
+        });
+      }, 150);
     }
   });
 
@@ -166,6 +173,14 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+    storage
+      .getItem('store')
+      .then((data) => {
+        mainWindow.setBounds({ width: data.app.windowWidth });
+        positioner.move('rightCenter');
+      })
+      .catch(console.error);
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
@@ -389,6 +404,9 @@ app.whenReady().then(() => {
                 guest: global.state?.settings?.currentUser?.guest,
               },
               showWelcome: global.state?.settings?.showWelcome,
+            },
+            app: {
+              windowWidth: global.state?.app?.windowWidth,
             },
           });
           // TODO: should this be blocking / wait? _.throttle?

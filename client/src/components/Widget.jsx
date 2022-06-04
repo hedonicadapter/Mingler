@@ -4,7 +4,6 @@ import './Widget.css';
 
 import colors from '../config/colors';
 import FriendsList from './FriendsList';
-import WidgetFooter from './WidgetFooter';
 import { AuthProvider } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import MenuButton from './MenuButton';
@@ -31,6 +30,7 @@ const Pane = ({ children }) => {
 
   return (
     <motion.div
+      // style={{ height: '100%' }}
       onContextMenu={(e) => e.preventDefault()}
       animate={appState?.app?.appVisible ? 'show' : 'hide'}
       variants={{
@@ -73,7 +73,6 @@ export default function Widget() {
             <Memoized>
               <MenuButton />
               <FriendsList />
-              <WidgetFooter />
             </Memoized>
           </UserStatusProvider>
         </FriendsProvider>

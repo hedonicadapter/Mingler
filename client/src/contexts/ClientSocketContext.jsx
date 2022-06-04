@@ -36,7 +36,7 @@ export function ClientSocketProvider({ children }) {
     });
     setSocket(newSocket);
 
-    if (!currentUser || !currentUser._id) socket.close();
+    // if (!currentUser || !currentUser._id) socket?.close();
   }, [currentUser]);
 
   useEffect(() => {
