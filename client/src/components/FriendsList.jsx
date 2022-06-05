@@ -109,7 +109,7 @@ export default function FriendsList() {
   }, []);
 
   return (
-    <div className={container()} spellcheck="false">
+    <div className={container()} spellCheck="false">
       <div style={{ flex: '0 1 auto' }}>
         <AccordionItem
           username={currentUser?.username}

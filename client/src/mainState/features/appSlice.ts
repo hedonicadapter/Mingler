@@ -48,7 +48,7 @@ export const appSlice = createSlice({
     appVisibleFalse: (state) => {
       // state.appVisible = false;
     },
-    setWindowWidth: (state, action: PayloadAction<string>) => {
+    setWindowWidth: (state, action: PayloadAction<number>) => {
       console.log('PAYLOAD ', action.payload);
       state.windowWidth = action.payload;
     },

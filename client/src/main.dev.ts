@@ -137,7 +137,6 @@ const createWindow = async () => {
     show: false,
     height: height,
     minWidth: 430,
-    width: 430,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -150,6 +149,7 @@ const createWindow = async () => {
     if (details.y != 0) {
       e.preventDefault();
     }
+
     if (details.width) {
       clearTimeout(persistWidth);
       persistWidth = setTimeout(() => {
@@ -173,13 +173,6 @@ const createWindow = async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    storage
-      .getItem('store')
-      .then((data) => {
-        mainWindow.setBounds({ width: data.app.windowWidth });
-        positioner.move('rightCenter');
-      })
-      .catch(console.error);
 
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
@@ -210,8 +203,16 @@ const createWindow = async () => {
     });
   });
 
-  mainWindow.webContents.once('dom-ready', () => {
+  mainWindow.webContents.once('dom-ready', async () => {
     try {
+      await storage
+        .getItem('store')
+        .then((data) => {
+          mainWindow.setBounds({ width: data.app.windowWidth });
+          positioner.move('rightCenter');
+        })
+        .catch(console.error);
+
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         const httpServer = createServer();
         const io = new Server(httpServer, {
@@ -390,10 +391,10 @@ app.whenReady().then(() => {
           };
         });
 
-        store.subscribe(() => {
+        store.subscribe(async () => {
           global.state = store.getState();
           // persist store changes
-          storage.setItem('store', {
+          await storage.setItem('store', {
             settings: {
               currentUser: {
                 _id: global.state?.settings?.currentUser?._id,
@@ -406,7 +407,7 @@ app.whenReady().then(() => {
               showWelcome: global.state?.settings?.showWelcome,
             },
             app: {
-              windowWidth: global.state?.app?.windowWidth,
+              ...global.state?.app,
             },
           });
           // TODO: should this be blocking / wait? _.throttle?
