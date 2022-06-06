@@ -408,6 +408,9 @@ app.whenReady().then(() => {
             },
             app: {
               ...global.state?.app,
+              settingsOpen: false,
+              settingsFocused: false,
+              appVisible: true,
             },
           });
           // TODO: should this be blocking / wait? _.throttle?

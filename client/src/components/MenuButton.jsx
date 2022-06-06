@@ -8,7 +8,16 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 
-const container = css({ position: 'absolute', top: 0, right: 0, margin: 10 });
+const container = css({
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  margin: 10,
+  width: 90,
+  backgroundColor: 'black',
+  color: 'white',
+  zIndex: 55,
+});
 const menuButtonStyle = css({
   position: 'absolute',
   top: 0,
@@ -17,7 +26,7 @@ const menuButtonStyle = css({
   height: 12,
   width: 12,
   borderRadius: '50%',
-  zIndex: 50,
+  zIndex: 55,
 });
 
 export default function MenuButton() {
@@ -28,6 +37,10 @@ export default function MenuButton() {
   const toggleMenu = () => {
     setMenuVisibility(!menuVisibility);
   };
+
+  useEffect(() => {
+    console.log('menuVisibility ', menuVisibility);
+  }, [menuVisibility]);
 
   const handleSignoutButton = () => {
     if (currentUser.guest) {
@@ -61,11 +74,6 @@ export default function MenuButton() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ staggerChildren: 0.25 }}
-            style={{
-              width: 90,
-              backgroundColor: 'black',
-              color: 'white',
-            }}
             onMouseEnter={() => setMenuVisibility(true)}
             onMouseLeave={() => setMenuVisibility(false)}
           >

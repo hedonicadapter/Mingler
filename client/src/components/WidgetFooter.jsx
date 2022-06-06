@@ -2,19 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@stitches/react';
 
 import colors from '../config/colors';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   appVisibleFalse,
+  getApp,
   settingsFocusedFalse,
   settingsFocusedTrue,
   settingsOpenFalse,
   settingsOpenTrue,
 } from '../mainState/features/appSlice';
 import { AnimatePresence, motion } from 'framer-motion';
-
-const electron = require('electron');
-const app = electron.remote.app;
-const BrowserWindow = electron.remote.BrowserWindow;
+import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 
 const container = css({
   fontSize: '1.0em',
@@ -50,7 +48,7 @@ const searchInputStyle = css({
   margin: 15,
   marginLeft: 20,
   marginRight: 20,
-  marginBottom: 20,
+  marginBottom: 18,
 });
 const button = css({
   cursor: 'pointer',
@@ -62,18 +60,6 @@ const button = css({
   // padding: 10,
 });
 
-const settingsWindowConfig = {
-  title: 'Settings',
-  show: false,
-  frame: false,
-  transparent: true,
-  width: 560,
-  webPreferences: {
-    nodeIntegration: true,
-    enableRemoteModule: true,
-  },
-};
-
 export default function WidgetFooter({
   handleSearchInput,
   toggleFindFriends,
@@ -82,55 +68,14 @@ export default function WidgetFooter({
 }) {
   const dispatch = useDispatch();
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsWindow, setSettingsWindow] = useState(
-    new BrowserWindow(settingsWindowConfig)
-  );
+  const appState = useSelector(getApp);
+  const { toggleSettings } = useBrowserWindow();
 
   const searchInputRef = useRef();
 
   useEffect(() => {
-    settingsWindow?.removeAllListeners();
-
-    settingsWindow?.on('focus', () => {
-      dispatch(settingsFocusedTrue());
-    });
-
-    settingsWindow?.on('blur', () => {
-      dispatch(settingsFocusedFalse());
-      if (!electron.remote.getCurrentWindow().isFocused()) {
-        dispatch(appVisibleFalse());
-      }
-    });
-  }, [settingsWindow]);
-
-  useEffect(() => {
     if (friends <= 0) searchInputRef?.current?.focus();
   }, [searchInputRef]);
-
-  const toggleSettings = () => {
-    if (!settingsOpen) {
-      settingsWindow.on('close', function () {
-        setSettingsWindow(null);
-        dispatch(settingsOpenFalse());
-      });
-      settingsWindow.on('closed', function () {
-        setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-        setSettingsOpen(false);
-        dispatch(settingsOpenFalse());
-      });
-      settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
-
-      settingsWindow.once('ready-to-show', () => {
-        settingsWindow.setTitle('Settings');
-        // settingsWindow.webContents.send('focus', searchValue);
-
-        settingsWindow.show();
-        setSettingsOpen(true);
-        dispatch(settingsOpenTrue());
-      });
-    } else settingsWindow.focus();
-  };
 
   return (
     <footer className={container()}>
@@ -163,17 +108,10 @@ export default function WidgetFooter({
         onClick={searchValue ? toggleFindFriends : toggleSettings}
         className={button()}
       >
-        {/* <AnimatePresence>
-          {searchValue ? (
-            <motion.div>find '{searchValue}'</motion.div>
-          ) : (
-            <>settings ⚙</>
-          )}
-        </AnimatePresence> */}
         <AnimatePresence>
           {searchValue && (
             <motion.div
-              style={{ position: 'absolute', right: 20, bottom: 15 }}
+              style={{ position: 'absolute', right: 20, bottom: 18 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.7 }}
               exit={{ opacity: 0 }}
@@ -186,7 +124,7 @@ export default function WidgetFooter({
         <AnimatePresence>
           {!searchValue && (
             <motion.div
-              style={{ position: 'absolute', bottom: 15, right: 20 }}
+              style={{ position: 'absolute', bottom: 20, right: 18 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.7 }}
               exit={{ opacity: 0 }}
@@ -197,11 +135,6 @@ export default function WidgetFooter({
           )}
         </AnimatePresence>
       </motion.div>
-      {/* // : (
-        //   <div className={button()} onClick={handleSettingsButton}>
-        //     settings ⚙
-        //   </div>
-        // ) */}
     </footer>
   );
 }

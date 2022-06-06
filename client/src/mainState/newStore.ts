@@ -55,8 +55,6 @@ export default function configureStore(
     // );
   }
 
-  console.log('STATTTT ', initialState);
-
   const rootReducer = createRootReducer(history, scope);
   const enhancer = compose(...enhanced);
   const store = createStore(rootReducer, initialState, enhancer);

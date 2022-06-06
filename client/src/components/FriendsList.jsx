@@ -12,6 +12,7 @@ import { useFriends } from '../contexts/FriendsContext';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 import WidgetFooter from './WidgetFooter';
+import MenuButton from './MenuButton';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -109,38 +110,45 @@ export default function FriendsList() {
   }, []);
 
   return (
-    <div className={container()} spellCheck="false">
-      <div style={{ flex: '0 1 auto' }}>
-        <AccordionItem
-          username={currentUser?.username}
-          friend={friends?.find((friend) => friend._id === currentUser?._id)}
-          isWidgetHeader={true}
-          handleNameChange={handleNameChange}
-        />
-
-        {friendRequests?.length > 0 && (
-          <FriendRequestsAccordion
-            friendRequests={friendRequests}
-            getFriends={getFriends} // To refresh friends list after accepting a friend request
-            getFriendRequests={getFriendRequests} // Same thing here
+    <>
+      <MenuButton />
+      <div className={container()} spellCheck="false">
+        <div style={{ flex: '0 1 auto' }}>
+          <AccordionItem
+            username={currentUser?.username}
+            friend={friends?.find((friend) => friend._id === currentUser?._id)}
+            isWidgetHeader={true}
+            handleNameChange={handleNameChange}
           />
-        )}
 
-        {searchValue
-          ? filteredFriends?.map((friend) => <AccordionItem friend={friend} />)
-          : friends.length
-          ? friends.map((friend, index) => (
-              <AccordionItem key={index} friend={friend} />
-            ))
-          : null}
+          {friendRequests?.length > 0 && (
+            <FriendRequestsAccordion
+              friendRequests={friendRequests}
+              getFriends={getFriends} // To refresh friends list after accepting a friend request
+              getFriendRequests={getFriendRequests} // Same thing here
+            />
+          )}
+
+          {searchValue
+            ? filteredFriends?.map((friend) => (
+                <AccordionItem friend={friend} />
+              ))
+            : friends.length
+            ? friends.map((friend, index) => (
+                <AccordionItem key={index} friend={friend} />
+              ))
+            : null}
+        </div>
+        <div
+          style={{ flex: '1 1 auto', backgroundColor: colors.offWhite }}
+        ></div>
+        <WidgetFooter
+          handleSearchInput={handleSearchInput}
+          toggleFindFriends={toggleFindFriends}
+          searchValue={searchValue}
+          friends={friends}
+        />
       </div>
-      <div style={{ flex: '1 1 auto', backgroundColor: colors.offWhite }}></div>
-      <WidgetFooter
-        handleSearchInput={handleSearchInput}
-        toggleFindFriends={toggleFindFriends}
-        searchValue={searchValue}
-        friends={friends}
-      />
-    </div>
+    </>
   );
 }

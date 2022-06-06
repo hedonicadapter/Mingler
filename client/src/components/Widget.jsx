@@ -16,6 +16,7 @@ import {
   getApp,
   toggleAppVisible,
 } from '../mainState/features/appSlice';
+import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
@@ -23,7 +24,7 @@ const Pane = ({ children }) => {
 
   // If settings window is open and focused, toggle the main app
   useEffect(() => {
-    if (appState.app.settingsOpen && appState.app.settingsFocused) {
+    if (appState.settingsOpen && appState.settingsFocused) {
       dispatch(appVisibleTrue());
     }
   }, [appState]);
@@ -32,7 +33,7 @@ const Pane = ({ children }) => {
     <motion.div
       // style={{ height: '100%' }}
       onContextMenu={(e) => e.preventDefault()}
-      animate={appState?.app?.appVisible ? 'show' : 'hide'}
+      animate={appState?.appVisible ? 'show' : 'hide'}
       variants={{
         show: {
           pointerEvents: 'auto',
@@ -70,10 +71,12 @@ export default function Widget() {
       <ClientSocketProvider>
         <FriendsProvider>
           <UserStatusProvider>
-            <Memoized>
-              <MenuButton />
-              <FriendsList />
-            </Memoized>
+            <BrowserWindowProvider>
+              <Memoized>
+                {/* <MenuButton /> */}
+                <FriendsList />
+              </Memoized>
+            </BrowserWindowProvider>
           </UserStatusProvider>
         </FriendsProvider>
       </ClientSocketProvider>
