@@ -120,6 +120,9 @@ export default function FriendsList() {
   useEffect(() => {
     return () => findFriendsWindow?.close();
   }, []);
+  useEffect(() => {
+    console.log('wtf ', filteredFriends);
+  }, [filteredFriends]);
 
   return (
     <>

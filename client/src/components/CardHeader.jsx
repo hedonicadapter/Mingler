@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
@@ -231,28 +231,38 @@ export default function CardHeader({
             transition={{ duration: 0.15 }}
             className={markyContainer()}
           >
-            {!expanded && (
-              <Marky
-                {...mainActivity}
-                setMarkyToReplaceWithYouTubeVideo={
-                  setMarkyToReplaceWithYouTubeVideo
-                }
-                markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-                marKey={1}
-                expanded={expanded}
-              />
-            )}
-            {expanded &&
-              activity?.map((activity, index) => (
-                <div className={markyContainer()}>
-                  <Marky
-                    {...activity}
-                    userID={userID}
-                    marKey={index}
-                    expanded={expanded}
-                  />
-                </div>
-              ))}
+            <Marky
+              {...mainActivity}
+              setMarkyToReplaceWithYouTubeVideo={
+                setMarkyToReplaceWithYouTubeVideo
+              }
+              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+              marKey={1}
+              expanded={expanded}
+            />
+            <AnimatePresence>
+              {expanded &&
+                activity?.map(
+                  (activity, index) =>
+                    index != 0 && (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className={markyContainer()}
+                      >
+                        <Marky
+                          {...activity}
+                          userID={userID}
+                          marKey={index}
+                          expanded={expanded}
+                        />
+                      </motion.div>
+                    )
+                )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </div>

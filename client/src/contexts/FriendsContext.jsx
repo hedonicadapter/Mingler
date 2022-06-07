@@ -206,14 +206,23 @@ export function FriendsProvider({ children }) {
       return new Date(b.Date) - new Date(a.Date);
     });
   };
+  useEffect(() => {
+    console.log('found friends ', filteredFriends);
+  }, [filteredFriends]);
 
   const findFriends = (searchTerm) => {
+    console.log(
+      'searching ',
+      friends.filter((friend) =>
+        friend.username.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
     setFilteredFriends(
       searchTerm
         ? friends.filter((friend) =>
             friend.username.toLowerCase().includes(searchTerm.toLowerCase())
           )
-        : null
+        : []
     );
   };
 
@@ -222,6 +231,7 @@ export function FriendsProvider({ children }) {
     getFriends,
     setFriends,
     findFriends,
+    filteredFriends,
     friendRequests,
     getFriendRequests,
   };
