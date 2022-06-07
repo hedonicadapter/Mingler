@@ -38,6 +38,18 @@ const findFriendsWindowConfig = {
   },
 };
 
+const EmptySpaceFiller = ({
+  setExpandedMasterToggle,
+  expandedMasterToggle,
+}) => {
+  return (
+    <div
+      style={{ flex: '1 1 auto', backgroundColor: colors.offWhite, zIndex: 60 }}
+      onClick={() => setExpandedMasterToggle(!expandedMasterToggle)}
+    />
+  );
+};
+
 export default function FriendsList() {
   const currentUser = useSelector(getCurrentUser);
   const { socket } = useClientSocket();
@@ -55,6 +67,7 @@ export default function FriendsList() {
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
   );
+  const [expandedMasterToggle, setExpandedMasterToggle] = useState(false);
 
   ipcRenderer.on('refreshtoken:frommain', (e, currentUser) => {
     findFriendsWindow?.webContents.send(
@@ -125,22 +138,31 @@ export default function FriendsList() {
               friendRequests={friendRequests}
               getFriends={getFriends} // To refresh friends list after accepting a friend request
               getFriendRequests={getFriendRequests} // Same thing here
+              expandedMasterToggle={expandedMasterToggle}
             />
           )}
 
           {searchValue
             ? filteredFriends?.map((friend) => (
-                <AccordionItem friend={friend} />
+                <AccordionItem
+                  friend={friend}
+                  expandedMasterToggle={expandedMasterToggle}
+                />
               ))
             : friends.length
             ? friends.map((friend, index) => (
-                <AccordionItem key={index} friend={friend} />
+                <AccordionItem
+                  key={index}
+                  friend={friend}
+                  expandedMasterToggle={expandedMasterToggle}
+                />
               ))
             : null}
         </div>
-        <div
-          style={{ flex: '1 1 auto', backgroundColor: colors.offWhite }}
-        ></div>
+        <EmptySpaceFiller
+          setExpandedMasterToggle={setExpandedMasterToggle}
+          expandedMasterToggle={expandedMasterToggle}
+        />
         <WidgetFooter
           handleSearchInput={handleSearchInput}
           toggleFindFriends={toggleFindFriends}

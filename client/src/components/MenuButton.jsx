@@ -96,18 +96,20 @@ export default function MenuButton() {
               initial="hidden"
               animate="show"
             >
-              <motion.li
+              {/* future feature: link to troubleshooting guide, download links, and other stuff */}
+              {/* <motion.li
                 whileHover={{ color: 'rgba(255,255,255,0.7)' }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
               >
                 Help
-              </motion.li>
-              <motion.li
+              </motion.li> */}
+              {/* future feature: minimize to tray */}
+              {/* <motion.li
                 whileHover={{ color: 'rgba(255,255,255,0.7)' }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
               >
                 Close
-              </motion.li>
+              </motion.li> */}
               <hr />
               {currentUser && (
                 <motion.li

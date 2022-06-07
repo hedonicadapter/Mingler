@@ -40,12 +40,17 @@ export default function AccordionItem({
   friend,
   isWidgetHeader,
   handleNameChange,
+  expandedMasterToggle,
 }) {
   const [expanded, setExpanded] = useState(false);
   const [cardHovered, setCardHovered] = useState();
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, [expandedMasterToggle]);
 
   const toggleExpansion = (evt) => {
     evt?.stopPropagation();

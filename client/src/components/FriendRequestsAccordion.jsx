@@ -28,6 +28,7 @@ export default function FriendRequestsAccordion({
   friendRequests,
   getFriends,
   getFriendRequests,
+  expandedMasterToggle,
 }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
 
@@ -35,6 +36,10 @@ export default function FriendRequestsAccordion({
   const [error, setError] = useState(null);
 
   const hasRequests = friendRequests?.length > 0;
+
+  useEffect(() => {
+    setExpanded(false);
+  }, [expandedMasterToggle]);
 
   useEffect(() => {
     setTimeout(() => setError(null), 3000);
