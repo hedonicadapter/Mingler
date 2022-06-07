@@ -5,13 +5,14 @@ import { motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
+import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 
 const nameAndActivityContainer = css({
   marginLeft: '20px',
   paddingRight: '20px',
 });
 const nameContainer = css({
-  // paddingLeft: '4px',
+  paddingBottom: 2,
 });
 
 const text = css({
@@ -25,11 +26,9 @@ const statusIndicatorContainer = css({
 });
 
 const markyContainer = css({
-  // display: 'flex',
-  // flexDirection: 'row',
-  // padding: 4,
-  paddingTop: 8,
+  marginTop: 4,
   paddingLeft: 5,
+  marginLeft: 22,
 });
 
 const OnlineStatusIndicator = ({ expanded }) => {
@@ -65,17 +64,20 @@ const AvatarContainer = ({
   isWidgetHeader,
   profilePicture,
 }) => {
+  const { toggleSettings } = useBrowserWindow();
+
   const handleProfilePictureClick = (evt) => {
     evt.stopPropagation();
+    toggleSettings('Account', 'profilePictureClicked');
   };
 
   return (
     <motion.div
-      animate={{
-        scale: expanded ? 0.8 : 1,
-        originX: expanded ? -0.5 : 0,
-        originY: expanded ? -0.6 : 0,
-      }}
+      // animate={{
+      //   scale: expanded ? 0.8 : 1,
+      //   originX: expanded ? -0.5 : 0,
+      //   originY: expanded ? -0.6 : 0,
+      // }}
       whileHover={
         isWidgetHeader && {
           backgroundColor: colors.offWhitePressed,
@@ -105,9 +107,11 @@ export default function CardHeader({
   isWidgetHeader,
   name,
   profilePicture,
+  userID,
   handleNameChange,
   expanded,
   mainActivity,
+  activity,
   setMarkyToReplaceWithYouTubeVideo,
   markyToReplaceWithYouTubeVideo,
   toggleChat,
@@ -160,11 +164,11 @@ export default function CardHeader({
         <div className={nameAndActivityContainer()}>
           <div className={nameContainer()}>
             <motion.div
-              animate={{
-                scale: expanded ? 0.8 : 1,
-                originX: expanded ? -0.1 : 0,
-                originY: expanded ? -0.4 : 0,
-              }}
+            // animate={{
+            //   scale: expanded ? 0.8 : 1,
+            //   originX: expanded ? -0.1 : 0,
+            //   originY: expanded ? -0.4 : 0,
+            // }}
             >
               <div
                 className={text()}
@@ -200,10 +204,10 @@ export default function CardHeader({
                   //   marginTop: 16,
                   //   position: 'absolute',
                   // }}
-                  animate={{
-                    x: expanded ? -6 : 0,
-                    y: expanded ? -12 : 0,
-                  }}
+                  // animate={{
+                  //   x: expanded ? -6 : 0,
+                  //   y: expanded ? -12 : 0,
+                  // }}
                   style={{
                     position: 'absolute',
                     // top: -4,
@@ -222,20 +226,33 @@ export default function CardHeader({
             )}
           </div>
           <motion.div
-            animate={expanded ? 'true' : 'false'}
-            variants={{ true: { opacity: 0 }, false: { opacity: 1 } }}
+            // animate={expanded ? 'true' : 'false'}
+            // variants={{ true: { opacity: 0 }, false: { opacity: 1 } }}
             transition={{ duration: 0.15 }}
             className={markyContainer()}
           >
-            <Marky
-              {...mainActivity}
-              setMarkyToReplaceWithYouTubeVideo={
-                setMarkyToReplaceWithYouTubeVideo
-              }
-              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-              marKey={1}
-              expanded={expanded}
-            />
+            {!expanded && (
+              <Marky
+                {...mainActivity}
+                setMarkyToReplaceWithYouTubeVideo={
+                  setMarkyToReplaceWithYouTubeVideo
+                }
+                markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+                marKey={1}
+                expanded={expanded}
+              />
+            )}
+            {expanded &&
+              activity?.map((activity, index) => (
+                <div className={markyContainer()}>
+                  <Marky
+                    {...activity}
+                    userID={userID}
+                    marKey={index}
+                    expanded={expanded}
+                  />
+                </div>
+              ))}
           </motion.div>
         </div>
       </div>

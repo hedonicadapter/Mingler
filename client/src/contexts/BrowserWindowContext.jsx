@@ -2,12 +2,17 @@ import React, { useContext, useState, useEffect, createContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   appVisibleFalse,
+  appVisibleTrue,
   getApp,
   settingsFocusedFalse,
   settingsFocusedTrue,
   settingsOpenFalse,
   settingsOpenTrue,
 } from '../mainState/features/appSlice';
+import {
+  getSettings,
+  setSettingsContentMain,
+} from '../mainState/features/settingsSlice';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -34,17 +39,17 @@ export function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
 
   const appState = useSelector(getApp);
+  const settingsState = useSelector(getSettings);
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
   );
 
   useEffect(() => {
     settingsWindow?.removeAllListeners();
-
     settingsWindow?.on('focus', () => {
       dispatch(settingsFocusedTrue());
+      electron.remote.getCurrentWindow().focus();
     });
-
     settingsWindow?.on('blur', () => {
       dispatch(settingsFocusedFalse());
       if (!electron.remote.getCurrentWindow().isFocused()) {
@@ -53,7 +58,9 @@ export function BrowserWindowProvider({ children }) {
     });
   }, [settingsWindow]);
 
-  const toggleSettings = () => {
+  const toggleSettings = (page = 'General', quickSetting = false) => {
+    dispatch(setSettingsContentMain(page));
+
     if (!appState.settingsOpen) {
       settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
 
@@ -62,6 +69,10 @@ export function BrowserWindowProvider({ children }) {
 
         settingsWindow.show();
         dispatch(settingsOpenTrue());
+
+        if (!quickSetting) return;
+        console.log('profilePictureClicked ', quickSetting);
+        settingsWindow.webContents.send('quickSetting', quickSetting);
       });
 
       settingsWindow.on('close', function () {

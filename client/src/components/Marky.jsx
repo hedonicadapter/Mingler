@@ -228,19 +228,18 @@ export default function Marky({
   return (
     <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
       <ActivityIcon />
-      <div
+      <motion.div
         ref={marqueeRef}
         className={activityText()}
         style={{
           color: expanded ? colors.darkmodeBlack : colors.darkmodeLightBlack,
+          width: '100%',
+          zIndex: 50,
         }}
       >
         <motion.div
           style={{
-            // width: '80px',
-            // textOverflow: 'ellipsis',
-            // whiteSpace: 'nowrap',
-            // overflow: 'hidden',
+            width: '100%',
             zIndex: 50,
           }}
           onMouseOver={() => console.log('hello')} //makes it work for some reason
@@ -269,7 +268,7 @@ export default function Marky({
         >
           <ActivityText />
         </motion.div>
-      </div>
+      </motion.div>
     </MarkyDiv>
   );
 }

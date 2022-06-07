@@ -21,17 +21,10 @@ import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
-
-  // If settings window is open and focused, toggle the main app
-  useEffect(() => {
-    if (appState.settingsOpen && appState.settingsFocused) {
-      dispatch(appVisibleTrue());
-    }
-  }, [appState]);
+  const [visible, setVisible] = useState(true);
 
   return (
     <motion.div
-      // style={{ height: '100%' }}
       onContextMenu={(e) => e.preventDefault()}
       animate={appState?.appVisible ? 'show' : 'hide'}
       variants={{

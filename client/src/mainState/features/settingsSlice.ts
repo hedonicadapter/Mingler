@@ -9,11 +9,13 @@ import produce from 'immer';
 interface SettingsState {
   currentUser: Array<any>;
   showWelcome: Boolean;
+  settingsContent: string;
 }
 
 const initialState: SettingsState = {
   currentUser: [],
   showWelcome: true, //Used to show welcome splash screen or header on first launch
+  settingsContent: 'General',
 };
 
 export const settingsSlice = createSlice({
@@ -57,6 +59,10 @@ export const settingsSlice = createSlice({
     turnOffShowWelcomeMain: (state) => {
       state.showWelcome = false;
     },
+    setSettingsContentMain: (state, action: PayloadAction<string>) => {
+      console.log('peload ', action.payload);
+      state.settingsContent = action.payload;
+    },
   },
 });
 
@@ -66,8 +72,11 @@ export const { setEmailMain } = settingsSlice.actions;
 export const { setAccessTokenMain } = settingsSlice.actions;
 export const { setRefreshTokenMain } = settingsSlice.actions;
 export const { setProfilePictureMain } = settingsSlice.actions;
+
 export const { setKeepMeSignedInMain } = settingsSlice.actions;
+
 export const { turnOffShowWelcomeMain } = settingsSlice.actions;
+export const { setSettingsContentMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 

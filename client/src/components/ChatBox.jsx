@@ -73,18 +73,16 @@ const chatContainer = css({
   borderColor: 'grey',
   display: 'flex',
   flexDirection: 'column',
-  height: 200,
+  maxHeight: 200,
   padding: 10,
-  marginLeft: -40,
   zIndex: 200,
 });
 const messageArea = css({
   overflowY: 'scroll',
   overflowX: 'hidden',
-  marginRight: -8,
   flex: 1,
-  height: 300,
-  marginBottom: 8,
+  // height: 300,
+  marginBottom: 4,
 
   scrollSnapType: 'y proximity',
 
@@ -93,11 +91,12 @@ const messageArea = css({
   },
 });
 const inputContainer = css({
-  borderTop: '1px solid #121212',
+  borderTop: '1px solid ' + colors.offWhitePressed2,
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
+  marginTop: 6,
 });
 const inputBox = css({
   border: 'none',
@@ -107,11 +106,12 @@ const inputBox = css({
   paddingTop: 8,
   marginLeft: 4,
   marginRight: 4,
-  color: colors.darkmodeHighWhite,
+  color: colors.darkmodeBlack,
   flex: 1,
+  fontFamily: 'inherit',
 });
 
-export const ChatBox = ({ receiver, conversations }) => {
+export const ChatBox = ({ receiver, conversations, expanded }) => {
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
@@ -266,6 +266,8 @@ export const ChatBox = ({ receiver, conversations }) => {
     const sendIcon = css({
       width: 22,
       height: 22,
+      transition: 'opacity 0.15s ease',
+      opacity: inputText ? 1 : 0,
     });
 
     const handleSendButton = () => {
@@ -278,10 +280,13 @@ export const ChatBox = ({ receiver, conversations }) => {
         whileHover={{ cursor: inputText ? 'pointer' : 'auto' }}
         onClick={handleSendButton}
       >
-        <MdSend
-          color={inputText ? colors.samBlue : colors.darkmodeBlack}
-          className={sendIcon()}
-        />
+        <motion.div
+          animate={inputText ? 'true' : 'false'}
+          variants={{ true: { opacity: 1 }, false: { opacity: 0 } }}
+          transition={{ duration: 0.15 }}
+        >
+          <MdSend color={colors.samBlue} className={sendIcon()} />
+        </motion.div>
       </motion.div>
     );
   };
@@ -292,7 +297,6 @@ export const ChatBox = ({ receiver, conversations }) => {
       const skip = conversations[0].messages.length;
       DAO.getMessages(conversations[0]._id, skip, currentUser?.accessToken)
         .then((res) => {
-          console.log('scrolled ', skip, ' ', conversations[0]._id);
           if (!res.data.messages) return;
 
           setFriends((prevState) =>
@@ -363,7 +367,7 @@ export const ChatBox = ({ receiver, conversations }) => {
         ) : (
           <ConnectButton />
         )}
-        <Dropdown />
+        {/* <Dropdown /> */}
         <SendButton />
       </div>
     </div>

@@ -2,6 +2,7 @@ export default {
   offWhite: 'rgba(253,245,241,1)',
   offWhiteHovered: 'rgba(241,235,232,255)',
   offWhitePressed: 'rgba(196,196,196,0.2)',
+  offWhitePressed2: 'rgba(196,196,196,0.3)',
 
   classyWhite: '#fdf5f1',
   depressedWhite: '#f1ebe8',

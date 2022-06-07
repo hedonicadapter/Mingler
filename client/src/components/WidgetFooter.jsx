@@ -105,7 +105,7 @@ export default function WidgetFooter({
         exit={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.15 }}
-        onClick={searchValue ? toggleFindFriends : toggleSettings}
+        onClick={searchValue ? toggleFindFriends : () => toggleSettings()}
         className={button()}
       >
         <AnimatePresence>

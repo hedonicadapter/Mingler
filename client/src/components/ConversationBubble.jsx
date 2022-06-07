@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css } from '@stitches/react';
+import { motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import { useSelector } from 'react-redux';
@@ -15,13 +16,13 @@ const conversationText = css({
   fontSize: '0.8em',
 });
 const sentTime = css({
-  color: colors.darkmodeDisabledWhite,
+  color: colors.darkmodeLightBlack,
   padding: 8,
-  marginInline: 5,
+  marginInline: 3,
   fontSize: '0.6em',
 });
 
-export const ConversationBubble = ({ fromID, message, sent }) => {
+export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
   const currentUser = useSelector((state) => getCurrentUser(state));
 
   const sentByMe = fromID === currentUser?._id;
@@ -31,17 +32,23 @@ export const ConversationBubble = ({ fromID, message, sent }) => {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    padding: 4,
+    padding: 3,
     justifyContent: sentByMe ? 'flex-end' : 'flex-start',
   });
   const bubble = css({
-    backgroundColor: sentByMe ? colors.nudeBloo : colors.darkmodeMediumWhite,
+    backgroundColor: sentByMe ? '#e6ccb2' : '#60463B',
     borderRadius: '15px',
     marginRight: 8,
   });
 
   return (
-    <div className={bubbleContainer()}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      duration={{ transition: 0.15 }}
+      className={bubbleContainer()}
+    >
       {sentByMe ? (
         <>
           <div className={sentTime()}>
@@ -65,6 +72,6 @@ export const ConversationBubble = ({ fromID, message, sent }) => {
           </div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 };

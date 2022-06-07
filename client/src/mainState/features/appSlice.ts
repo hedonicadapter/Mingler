@@ -23,6 +23,7 @@ export const appSlice = createSlice({
       state.appVisible = true;
     },
     appVisibleFalse: (state) => {
+      if (state.settingsOpen) return;
       state.appVisible = false;
     },
     settingsOpenTrue: (state) => {
@@ -33,6 +34,7 @@ export const appSlice = createSlice({
     },
     settingsFocusedTrue: (state) => {
       state.settingsFocused = true;
+      if (!state.appVisible) state.appVisible = true;
     },
     settingsFocusedFalse: (state) => {
       state.settingsFocused = false;
@@ -40,13 +42,14 @@ export const appSlice = createSlice({
   },
   extraReducers: {
     toggleAppVisible: (state) => {
-      // state.appVisible = !state.appVisible;
+      state.appVisible = !state.appVisible;
     },
     appVisibleTrue: (state) => {
-      // state.appVisible = true;
+      state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      // state.appVisible = false;
+      if (state.settingsOpen) return;
+      state.appVisible = false;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
       state.windowWidth = action.payload;

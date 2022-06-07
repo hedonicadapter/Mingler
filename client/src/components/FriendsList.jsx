@@ -21,7 +21,6 @@ const ipcRenderer = electron.ipcRenderer;
 
 const container = css({
   display: 'flex',
-  // flexDirection: 'column',
   flexFlow: 'column',
   height: '100vh',
   pointerEvents: 'auto',

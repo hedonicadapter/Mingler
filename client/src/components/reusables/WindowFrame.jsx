@@ -26,11 +26,11 @@ const tapAnimation = {
 
 const FrameButtons = () => {
   const handleMinimize = () => {
-    BrowserWindow.getFocusedWindow().minimize();
+    remote.getCurrentWindow().minimize();
   };
 
   const handleClose = () => {
-    BrowserWindow.getFocusedWindow().close();
+    remote.getCurrentWindow().close();
   };
 
   return (

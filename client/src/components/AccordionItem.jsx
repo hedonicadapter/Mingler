@@ -47,7 +47,8 @@ export default function AccordionItem({
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
 
-  const toggleExpansion = () => {
+  const toggleExpansion = (evt) => {
+    evt?.stopPropagation();
     setExpanded(!expanded);
   };
 
@@ -99,7 +100,7 @@ export default function AccordionItem({
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
-            : 'radial-gradient(circle 8px at 36px 50%,transparent 95%,#fff)',
+            : 'radial-gradient(circle 9px at 36px 50%,transparent 90%,#fff)',
           // backgroundColor: expanded
           //   ? colors.offWhite //used to be rgba(241,235,232,1)
           //   : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
@@ -107,7 +108,7 @@ export default function AccordionItem({
           paddingTop: isWidgetHeader ? 35 : 28,
         }}
         transition={{ duration: 0.1 }}
-        onClick={() => toggleExpansion()}
+        onClick={toggleExpansion}
         className={header()}
         onMouseEnter={() => setCardHovered(true)}
         onMouseLeave={() => setCardHovered(false)}
@@ -116,7 +117,9 @@ export default function AccordionItem({
           key={friend?.key}
           name={username ? username : friend?.username}
           profilePicture={friend?.profilePicture}
+          userID={friend?._id}
           mainActivity={friend?.activity?.[0]}
+          activity={friend?.activity}
           expanded={expanded}
           markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
           setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}

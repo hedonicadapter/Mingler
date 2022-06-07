@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
-import { VscChromeMinimize } from 'react-icons/vsc';
-import { BsCircle } from 'react-icons/bs';
-import { IoIosClose } from 'react-icons/io';
 import TextareaAutosize from 'react-textarea-autosize';
 
 import UserItem from './UserItem';
@@ -19,9 +16,11 @@ import {
   setProfilePictureMain,
   setUsernameMain,
   setEmailMain,
+  setSettingsContentMain,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
 import { getBase64 } from '../helpers/fileManager';
+import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -94,6 +93,7 @@ const AccountSettingsContent = ({
   handleEmailChange,
   dispatch,
   settingsState,
+  fileInputRef,
 }) => {
   const handleFileUpload = (evt) => {
     const file = Array.from(evt.target.files)[0];
@@ -123,6 +123,7 @@ const AccountSettingsContent = ({
           whileHover={{ cursor: 'pointer' }}
           htmlFor="file-upload"
           className="custom-file-upload"
+          ref={fileInputRef}
         >
           <Avatar
             name={username}
@@ -135,7 +136,12 @@ const AccountSettingsContent = ({
           accept="image/*"
           id="file-upload"
           type="file"
-          style={{ opacity: 0, position: 'absolute', zIndex: -1 }}
+          style={{
+            opacity: 0,
+            position: 'absolute',
+            zIndex: -1,
+            display: 'none',
+          }}
         />
       </motion.div>
       <div style={{ flexDirection: 'row' }}>
@@ -167,9 +173,14 @@ export default function SettingsContent() {
   const dispatch = useDispatch();
 
   const [expanded, setExpanded] = useState(false);
-  const [content, setContent] = useState('General');
   const [username, setUsername] = useState(settingsState.currentUser.username);
   const [email, setEmail] = useState(settingsState.currentUser.email);
+
+  const fileInputRef = useRef(null);
+
+  ipcRenderer.on('quickSetting', (e, quickSetting) => {
+    if (quickSetting === 'profilePictureClicked') fileInputRef?.current.click();
+  });
 
   const handleEscapeKey = (evt) => {
     if (evt.keyCode === 27) {
@@ -219,7 +230,11 @@ export default function SettingsContent() {
             <div className={menuHeader()}>SETTINGS</div>
             {settings.map((setting, index) => {
               return (
-                <div onClick={() => setContent(setting.title)}>
+                <div
+                  onClick={() =>
+                    dispatch(setSettingsContentMain(setting.title))
+                  }
+                >
                   <AccordionSetting
                     setting={setting}
                     key={index}
@@ -232,9 +247,12 @@ export default function SettingsContent() {
             })}
           </div>
           <div className={contentContainer()}>
-            <div className={contentHeader()}>{content}</div>
-            {content === 'Account' && (
+            <div className={contentHeader()}>
+              {settingsState.settingsContent}
+            </div>
+            {settingsState.settingsContent === 'Account' && (
               <AccountSettingsContent
+                fileInputRef={fileInputRef}
                 handleNameChange={handleNameChange}
                 handleEmailChange={handleEmailChange}
                 username={username}
