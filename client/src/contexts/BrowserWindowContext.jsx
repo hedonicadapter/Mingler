@@ -50,7 +50,8 @@ export function BrowserWindowProvider({ children }) {
       dispatch(settingsFocusedTrue());
       electron.remote.getCurrentWindow().focus();
     });
-    settingsWindow?.on('blur', () => {
+    settingsWindow?.on('blur', (e) => {
+      console.log('blurred for no reason ', e);
       dispatch(settingsFocusedFalse());
       if (!electron.remote.getCurrentWindow().isFocused()) {
         dispatch(appVisibleFalse());

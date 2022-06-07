@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
@@ -22,7 +22,7 @@ const CardSeparator = ({ cardHovered, expanded }) => {
     backgroundColor: colors.offWhiteHovered,
     transition: 'opacity 0.15s ease',
     filter: 'blur(1px)',
-    zIndex: 50,
+    zIndex: 80,
   });
 
   return (
@@ -47,6 +47,8 @@ export default function AccordionItem({
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
+
+  const cardHeaderRef = useRef(null);
 
   useEffect(() => {
     setExpanded(false);
@@ -101,7 +103,8 @@ export default function AccordionItem({
           // height: expanded ? '120px' : '90px',
           // paddingTop: '55px',
           // paddingBottom: '55px',
-          height: 84,
+          // height: expanded ? cardHeaderRef.current?.clientHeight + 10 : 84,
+          minHeight: friend?.activity?.length >= 2 ? 104 : 84,
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
@@ -109,16 +112,17 @@ export default function AccordionItem({
           // backgroundColor: expanded
           //   ? colors.offWhite //used to be rgba(241,235,232,1)
           //   : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
-          paddingLeft: isWidgetHeader ? 26 : 54,
+          paddingLeft: isWidgetHeader ? 23 : 54,
           paddingTop: isWidgetHeader ? 35 : 28,
+          // paddingBottom: expanded ? 24 : 0,
         }}
-        transition={{ duration: 0.1 }}
         onClick={toggleExpansion}
         className={header()}
         onMouseEnter={() => setCardHovered(true)}
         onMouseLeave={() => setCardHovered(false)}
       >
         <CardHeader
+          cardHeaderRef={cardHeaderRef}
           key={friend?.key}
           name={username ? username : friend?.username}
           profilePicture={friend?.profilePicture}

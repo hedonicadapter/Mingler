@@ -29,7 +29,7 @@ const ipcRenderer = require('electron').ipcRenderer;
 const settings = [{ title: 'General' }, { title: 'Account' }];
 
 const container = css({
-  backgroundColor: colors.darkmodeBlack,
+  backgroundColor: colors.offWhite,
 });
 
 const menuAndContentContainer = css({
@@ -40,11 +40,11 @@ const menu = css({
   paddingTop: 12,
   flexDirection: 'column',
   width: '120px',
-  backgroundColor: colors.darkmodeLightBlack,
+  backgroundColor: colors.offWhitePressed,
 });
 const menuHeader = css({
   color: colors.darkmodeDisabledBlack,
-  fontSize: '0.7em',
+  fontSize: '0.6em',
   fontWeight: 'bold',
   textAlign: 'right',
   paddingTop: 12,
@@ -56,33 +56,43 @@ const contentContainer = css({
   flex: 1,
 });
 const contentHeader = css({
-  fontWeight: 'bold',
+  // fontWeight: 'bold',
   fontSize: '1.2em',
-  color: colors.darkmodeHighWhite,
-  paddingBottom: 14,
+  color: colors.darkmodeLightBlack,
+  paddingBottom: 12,
 });
 
 const profilePictureFormContainer = css({
-  width: '200px',
-  backgroundColor: colors.darkmodeLightBlack,
+  backgroundColor: colors.offWhitePressed,
   display: 'flex',
   flexDirection: 'row',
+  width: '100%',
 });
 const avatarContainer = css({
+  margin: 'auto',
+  paddingLeft: 6,
   '&:hover': {
     cursor: 'pointer',
     backgroundColor: colors.darkmodeFocused,
   },
 });
-const genericInput = css({
-  padding: 6,
+const inputsContainer = css({
+  flexDirection: 'row',
+  paddingRight: 8,
   margin: 6,
+});
+const genericInput = css({
+  width: '100%',
+  paddingTop: 5,
+  paddingBottom: 5,
+  paddingLeft: 5,
   transition: 'background-color 0.15s ease',
-  color: colors.darkmodeMediumWhite,
+  color: colors.darkmodeLightBlack,
+  fontFamily: 'inherit',
 
   '&:hover, &:focus': {
-    backgroundColor: colors.darkmodeFocused,
-    color: colors.darkmodeHighWhite,
+    backgroundColor: colors.offWhitePressed,
+    color: colors.darkmodeBlack,
   },
 });
 
@@ -114,11 +124,7 @@ const AccountSettingsContent = ({
 
   return (
     <div className={profilePictureFormContainer()}>
-      <motion.div
-        className={avatarContainer()}
-        whileHover={{ outlineColor: 'rgba(0,0,0,1)' }}
-        style={{ outline: '4px solid rgba(0,0,0,0)' }}
-      >
+      <motion.div className={avatarContainer()}>
         <motion.label
           whileHover={{ cursor: 'pointer' }}
           htmlFor="file-upload"
@@ -126,13 +132,15 @@ const AccountSettingsContent = ({
           ref={fileInputRef}
         >
           <Avatar
+            round
             name={username}
-            size="60"
+            size="58"
             src={settingsState.currentUser.profilePicture}
           />
         </motion.label>
         <input
           onChange={handleFileUpload}
+          onFocus={(evt) => evt.preventDefault()}
           accept="image/*"
           id="file-upload"
           type="file"
@@ -144,7 +152,7 @@ const AccountSettingsContent = ({
           }}
         />
       </motion.div>
-      <div style={{ flexDirection: 'row' }}>
+      <div className={inputsContainer()}>
         <TextareaAutosize
           spellCheck="false"
           placeholder="Username"

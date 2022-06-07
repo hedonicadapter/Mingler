@@ -25,12 +25,6 @@ const statusIndicatorContainer = css({
   position: 'absolute',
 });
 
-const markyContainer = css({
-  marginTop: 4,
-  paddingLeft: 5,
-  marginLeft: 22,
-});
-
 const OnlineStatusIndicator = ({ expanded }) => {
   return (
     <motion.span
@@ -117,6 +111,7 @@ export default function CardHeader({
   toggleChat,
   chatVisible,
   cardHovered,
+  cardHeaderRef,
 }) {
   const el = useRef(undefined);
   const [refresh, setRefresh] = useState(true);
@@ -145,11 +140,18 @@ export default function CardHeader({
     setRefresh(!refresh);
   };
 
+  const markyContainer = css({
+    marginTop: 4,
+    paddingLeft: 5,
+    marginLeft: isWidgetHeader ? 27 : 22,
+  });
+
   return (
-    <>
+    <div style={{}} ref={cardHeaderRef}>
       <div
         style={{
           margin: 'auto',
+          // paddingBottom: 24,
         }}
       >
         {/* <OnlineStatusIndicator expanded={expanded} /> */}
@@ -266,6 +268,6 @@ export default function CardHeader({
           </motion.div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

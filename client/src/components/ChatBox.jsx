@@ -11,6 +11,7 @@ import { ConversationBubble } from './ConversationBubble';
 import { useFriends } from '../contexts/FriendsContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
+import { getApp } from '../mainState/features/appSlice';
 
 const ConnectButton = () => {
   const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
@@ -113,6 +114,7 @@ const inputBox = css({
 
 export const ChatBox = ({ receiver, conversations, expanded }) => {
   const currentUser = useSelector(getCurrentUser);
+  const appState = useSelector(getApp);
   const dispatch = useDispatch();
 
   const { socket } = useClientSocket();
@@ -126,7 +128,7 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
   const [scrollTop, setScrollTop] = useState(null);
 
-  const inputBoxRef = useRef();
+  const inputBoxRef = useRef(null);
 
   const handleInput = (evt) => {
     setInputText(evt.target.value);
@@ -355,7 +357,7 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
           <TextareaAutosize
             ref={inputBoxRef}
             maxRows={10}
-            autoFocus
+            autoFocus={appState?.settingsFocused ? false : true}
             placeholder="Aa"
             rows={1}
             className={inputBox()}

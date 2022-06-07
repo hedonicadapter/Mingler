@@ -253,15 +253,15 @@ export default function Marky({
                 delay: 0.15,
                 duration:
                   marqueeWidth > 40
-                    ? 1
-                    : marqueeWidth > 30
-                    ? 2
-                    : marqueeWidth > 20
-                    ? 3
-                    : marqueeWidth > 10
                     ? 4
+                    : marqueeWidth > 30
+                    ? 3
+                    : marqueeWidth > 20
+                    ? 2
+                    : marqueeWidth > 10
+                    ? 1
                     : 0,
-                ease: 'anticipate',
+                ease: 'easeOut',
               },
             },
           }}

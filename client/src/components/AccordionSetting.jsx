@@ -10,11 +10,11 @@ const header = css({
   width: '100%',
   paddingBlock: 8,
 
-  color: colors.darkmodeDisabledText,
+  color: colors.darkmodeBlack,
 });
-const settingText = css({ paddingLeft: 16 });
+const settingText = css({ fontSize: '0.9em', paddingLeft: 16 });
 const subSettings = css({
-  color: colors.darkmodeMediumWhite,
+  color: colors.darkmodeLightBlack,
   fontSize: '0.9em',
   paddingLeft: 20,
 
@@ -44,11 +44,11 @@ export default function AccordionSetting({
         variants={{
           expanded: {
             color: colors.darkmodeBlack,
-            backgroundColor: colors.darkmodeBlack,
+            backgroundColor: colors.offWhite,
           },
           notExpanded: {
-            color: colors.darkmodeMediumWhite,
-            backgroundColor: colors.darkmodeLightBlack,
+            color: colors.darkmodeDisabledText,
+            backgroundColor: colors.offWhitePressed,
           },
         }}
         whileHover={{
