@@ -26,7 +26,7 @@ const text = css({
   fontSize: '1.2em',
 });
 
-const header = css({});
+const header = css({ paddingLeft: 5, paddingTop: 5, paddingBottom: 5 });
 const avatar = css({});
 
 const friendRequestButtonStyle = css({
@@ -124,6 +124,7 @@ const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
 export default function UserItem({
   user,
   index,
+  alreadyFriends,
   handleSendRequestButton,
   handleAcceptRequestButton,
   handleRejectRequestButton,
@@ -133,7 +134,11 @@ export default function UserItem({
 }) {
   const [hovered, setHovered] = useState(false);
 
-  const alternatingColor = [colors.classyWhite, colors.depressedWhite];
+  const alternatingColor = [colors.offWhiteHovered, colors.offWhite];
+
+  useEffect(() => {
+    console.log('alreadyFriends ', alreadyFriends);
+  }, [alreadyFriends]);
 
   return (
     <motion.div
@@ -143,6 +148,7 @@ export default function UserItem({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="clickable"
+      style={{ backgroundColor: colors.offWhite }}
     >
       <header
         style={{
@@ -154,7 +160,9 @@ export default function UserItem({
           <Avatar round className={avatar()} name={user.username} size="34" />
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user.username}</div>
-            {!requestSent ? (
+            {alreadyFriends ? (
+              <></>
+            ) : !requestSent ? (
               accept ? (
                 <AcceptRejectButtons
                   handleAcceptRequestButton={handleAcceptRequestButton}

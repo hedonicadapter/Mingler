@@ -14,6 +14,30 @@ const header = css({
   zIndex: 5,
 });
 
+const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
+  return (
+    <motion.span
+      style={{
+        pointerEvents: 'none',
+        position: 'absolute',
+        zIndex: 80,
+      }}
+    >
+      <span
+        style={{
+          height: '50px',
+          width: '50px',
+          backgroundColor: colors.samBlue,
+          clipPath: 'circle(9px at 36px)',
+          display: 'inline-block',
+          minHeight: activityLength >= 2 ? 104 : 84,
+          paddingTop: isWidgetHeader ? 35 : 28,
+        }}
+      />
+    </motion.span>
+  );
+};
+
 const CardSeparator = ({ cardHovered, expanded }) => {
   const separator = css({
     position: 'absolute',
@@ -43,12 +67,17 @@ export default function AccordionItem({
   expandedMasterToggle,
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [cardHovered, setCardHovered] = useState();
+  const [cardHovered, setCardHovered] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
   const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
     useState(null);
+  const [activityLength, setActivityLength] = useState(null);
 
   const cardHeaderRef = useRef(null);
+
+  useEffect(() => {
+    setActivityLength(friend?.activity?.length);
+  }, [friend]);
 
   useEffect(() => {
     setExpanded(false);
@@ -92,6 +121,12 @@ export default function AccordionItem({
 
   return (
     <>
+      {!isWidgetHeader && friend?.online && (
+        <OnlineStatusIndicator
+          activityLength={activityLength}
+          isWidgetHeader={isWidgetHeader}
+        />
+      )}
       <motion.header
         // user.offline ? 'transparent'
         style={{
@@ -104,11 +139,12 @@ export default function AccordionItem({
           // paddingTop: '55px',
           // paddingBottom: '55px',
           // height: expanded ? cardHeaderRef.current?.clientHeight + 10 : 84,
-          minHeight: friend?.activity?.length >= 2 ? 104 : 84,
+          minHeight: activityLength >= 2 ? 104 : 84,
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
-            : 'radial-gradient(circle 9px at 36px 50%,transparent 90%,#fff)',
+            : !friend?.online &&
+              'radial-gradient(circle 9px at 36px 50%,transparent 88%,#fff)',
           // backgroundColor: expanded
           //   ? colors.offWhite //used to be rgba(241,235,232,1)
           //   : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
@@ -123,6 +159,7 @@ export default function AccordionItem({
       >
         <CardHeader
           cardHeaderRef={cardHeaderRef}
+          online={friend?.online}
           key={friend?.key}
           name={username ? username : friend?.username}
           profilePicture={friend?.profilePicture}

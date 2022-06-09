@@ -150,8 +150,6 @@ export function UserStatusProvider({ children }) {
     }
   }, [currentUser]);
 
-  useEffect(() => {}, [currentUser]);
-
   useEffect(() => {
     activeWindowListener();
     // return exitListeners();

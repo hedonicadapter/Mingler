@@ -62,14 +62,13 @@ const button = css({
 
 export default function WidgetFooter({
   handleSearchInput,
-  toggleFindFriends,
   searchValue,
   friends,
 }) {
   const dispatch = useDispatch();
 
   const appState = useSelector(getApp);
-  const { toggleSettings } = useBrowserWindow();
+  const { toggleFindFriends, toggleSettings } = useBrowserWindow();
 
   const searchInputRef = useRef();
 

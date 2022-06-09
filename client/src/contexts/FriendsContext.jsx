@@ -34,6 +34,7 @@ export function FriendsProvider({ children }) {
 
     if (!friends) return;
 
+    setUserStatusListener();
     setConversationListeners();
     setActivityListeners();
 
@@ -42,6 +43,8 @@ export function FriendsProvider({ children }) {
       socket.removeAllListeners('friendrequest:cancelreceive');
       socket.removeAllListeners('message:receive');
       socket.removeAllListeners('activity:receive');
+      socket.removeAllListeners('user:online');
+      socket.removeAllListeners('user:offline');
     };
   }, [socket, friends]);
 
@@ -78,6 +81,37 @@ export function FriendsProvider({ children }) {
       .catch((e) => {
         console.log(e);
       });
+  };
+
+  const setUserStatusListener = () => {
+    console.log('setting listener ');
+    socket.on('user:online', (userID) => {
+      console.log('going online ', userID);
+      setFriends((prevState) => {
+        return prevState.map((friend) => {
+          if (friend._id === userID) {
+            return {
+              ...friend,
+              online: true,
+            };
+          }
+          return friend;
+        });
+      });
+    });
+    socket.on('user:offline', (userID) => {
+      setFriends((prevState) => {
+        return prevState.map((friend) => {
+          if (friend._id === userID) {
+            return {
+              ...friend,
+              online: false,
+            };
+          }
+          return friend;
+        });
+      });
+    });
   };
 
   const setFriendRequestListeners = () => {

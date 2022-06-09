@@ -5,6 +5,8 @@ interface AppState {
   appVisible: Boolean;
   settingsOpen: Boolean;
   settingsFocused: Boolean;
+  findFriendsOpen: Boolean;
+  findFriendsSearchValue: string;
   windowWidth: number;
 }
 
@@ -12,6 +14,8 @@ const initialState: AppState = {
   appVisible: true,
   settingsOpen: false,
   settingsFocused: false,
+  findFriendsOpen: false,
+  findFriendsSearchValue: '',
   windowWidth: 430,
 };
 
@@ -20,17 +24,23 @@ export const appSlice = createSlice({
   initialState,
   reducers: {
     appVisibleTrue: (state) => {
-      state.appVisible = true;
+      // state.appVisible = true;
     },
     appVisibleFalse: (state) => {
       if (state.settingsOpen) return;
-      state.appVisible = false;
+      // state.appVisible = false;
     },
     settingsOpenTrue: (state) => {
       state.settingsOpen = true;
     },
     settingsOpenFalse: (state) => {
       state.settingsOpen = false;
+    },
+    findFriendsOpenTrue: (state) => {
+      state.findFriendsOpen = true;
+    },
+    findFriendsOpenFalse: (state) => {
+      state.findFriendsOpen = false;
     },
     settingsFocusedTrue: (state) => {
       state.settingsFocused = true;
@@ -39,17 +49,20 @@ export const appSlice = createSlice({
     settingsFocusedFalse: (state) => {
       state.settingsFocused = false;
     },
+    setFindFriendsSearchValue: (state, action: PayloadAction<string>) => {
+      state.findFriendsSearchValue = action.payload;
+    },
   },
   extraReducers: {
     toggleAppVisible: (state) => {
-      state.appVisible = !state.appVisible;
+      // state.appVisible = !state.appVisible;
     },
     appVisibleTrue: (state) => {
-      state.appVisible = true;
+      // state.appVisible = true;
     },
     appVisibleFalse: (state) => {
       if (state.settingsOpen) return;
-      state.appVisible = false;
+      // state.appVisible = false;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
       state.windowWidth = action.payload;
@@ -59,10 +72,13 @@ export const appSlice = createSlice({
 
 export const { appVisibleTrue } = appSlice.actions;
 export const { appVisibleFalse } = appSlice.actions;
-export const { settingsFocusedTrue } = appSlice.actions;
-export const { settingsFocusedFalse } = appSlice.actions;
 export const { settingsOpenTrue } = appSlice.actions;
 export const { settingsOpenFalse } = appSlice.actions;
+export const { findFriendsOpenTrue } = appSlice.actions;
+export const { findFriendsOpenFalse } = appSlice.actions;
+export const { settingsFocusedTrue } = appSlice.actions;
+export const { settingsFocusedFalse } = appSlice.actions;
+export const { setFindFriendsSearchValue } = appSlice.actions;
 
 export default appSlice.reducer;
 

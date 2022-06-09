@@ -60,7 +60,6 @@ export const settingsSlice = createSlice({
       state.showWelcome = false;
     },
     setSettingsContentMain: (state, action: PayloadAction<string>) => {
-      console.log('peload ', action.payload);
       state.settingsContent = action.payload;
     },
   },

@@ -16,6 +16,11 @@ import {
   setCurrentUserMain,
   setRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
+import { makeClickthrough } from '../config/clickthrough';
+import {
+  getApp,
+  setFindFriendsSearchValue,
+} from '../mainState/features/appSlice';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -34,28 +39,30 @@ const searchInputStyle = css({
   WebkitAppearance: 'none',
   outline: 'none',
   border: 'none',
-  backgroundColor: colors.offWhite,
 
   fontSize: '1.0em',
-  fontWeight: 600,
+  // fontWeight: 600,
 
   overflow: 'hidden',
 
   width: '100%',
-  padding: 15,
-  // paddingRight: 30,
+  padding: 14,
+  color: colors.darkmodeDisabledText,
 });
 
 const searchResultsStyle = css({
   overflow: 'auto',
 });
 
-export default function FindFriendsPopUp() {
+export default function FindFriendsContent() {
+  makeClickthrough();
+
+  const [friends, setFriends] = useState(null);
   const [foundFriends, setFoundFriends] = useState(null);
-  const [searchValue, setSearchValue] = useState(null);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
 
   const currentUser = useSelector(getCurrentUser);
+  const appState = useSelector(getApp);
 
   const dispatch = useDispatch();
 
@@ -67,28 +74,28 @@ export default function FindFriendsPopUp() {
   let timeouts = [];
 
   useEffect(() => {
-    timeouts.push(setTimeout(() => search(searchValue), 150));
+    timeouts.push(
+      setTimeout(() => search(appState?.findFriendsSearchValue), 150)
+    );
 
-    if (!searchValue) {
+    if (!appState?.findFriendsSearchValue) {
       timeouts.forEach((item) => clearTimeout(item));
       setFoundFriends(null);
     }
 
     return () => timeouts.forEach((item) => clearTimeout(item));
-  }, [searchValue]);
+  }, [appState?.findFriendsSearchValue]);
 
   useEffect(() => {
     getSentFriendRequests();
 
-    ipcRenderer.on('refreshtoken:fromrenderer', (e, { currentUser }) => {
-      // dispatch(setAccessTokenMain(access));
-      // dispatch(setRefreshTokenMain(refresh));
-      dispatch(setCurrentUserMain(currentUser));
+    ipcRenderer.on('friends', (e, friends) => {
+      setFriends(friends);
     });
   }, []);
 
   ipcRenderer.once('initialValue', (event, value) => {
-    setSearchValue(value);
+    dispatch(setFindFriendsSearchValue(value));
     search(value);
   });
 
@@ -114,7 +121,7 @@ export default function FindFriendsPopUp() {
   };
 
   const handleSearchInput = (evt) => {
-    setSearchValue(evt.target.value);
+    dispatch(setFindFriendsSearchValue(evt.target.value));
   };
 
   const handleSendRequestButton = (toID) => {
@@ -152,12 +159,18 @@ export default function FindFriendsPopUp() {
   return (
     <div className={container()} onKeyDown={handleEscapeKey}>
       <WindowFrame>
-        <input
+        <motion.input
           className={[searchInputStyle(), 'undraggable', 'clickable'].join(' ')}
+          whileHover={{
+            color: colors.darkmodeLightBlack,
+          }}
+          whileFocus={{ color: colors.darkmodeBlack }}
+          transition={{ duration: 0.1 }}
           placeholder="Find friends..."
           type="text"
-          value={searchValue || ''}
+          value={appState?.findFriendsSearchValue || ''}
           onChange={handleSearchInput}
+          style={{ backgroundColor: colors.offWhite }}
         />
         <div className={searchResultsStyle()}>
           {foundFriends &&
@@ -166,6 +179,9 @@ export default function FindFriendsPopUp() {
               <UserItem
                 user={user}
                 requestSent={sentFriendRequests.includes(user._id)}
+                alreadyFriends={friends?.some(
+                  (friend) => friend._id === user._id
+                )}
                 index={index}
                 handleSendRequestButton={handleSendRequestButton}
                 handleCancelRequestButton={handleCancelRequestButton}

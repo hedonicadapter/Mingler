@@ -17,6 +17,7 @@ import {
   toggleAppVisible,
 } from '../mainState/features/appSlice';
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
+import { makeClickthrough } from '../config/clickthrough';
 
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
@@ -48,16 +49,7 @@ const Pane = ({ children }) => {
 const Memoized = React.memo(Pane);
 
 export default function Widget() {
-  // clickthrough everything except className='clickable' (pointer-events: 'auto')
-  const setIgnoreMouseEvents =
-    require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
-  addEventListener('pointerover', function mousePolicy(event) {
-    mousePolicy._canClick =
-      event.target === document.documentElement
-        ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
-        : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
-  });
-  setIgnoreMouseEvents(true, { forward: true });
+  makeClickthrough();
 
   return (
     <AuthProvider>

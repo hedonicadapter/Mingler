@@ -9,15 +9,14 @@ import colors from '../config/colors';
 import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 import WidgetFooter from './WidgetFooter';
 import MenuButton from './MenuButton';
-
-const electron = require('electron');
-const app = electron.remote.app;
-const BrowserWindow = electron.remote.BrowserWindow;
-const ipcRenderer = electron.ipcRenderer;
+import {
+  getApp,
+  setFindFriendsSearchValue,
+} from '../mainState/features/appSlice';
 
 const container = css({
   display: 'flex',
@@ -26,17 +25,6 @@ const container = css({
   pointerEvents: 'auto',
   backgroundColor: 'transparent',
 });
-
-const findFriendsWindowConfig = {
-  show: false,
-  frame: false,
-  transparent: true,
-  width: 560,
-  webPreferences: {
-    nodeIntegration: true,
-    enableRemoteModule: true,
-  },
-};
 
 const EmptySpaceFiller = ({
   setExpandedMasterToggle,
@@ -51,7 +39,11 @@ const EmptySpaceFiller = ({
 };
 
 export default function FriendsList() {
+  const dispatch = useDispatch();
+
   const currentUser = useSelector(getCurrentUser);
+  const appState = useSelector(getApp);
+
   const { socket } = useClientSocket();
   const {
     friends,
@@ -62,48 +54,13 @@ export default function FriendsList() {
     friendRequests,
   } = useFriends();
 
-  const [findFriendsOpen, setFindFriendsOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState(null);
-  const [findFriendsWindow, setFindFriendsWindow] = useState(
-    new BrowserWindow(findFriendsWindowConfig)
-  );
   const [expandedMasterToggle, setExpandedMasterToggle] = useState(false);
 
-  ipcRenderer.on('refreshtoken:frommain', (e, currentUser) => {
-    findFriendsWindow?.webContents.send(
-      'refreshtoken:fromrenderer',
-      currentUser
-    );
-  });
-
   const handleSearchInput = (evt) => {
-    let searchTerm = evt.target.value;
-    setSearchValue(searchTerm);
+    let searchValue = evt.target.value;
+    dispatch(setFindFriendsSearchValue(searchValue));
 
-    findFriends(searchTerm);
-  };
-
-  const toggleFindFriends = () => {
-    // ipcRenderer.send('findFriendsWindow:toggle');
-    if (!findFriendsOpen) {
-      findFriendsWindow.on('close', function () {
-        setFindFriendsWindow(null);
-      });
-      findFriendsWindow.on('closed', function () {
-        setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-        setFindFriendsOpen(false);
-      });
-      findFriendsWindow.loadURL(
-        `file://${app.getAppPath()}/index.html#/findfriends`
-      );
-
-      findFriendsWindow.once('ready-to-show', () => {
-        findFriendsWindow.webContents.send('initialValue', searchValue);
-
-        findFriendsWindow.show();
-        setFindFriendsOpen(true);
-      });
-    } else findFriendsWindow.focus();
+    findFriends(searchValue);
   };
 
   const handleNameChange = (evt) => {
@@ -116,13 +73,6 @@ export default function FriendsList() {
   //     setActivityListeners();
   //   }
   // }, [friends, socket]);
-
-  useEffect(() => {
-    return () => findFriendsWindow?.close();
-  }, []);
-  useEffect(() => {
-    console.log('wtf ', filteredFriends);
-  }, [filteredFriends]);
 
   return (
     <>
@@ -145,9 +95,10 @@ export default function FriendsList() {
             />
           )}
 
-          {searchValue
-            ? filteredFriends?.map((friend) => (
+          {appState?.findFriendsSearchValue
+            ? filteredFriends?.map((friend, index) => (
                 <AccordionItem
+                  key={index}
                   friend={friend}
                   expandedMasterToggle={expandedMasterToggle}
                 />
@@ -168,8 +119,7 @@ export default function FriendsList() {
         />
         <WidgetFooter
           handleSearchInput={handleSearchInput}
-          toggleFindFriends={toggleFindFriends}
-          searchValue={searchValue}
+          searchValue={appState?.findFriendsSearchValue}
           friends={friends}
         />
       </div>

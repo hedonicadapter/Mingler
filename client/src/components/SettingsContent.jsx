@@ -21,6 +21,7 @@ import {
 import settingsDao from '../config/settingsDao';
 import { getBase64 } from '../helpers/fileManager';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
+import { makeClickthrough } from '../config/clickthrough';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -177,6 +178,8 @@ const AccountSettingsContent = ({
 };
 
 export default function SettingsContent() {
+  makeClickthrough();
+
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 

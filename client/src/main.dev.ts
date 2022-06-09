@@ -208,8 +208,10 @@ const createWindow = async () => {
       await storage
         .getItem('store')
         .then((data) => {
-          mainWindow.setBounds({ width: data.app.windowWidth });
-          positioner.move('rightCenter');
+          if (data?.app?.windowWidth) {
+            mainWindow.setBounds({ width: data.app.windowWidth });
+            positioner.move('rightCenter');
+          }
         })
         .catch(console.error);
 
@@ -409,6 +411,7 @@ app.whenReady().then(() => {
             app: {
               ...global.state?.app,
               settingsOpen: false,
+              findFriendsOpen: false,
               settingsFocused: false,
               appVisible: true,
             },

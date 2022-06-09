@@ -25,33 +25,6 @@ const statusIndicatorContainer = css({
   position: 'absolute',
 });
 
-const OnlineStatusIndicator = ({ expanded }) => {
-  return (
-    <motion.span
-      style={{
-        left: 13,
-        marginTop: 16,
-        position: 'absolute',
-      }}
-      animate={{
-        scale: expanded ? 0.9 : 1,
-        x: expanded ? -6 : 0,
-        y: expanded ? -12 : 0,
-      }}
-    >
-      <span
-        style={{
-          height: '12px',
-          width: '12px',
-          backgroundColor: '#bbb',
-          borderRadius: '50%',
-          display: 'inline-block',
-        }}
-      ></span>
-    </motion.span>
-  );
-};
-
 const AvatarContainer = ({
   expanded,
   name,
@@ -99,6 +72,7 @@ const AvatarContainer = ({
 
 export default function CardHeader({
   isWidgetHeader,
+  online,
   name,
   profilePicture,
   userID,
@@ -147,14 +121,15 @@ export default function CardHeader({
   });
 
   return (
-    <div style={{}} ref={cardHeaderRef}>
+    <div ref={cardHeaderRef}>
       <div
-        style={{
-          margin: 'auto',
-          // paddingBottom: 24,
-        }}
+        style={
+          {
+            // margin: 'auto',
+            // paddingBottom: 24,
+          }
+        }
       >
-        {/* <OnlineStatusIndicator expanded={expanded} /> */}
         <div style={{ float: 'left', paddingRight: '16px' }}>
           <AvatarContainer
             expanded={expanded}
@@ -197,35 +172,6 @@ export default function CardHeader({
               spellCheck={false}
             /> */}
             </motion.div>
-
-            {!isWidgetHeader && (
-              <div className={statusIndicatorContainer()}>
-                <motion.div
-                  // style={{
-                  //   left: 13,
-                  //   marginTop: 16,
-                  //   position: 'absolute',
-                  // }}
-                  // animate={{
-                  //   x: expanded ? -6 : 0,
-                  //   y: expanded ? -12 : 0,
-                  // }}
-                  style={{
-                    position: 'absolute',
-                    // top: -4,
-                    marginTop: 38,
-                    left: '-88px',
-                    width: '14px',
-                    height: '14px',
-                    borderRadius: '50%',
-                    // clipPath: 'inset(-325% -100vmax -500% -420%)',
-                    // clipPath: 'inset(-25% -20% -20% -20%)',
-                    zIndex: -1,
-                    // boxShadow: '0 0 0 9999px ' + colors.offWhite, // used to be colors.classyWhite
-                  }}
-                />
-              </div>
-            )}
           </div>
           <motion.div
             // animate={expanded ? 'true' : 'false'}
