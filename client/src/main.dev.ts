@@ -237,8 +237,6 @@ const createWindow = async () => {
           authIo.emit('fromAppToHost:userID', userID);
 
           socket.on('fromHostToApp:data', (data) => {
-            console.log('from host: ', data);
-
             // if data = time send time not chromiumhostdata
             // Picked up by Marky which then opens a browser tab for the video with the correct time
             if (data.time) {
@@ -402,6 +400,10 @@ app.whenReady().then(() => {
                 _id: global.state?.settings?.currentUser?._id,
                 accessToken: global.state?.settings?.currentUser?.accessToken,
                 refreshToken: global.state?.settings?.currentUser?.refreshToken,
+                spotifyAccessToken:
+                  global.state?.settings?.currentUser?.spotifyAccessToken,
+                spotifyRefreshToken:
+                  global.state?.settings?.currentUser?.spotifyRefreshToken,
                 keepMeSignedIn:
                   global.state?.settings?.currentUser?.keepMeSignedIn,
                 guest: global.state?.settings?.currentUser?.guest,

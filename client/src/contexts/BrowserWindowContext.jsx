@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import DAO from '../config/DAO';
 import {
   appVisibleFalse,
   appVisibleTrue,
@@ -12,8 +13,11 @@ import {
   settingsOpenTrue,
 } from '../mainState/features/appSlice';
 import {
+  getCurrentUser,
   getSettings,
   setSettingsContentMain,
+  setSpotifyAccessTokenMain,
+  setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 import { useFriends } from './FriendsContext';
 
@@ -50,6 +54,10 @@ const findFriendsWindowConfig = {
   },
 };
 
+const connectSpotifyWindowConfig = {
+  show: false,
+};
+
 export function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
 
@@ -57,6 +65,7 @@ export function BrowserWindowProvider({ children }) {
 
   const appState = useSelector(getApp);
   const settingsState = useSelector(getSettings);
+  const currentUser = useSelector(getCurrentUser);
 
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
@@ -64,6 +73,10 @@ export function BrowserWindowProvider({ children }) {
 
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
+  );
+
+  const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(
+    new BrowserWindow(connectSpotifyWindowConfig)
   );
 
   useEffect(() => {
@@ -152,7 +165,65 @@ export function BrowserWindowProvider({ children }) {
     } else findFriendsWindow.focus();
   };
 
-  const value = { toggleSettings, toggleFindFriends };
+  const loadConnectSpotifyContent = () => {
+    DAO.createSpotifyURL(currentUser.accessToken)
+      .then((res) => {
+        console.log('res.data ', res.data);
+        connectSpotifyWindow.loadURL(res.data);
+
+        connectSpotifyWindow.once('ready-to-show', () => {
+          connectSpotifyWindow.setTitle('Connect to Spotify');
+
+          connectSpotifyWindow.show();
+
+          let currentUrl = connectSpotifyWindow.webContents.getURL();
+          let code;
+
+          if (currentUrl.includes('localhost:')) {
+            code = currentUrl.substring(currentUrl.indexOf('=') + 1);
+          } else {
+            connectSpotifyWindow.webContents.once(
+              'will-redirect',
+              (event, url) => {
+                connectSpotifyWindow.webContents.once('dom-ready', () => {
+                  // get only the string content after "="
+                  code = url.substring(url.indexOf('=') + 1);
+                  //localhost:1212/?code=AQC9QkkbHZT2A6sYJLo8Rd0taIkkbgRTReRx6Lw9QyiUwHykeCXdw55bEk6CBJjYS5sXDyzQPAjkt-QVzNcUzZDSzUeMqdfs2RKjyM9EnDKhI4dbnzk9cZMGSjeldKq_8B6eRRU2hD_imYqVIE-mGxYioZ9n_w_lzIzRJt4dXNpNyDiee9FZF9hxuq-kDSOX8QPVGqsmles7I9SSbQXtRg9R0LHSjS-wO62GA-mUZtAiefCsrINxDOjRaMyBJRZ31PeerArXZACX8tTSqQ
+                });
+              }
+            );
+          }
+
+          DAO.authorizeSpotify(code, currentUser.accessToken).then((result) => {
+            dispatch(
+              setSpotifyAccessTokenMain(result.data.body['access_token'])
+            );
+            dispatch(
+              setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
+            );
+            console.log(new Date() + result.data.body['expires_in']);
+            localStorage.setItem('expires_in', result.data.body['expires_in']);
+          });
+
+          connectSpotifyWindow.close();
+        });
+      })
+      .catch(console.log);
+
+    connectSpotifyWindow.on('close', function () {
+      setConnectSpotifyWindow(null);
+    });
+
+    connectSpotifyWindow.on('closed', function () {
+      setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
+    });
+  };
+
+  const toggleConnectSpotify = () => {
+    loadConnectSpotifyContent();
+  };
+
+  const value = { toggleSettings, toggleFindFriends, toggleConnectSpotify };
 
   return (
     <BrowserWindowContext.Provider value={value}>

@@ -1,6 +1,7 @@
 import sys
 from threading import Timer
 import requests
+import json
 
 SPOTIFY_ACCESS_TOKEN = sys.argv[1]
 SPOTIFY_API_METHOD_ENDPOINT= 'https://api.spotify.com/v1/me/player'
@@ -50,13 +51,14 @@ def main():
 
             current_track_info = get_current_track(SPOTIFY_ACCESS_TOKEN)
             
-            if current_track_info["id"] is None:
-                pass;
-            elif previous_track_id != current_track_info["id"]:
-                send_to_app(current_track_info)
+            if current_track_info:
+                if current_track_info["id"] is None:
+                    pass;
+                elif previous_track_id != current_track_info["id"]:
+                    send_to_app(current_track_info)
 
-                previous_track_id = current_track_info["id"]
-            
+                    previous_track_id = current_track_info["id"]
+                
             Timer(1.0, get_track_info).start()
     
     get_track_info()

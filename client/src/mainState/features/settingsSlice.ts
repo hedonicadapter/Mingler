@@ -6,6 +6,7 @@ import {
 import { upsertArray } from '../../helpers/arrayTools';
 import produce from 'immer';
 
+// add interface for currentUser
 interface SettingsState {
   currentUser: Array<any>;
   showWelcome: Boolean;
@@ -50,6 +51,12 @@ export const settingsSlice = createSlice({
     setRefreshTokenMain: (state, action: PayloadAction<string>) => {
       state.currentUser.refreshToken = action.payload;
     },
+    setSpotifyAccessTokenMain: (state, action: PayloadAction<string>) => {
+      state.currentUser.spotifyAccessToken = action.payload;
+    },
+    setSpotifyRefreshTokenMain: (state, action: PayloadAction<string>) => {
+      state.currentUser.spotifyRefreshToken = action.payload;
+    },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.profilePicture = profilePictureToJSXImg(action.payload);
     },
@@ -71,6 +78,9 @@ export const { setEmailMain } = settingsSlice.actions;
 export const { setAccessTokenMain } = settingsSlice.actions;
 export const { setRefreshTokenMain } = settingsSlice.actions;
 export const { setProfilePictureMain } = settingsSlice.actions;
+
+export const { setSpotifyAccessTokenMain } = settingsSlice.actions;
+export const { setSpotifyRefreshTokenMain } = settingsSlice.actions;
 
 export const { setKeepMeSignedInMain } = settingsSlice.actions;
 

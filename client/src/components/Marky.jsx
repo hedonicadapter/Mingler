@@ -2,8 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as electron from 'electron';
 import { css, styled } from '@stitches/react';
 import { BiPlanet } from 'react-icons/bi';
-import { RiWindow2Fill } from 'react-icons/ri';
-import { RiArrowDropUpLine, RiSpotifyLine } from 'react-icons/ri';
+import {
+  RiWindow2Fill,
+  RiArrowDropUpLine,
+  RiSpotifyFill,
+} from 'react-icons/ri';
+import { FaSpotify } from 'react-icons/fa';
+import { GrSpotify } from 'react-icons/gr';
+import { ImSpotify } from 'react-icons/im';
+import { BsSpotify } from 'react-icons/bs';
+import { SiSpotify } from 'react-icons/si';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
@@ -179,7 +187,7 @@ export default function Marky({
     }
 
     if (TrackTitle) {
-      return <RiSpotifyLine className={activityIconStyle()} />;
+      return <BsSpotify className={activityIconStyle()} />;
     }
 
     if (TabTitle || TabURL) {

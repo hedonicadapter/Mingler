@@ -14,9 +14,6 @@ const refreshAccessToken = () => {
     function (data) {
       console.log('The access token has been refreshed!');
 
-      localStorage.setItem('expires_in', data.body['expires_in']);
-      localStorage.setItem('access_token', data.body['access_token']);
-
       spotifyApi.setAccessToken(data.body['access_token']);
     },
     function (e) {

@@ -31,9 +31,6 @@ export function FriendsProvider({ children }) {
     if (!socket) return;
 
     setFriendRequestListeners();
-
-    if (!friends) return;
-
     setUserStatusListener();
     setConversationListeners();
     setActivityListeners();
@@ -46,7 +43,7 @@ export function FriendsProvider({ children }) {
       socket.removeAllListeners('user:online');
       socket.removeAllListeners('user:offline');
     };
-  }, [socket, friends]);
+  }, [socket]);
 
   const getFriends = () => {
     DAO.getFriends(currentUser._id, currentUser.accessToken)
@@ -86,7 +83,6 @@ export function FriendsProvider({ children }) {
   const setUserStatusListener = () => {
     console.log('setting listener ');
     socket.on('user:online', (userID) => {
-      console.log('going online ', userID);
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === userID) {
@@ -155,6 +151,7 @@ export function FriendsProvider({ children }) {
     socket.removeAllListeners('friendrequest:cancelreceive');
 
     socket.once('activity:receive', (packet) => {
+      console.log('packet ', packet);
       // console.log('datatata ', packet.data);
       // Set activities in friends array
       setFriends((prevState) => {

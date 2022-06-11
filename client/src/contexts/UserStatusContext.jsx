@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, createContext } from 'react';
 var path = require('path');
 const execFile = require('child_process').execFile;
 
-import { getAccessToken, refreshAccessToken } from '../config/spotify';
 import DAO from '../config/DAO';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import { useClientSocket } from './ClientSocketContext';
@@ -10,7 +9,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getCurrentUser,
   setAccessTokenMain,
+  setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
+
+const JSON5 = require('json5');
 
 const { ipcRenderer } = require('electron');
 
@@ -83,35 +85,44 @@ export function UserStatusProvider({ children }) {
   const activeTrackListener = () => {
     trackProcess?.kill();
 
-    if (currentUser?.accessToken) {
+    if (currentUser?.spotifyAccessToken) {
+      console.log('launching scripp');
+
       var exePath = path.resolve(
         __dirname,
         '../scripts/ActiveTrackListener.py'
       );
 
-      trackProcess = execFile('python', [exePath, currentUser?.accessToken]);
+      trackProcess = execFile('python', [
+        exePath,
+        currentUser?.spotifyAccessToken,
+      ]);
 
       trackProcess.stdout.on('data', function (data) {
         if (data === '401' && refreshRetryLimit < 2) {
+          console.log('refreeshing');
           refreshSpotify();
           refreshRetryLimit++;
           return;
         }
 
         let processedData = data.toString().trim();
+        try {
+          let trackInfo = JSON5.parse(processedData);
 
-        let trackInfo = JSON.parse(processedData.replaceAll("'", '"'));
-
-        if (trackInfo) {
-          sendActivity(
-            {
-              Artists: trackInfo.artists,
-              TrackTitle: trackInfo.name,
-              TrackURL: trackInfo.link,
-              Date: new Date(),
-            },
-            currentUser._id
-          );
+          if (trackInfo) {
+            sendActivity(
+              {
+                Artists: trackInfo.artists,
+                TrackTitle: trackInfo.name,
+                TrackURL: trackInfo.link,
+                Date: new Date(),
+              },
+              currentUser._id
+            );
+          }
+        } catch (e) {
+          console.error(e);
         }
       });
 
@@ -126,10 +137,16 @@ export function UserStatusProvider({ children }) {
   };
 
   const refreshSpotify = () => {
-    DAO.refreshSpotify(currentUser?.refreshToken, currentUser?.accessToken)
+    console.log('refreshing spotify');
+    DAO.refreshSpotify(
+      currentUser?.spotifyRefreshToken,
+      currentUser?.accessToken
+    )
       .then((result) => {
-        console.log('DAO REFRESHSPOTIFY LALALA ');
-        dispatch(setAccessTokenMain(result.data.body.access_token));
+        dispatch(setSpotifyAccessTokenMain(result.data.body.access_token));
+        dispatch(setSpotifyRefreshTokenMain(result.data.body.refresh_token));
+
+        activeTrackListener();
       })
       .catch((e) => {
         console.log('Refreshing spotify auth error ', e);
@@ -141,18 +158,11 @@ export function UserStatusProvider({ children }) {
   };
 
   useEffect(() => {
-    if (currentUser?.accessToken) {
+    if (currentUser?.spotifyAccessToken) {
       activeTrackListener();
-
-      if (currentUser?.refreshToken) {
-        refreshSpotify();
-      }
     }
-  }, [currentUser]);
-
-  useEffect(() => {
     activeWindowListener();
-    // return exitListeners();
+    return () => exitListeners();
   }, []);
 
   const value = {};

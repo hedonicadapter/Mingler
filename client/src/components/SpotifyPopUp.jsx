@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import DAO from '../config/DAO';
-import { spotifyApi } from '../config/spotify';
 import { useStatus } from '../contexts/UserStatusContext';
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
@@ -12,8 +11,6 @@ export default function SpotifyPopUp(
   setAccessToken,
   setRefreshToken
 ) {
-  let authorizeURL;
-
   DAO.createSpotifyURL(accessToken).then((res) => {
     // authorize?client_id=5fe01282e44241328a84e7c5cc169165&response_type=code&redirect_uri=https://example.com/callback&scope=user-read-private%20user-read-email&state=some-state-of-my-choice
 
@@ -47,7 +44,6 @@ export default function SpotifyPopUp(
       setAccessToken(result.data.body['access_token']);
       setRefreshToken(result.data.body['refresh_token']);
       localStorage.setItem('expires_in', result.data.body['expires_in']);
-      return;
     });
   };
 }
