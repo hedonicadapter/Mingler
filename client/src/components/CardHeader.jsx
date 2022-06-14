@@ -56,7 +56,7 @@ const AvatarContainer = ({
       style={
         isWidgetHeader && {
           borderRadius: '50%',
-          backgroundColor: 'transparent',
+          backgroundColor: 'rgba(0,0,0,0)',
         }
       }
     >

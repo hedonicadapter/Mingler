@@ -38,10 +38,6 @@ export default function MenuButton() {
     setMenuVisibility(!menuVisibility);
   };
 
-  useEffect(() => {
-    console.log('menuVisibility ', menuVisibility);
-  }, [menuVisibility]);
-
   const handleSignoutButton = () => {
     if (currentUser.guest) {
       if (window.confirm("Since you're a guest, your account wil be lost.")) {

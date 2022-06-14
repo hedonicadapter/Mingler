@@ -57,12 +57,17 @@ const UserSchema = new mongoose.Schema({
   ],
   conversations: [{ type: mongoose.Types.ObjectId, ref: 'Conversation' }],
   guest: { type: Boolean, default: false },
-  status: { type: String, default: 'offline' },
+  // status: { type: String, default: 'offline' },
+  online: { type: Boolean, default: false },
   previousStatus: { type: String, default: 'online' },
   clientFingerprint: String,
   created: { type: Date, default: new Date() },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  // TODO: Turn into separate collection
+  spotifyAccessToken: String,
+  spotifyRefreshToken: String,
+  spotifyExpiryDate: Date,
 });
 
 UserSchema.pre('save', async function (next) {

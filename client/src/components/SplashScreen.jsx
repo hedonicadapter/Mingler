@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import * as electron from 'electron';
-import { IoIosArrowRoundBack } from 'react-icons/io';
+import { IoIosArrowBack } from 'react-icons/io';
 
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const container = css({
   pointerEvents: 'auto',
-  backgroundColor: colors.darkmodeBlack,
+  backgroundColor: colors.offWhite,
   height: window.innerHeight,
 
   display: 'flex',
@@ -28,28 +28,37 @@ const container = css({
 const header = css({
   fontSize: '1.4em',
   textAlign: 'center',
-  paddingInline: 20,
-  paddingBottom: 10,
+  // paddingInline: 20,
+  paddingBottom: 14,
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
 });
 
 const buttonStyle = css({
   margin: 4,
-  padding: 8,
+  padding: 10,
   textAlign: 'left',
+  fontSize: '0.8em',
 
-  borderRadius: 3,
-  border: '1px solid black',
+  borderRadius: 2,
+  // border: '1px solid black',
 });
 
 const inputStyle = css({
-  WebkitAppearance: 'none',
-  outline: 'none',
-  border: '1px solid black',
-  backgroundColor: colors.darkmodeLightBlack,
+  transition: 'border-top 0.15s ease',
 
-  margin: 4,
-  padding: 10,
-  borderRadius: 3,
+  border: 'none',
+  outline: 'none',
+  resize: 'none',
+  backgroundColor: 'transparent',
+  paddingTop: 14,
+  paddingBottom: 14,
+  paddingLeft: 6,
+  marginLeft: 4,
+  marginRight: 4,
+  color: colors.darkmodeBlack,
+  flex: 1,
 });
 
 const Separator = styled('h5', {
@@ -57,6 +66,7 @@ const Separator = styled('h5', {
   flexDirection: 'row',
   paddingInline: '10%',
   color: colors.darkmodeDisabledText,
+  opacity: 0.2,
 
   '&:before': {
     content: '',
@@ -76,7 +86,7 @@ const Separator = styled('h5', {
 
 const availableButtonStyle = css({
   color: colors.darkmodeMediumWhite,
-  backgroundColor: colors.samBlue,
+  backgroundColor: colors.coffeeBlue,
   cursor: 'pointer',
 });
 
@@ -88,17 +98,20 @@ const unavailableButtonStyle = css({
 
 const formFilledVariants = {
   true: {
-    backgroundColor: colors.samBlue,
-    color: colors.darkmodeHighWhite,
+    // backgroundColor: colors.coffeeBlue,
+    opacity: 1,
+    color: colors.darkmodeBlack,
     cursor: 'pointer',
   },
   false: {
-    backgroundColor: colors.darkmodeDisabledBlack,
+    // backgroundColor: colors.darkmodeDisabledBlack,
+    opacity: 0,
     color: colors.darkmodeDisabledText,
     cursor: 'auto',
   },
   loading: {
-    backgroundColor: colors.darkmodeDisabledBlack,
+    // backgroundColor: colors.darkmodeDisabledBlack,
+    // opacity:0
     color: colors.darkmodeDisabledText,
     cursor: 'auto',
   },
@@ -144,7 +157,7 @@ export default function SplashScreen({}) {
             duration: 0.35,
           }}
           style={{
-            maxWidth: '70%',
+            maxWidth: '72%',
             marginInline: 'auto',
           }}
         >
@@ -156,30 +169,31 @@ export default function SplashScreen({}) {
 
   const BackButton = () => {
     const handleBackButton = () => {
-      setSlide('Init');
+      slide !== 'Init' && setSlide('Init');
     };
 
     const backButton = css({
-      marginTop: -20,
       display: 'flex',
+      paddingInline: 8,
       flexDirection: 'row',
       alignContent: 'center',
       alignItems: 'center',
       fontWeight: 'bold',
       fontSize: '0.6em',
+      transition: 'opacity 0.15s ease',
+      opacity: slide === 'Init' ? 0.2 : 1,
     });
 
     return (
-      slide !== 'Init' &&
-      slide !== 'SignIn' && (
-        <motion.div
-          whileHover={{ cursor: 'pointer' }}
-          className={backButton()}
-          onClick={handleBackButton}
-        >
-          <IoIosArrowRoundBack size={20} /> <div>GO BACK</div>
-        </motion.div>
-      )
+      <motion.div
+        whileHover={{
+          cursor: slide !== 'Init' && 'pointer',
+        }}
+        className={backButton()}
+        onClick={handleBackButton}
+      >
+        <IoIosArrowBack size={24} color={colors.darkmodeLightBlack} />
+      </motion.div>
     );
   };
 
@@ -207,13 +221,32 @@ export default function SplashScreen({}) {
     const ServiceSelector = () => {
       return (
         <AnimationWrapper>
+          <motion.div
+            whileHover={{ color: colors.darkmodeHighWhite }}
+            whileTap={{
+              opacity: 0.4,
+              transition: { duration: 0.1 },
+            }}
+            className={[buttonStyle(), availableButtonStyle()].join(' ')}
+            style={{ backgroundColor: colors.coffeePink }}
+            onClick={() => handleServiceButtonClick('Email')}
+          >
+            {'Sign up with Email'}
+          </motion.div>
           {slides.map((service) => {
-            if (service.title !== 'Init' && service.title !== 'Email') {
+            if (
+              service.title !== 'Init' &&
+              service.title !== 'Email' &&
+              service.title !== 'Guest'
+            ) {
               return (
                 <motion.div
                   key={service.key}
                   whileHover={
-                    service.available && { color: colors.darkmodeHighWhite }
+                    service.available && {
+                      color: colors.darkmodeHighWhite,
+                      transition: { duration: 0.1 },
+                    }
                   }
                   whileTap={
                     service.available && {
@@ -229,7 +262,7 @@ export default function SplashScreen({}) {
                   ].join(' ')}
                   style={{
                     backgroundColor:
-                      service.title === 'Guest' && colors.nudeBloo,
+                      service.title === 'Guest' && colors.coffeeBrown,
                   }}
                   onClick={() =>
                     service.available && handleServiceButtonClick(service.title)
@@ -244,16 +277,21 @@ export default function SplashScreen({}) {
           })}
           <Separator>or</Separator>
           <motion.div
-            whileHover={{ color: colors.darkmodeHighWhite }}
+            whileHover={{
+              color: colors.darkmodeHighWhite,
+              transition: { duration: 0.1 },
+            }}
             whileTap={{
               opacity: 0.4,
               transition: { duration: 0.1 },
             }}
             className={[buttonStyle(), availableButtonStyle()].join(' ')}
-            style={{ backgroundColor: colors.nudePink }}
-            onClick={() => handleServiceButtonClick('Email')}
+            style={{
+              backgroundColor: colors.coffeeBrown,
+            }}
+            onClick={() => handleServiceButtonClick('Guest')}
           >
-            {'Sign up with Email'}
+            {'Continue as guest '}
           </motion.div>
         </AnimationWrapper>
       );
@@ -319,13 +357,18 @@ export default function SplashScreen({}) {
     const buttonsContainer = css({
       display: 'flex',
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
     });
 
     return (
       <AnimationWrapper>
         <div
-          style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            borderTop: '1px solid ' + colors.offWhitePressed2,
+          }}
         >
           <input
             disabled={formFilled === 'loading' ? true : false}
@@ -336,10 +379,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt)}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: name
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 nameFieldFocused && name
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             autoFocus={true}
             onFocus={() => {
@@ -351,7 +397,6 @@ export default function SplashScreen({}) {
           />
         </div>
         <div className={buttonsContainer()}>
-          <BackButton />
           <motion.div
             animate={formFilled}
             variants={formFilledVariants}
@@ -363,14 +408,14 @@ export default function SplashScreen({}) {
               }
             }
             className={buttonStyle()}
-            style={{ width: '20%', minWidth: '60px' }}
+            style={{ width: '20%', minWidth: '60px', opacity: 0 }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
               handleContinueButton()
             }
           >
-            {formFilled === 'loading' && <LoadingAnimation />}
+            <LoadingAnimation formFilled={formFilled} buttonText={'continue'} />
           </motion.div>
         </div>
         {error}
@@ -433,23 +478,25 @@ export default function SplashScreen({}) {
     const handleSignUpButton = () => {
       setFormFilled('loading');
 
-      signUpWithEmail(name, email, password).then(({ success, error }) => {
-        if (error) {
-          setError(error);
-          setFormFilled('true');
-        }
-        if (success) {
-          setJustRegistered({ email, password });
-          setError(null);
-          setSlide('SignIn');
-        }
-      });
+      // signUpWithEmail(name, email, password).then(({ success, error }) => {
+      //   if (error) {
+      //     setError(error);
+      //     setFormFilled('true');
+      //   }
+      //   if (success) {
+      //     setJustRegistered({ email, password });
+      //     setError(null);
+      //     setSlide('SignIn');
+      //   }
+      // });
     };
 
     const buttonsContainer = css({
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      float: 'right',
+      // display: 'flex',
+      // flexDirection: 'row',
+      // // justifyContent: 'end',
+      // alignContent: 'end',
     });
 
     return (
@@ -466,10 +513,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'name')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: name
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 nameFieldFocused && name
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             autoFocus={true}
             onFocus={() => {
@@ -488,10 +538,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'Email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: email
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 emailFieldFocused && email
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             onFocus={() => {
               setEmailFieldFocused(true);
@@ -509,10 +562,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: password
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 passwordFieldFocused && password
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             onFocus={() => {
               setPasswordFieldFocused(true);
@@ -523,7 +579,6 @@ export default function SplashScreen({}) {
           />
         </div>
         <div className={buttonsContainer()}>
-          <BackButton />
           <motion.div
             animate={formFilled}
             variants={formFilledVariants}
@@ -535,15 +590,14 @@ export default function SplashScreen({}) {
               }
             }
             className={buttonStyle()}
-            style={{ width: '20%', minWidth: '60px' }}
+            style={{ width: '20%', minWidth: '60px', opacity: 0 }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
               handleSignUpButton()
             }
           >
-            Sign up!
-            {formFilled === 'loading' && <LoadingAnimation />}
+            <LoadingAnimation formFilled={formFilled} buttonText={'Sign up!'} />
           </motion.div>
         </div>
         {error}
@@ -665,10 +719,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: email
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 emailFieldFocused && email
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             onFocus={() => {
               setEmailFieldFocused(true);
@@ -686,10 +743,13 @@ export default function SplashScreen({}) {
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
+              borderTop: password
+                ? '1px solid ' + colors.darkmodeBlack
+                : '1px solid ' + colors.offWhitePressed2,
               color:
                 passwordFieldFocused && password
-                  ? colors.darkmodeHighWhite
-                  : colors.darkmodeMediumWhite,
+                  ? colors.darkmodeBlack
+                  : colors.darkmodeLightBlack,
             }}
             onFocus={() => {
               setPasswordFieldFocused(true);
@@ -723,7 +783,12 @@ export default function SplashScreen({}) {
               }
             }
             className={buttonStyle()}
-            style={{ width: '20%', minWidth: '60px' }}
+            style={{
+              width: '20%',
+              minWidth: '60px',
+              opacity: 0,
+              opacity: formFilled === 'false' ? 0 : 1,
+            }}
             // formFilled={formFilled}
             onClick={() =>
               formFilled != 'false' &&
@@ -731,12 +796,10 @@ export default function SplashScreen({}) {
               handleSignInButton()
             }
           >
-            Sign in
-            {formFilled === 'loading' && <LoadingAnimation />}
+            <LoadingAnimation formFilled={formFilled} buttonText={'Sign in'} />
           </motion.div>
         </div>
         {error}
-        <BackButton />
         <Separator>or</Separator>
         {signInOptions.map((option) => {
           return (
@@ -799,13 +862,17 @@ export default function SplashScreen({}) {
   const Header = () => {
     return (
       <div className={header()}>
+        <BackButton />
         {appSettings.showWelcome ? (
           <h2>
-            Welcome to <h1>ShareHub!</h1>
+            Welcome to <h1>Mingler!</h1>
           </h2>
         ) : (
-          <h1>ShareHub</h1>
+          <h1>Mingler</h1>
         )}
+        <div style={{ opacity: 0, pointerEvents: 'none' }}>
+          <BackButton />
+        </div>
       </div>
     );
   };
@@ -838,14 +905,14 @@ export default function SplashScreen({}) {
         textDecoration: 'underline',
         textDecorationColor: 'transparent',
         cursor: 'pointer',
-        color: colors.samBlue,
+        color: colors.coffeeBlue,
       });
 
       return (
         <motion.div
           className={footerLink()}
           whileHover={{
-            textDecorationColor: colors.samBlue,
+            textDecorationColor: colors.coffeeBlue,
             transition: { duration: 0.15 },
           }}
           onClick={handleAlreadyAMemberButton || handleNotAMemberButton}

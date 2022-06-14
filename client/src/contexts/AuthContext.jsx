@@ -128,6 +128,7 @@ export function authAndy({ children }) {
   const signInRememberedUser = async (refreshToken) => {
     await DAO.signInRememberedUser(refreshToken)
       .then((result) => {
+        console.log('result.data ', result.data);
         dispatch(setCurrentUserMain(result.data));
 
         ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main

@@ -17,9 +17,11 @@ import {
   getSettings,
   setSettingsContentMain,
   setSpotifyAccessTokenMain,
+  setSpotifyExpiryDate,
   setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 import { useFriends } from './FriendsContext';
+import { useStatus } from './UserStatusContext';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -62,6 +64,7 @@ export function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
 
   const { friends } = useFriends();
+  const { activeTrackListener } = useStatus();
 
   const appState = useSelector(getApp);
   const settingsState = useSelector(getSettings);
@@ -194,16 +197,21 @@ export function BrowserWindowProvider({ children }) {
             );
           }
 
-          DAO.authorizeSpotify(code, currentUser.accessToken).then((result) => {
-            dispatch(
-              setSpotifyAccessTokenMain(result.data.body['access_token'])
-            );
-            dispatch(
-              setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
-            );
-            console.log(new Date() + result.data.body['expires_in']);
-            localStorage.setItem('expires_in', result.data.body['expires_in']);
-          });
+          // TODO: dateBySecondsFromNow is formatted server-side, might not need this here if mongodb sends dates as is
+          DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
+            .then((result) => {
+              dispatch(
+                setSpotifyAccessTokenMain(result.data.body['access_token'])
+              );
+              dispatch(
+                setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
+              );
+              dispatch(
+                setSpotifyExpiryDate(result.data.body['spotifyExpiryDate'])
+              );
+              activeTrackListener(result.data.body['access_token']);
+            })
+            .catch(console.log);
 
           connectSpotifyWindow.close();
         });

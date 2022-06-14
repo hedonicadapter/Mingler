@@ -28,21 +28,21 @@ export function FriendsProvider({ children }) {
   }, [currentUser, socket]);
 
   useEffect(() => {
+    console.log('socket? ', socket);
     if (!socket) return;
-
     setFriendRequestListeners();
     setUserStatusListener();
     setConversationListeners();
     setActivityListeners();
 
-    return () => {
-      socket.removeAllListeners('friendrequest:receive');
-      socket.removeAllListeners('friendrequest:cancelreceive');
-      socket.removeAllListeners('message:receive');
-      socket.removeAllListeners('activity:receive');
-      socket.removeAllListeners('user:online');
-      socket.removeAllListeners('user:offline');
-    };
+    // return () => {
+    //   socket.removeAllListeners('friendrequest:receive');
+    //   socket.removeAllListeners('friendrequest:cancelreceive');
+    //   socket.removeAllListeners('message:receive');
+    //   socket.removeAllListeners('activity:receive');
+    //   socket.removeAllListeners('user:online');
+    //   socket.removeAllListeners('user:offline');
+    // };
   }, [socket]);
 
   const getFriends = () => {
@@ -81,7 +81,6 @@ export function FriendsProvider({ children }) {
   };
 
   const setUserStatusListener = () => {
-    console.log('setting listener ');
     socket.on('user:online', (userID) => {
       setFriends((prevState) => {
         return prevState.map((friend) => {
@@ -111,22 +110,22 @@ export function FriendsProvider({ children }) {
   };
 
   const setFriendRequestListeners = () => {
-    socket.removeAllListeners('friendrequest:receive');
-    socket.removeAllListeners('friendrequest:cancelreceive');
+    // socket.removeAllListeners('friendrequest:receive');
+    // socket.removeAllListeners('friendrequest:cancelreceive');
 
-    socket.once('friendrequest:receive', () => {
+    socket.on('friendrequest:receive', () => {
       getFriendRequests();
     });
 
-    socket.once('friendrequest:cancelreceive', () => {
+    socket.on('friendrequest:cancelreceive', () => {
       getFriendRequests();
     });
   };
 
   const setConversationListeners = () => {
-    socket.removeAllListeners('message:receive');
+    // socket.removeAllListeners('message:receive');
 
-    socket.once('message:receive', ({ fromID, message }) => {
+    socket.on('message:receive', ({ fromID, message }) => {
       console.error('fix this');
       setFriends((prevState) => {
         return prevState.map((friend) => {
@@ -148,11 +147,8 @@ export function FriendsProvider({ children }) {
   };
 
   const setActivityListeners = () => {
-    socket.removeAllListeners('friendrequest:cancelreceive');
-
-    socket.once('activity:receive', (packet) => {
-      console.log('packet ', packet);
-      // console.log('datatata ', packet.data);
+    socket.on('activity:receive', (packet) => {
+      console.log('received ', packet);
       // Set activities in friends array
       setFriends((prevState) => {
         return prevState.map((friend) => {

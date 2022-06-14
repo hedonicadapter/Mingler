@@ -249,6 +249,9 @@ const sendToken = (user, statusCode, res) => {
       email: user.email,
       profilePicture: user?.profilePicture,
       guest: user.guest,
+      spotifyAccessToken: user.spotifyAccessToken,
+      spotifyRefreshToken: user.spotifyRefreshToken,
+      spotifyExpiryDate: user.spotifyExpiryDate,
     });
   });
 };

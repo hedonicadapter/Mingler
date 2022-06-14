@@ -61,15 +61,23 @@ async function joinRooms(socket, rooms) {
   return await socket.join(rooms);
 }
 
+function setUserStatus(user, friendIDs, status, userIo) {
+  user.online = status;
+  user.save().then(() => {
+    userIo
+      .in(friendIDs)
+      .emit('user:' + status ? 'online' : 'offline', user._id);
+  });
+}
+
 userIo.on('connection', async (socket) => {
   console.log('userIo connected');
   // Get the client's mongoDB ID
   const userID = socket.handshake.query.userID;
 
   if (userID) {
-    const friends = await User.findById(
+    const user = await User.findById(
       userID,
-      { _id: 0 },
       { lean: true },
       function (err, result) {
         if (err) {
@@ -79,9 +87,11 @@ userIo.on('connection', async (socket) => {
       }
     ).select({ friends: 1 });
 
-    const friendIDs = Object.values(friends.friends).map(function (item) {
+    const friendIDs = Object.values(user.friends).map(function (item) {
       return item.toString();
     });
+
+    setUserStatus(user, friendIDs, true, userIo);
 
     socket.join(userID);
     // Client's own UserID is also returned by findById
@@ -124,13 +134,20 @@ userIo.on('connection', async (socket) => {
     });
 
     socket.on('disconnecting', (reason) => {
+      setUserStatus(user, friendIDs, false, userIo);
       console.log('socket disconnecting: ', reason);
     });
     socket.on('disconnect', (reason) => {
       console.log('socket disconnected: ', reason);
     });
 
+    userIo.on('disconnecting', (reason) => {
+      setUserStatus(user, friendIDs, false, userIo);
+      console.log('io disconnecting: ', reason);
+    });
     userIo.on('disconnect', (reason) => {
+      setUserStatus(user, friendIDs, false, userIo);
+
       console.log('io disconnected: ', reason);
     });
   } else console.error('No userID in handshake');

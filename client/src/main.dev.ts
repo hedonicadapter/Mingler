@@ -404,6 +404,8 @@ app.whenReady().then(() => {
                   global.state?.settings?.currentUser?.spotifyAccessToken,
                 spotifyRefreshToken:
                   global.state?.settings?.currentUser?.spotifyRefreshToken,
+                spotifyExpiryDate:
+                  global.state?.settings?.currentUser?.spotifyExpiryDate,
                 keepMeSignedIn:
                   global.state?.settings?.currentUser?.keepMeSignedIn,
                 guest: global.state?.settings?.currentUser?.guest,

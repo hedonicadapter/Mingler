@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   getCurrentUser,
   setAccessTokenMain,
+  setSpotifyAccessTokenMain,
+  setSpotifyExpiryDate,
   setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 
@@ -48,7 +50,7 @@ export function UserStatusProvider({ children }) {
 
   const activeWindowListener = () => {
     let process;
-    var exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
+    let exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
     process = execFile('python', [exePath]);
 
     process.stdout.on('data', function (data) {
@@ -82,90 +84,110 @@ export function UserStatusProvider({ children }) {
 
   let trackProcess;
   let refreshRetryLimit = 0;
-  const activeTrackListener = () => {
-    trackProcess?.kill();
+  const activeTrackListener = (spotifyAccessToken) => {
+    trackProcess?.close();
 
-    if (currentUser?.spotifyAccessToken) {
-      console.log('launching scripp');
+    if (!spotifyAccessToken) return;
 
-      var exePath = path.resolve(
-        __dirname,
-        '../scripts/ActiveTrackListener.py'
-      );
+    let exePath = path.resolve(__dirname, '../scripts/ActiveTrackListener.py');
 
-      trackProcess = execFile('python', [
-        exePath,
-        currentUser?.spotifyAccessToken,
-      ]);
+    trackProcess = execFile('python', [exePath, spotifyAccessToken]);
 
-      trackProcess.stdout.on('data', function (data) {
-        if (data === '401' && refreshRetryLimit < 2) {
-          console.log('refreeshing');
-          refreshSpotify();
-          refreshRetryLimit++;
-          return;
+    trackProcess.on('exit', () =>
+      console.warn('trackprocess exited ', trackProcess)
+    );
+
+    trackProcess.stdout.on('data', function (data) {
+      let processedData = data.toString().trim();
+      if (processedData === '401') {
+        trackProcess.stdin.end();
+        trackProcess.stdout.destroy();
+        trackProcess.stderr.destroy();
+        trackProcess?.close();
+        return;
+      }
+
+      try {
+        console.log('processedData1', processedData);
+        let trackInfo = JSON5.parse(processedData);
+
+        console.log('trackinfo3 ', trackInfo);
+
+        if (trackInfo) {
+          sendActivity(
+            {
+              Artists: trackInfo.artists,
+              TrackTitle: trackInfo.name,
+              TrackURL: trackInfo.link,
+              Date: new Date(),
+            },
+            currentUser._id
+          );
         }
+      } catch (e) {
+        console.error(e);
+      }
+    });
 
-        let processedData = data.toString().trim();
-        try {
-          let trackInfo = JSON5.parse(processedData);
+    trackProcess.stderr.on('data', function (data) {
+      console.warn('stderr activeTrackListener: ', data);
+    });
 
-          if (trackInfo) {
-            sendActivity(
-              {
-                Artists: trackInfo.artists,
-                TrackTitle: trackInfo.name,
-                TrackURL: trackInfo.link,
-                Date: new Date(),
-              },
-              currentUser._id
-            );
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      });
-
-      trackProcess.stderr.on('data', function (data) {
-        console.log('stderr activeTrackListener', data);
-      });
-
-      trackProcess.on('error', function (err) {
-        if (err) return console.error(err);
-      });
-    }
+    trackProcess.on('error', function (err) {
+      if (err) return console.error('trackprocess error: ', err);
+    });
   };
 
   const refreshSpotify = () => {
-    console.log('refreshing spotify');
     DAO.refreshSpotify(
       currentUser?.spotifyRefreshToken,
+      currentUser._id,
       currentUser?.accessToken
     )
       .then((result) => {
-        dispatch(setSpotifyAccessTokenMain(result.data.body.access_token));
-        dispatch(setSpotifyRefreshTokenMain(result.data.body.refresh_token));
+        if (!result.data) return;
 
-        activeTrackListener();
+        dispatch(setSpotifyAccessTokenMain(result.data.body.access_token));
+        dispatch(setSpotifyExpiryDate(result.data.body.spotifyExpiryDate));
+        activeTrackListener(result.data.body.access_token);
       })
       .catch((e) => {
-        console.log('Refreshing spotify auth error ', e);
+        console.log('Refreshing spotify error ', e);
       });
   };
 
   const exitListeners = () => {
-    process.kill();
+    trackProcess?.close();
+    process.exit();
   };
 
   useEffect(() => {
-    if (currentUser?.spotifyAccessToken) {
-      activeTrackListener();
-    }
-    activeWindowListener();
-    return () => exitListeners();
+    if (!currentUser?.spotifyExpiryDate) return;
+
+    let now = new Date();
+    let spotifyExpiryDate = new Date(currentUser?.spotifyExpiryDate);
+    let timeout = spotifyExpiryDate - now;
+
+    setTimeout(
+      () => {
+        refreshSpotify();
+      },
+      spotifyExpiryDate > now ? timeout : 0
+    );
+
+    console.log(
+      'set spotify refresh timeout for ',
+      spotifyExpiryDate > now ? Math.floor(timeout / 60000) : 0,
+      ' minutes.'
+    );
+  }, [currentUser?.spotifyExpiryDate]);
+
+  useEffect(() => {
+    activeTrackListener(currentUser?.spotifyAccessToken);
+    // return () => exitListeners();
   }, []);
 
-  const value = {};
+  const value = { activeTrackListener };
 
   return (
     <UserStatusContext.Provider value={value}>

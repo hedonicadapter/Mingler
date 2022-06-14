@@ -57,6 +57,9 @@ export const settingsSlice = createSlice({
     setSpotifyRefreshTokenMain: (state, action: PayloadAction<string>) => {
       state.currentUser.spotifyRefreshToken = action.payload;
     },
+    setSpotifyExpiryDate: (state, action: PayloadAction<Date>) => {
+      state.currentUser.spotifyExpiryDate = action.payload;
+    },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.profilePicture = profilePictureToJSXImg(action.payload);
     },
@@ -81,6 +84,7 @@ export const { setProfilePictureMain } = settingsSlice.actions;
 
 export const { setSpotifyAccessTokenMain } = settingsSlice.actions;
 export const { setSpotifyRefreshTokenMain } = settingsSlice.actions;
+export const { setSpotifyExpiryDate } = settingsSlice.actions;
 
 export const { setKeepMeSignedInMain } = settingsSlice.actions;
 

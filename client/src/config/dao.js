@@ -163,8 +163,8 @@ export class DAO {
     });
   };
 
-  authorizeSpotify = (code, token) => {
-    const data = { code };
+  authorizeSpotify = (code, userID, token) => {
+    const data = { code, userID, currentClientTime: new Date() };
 
     return privateRoute.post('/authorizeSpotify', data, {
       headers: {
@@ -173,9 +173,11 @@ export class DAO {
     });
   };
 
-  refreshSpotify = (refreshToken, token) => {
+  refreshSpotify = (refreshToken, userID, token) => {
     const data = {
       refreshToken,
+      userID,
+      currentClientTime: new Date(),
     };
 
     return privateRoute.post('/refreshSpotify', data, {
@@ -210,6 +212,7 @@ privateRoute.interceptors.response.use(
   function (error) {
     const ogRequest = error.config;
     if (401 === error.response.status && !ogRequest.retry) {
+      console.log('retrying spotify ');
       const oldAccessToken = ogRequest.headers.Authorization.replace(
         /^Bearer\s+/,
         ''
@@ -221,9 +224,10 @@ privateRoute.interceptors.response.use(
           if (!refreshToken)
             return Promise.reject('409: No refresh token found.');
 
-          await getNewToken(refreshToken)
+          getNewToken(refreshToken)
             .then((tokens) => {
-              const access = tokens.data.token;
+              console.log(tokens);
+              const access = tokens.data.accessToken;
 
               ogRequest.headers.Authorization = 'Bearer ' + access;
               ogRequest.retry = true;
@@ -236,7 +240,9 @@ privateRoute.interceptors.response.use(
               );
 
               return axios(ogRequest)
-                .then()
+                .then((res) => {
+                  console.log('spotify res? ', res);
+                })
                 .catch((e) => Promise.reject(e));
             })
             .catch((e) => console.log(e));

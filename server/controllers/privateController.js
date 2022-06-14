@@ -12,6 +12,14 @@ const { promisify } = require('util');
 
 const unlinkAsync = promisify(fs.unlink);
 
+const dateBySecondsFromCurrentClientTime = (currentClientTime, seconds) => {
+  let formattedClientTime = new Date(currentClientTime);
+
+  return formattedClientTime.setSeconds(
+    formattedClientTime.getSeconds() + seconds
+  );
+};
+
 exports.getPrivateData = (req, res, next) => {
   res.status(200).json({
     success: true,
@@ -423,14 +431,33 @@ exports.createSpotifyURL = async (req, res, next) => {
 };
 
 exports.authorizeSpotify = async (req, res, next) => {
-  const { code } = req.body;
+  const { code, userID, currentClientTime } = req.body;
 
   spotifyApi.authorizationCodeGrant(code).then(
-    function (data) {
-      spotifyApi.setAccessToken(data.body['access_token']);
-      spotifyApi.setRefreshToken(data.body['refresh_token']);
+    async function (data) {
+      let newData = data;
 
-      return res.send(data);
+      let accessToken = newData.body['access_token'];
+      let refreshToken = newData.body['refresh_token'];
+      let expiresIn = newData.body['expires_in'];
+      let spotifyExpiryDate = dateBySecondsFromCurrentClientTime(
+        currentClientTime,
+        expiresIn
+      );
+
+      spotifyApi.setAccessToken(accessToken);
+      spotifyApi.setRefreshToken(refreshToken);
+
+      // TODO: Make this a user function?
+      const user = await User.findById(userID);
+      user.spotifyAccessToken = accessToken;
+      user.spotifyRefreshToken = refreshToken;
+      user.spotifyExpiryDate = spotifyExpiryDate;
+      await user.save();
+
+      newData.body.spotifyExpiryDate = spotifyExpiryDate;
+
+      return res.send(newData);
     },
     function (e) {
       console.log('Spotify authorization code grant error: ', e);
@@ -442,22 +469,42 @@ exports.authorizeSpotify = async (req, res, next) => {
 exports.refreshSpotify = async (req, res, next) => {
   const {
     refreshToken,
-    // , accessToken
+    userID,
+    currentClientTime,
+    //accessToken
   } = req.body;
 
   spotifyApi.setRefreshToken(refreshToken);
-  // spotifyApi.setAccessToken(accessToken);
 
   spotifyApi.refreshAccessToken().then(
-    function (data) {
-      console.log('The access token has been refreshed!');
+    async function (data) {
+      let newData = data;
 
-      spotifyApi.setAccessToken(data.body['access_token']);
+      console.log('Spotify access token refreshed!');
+      let newAccessToken = newData.body['access_token'];
+      let expiresIn = newData.body['expires_in'];
+      let spotifyExpiryDate = dateBySecondsFromCurrentClientTime(
+        currentClientTime,
+        expiresIn
+      );
 
-      return res.send(data);
+      spotifyApi.setAccessToken(newAccessToken);
+
+      // TODO: Make this a user function?
+      const user = await User.findById(userID);
+      user.spotifyAccessToken = newAccessToken;
+      user.spotifyRefreshToken = refreshToken;
+      user.spotifyExpiryDate = dateBySecondsFromCurrentClientTime(
+        currentClientTime,
+        expiresIn
+      );
+      await user.save();
+
+      newData.body.spotifyExpiryDate = spotifyExpiryDate;
+
+      return res.send(newData);
     },
     function (e) {
-      // console.log('Could not refresh access token', e);
       next(e);
     }
   );
