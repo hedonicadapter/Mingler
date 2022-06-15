@@ -282,6 +282,10 @@ const createWindow = async () => {
     mainWindow?.webContents.send('refreshtoken:frommain', currentUser);
   });
 
+  ipcMain.on('toggleconnectspotify:fromrenderer', () => {
+    mainWindow?.webContents.send('toggleconnectspotify:frommain');
+  });
+
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
     mainWindow.on('close', async function (e) {

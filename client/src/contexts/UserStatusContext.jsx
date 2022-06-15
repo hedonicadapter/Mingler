@@ -58,6 +58,8 @@ export function UserStatusProvider({ children }) {
 
       let activeWindow = data.toString().trim();
 
+      console.log('activeWindow ', activeWindow);
+
       // Second comparison doesn't work for some reason
       if (
         activeWindow &&
@@ -85,6 +87,7 @@ export function UserStatusProvider({ children }) {
   let trackProcess;
   let refreshRetryLimit = 0;
   const activeTrackListener = (spotifyAccessToken) => {
+    console.log('before close ', trackProcess);
     trackProcess?.close();
 
     if (!spotifyAccessToken) return;
@@ -103,7 +106,11 @@ export function UserStatusProvider({ children }) {
         trackProcess.stdin.end();
         trackProcess.stdout.destroy();
         trackProcess.stderr.destroy();
-        trackProcess?.close();
+        try {
+          trackProcess?.close();
+        } catch (e) {
+          console.log(e);
+        }
         return;
       }
 
@@ -183,6 +190,7 @@ export function UserStatusProvider({ children }) {
   }, [currentUser?.spotifyExpiryDate]);
 
   useEffect(() => {
+    activeWindowListener();
     activeTrackListener(currentUser?.spotifyAccessToken);
     // return () => exitListeners();
   }, []);

@@ -45,7 +45,6 @@ export default function FriendsList() {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
 
-  const { toggleConnectSpotify } = useBrowserWindow();
   const { socket } = useClientSocket();
   const {
     friends,
@@ -115,7 +114,7 @@ export default function FriendsList() {
               ))
             : null}
         </div>
-        <div onClick={toggleConnectSpotify}> connect to spotify lol</div>
+
         <EmptySpaceFiller
           setExpandedMasterToggle={setExpandedMasterToggle}
           expandedMasterToggle={expandedMasterToggle}

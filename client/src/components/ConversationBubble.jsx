@@ -38,7 +38,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
   const bubble = css({
     backgroundColor: sentByMe ? '#e6ccb2' : '#60463B',
     borderRadius: '15px',
-    marginRight: 8,
+    marginRight: 10,
   });
 
   return (
@@ -65,7 +65,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
           <div className={bubble()}>
             <p className={conversationText()}>{message}</p>
           </div>
-          <div className={sentTime()}>
+          <div className={sentTime()} style={{ padding: 0 }}>
             {new Date(sent).toLocaleTimeString('en-US', {
               timeStyle: 'short',
             })}

@@ -102,8 +102,17 @@ export function BrowserWindowProvider({ children }) {
       findFriendsWindow.webContents.send('friends', friends);
   }, [friends, findFriendsWindow]);
 
+  useEffect(() => {
+    ipcRenderer.on('toggleconnectspotify:frommain', () => {
+      toggleConnectSpotify();
+    });
+  }, []);
+
   const loadSettingsContent = (quickSetting) => {
-    settingsWindow.loadURL(`file://${app.getAppPath()}/index.html#/settings`);
+    settingsWindow
+      .loadURL(`file://${app.getAppPath()}/index.html#/settings`)
+      .then()
+      .catch(console.warn);
 
     settingsWindow.once('ready-to-show', () => {
       settingsWindow.setTitle('Settings');
@@ -131,15 +140,16 @@ export function BrowserWindowProvider({ children }) {
 
     if (!appState.settingsOpen) {
       loadSettingsContent(quickSetting);
-    } else if (appState.settingsOpen && !settingsWindow.isVisible()) {
+    } else if (appState.settingsOpen && !settingsWindow?.isVisible()) {
       loadSettingsContent(quickSetting);
     } else settingsWindow.focus();
   };
 
   const loadFindFriendsContent = () => {
-    findFriendsWindow.loadURL(
-      `file://${app.getAppPath()}/index.html#/findfriends`
-    );
+    findFriendsWindow
+      .loadURL(`file://${app.getAppPath()}/index.html#/findfriends`)
+      .then()
+      .catch(console.warn);
 
     findFriendsWindow.once('ready-to-show', () => {
       findFriendsWindow.setTitle('Find friends');
@@ -163,7 +173,7 @@ export function BrowserWindowProvider({ children }) {
     // ipcRenderer.send('findFriendsWindow:toggle');
     if (!appState.findFriendsOpen) {
       loadFindFriendsContent();
-    } else if (appState.findFriendsOpen && !findFriendsWindow.isVisible()) {
+    } else if (appState.findFriendsOpen && !findFriendsWindow?.isVisible()) {
       loadFindFriendsContent();
     } else findFriendsWindow.focus();
   };
@@ -172,7 +182,7 @@ export function BrowserWindowProvider({ children }) {
     DAO.createSpotifyURL(currentUser.accessToken)
       .then((res) => {
         console.log('res.data ', res.data);
-        connectSpotifyWindow.loadURL(res.data);
+        connectSpotifyWindow.loadURL(res.data).then().catch(console.warn);
 
         connectSpotifyWindow.once('ready-to-show', () => {
           connectSpotifyWindow.setTitle('Connect to Spotify');

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
+import { BsSpotify } from 'react-icons/bs';
 
 import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
@@ -19,7 +20,6 @@ import {
   setSettingsContentMain,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
-import { getBase64 } from '../helpers/fileManager';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 
@@ -65,9 +65,11 @@ const contentHeader = css({
 
 const profilePictureFormContainer = css({
   backgroundColor: colors.offWhitePressed,
+  borderRadius: '2px',
   display: 'flex',
   flexDirection: 'row',
   width: '100%',
+  marginBottom: 8,
 });
 const avatarContainer = css({
   margin: 'auto',
@@ -124,56 +126,82 @@ const AccountSettingsContent = ({
   };
 
   return (
-    <div className={profilePictureFormContainer()}>
-      <motion.div className={avatarContainer()}>
-        <motion.label
-          whileHover={{ cursor: 'pointer' }}
-          htmlFor="file-upload"
-          className="custom-file-upload"
-          ref={fileInputRef}
-        >
-          <Avatar
-            round
-            name={username}
-            size="58"
-            src={settingsState.currentUser.profilePicture}
+    <>
+      <div className={profilePictureFormContainer()}>
+        <motion.div className={avatarContainer()}>
+          <motion.label
+            whileHover={{ cursor: 'pointer' }}
+            htmlFor="file-upload"
+            className="custom-file-upload"
+            ref={fileInputRef}
+          >
+            <Avatar
+              round
+              name={username}
+              size="58"
+              src={settingsState.currentUser.profilePicture}
+            />
+          </motion.label>
+          <input
+            onChange={handleFileUpload}
+            onFocus={(evt) => evt.preventDefault()}
+            accept="image/*"
+            id="file-upload"
+            type="file"
+            style={{
+              opacity: 0,
+              position: 'absolute',
+              zIndex: -1,
+              display: 'none',
+            }}
           />
-        </motion.label>
-        <input
-          onChange={handleFileUpload}
-          onFocus={(evt) => evt.preventDefault()}
-          accept="image/*"
-          id="file-upload"
-          type="file"
-          style={{
-            opacity: 0,
-            position: 'absolute',
-            zIndex: -1,
-            display: 'none',
-          }}
-        />
-      </motion.div>
-      <div className={inputsContainer()}>
-        <TextareaAutosize
-          spellCheck="false"
-          placeholder="Username"
-          maxLength={25}
-          maxRows={1}
-          value={username || ''}
-          className={genericInput()}
-          onChange={handleNameChange}
-        />
-        <TextareaAutosize
-          spellCheck="false"
-          placeholder="Email"
-          maxLength={25}
-          maxRows={1}
-          value={email || ''}
-          className={genericInput()}
-          onChange={handleEmailChange}
-        />
+        </motion.div>
+        <div className={inputsContainer()}>
+          <TextareaAutosize
+            spellCheck="false"
+            placeholder="Username"
+            maxLength={25}
+            maxRows={1}
+            value={username || ''}
+            className={genericInput()}
+            onChange={handleNameChange}
+          />
+          <TextareaAutosize
+            spellCheck="false"
+            placeholder="Email"
+            maxLength={25}
+            maxRows={1}
+            value={email || ''}
+            className={genericInput()}
+            onChange={handleEmailChange}
+          />
+        </div>
       </div>
-    </div>
+      <motion.div
+        style={{
+          border: '2px solid ' + colors.offWhitePressed2,
+          borderRadius: '2px',
+          padding: 6,
+          paddingRight: 6,
+          color: colors.offWhitePressed2,
+          display: 'flex',
+          flexDirection: 'row',
+          // justifyContent: 'space-between',
+          // alignItems: 'center', connect text looks more centered without this lmao
+          fontSize: '0.9em',
+        }}
+        whileHover={{
+          borderColor: colors.pastelGreen,
+          color: colors.pastelGreen,
+          cursor: 'pointer',
+        }}
+        transition={{ duration: 0.15 }}
+        onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
+      >
+        <BsSpotify size={'18px'} style={{ paddingRight: 6 }} />
+        connect
+      </motion.div>
+    </>
   );
 };
 

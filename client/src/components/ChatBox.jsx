@@ -6,6 +6,7 @@ import { MdSend } from 'react-icons/md';
 
 import colors from '../config/colors';
 import { useClientSocket } from '../contexts/ClientSocketContext';
+import { useFriends } from '../contexts/FriendsContext';
 import DAO from '../config/DAO';
 import { ConversationBubble } from './ConversationBubble';
 import { useDispatch, useSelector } from 'react-redux';
@@ -115,6 +116,7 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
   const dispatch = useDispatch();
 
   const { socket } = useClientSocket();
+  const { setFriends } = useFriends();
 
   const anchorRef = useRef();
 
@@ -209,19 +211,17 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
       createdAt: new Date(),
     };
 
-    dispatch(
-      setFriendsMain((prevState) =>
-        prevState.map((f) =>
-          f._id === receiver
-            ? {
-                ...f,
-                conversations: [
-                  { messages: f.conversations[0].messages.concat(newMessage) },
-                  ...f.conversations,
-                ],
-              }
-            : f
-        )
+    setFriends((prevState) =>
+      prevState.map((f) =>
+        f._id === receiver
+          ? {
+              ...f,
+              conversations: [
+                { messages: f.conversations[0].messages.concat(newMessage) },
+                ...f.conversations,
+              ],
+            }
+          : f
       )
     );
 
@@ -299,24 +299,22 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
         .then((res) => {
           if (!res.data.messages) return;
 
-          dispatch(
-            setFriendsMain((prevState) =>
-              prevState.map((f) =>
-                f._id === receiver
-                  ? {
-                      ...f,
-                      conversations: [
-                        {
-                          ...f.conversations[0],
-                          messages: [
-                            ...res.data.messages,
-                            ...f.conversations[0].messages,
-                          ],
-                        },
-                      ],
-                    }
-                  : f
-              )
+          setFriends((prevState) =>
+            prevState.map((f) =>
+              f._id === receiver
+                ? {
+                    ...f,
+                    conversations: [
+                      {
+                        ...f.conversations[0],
+                        messages: [
+                          ...res.data.messages,
+                          ...f.conversations[0].messages,
+                        ],
+                      },
+                    ],
+                  }
+                : f
             )
           );
         })

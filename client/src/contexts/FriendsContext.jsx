@@ -126,23 +126,25 @@ export function FriendsProvider({ children }) {
     // socket.removeAllListeners('message:receive');
 
     socket.on('message:receive', ({ fromID, message }) => {
-      console.error('fix this');
-      setFriends((prevState) => {
-        return prevState.map((friend) => {
-          // if (friend._id === fromID) {
-          //   friend.sharehubConversations.push({
-          //     fromID,
-          //     message,
-          //     received: new Date(),
-          //   });
-
-          //   return {
-          //     ...friend,
-          //   };
-          // }
-          return friend;
-        });
-      });
+      setFriends((prevState) =>
+        prevState.map((friend) =>
+          friend._id === fromID
+            ? {
+                ...friend,
+                conversations: [
+                  {
+                    messages: friend.conversations[0].messages.concat({
+                      fromID,
+                      message,
+                      received: new Date(),
+                    }),
+                  },
+                  ...friend.conversations,
+                ],
+              }
+            : friend
+        )
+      );
     });
   };
 
