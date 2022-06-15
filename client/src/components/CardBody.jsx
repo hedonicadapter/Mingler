@@ -33,7 +33,6 @@ export default function CardBody({
   userID,
   expanded,
   chatVisible,
-  conversations,
   setFriends,
 }) {
   return (
@@ -51,11 +50,7 @@ export default function CardBody({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            <ChatBox
-              receiver={userID}
-              conversations={conversations}
-              expanded={expanded}
-            />
+            <ChatBox receiver={userID} expanded={expanded} />
           </motion.div>
         )}
       </AnimatePresence>

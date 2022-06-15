@@ -209,7 +209,6 @@ export default function AccordionItem({
             <CardBody
               activity={friend?.activity}
               userID={friend?._id}
-              conversations={friend?.conversations}
               markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
               setMarkyToReplaceWithYouTubeVideo={
                 setMarkyToReplaceWithYouTubeVideo

@@ -402,6 +402,7 @@ app.whenReady().then(() => {
             settings: {
               currentUser: {
                 _id: global.state?.settings?.currentUser?._id,
+                friends: global.state?.settings?.currentUser?.friends,
                 accessToken: global.state?.settings?.currentUser?.accessToken,
                 refreshToken: global.state?.settings?.currentUser?.refreshToken,
                 spotifyAccessToken:

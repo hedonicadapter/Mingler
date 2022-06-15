@@ -110,17 +110,16 @@ const inputBox = css({
   fontFamily: 'inherit',
 });
 
-export const ChatBox = ({ receiver, conversations, expanded }) => {
+export const ChatBox = ({ receiver, expanded }) => {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
 
   const { socket } = useClientSocket();
-  const { setFriends } = useFriends();
+  const { conversations, setConversations } = useFriends();
 
   const anchorRef = useRef();
 
-  const [nativeConversations, setNativeConversations] = useState();
   const [inputText, setInputText] = useState('');
   const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
@@ -211,19 +210,23 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
       createdAt: new Date(),
     };
 
-    setFriends((prevState) =>
-      prevState.map((f) =>
-        f._id === receiver
-          ? {
-              ...f,
-              conversations: [
-                { messages: f.conversations[0].messages.concat(newMessage) },
-                ...f.conversations,
-              ],
-            }
-          : f
-      )
-    );
+    // setFriends((prevState) =>
+    //   prevState.map((f) =>
+    //     f._id === receiver
+    //       ? {
+    //           ...f,
+    //           conversations: [
+    //             { messages: f.conversations[0].messages.concat(newMessage) },
+    //             ...f.conversations,
+    //           ],
+    //         }
+    //       : f
+    //   )
+    // );
+    setConversations((prevState) => {
+      prevState[receiver].messages.push(newMessage);
+      return { ...prevState };
+    });
 
     DAO.sendMessage(
       receiver,
@@ -332,7 +335,7 @@ export const ChatBox = ({ receiver, conversations, expanded }) => {
   return (
     <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
-        {conversations[0]?.messages?.map((message, index) => {
+        {conversations[receiver]?.messages?.map((message, index) => {
           return (
             <motion.div
               key={index}

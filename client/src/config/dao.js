@@ -75,6 +75,16 @@ export class DAO {
     });
   };
 
+  getConversations = (userID, token) => {
+    const data = { userID };
+
+    return privateRoute.post(`/getConversations`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   searchUsers = (searchTerm, token) => {
     const data = { searchTerm };
 

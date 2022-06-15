@@ -17,13 +17,22 @@ export function FriendsProvider({ children }) {
   const { socket } = useClientSocket();
 
   const [friends, setFriends] = useState([]);
+  const [conversations, setConversations] = useState(null);
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
+
+  useEffect(() => {
+    console.log('ffff ', friends);
+  }, [friends]);
+  useEffect(() => {
+    console.log('cccc ', conversations);
+  }, [conversations]);
 
   useEffect(() => {
     if (!currentUser?.accessToken) return;
 
     getFriends();
+    getConversations();
     getFriendRequests();
   }, [currentUser, socket]);
 
@@ -45,6 +54,13 @@ export function FriendsProvider({ children }) {
     // };
   }, [socket]);
 
+  const getConversations = () => {
+    DAO.getConversations(currentUser._id, currentUser.accessToken).then(
+      (res) => {
+        setConversations(res?.data);
+      }
+    );
+  };
   const getFriends = () => {
     DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
@@ -126,25 +142,26 @@ export function FriendsProvider({ children }) {
     // socket.removeAllListeners('message:receive');
 
     socket.on('message:receive', ({ fromID, message }) => {
-      setFriends((prevState) =>
-        prevState.map((friend) =>
-          friend._id === fromID
-            ? {
-                ...friend,
-                conversations: [
-                  {
-                    messages: friend.conversations[0].messages.concat({
-                      fromID,
-                      message,
-                      received: new Date(),
-                    }),
-                  },
-                  ...friend.conversations,
-                ],
-              }
-            : friend
-        )
-      );
+      console.warn('fix this');
+      // setFriends((prevState) =>
+      //   prevState.map((friend) =>
+      //     friend._id === fromID
+      //       ? {
+      //           ...friend,
+      //           conversations: [
+      //             {
+      //               messages: friend.conversations[0].messages.concat({
+      //                 fromID,
+      //                 message,
+      //                 received: new Date(),
+      //               }),
+      //             },
+      //             ...friend.conversations,
+      //           ],
+      //         }
+      //       : friend
+      //   )
+      // );
     });
   };
 
@@ -263,6 +280,8 @@ export function FriendsProvider({ children }) {
     filteredFriends,
     friendRequests,
     getFriendRequests,
+    conversations,
+    setConversations,
   };
 
   return (
