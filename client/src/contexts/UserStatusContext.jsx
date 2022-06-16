@@ -88,7 +88,11 @@ export function UserStatusProvider({ children }) {
   let refreshRetryLimit = 0;
   const activeTrackListener = (spotifyAccessToken) => {
     console.log('before close ', trackProcess);
-    trackProcess?.close();
+    try {
+      trackProcess?.close();
+    } catch (e) {
+      console.warn(e);
+    }
 
     if (!spotifyAccessToken) return;
 
@@ -116,6 +120,7 @@ export function UserStatusProvider({ children }) {
 
       try {
         console.log('processedData1', processedData);
+        if (processedData === 401) return;
         let trackInfo = JSON5.parse(processedData);
 
         console.log('trackinfo3 ', trackInfo);

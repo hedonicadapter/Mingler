@@ -22,9 +22,6 @@ export function FriendsProvider({ children }) {
   const [filteredFriends, setFilteredFriends] = useState([]);
 
   useEffect(() => {
-    console.log('ffff ', friends);
-  }, [friends]);
-  useEffect(() => {
     console.log('cccc ', conversations);
   }, [conversations]);
 
@@ -57,7 +54,7 @@ export function FriendsProvider({ children }) {
   const getConversations = () => {
     DAO.getConversations(currentUser._id, currentUser.accessToken).then(
       (res) => {
-        setConversations(res?.data);
+        setConversations(res?.data?.reverse());
       }
     );
   };

@@ -9,8 +9,22 @@ const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const fs = require('fs');
 const { promisify } = require('util');
+const moment = require('moment');
 
 const unlinkAsync = promisify(fs.unlink);
+
+const excludeFieldsForPrivacy = {
+  guest: 0,
+  clientFingerprint: 0,
+  created: 0,
+  resetPasswordToken: 0,
+  resetPasswordExpire: 0,
+  friends: 0,
+  conversations: 0,
+  spotifyAccessToken: 0,
+  spotifyExpiryDate: 0,
+  spotifyRefreshToken: 0,
+};
 
 const dateBySecondsFromCurrentClientTime = (currentClientTime, seconds) => {
   let formattedClientTime = new Date(currentClientTime);
@@ -31,56 +45,86 @@ exports.getFriends = async (req, res, next) => {
   const { userID } = req.body;
 
   try {
-    User.findById(
-      userID,
-      'friends conversations profilePicture',
-      function (err, result) {
-        if (err) return next(new ErrorResponse('Could not find friends.', 404));
-        if (!result) return next(new ErrorResponse('Invalid body.', 400));
-        if (!result.friends) {
-          return res.status(201).json({
-            status: 'Success',
-            message: 'No friends',
-            data: null,
-          });
-        }
-
-        User.find(
-          { _id: { $in: result.friends } },
-          {
-            guest: 0,
-            previousStatus: 0,
-            clientFingerprint: 0,
-            created: 0,
-            resetPasswordToken: 0,
-            resetPasswordExpire: 0,
-          },
-          function (err, friends) {
-            if (err)
-              return next(new ErrorResponse('Could not find friends.', 404));
-
-            result.conversations.forEach((conversation) => {
-              friends.forEach((friend) => {
-                if (
-                  conversation?.users.every((user) => user._id === friend._id)
-                ) {
-                } else if (conversation?.users.includes(friend._id)) {
-                  friends[
-                    friends.findIndex((obj) => obj._id === friend._id)
-                  ].conversations = [conversation];
-                }
-              });
-            });
-            res.send({ friends });
-          }
-        );
+    User.findById(userID, 'friends profilePicture', function (err, result) {
+      if (err) return next(new ErrorResponse('Could not find friends.', 404));
+      if (!result) return next(new ErrorResponse('Invalid body.', 400));
+      if (!result.friends) {
+        return res.status(201).json({
+          status: 'Success',
+          message: 'No friends',
+          data: null,
+        });
       }
-    ).populate({
+
+      User.find(
+        { _id: { $in: result.friends } },
+        excludeFieldsForPrivacy,
+        function (err, friends) {
+          if (err)
+            return next(new ErrorResponse('Could not find friends.', 404));
+
+          res.send({ friends });
+        }
+      );
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+exports.getConversations = async (req, res, next) => {
+  const { userID } = req.body;
+
+  try {
+    User.findById(userID, 'friends conversations', function (err, result) {
+      if (err) return next(new ErrorResponse('Could not find friends.', 404));
+      if (!result) return next(new ErrorResponse('Invalid body.', 400));
+      if (!result.friends) {
+        return res.status(201).json({
+          status: 'Success',
+          message: 'No friends',
+          data: null,
+        });
+      }
+
+      User.find(
+        { _id: { $in: result.friends } },
+        'conversations',
+        function (err, friends) {
+          if (err)
+            return next(new ErrorResponse('Could not find friends.', 404));
+
+          let conversationByID = [];
+
+          result.conversations.forEach((conversation) => {
+            conversation.messages.forEach((msg) => {
+              console.log(
+                moment(msg.createdAt).format('YYYY-MM-DD--HH:MM:SS'),
+                ' ',
+                msg.message
+              );
+              msg.createdAt = new Date(msg.createdAt);
+            });
+
+            friends.forEach((friend) => {
+              if (
+                // TODO: why did I do this
+                conversation?.users.every((user) => user._id === friend._id)
+              ) {
+              } else if (conversation?.users.includes(friend._id)) {
+                conversationByID.push({ _id: friend._id, conversation });
+              }
+            });
+          });
+          res.send(conversationByID);
+        }
+      );
+    }).populate({
       path: 'conversations',
       select: '_id users',
+      match: { users: { $in: userID } },
       populate: {
         path: 'messages',
-        options: { sort: { createdAt: -1 }, limit: 6 },
+        options: { sort: { sentDate: -1 }, limit: 6 },
       },
     });
   } catch (e) {
@@ -353,11 +397,12 @@ exports.getMessages = async (req, res, next) => {
       'messages -_id',
       function (err, result) {
         if (err) return next(new ErrorResponse('Database Error'), 500);
-        return res.send(result);
+        console.log(result);
+        return res.send(result?.messages);
       }
     ).populate({
       path: 'messages',
-      options: { sort: { createdAt: -1 }, limit: 6, skip: skip },
+      options: { sort: { sentDate: -1 }, limit: 6, skip: skip },
     });
   } catch (e) {
     next(e);
@@ -365,9 +410,9 @@ exports.getMessages = async (req, res, next) => {
 };
 
 exports.sendMessage = async (req, res, next) => {
-  const { toID, fromID, message } = req.body;
+  const { toID, fromID, message, sentDate } = req.body;
 
-  const messageObject = { fromID, message };
+  const messageObject = { fromID, message, sentDate };
 
   const session = await Conversation.startSession();
   try {

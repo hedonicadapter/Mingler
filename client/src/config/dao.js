@@ -155,8 +155,8 @@ export class DAO {
     });
   };
 
-  sendMessage = (toID, fromID, message, token) => {
-    const data = { toID, fromID, message };
+  sendMessage = (toID, fromID, message, sentDate, token) => {
+    const data = { toID, fromID, message, sentDate };
 
     return privateRoute.post('/sendMessage', data, {
       headers: {

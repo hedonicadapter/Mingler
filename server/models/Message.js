@@ -14,8 +14,9 @@ const MessageSchema = new mongoose.Schema(
       type: String,
       required: [true, 'No message content.'],
     },
-  },
-  { timestamps: true }
+    sentDate: Date,
+  }
+  // { timestamps: true }
 );
 
 const Message = mongoose.model('Message', MessageSchema);

@@ -29,15 +29,15 @@ router.route('/').get(protect, getPrivateData);
 router.route('/searchUsers').post(protect, searchUsers);
 
 router.route('/getFriends').post(protect, getFriends);
+router.route('/getConversations').post(getConversations);
+router.route('/getMessages').post(getMessages);
+router.route('/sendMessage').post(protect, sendMessage);
 
 router.route('/sendFriendRequest').post(protect, sendFriendRequest);
 router.route('/acceptFriendRequest').post(protect, acceptFriendRequest);
 router.route('/getFriendRequests').post(protect, getFriendRequests);
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
 router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
-
-router.route('/getMessages').post(protect, getMessages);
-router.route('/sendMessage').post(protect, sendMessage);
 
 router.route('/createSpotifyURL').post(protect, createSpotifyURL);
 router.route('/authorizeSpotify').post(protect, authorizeSpotify);

@@ -207,31 +207,28 @@ export const ChatBox = ({ receiver, expanded }) => {
     const newMessage = {
       fromID: currentUser?._id,
       message: inputText,
-      createdAt: new Date(),
+      sentDate: new Date(),
     };
 
-    // setFriends((prevState) =>
-    //   prevState.map((f) =>
-    //     f._id === receiver
-    //       ? {
-    //           ...f,
-    //           conversations: [
-    //             { messages: f.conversations[0].messages.concat(newMessage) },
-    //             ...f.conversations,
-    //           ],
-    //         }
-    //       : f
-    //   )
-    // );
-    setConversations((prevState) => {
-      prevState[receiver].messages.push(newMessage);
-      return { ...prevState };
-    });
+    setConversations((prevState) =>
+      prevState.map((conversation) =>
+        conversation._id === receiver
+          ? {
+              ...conversation,
+              conversation: {
+                messages:
+                  conversation.conversation.messages?.concat(newMessage),
+              },
+            }
+          : { ...conversation }
+      )
+    );
 
     DAO.sendMessage(
       receiver,
       currentUser?._id,
       inputText,
+      new Date(),
       currentUser?.accessToken
     )
       .then((res) => {
@@ -246,7 +243,9 @@ export const ChatBox = ({ receiver, expanded }) => {
   };
 
   const handleInputKeyUp = (evt) => {
-    // console.log('keys: ', evt.key);
+    if (evt.key === 'Enter') {
+      sendMessage();
+    }
 
     console.log('key pressed: ', evt.key);
     console.log('shiftKey: ', evt.shiftKey);
@@ -295,29 +294,36 @@ export const ChatBox = ({ receiver, expanded }) => {
   };
 
   const handleMessageAreaScroll = (evt) => {
+    if (!conversations) return;
+
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
-      const skip = conversations[0].messages.length;
-      DAO.getMessages(conversations[0]._id, skip, currentUser?.accessToken)
-        .then((res) => {
-          if (!res.data.messages) return;
 
-          setFriends((prevState) =>
-            prevState.map((f) =>
-              f._id === receiver
+      const convoObject = conversations.find(
+        (convo) => convo._id === receiver
+      )?.conversation;
+
+      DAO.getMessages(
+        convoObject._id,
+        convoObject.messages.length,
+        currentUser?.accessToken
+      )
+        .then((res) => {
+          if (!res.data) return;
+          console.log(res.data);
+
+          setConversations((prevState) =>
+            prevState.map((conversation) =>
+              conversation._id === receiver
                 ? {
-                    ...f,
-                    conversations: [
-                      {
-                        ...f.conversations[0],
-                        messages: [
-                          ...res.data.messages,
-                          ...f.conversations[0].messages,
-                        ],
-                      },
-                    ],
+                    ...conversation,
+                    conversation: {
+                      messages: res.data.concat(
+                        conversation.conversation.messages
+                      ),
+                    },
                   }
-                : f
+                : { ...conversation }
             )
           );
         })
@@ -335,22 +341,24 @@ export const ChatBox = ({ receiver, expanded }) => {
   return (
     <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
-        {conversations[receiver]?.messages?.map((message, index) => {
-          return (
-            <motion.div
-              key={index}
-              animate={{ opacity: 1 }}
-              initial={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <ConversationBubble
-                fromID={message.fromID}
-                message={message.message}
-                sent={message.createdAt}
-              />
-            </motion.div>
-          );
-        })}
+        {conversations
+          ?.find((convo) => convo._id === receiver)
+          .conversation.messages?.map((message, index) => {
+            return (
+              <motion.div
+                key={index}
+                animate={{ opacity: 1 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <ConversationBubble
+                  fromID={message.fromID}
+                  message={message.message}
+                  sent={message.sentDate}
+                />
+              </motion.div>
+            );
+          })}
         <div ref={anchorRef} />
       </div>
       <div className={inputContainer()}>
