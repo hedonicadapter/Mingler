@@ -211,16 +211,15 @@ export const ChatBox = ({ receiver, expanded }) => {
     };
 
     setConversations((prevState) =>
-      prevState.map((conversation) =>
-        conversation._id === receiver
+      prevState.map((convoObject) =>
+        convoObject._id === receiver
           ? {
-              ...conversation,
+              ...convoObject,
               conversation: {
-                messages:
-                  conversation.conversation.messages?.concat(newMessage),
+                messages: convoObject.conversation.messages?.concat(newMessage),
               },
             }
-          : { ...conversation }
+          : { ...convoObject }
       )
     );
 
@@ -313,17 +312,17 @@ export const ChatBox = ({ receiver, expanded }) => {
           console.log(res.data);
 
           setConversations((prevState) =>
-            prevState.map((conversation) =>
-              conversation._id === receiver
+            prevState.map((convoObject) =>
+              convoObject._id === receiver
                 ? {
-                    ...conversation,
+                    ...convoObject,
                     conversation: {
                       messages: res.data.concat(
-                        conversation.conversation.messages
+                        convoObject.conversation.messages
                       ),
                     },
                   }
-                : { ...conversation }
+                : { ...convoObject }
             )
           );
         })
@@ -338,12 +337,19 @@ export const ChatBox = ({ receiver, expanded }) => {
     anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [anchorRef]);
 
+  useEffect(() => {
+    console.log(
+      'convo ',
+      conversations?.find((convo) => convo._id === receiver)
+    );
+  }, [conversations]);
+
   return (
     <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
         {conversations
           ?.find((convo) => convo._id === receiver)
-          .conversation.messages?.map((message, index) => {
+          ?.conversation.messages?.map((message, index) => {
             return (
               <motion.div
                 key={index}

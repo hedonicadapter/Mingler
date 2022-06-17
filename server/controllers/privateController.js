@@ -96,14 +96,15 @@ exports.getConversations = async (req, res, next) => {
           let conversationByID = [];
 
           result.conversations.forEach((conversation) => {
-            conversation.messages.forEach((msg) => {
-              console.log(
-                moment(msg.createdAt).format('YYYY-MM-DD--HH:MM:SS'),
-                ' ',
-                msg.message
-              );
-              msg.createdAt = new Date(msg.createdAt);
-            });
+            conversation.messages?.reverse();
+            // .forEach((msg) => {
+            //   console.log(
+            //     moment(msg.createdAt).format('YYYY-MM-DD--HH:MM:SS'),
+            //     ' ',
+            //     msg.message
+            //   );
+            //   msg.createdAt = new Date(msg.createdAt);
+            // });
 
             friends.forEach((friend) => {
               if (
@@ -371,23 +372,6 @@ exports.getSentFriendRequests = async (req, res, next) => {
   }
 };
 
-// exports.getConversations = async (req, res, next) => {
-//   const { userID } = req.body;
-
-//   try {
-//     await User.findById(userID, 'conversations', function (err, result) {
-//       if (err) return next(new ErrorResponse('Database Error'), 500);
-//       return res.send(result);
-//     }).populate({
-//       path: 'conversations',
-//       select: '_id users',
-//       populate: { path: 'messages', options: { limit: 6 } },
-//     });
-//   } catch (e) {
-//     next(e);
-//   }
-// };
-
 exports.getMessages = async (req, res, next) => {
   const { conversationID, skip } = req.body;
 
@@ -397,8 +381,7 @@ exports.getMessages = async (req, res, next) => {
       'messages -_id',
       function (err, result) {
         if (err) return next(new ErrorResponse('Database Error'), 500);
-        console.log(result);
-        return res.send(result?.messages);
+        return res.send(result?.messages.reverse());
       }
     ).populate({
       path: 'messages',

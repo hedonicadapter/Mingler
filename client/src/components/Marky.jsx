@@ -11,6 +11,8 @@ import colors from '../config/colors';
 import DAO from '../config/DAO';
 import { useStatus } from '../contexts/UserStatusContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
+import { useSelector } from 'react-redux';
+import { getApp } from '../mainState/features/appSlice';
 
 const shell = electron.shell;
 const ipcRenderer = electron.ipcRenderer;
@@ -109,6 +111,8 @@ export default function Marky({
 }) {
   const { sendYouTubeTimeRequest } = useClientSocket();
 
+  const appState = useSelector(getApp);
+
   const marqueeRef = useRef();
   const { setAccessToken, setRefreshToken } = useStatus();
 
@@ -133,6 +137,7 @@ export default function Marky({
   }, [marKey]);
 
   useEffect(() => {
+    console.log(appState.windowWidth);
     if (marqueeRef.current) {
       setMarqueeWidth(
         // Width of overflowing text
@@ -141,14 +146,21 @@ export default function Marky({
     } else {
       setMarqueeWidth(0);
     }
-  }, [marqueeRef, WindowTitle, TabTitle, YouTubeTitle]);
+  }, [
+    marqueeRef,
+    WindowTitle,
+    TrackTitle,
+    TabTitle,
+    YouTubeTitle,
+    appState.windowWidth,
+  ]);
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
       (TrackTitle && setMarkyType('Track')) ||
       (TabTitle && setMarkyType('Tab')) ||
-      (YouTubeURL && setMarkyType('YouTubeVideo'));
-  }, [WindowTitle, TrackTitle, TabTitle, YouTubeURL]);
+      (YouTubeTitle && setMarkyType('YouTubeVideo'));
+  }, [WindowTitle, TrackTitle, TabTitle, YouTubeTitle]);
 
   const handleClick = () => {
     if (WindowTitle) {
