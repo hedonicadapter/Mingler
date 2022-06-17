@@ -12,11 +12,26 @@ export function useFriends() {
   return useContext(FriendsContext);
 }
 
+const useGetSetFriends = (initialValue = []) => {
+  const [value, setValue] = useState(initialValue);
+
+  const sortByOnlineBeforeSetting = (newValue) => {
+    if (newValue instanceof Array) {
+      newValue.sort((a, b) => b.online - a.online);
+    }
+
+    setValue(newValue);
+  };
+
+  return [value, sortByOnlineBeforeSetting];
+};
+
 export function FriendsProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const { socket } = useClientSocket();
 
-  const [friends, setFriends] = useState([]);
+  // const [friends, setFriends] = useState([]);
+  const [friends, setFriends] = useGetSetFriends([]);
   const [conversations, setConversations] = useState(null);
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
