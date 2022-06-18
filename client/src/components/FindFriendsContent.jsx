@@ -57,8 +57,8 @@ const searchResultsStyle = css({
 export default function FindFriendsContent() {
   makeClickthrough();
 
-  const [friends, setFriends] = useState(null);
-  const [foundFriends, setFoundFriends] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [foundFriends, setFoundFriends] = useState([]);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
 
   const currentUser = useSelector(getCurrentUser);
@@ -179,9 +179,11 @@ export default function FindFriendsContent() {
               <UserItem
                 user={user}
                 requestSent={sentFriendRequests.includes(user._id)}
-                alreadyFriends={friends?.some(
-                  (friend) => friend._id === user._id
-                )}
+                alreadyFriends={
+                  !Array.isArray(friends) || !friends.length
+                    ? false
+                    : friends.some((friend) => friend._id === user._id)
+                }
                 index={index}
                 handleSendRequestButton={handleSendRequestButton}
                 handleCancelRequestButton={handleCancelRequestButton}

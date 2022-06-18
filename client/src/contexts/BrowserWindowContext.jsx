@@ -99,8 +99,8 @@ export function BrowserWindowProvider({ children }) {
   }, [settingsWindow]);
 
   useEffect(() => {
-    // if (findFriendsWindow?.isVisible())
-    //   findFriendsWindow.webContents.send('friends', friends);
+    if (findFriendsWindow?.isVisible())
+      findFriendsWindow.webContents.send('friends', friends);
   }, [friends, findFriendsWindow]);
 
   useEffect(() => {
@@ -114,6 +114,9 @@ export function BrowserWindowProvider({ children }) {
       settingsWindow?.close();
       findFriendsWindow?.close();
       connectSpotifyWindow?.close();
+      setSettingsWindow(new BrowserWindow(settingsWindowConfig));
+      setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
+      setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
     }
   }, [currentUser?.accessToken]);
 

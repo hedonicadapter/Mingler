@@ -137,7 +137,11 @@ export default function UserItem({
   const alternatingColor = [colors.offWhiteHovered, colors.offWhite];
 
   useEffect(() => {
-    console.log('alreadyFriends ', alreadyFriends);
+    console.log('alreadyFriends ', user);
+  }, [user]);
+
+  useEffect(() => {
+    console.log('alreadyFriends ', user._id, ' ', alreadyFriends);
   }, [alreadyFriends]);
 
   return (
