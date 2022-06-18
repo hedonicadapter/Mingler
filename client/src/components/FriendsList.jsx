@@ -27,7 +27,7 @@ const container = css({
   backgroundColor: 'transparent',
 });
 
-const EmptySpaceFiller = ({
+export const EmptySpaceFiller = ({
   setExpandedMasterToggle,
   expandedMasterToggle,
 }) => {

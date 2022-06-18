@@ -38,7 +38,8 @@ const settingsWindowConfig = {
   show: false,
   frame: false,
   transparent: true,
-  width: 560,
+  width: 475,
+  height: 510,
   webPreferences: {
     nodeIntegration: true,
     enableRemoteModule: true,
@@ -50,7 +51,7 @@ const findFriendsWindowConfig = {
   frame: false,
   transparent: true,
   width: 460,
-  height: 634,
+  // height: 634,
   webPreferences: {
     nodeIntegration: true,
     enableRemoteModule: true,

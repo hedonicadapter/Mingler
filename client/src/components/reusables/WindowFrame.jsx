@@ -72,6 +72,7 @@ const body = css({
   flexBasis: 'auto',
   alignSelf: 'auto',
   order: 0,
+  overflow: 'hidden',
 });
 
 export const WindowFrame = ({ children }) => {

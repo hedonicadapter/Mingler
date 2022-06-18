@@ -27,12 +27,15 @@ const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
 
 const container = css({
-  display: 'flex',
-  flexDirection: 'column',
-  flexWrap: 'nowrap',
-  justifyContent: 'normal',
-  alignItems: 'stretch',
-  alignContent: 'normal',
+  // display: 'flex',
+  // flexDirection: 'column',
+  // flexWrap: 'nowrap',
+  // justifyContent: 'normal',
+  // alignItems: 'stretch',
+  // alignContent: 'normal',
+  // overflow: 'hidden',
+  backgroundColor: colors.offWhite,
+  pointerEvents: 'auto',
 });
 
 const searchInputStyle = css({
@@ -51,7 +54,8 @@ const searchInputStyle = css({
 });
 
 const searchResultsStyle = css({
-  overflowY: 'auto',
+  height: '100vh',
+  overflowY: 'scroll',
   scrollbarGutter: 'stable',
 });
 
@@ -158,25 +162,30 @@ export default function FindFriendsContent() {
   };
 
   return (
-    <div className={container()} onKeyDown={handleEscapeKey}>
-      <WindowFrame>
-        <motion.input
-          className={[searchInputStyle(), 'undraggable', 'clickable'].join(' ')}
-          whileHover={{
-            color: colors.darkmodeLightBlack,
-          }}
-          whileFocus={{ color: colors.darkmodeBlack }}
-          transition={{ duration: 0.1 }}
-          placeholder="Find friends..."
-          type="text"
-          value={appState?.findFriendsSearchValue || ''}
-          onChange={handleSearchInput}
-          style={{ backgroundColor: colors.offWhite }}
-        />
-        <div className={searchResultsStyle()}>
-          {foundFriends &&
-            sentFriendRequests &&
-            foundFriends.map((user, index) => (
+    <WindowFrame>
+      <div style={{ overflow: 'hidden', pointerEvents: 'auto' }}>
+        <div className={container()}>
+          <div style={{}} onKeyDown={handleEscapeKey}>
+            <motion.input
+              className={[searchInputStyle(), 'undraggable', 'clickable'].join(
+                ' '
+              )}
+              whileHover={{
+                color: colors.darkmodeLightBlack,
+              }}
+              whileFocus={{ color: colors.darkmodeBlack }}
+              transition={{ duration: 0.1 }}
+              placeholder="Find friends..."
+              type="text"
+              value={appState?.findFriendsSearchValue || ''}
+              onChange={handleSearchInput}
+              style={{ backgroundColor: colors.offWhite }}
+            />
+          </div>
+        </div>
+        {foundFriends && sentFriendRequests && (
+          <div className={searchResultsStyle()}>
+            {foundFriends.map((user, index) => (
               <UserItem
                 user={user}
                 requestSent={sentFriendRequests.includes(user._id)}
@@ -190,8 +199,10 @@ export default function FindFriendsContent() {
                 handleCancelRequestButton={handleCancelRequestButton}
               />
             ))}
-        </div>
-      </WindowFrame>
-    </div>
+            <div style={{ height: 66 }}></div>
+          </div>
+        )}
+      </div>
+    </WindowFrame>
   );
 }
