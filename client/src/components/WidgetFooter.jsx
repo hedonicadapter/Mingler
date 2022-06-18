@@ -17,10 +17,10 @@ import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 const container = css({
   fontSize: '1.0em',
   backgroundColor: 'transparent',
-  flex: 1,
-  height: '100%',
-  marginTop: 'auto',
-  flex: '0 1 40px',
+  // flex: 1,
+  // height: '100%',
+  // marginTop: 'auto',
+
   backgroundColor: colors.offWhite,
   display: 'flex',
   flexDirection: 'row',

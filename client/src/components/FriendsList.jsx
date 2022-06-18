@@ -96,7 +96,8 @@ export default function FriendsList() {
               acceptFriendRequest={acceptFriendRequest}
             />
           )}
-
+        </div>
+        <div style={{ flexGrow: 1, overflowY: 'auto' }}>
           {appState?.findFriendsSearchValue
             ? filteredFriends?.map((friend, index) => (
                 <AccordionItem
@@ -120,11 +121,13 @@ export default function FriendsList() {
           setExpandedMasterToggle={setExpandedMasterToggle}
           expandedMasterToggle={expandedMasterToggle}
         />
-        <WidgetFooter
-          handleSearchInput={handleSearchInput}
-          searchValue={appState?.findFriendsSearchValue}
-          friends={friends}
-        />
+        <div style={{ flex: '0 1 40px' }}>
+          <WidgetFooter
+            handleSearchInput={handleSearchInput}
+            searchValue={appState?.findFriendsSearchValue}
+            friends={friends}
+          />
+        </div>
       </div>
     </>
   );

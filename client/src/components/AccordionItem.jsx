@@ -19,12 +19,13 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
     <motion.span
       style={{
         pointerEvents: 'none',
-        position: 'absolute',
-        zIndex: 80,
+        position: 'relative',
       }}
     >
       <span
         style={{
+          zIndex: 80,
+          position: 'absolute',
           height: '50px',
           width: '50px',
           backgroundColor: colors.samBlue,
