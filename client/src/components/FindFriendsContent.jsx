@@ -52,6 +52,7 @@ const searchInputStyle = css({
 
 const searchResultsStyle = css({
   overflowY: 'auto',
+  scrollbarGutter: 'stable',
 });
 
 export default function FindFriendsContent() {
