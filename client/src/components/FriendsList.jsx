@@ -45,7 +45,7 @@ export default function FriendsList() {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
 
-  const { socket } = useClientSocket();
+  const { socket, acceptFriendRequest } = useClientSocket();
   const {
     friends,
     getFriends,
@@ -93,6 +93,7 @@ export default function FriendsList() {
               getFriends={getFriends} // To refresh friends list after accepting a friend request
               getFriendRequests={getFriendRequests} // Same thing here
               expandedMasterToggle={expandedMasterToggle}
+              acceptFriendRequest={acceptFriendRequest}
             />
           )}
 

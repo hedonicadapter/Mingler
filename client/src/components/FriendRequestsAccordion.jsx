@@ -29,6 +29,7 @@ export default function FriendRequestsAccordion({
   getFriends,
   getFriendRequests,
   expandedMasterToggle,
+  acceptFriendRequest,
 }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
 
@@ -57,6 +58,8 @@ export default function FriendRequestsAccordion({
         // Refresh friends list
         getFriends();
         getFriendRequests();
+        acceptFriendRequest(fromID);
+
         setError(null);
       })
       .catch((e) => {
@@ -81,9 +84,8 @@ export default function FriendRequestsAccordion({
   return (
     <>
       <motion.header
-        // user.offline ? 'transparent'
         style={{
-          backgroundColor: expanded ? colors.offWhitePressed : colors.offWhite,
+          backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           color: hasRequests
             ? colors.darkmodeLightBlack
             : colors.darkmodeDisabledBlack,
@@ -111,28 +113,22 @@ export default function FriendRequestsAccordion({
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            <motion.div
-              variants={{
-                open: { marginTop: 0 },
-                collapsed: { marginTop: -40 },
-              }}
-            >
-              {friendRequests.map((user) => (
-                <div
-                  style={{
-                    padding: generalPadding,
-                    backgroundColor: colors.depressedWhite,
-                  }}
-                >
-                  <UserItem
-                    user={user}
-                    accept={true}
-                    handleAcceptRequestButton={handleAcceptRequestButton}
-                    handleRejectRequestButton={handleRejectRequestButton}
-                  />
-                </div>
-              ))}
-            </motion.div>
+            {friendRequests.map((user) => (
+              <div
+                style={{
+                  padding: generalPadding,
+                  backgroundColor: colors.offWhiteHovered,
+                }}
+              >
+                <UserItem
+                  user={user}
+                  accept={true}
+                  handleAcceptRequestButton={handleAcceptRequestButton}
+                  handleRejectRequestButton={handleRejectRequestButton}
+                  index={0}
+                />
+              </div>
+            ))}
           </motion.section>
         )}
       </AnimatePresence>

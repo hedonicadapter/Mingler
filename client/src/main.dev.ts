@@ -421,6 +421,7 @@ app.whenReady().then(() => {
               ...global.state?.app,
               settingsOpen: false,
               findFriendsOpen: false,
+              findFriendsSearchValue: '',
               settingsFocused: false,
               appVisible: true,
             },

@@ -49,7 +49,6 @@ export function FriendsProvider({ children }) {
   }, [currentUser, socket]);
 
   useEffect(() => {
-    console.log('socket? ', socket);
     if (!socket) return;
     setFriendRequestListeners();
     setUserStatusListener();
@@ -73,6 +72,7 @@ export function FriendsProvider({ children }) {
       }
     );
   };
+
   const getFriends = () => {
     DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
@@ -292,6 +292,7 @@ export function FriendsProvider({ children }) {
     filteredFriends,
     friendRequests,
     getFriendRequests,
+    getConversations,
     conversations,
     setConversations,
   };

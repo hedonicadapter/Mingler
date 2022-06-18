@@ -374,7 +374,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Name"
             type="name"
-            value={name}
+            value={name || ''}
             onChange={handleNameInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt)}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
@@ -478,17 +478,17 @@ export default function SplashScreen({}) {
     const handleSignUpButton = () => {
       setFormFilled('loading');
 
-      // signUpWithEmail(name, email, password).then(({ success, error }) => {
-      //   if (error) {
-      //     setError(error);
-      //     setFormFilled('true');
-      //   }
-      //   if (success) {
-      //     setJustRegistered({ email, password });
-      //     setError(null);
-      //     setSlide('SignIn');
-      //   }
-      // });
+      signUpWithEmail(name, email, password).then(({ success, error }) => {
+        if (error) {
+          setError(error);
+          setFormFilled('true');
+        }
+        if (success) {
+          setJustRegistered({ email, password });
+          setError(null);
+          setSlide('SignIn');
+        }
+      });
     };
 
     const buttonsContainer = css({
@@ -508,7 +508,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Name"
             type="name"
-            value={name}
+            value={name || ''}
             onChange={handleNameInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'name')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
@@ -533,7 +533,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Email adress"
             type="email"
-            value={email}
+            value={email || ''}
             onChange={handleEmailInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'Email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
@@ -557,7 +557,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Password"
             type="password"
-            value={password}
+            value={password || ''}
             onChange={handlePasswordInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
@@ -714,7 +714,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Email address"
             type="email"
-            value={email}
+            value={email || ''}
             onChange={handleEmailInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
@@ -738,7 +738,7 @@ export default function SplashScreen({}) {
             disabled={formFilled === 'loading' ? true : false}
             placeholder="Password"
             type="password"
-            value={password}
+            value={password || ''}
             onChange={handlePasswordInput}
             onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}

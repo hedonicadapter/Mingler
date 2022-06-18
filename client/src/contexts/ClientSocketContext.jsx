@@ -128,6 +128,12 @@ export function ClientSocketProvider({ children }) {
     socket.emit('friendrequest:send', packet);
   };
 
+  const acceptFriendRequest = (toID) => {
+    const packet = { toID, fromID: currentUser._id };
+
+    socket.emit('friendrequest:accept', packet);
+  };
+
   const cancelFriendRequest = (toID) => {
     const packet = { toID, fromID: currentUser._id };
 
@@ -137,6 +143,7 @@ export function ClientSocketProvider({ children }) {
   const value = {
     sendActivity,
     sendFriendRequest,
+    acceptFriendRequest,
     cancelFriendRequest,
     sendActivityToLocalStorage,
     sendYouTubeTimeRequest,
