@@ -198,17 +198,17 @@ export const ChatBox = ({ receiver, expanded }) => {
 
   const sendMessage = () => {
     if (!inputText || !receiver || inputText === '') return;
-    socket.emit('message:send', {
-      toID: receiver,
-      fromID: currentUser?._id,
-      message: inputText,
-    });
-
     const newMessage = {
       fromID: currentUser?._id,
       message: inputText,
       sentDate: new Date(),
     };
+
+    socket.emit('message:send', {
+      toID: receiver,
+      fromID: currentUser?._id,
+      message: newMessage,
+    });
 
     setConversations((prevState) =>
       prevState.map((convoObject) =>

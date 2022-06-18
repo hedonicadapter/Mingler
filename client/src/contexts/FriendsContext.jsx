@@ -151,29 +151,19 @@ export function FriendsProvider({ children }) {
   };
 
   const setConversationListeners = () => {
-    // socket.removeAllListeners('message:receive');
-
     socket.on('message:receive', ({ fromID, message }) => {
-      console.warn('fix this');
-      // setFriends((prevState) =>
-      //   prevState.map((friend) =>
-      //     friend._id === fromID
-      //       ? {
-      //           ...friend,
-      //           conversations: [
-      //             {
-      //               messages: friend.conversations[0].messages.concat({
-      //                 fromID,
-      //                 message,
-      //                 received: new Date(),
-      //               }),
-      //             },
-      //             ...friend.conversations,
-      //           ],
-      //         }
-      //       : friend
-      //   )
-      // );
+      setConversations((prevState) =>
+        prevState.map((convoObject) =>
+          convoObject._id === receiver
+            ? {
+                ...convoObject,
+                conversation: {
+                  messages: convoObject.conversation.messages?.concat(message),
+                },
+              }
+            : { ...convoObject }
+        )
+      );
     });
   };
 
