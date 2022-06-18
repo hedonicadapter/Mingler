@@ -84,12 +84,13 @@ export function BrowserWindowProvider({ children }) {
 
   useEffect(() => {
     settingsWindow?.removeAllListeners();
+
     settingsWindow?.on('focus', () => {
       dispatch(settingsFocusedTrue());
-      electron.remote.getCurrentWindow().focus();
+      electron.remote.getCurrentWindow().moveTop();
     });
+
     settingsWindow?.on('blur', (e) => {
-      console.log('blurred for no reason ', e);
       dispatch(settingsFocusedFalse());
       if (!electron.remote.getCurrentWindow().isFocused()) {
         dispatch(appVisibleFalse());

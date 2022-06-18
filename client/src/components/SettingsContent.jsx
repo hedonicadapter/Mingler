@@ -245,6 +245,8 @@ export default function SettingsContent() {
   };
 
   const handleEmailChange = (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
     let newEmail = evt.target.value;
 
     settingsDao
