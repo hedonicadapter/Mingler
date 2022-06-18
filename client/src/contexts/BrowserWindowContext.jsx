@@ -99,8 +99,8 @@ export function BrowserWindowProvider({ children }) {
   }, [settingsWindow]);
 
   useEffect(() => {
-    if (findFriendsWindow?.isVisible())
-      findFriendsWindow.webContents.send('friends', friends);
+    // if (findFriendsWindow?.isVisible())
+    //   findFriendsWindow.webContents.send('friends', friends);
   }, [friends, findFriendsWindow]);
 
   useEffect(() => {
@@ -108,6 +108,14 @@ export function BrowserWindowProvider({ children }) {
       toggleConnectSpotify();
     });
   }, []);
+
+  useEffect(() => {
+    if (!currentUser?.accessToken) {
+      settingsWindow?.close();
+      findFriendsWindow?.close();
+      connectSpotifyWindow?.close();
+    }
+  }, [currentUser?.accessToken]);
 
   const loadSettingsContent = (quickSetting) => {
     settingsWindow

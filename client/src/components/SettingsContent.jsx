@@ -212,8 +212,10 @@ export default function SettingsContent() {
   const dispatch = useDispatch();
 
   const [expanded, setExpanded] = useState(false);
-  const [username, setUsername] = useState(settingsState.currentUser.username);
-  const [email, setEmail] = useState(settingsState.currentUser.email);
+  const [username, setUsername] = useState(
+    settingsState?.currentUser?.username
+  );
+  const [email, setEmail] = useState(settingsState?.currentUser?.email);
 
   const fileInputRef = useRef(null);
 
