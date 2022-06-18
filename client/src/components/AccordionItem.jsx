@@ -40,23 +40,29 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
 };
 
 const CardSeparator = ({ cardHovered, expanded }) => {
+  const separatorContainer = css({
+    zIndex: 80,
+    position: 'relative',
+  });
   const separator = css({
     position: 'absolute',
-    height: '2px',
+    // height: '2px',
+    outline: '1px solid ' + colors.offWhiteHovered,
     width: '100%',
-    backgroundColor: colors.offWhiteHovered,
+    // backgroundColor: colors.offWhiteHovered,
     transition: 'opacity 0.15s ease',
     filter: 'blur(1px)',
-    zIndex: 80,
   });
 
   return (
-    <div
-      className={separator()}
-      style={{
-        opacity: cardHovered ? (expanded ? 0 : 1) : 0,
-      }}
-    />
+    <div className={separatorContainer()}>
+      <div
+        className={separator()}
+        style={{
+          opacity: cardHovered ? (expanded ? 0 : 1) : 0,
+        }}
+      />
+    </div>
   );
 };
 

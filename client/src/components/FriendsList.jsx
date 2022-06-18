@@ -97,7 +97,9 @@ export default function FriendsList() {
             />
           )}
         </div>
-        <div style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <div
+          style={{ flexGrow: 1, overflowY: 'auto', scrollbarGutter: 'stable' }}
+        >
           {appState?.findFriendsSearchValue
             ? filteredFriends?.map((friend, index) => (
                 <AccordionItem
