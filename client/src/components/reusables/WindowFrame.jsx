@@ -76,13 +76,13 @@ const body = css({
 
 export const WindowFrame = ({ children }) => {
   return (
-    <>
-      <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
+    <div className={['draggable', 'clickable'].join(' ')}>
+      <div className={frame()}>
         <FrameButtons />
       </div>
       <div className={[body(), 'undraggable', 'clickable'].join(' ')}>
         {children}
       </div>
-    </>
+    </div>
   );
 };

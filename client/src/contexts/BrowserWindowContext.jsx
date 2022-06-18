@@ -50,6 +50,7 @@ const findFriendsWindowConfig = {
   frame: false,
   transparent: true,
   width: 460,
+  height: 634,
   webPreferences: {
     nodeIntegration: true,
     enableRemoteModule: true,
