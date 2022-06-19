@@ -16,27 +16,26 @@ import {
   setCurrentUserMain,
   setRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
-import { makeClickthrough } from '../config/clickthrough';
 import {
   getApp,
   setFindFriendsSearchValue,
 } from '../mainState/features/appSlice';
+import { makeClickthrough } from '../config/clickthrough';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
 
 const container = css({
-  // display: 'flex',
-  // flexDirection: 'column',
-  // flexWrap: 'nowrap',
-  // justifyContent: 'normal',
-  // alignItems: 'stretch',
-  // alignContent: 'normal',
-  // overflow: 'hidden',
-  backgroundColor: colors.offWhite,
+  width: '100%',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  flexWrap: 'nowrap',
   pointerEvents: 'auto',
 });
+const header = css({ flexShrink: 0 });
+const body = css({ flexGrow: '1', overflow: 'auto' });
 
 const searchInputStyle = css({
   WebkitAppearance: 'none',
@@ -162,9 +161,10 @@ export default function FindFriendsContent() {
   };
 
   return (
-    <WindowFrame>
-      <div style={{ overflow: 'hidden', pointerEvents: 'auto' }}>
-        <div className={container()}>
+    <div className="clickable">
+      <div className={container()}>
+        <header className={header()}>
+          <WindowFrame />
           <div style={{}} onKeyDown={handleEscapeKey}>
             <motion.input
               className={[searchInputStyle(), 'undraggable', 'clickable'].join(
@@ -182,27 +182,24 @@ export default function FindFriendsContent() {
               style={{ backgroundColor: colors.offWhite }}
             />
           </div>
+        </header>
+        <div className={body()}>
+          {foundFriends?.map((user, index) => (
+            <UserItem
+              user={user}
+              requestSent={sentFriendRequests.includes(user._id)}
+              alreadyFriends={
+                !Array.isArray(friends) || !friends.length
+                  ? false
+                  : friends.some((friend) => friend._id === user._id)
+              }
+              index={index}
+              handleSendRequestButton={handleSendRequestButton}
+              handleCancelRequestButton={handleCancelRequestButton}
+            />
+          ))}
         </div>
-        {foundFriends && sentFriendRequests && (
-          <div className={searchResultsStyle()}>
-            {foundFriends.map((user, index) => (
-              <UserItem
-                user={user}
-                requestSent={sentFriendRequests.includes(user._id)}
-                alreadyFriends={
-                  !Array.isArray(friends) || !friends.length
-                    ? false
-                    : friends.some((friend) => friend._id === user._id)
-                }
-                index={index}
-                handleSendRequestButton={handleSendRequestButton}
-                handleCancelRequestButton={handleCancelRequestButton}
-              />
-            ))}
-            <div style={{ height: 66 }}></div>
-          </div>
-        )}
       </div>
-    </WindowFrame>
+    </div>
   );
 }

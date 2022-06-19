@@ -9,8 +9,8 @@ import colors from '../../config/colors';
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 
-const frameColor = colors.depressedWhite;
-const buttonColor = 'white';
+const frameColor = colors.offWhite;
+const buttonColor = colors.darkmodeLightBlack;
 
 const hoverAnimation = {
   opacity: 0.5,
@@ -56,34 +56,22 @@ const FrameButtons = () => {
 };
 
 const frame = css({
-  display: 'block',
-  flexGrow: 0,
-  flexShrink: 1,
-  flexBasis: 'auto',
-  alignSelf: 'right',
-  order: '0',
+  flexShrink: 0,
   backgroundColor: frameColor,
 });
 
 const body = css({
-  display: 'block',
-  flexGrow: 1,
-  flexShrink: 1,
-  flexBasis: 'auto',
-  alignSelf: 'auto',
-  order: 0,
-  overflow: 'hidden',
+  pointerEvents: 'auto',
+  flexShrink: 0,
 });
 
 export const WindowFrame = ({ children }) => {
   return (
-    <div className={['draggable', 'clickable'].join(' ')}>
-      <div className={frame()}>
+    <div>
+      <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
         <FrameButtons />
       </div>
-      <div className={[body(), 'undraggable', 'clickable'].join(' ')}>
-        {children}
-      </div>
+      <div className={[body(), 'clickable'].join(' ')}>{children}</div>
     </div>
   );
 };
