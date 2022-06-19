@@ -264,7 +264,6 @@
     "electron-redux": "^1.5.4",
     "electron-updater": "^4.3.4",
     "facebook-chat-api": "^1.8.0",
-    "firebase": "^8.6.8",
     "framer-motion": "^4.1.17",
     "fs-jetpack": "^4.1.0",
     "history": "^4.10.1",

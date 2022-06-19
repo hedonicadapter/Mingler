@@ -44,7 +44,7 @@ export function UserStatusProvider({ children }) {
         YouTubeURL: data?.YouTubeURL,
         Date: new Date(),
       },
-      currentUser._id
+      currentUser?._id
     );
   });
 

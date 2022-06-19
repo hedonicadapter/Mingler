@@ -79,31 +79,37 @@ async function getUser(userID) {
   }).select({ friends: 1 });
 }
 
-const onActivitySend = (packet, friendIDs) => {
+const onActivitySend = (packet, sendTo) => {
   // Since a client's friends joins a room by the client's ID on connection,
   // anything emitted to the client's ID will be received by friends
-  userIo.in(friendIDs).emit('activity:receive', packet);
+  userIo.in(sendTo).emit('activity:receive', packet);
 };
 
+let clients = {};
+
 userIo.on('connection', async (socket) => {
-  console.log('userIo connected');
+  clients[socket.id] = socket.id;
+  console.log('userIo connected, rand: ', Math.random());
   // Get the client's mongoDB ID
   const userID = socket.handshake.query.userID;
 
   if (userID) {
     const user = await getUser(userID);
 
-    let friendIDs = user.friends
-      ? Object.values(user.friends).map(function (item) {
-          return item.toString();
-        })
+    const friendIDs = user.friends
+      ? Object.values(user.friends).map((item) => item.toString())
       : null;
 
     setUserStatus(user, friendIDs, true, userIo);
 
     socket.join(userID);
     // Client's own UserID is also returned by findById
-    socket.on('activity:send', (packet) => onActivitySend(packet, friendIDs));
+    socket.on('activity:send', (packet) => {
+      // let sendTo = friendIDs;
+      console.log('connected clients ', clients);
+      onActivitySend(packet, friendIDs);
+      console.log('activity:send ', friendIDs.length);
+    });
 
     socket.on('message:send', ({ toID, fromID, message }) => {
       userIo.to(toID).emit('message:receive', { fromID, message });
@@ -136,12 +142,12 @@ userIo.on('connection', async (socket) => {
       const { toID } = packet;
       friendIDs.push(toID);
       userIo.in(toID).emit('user:online', user._id);
-
       // reset activity listener to include new friendIDs
-      socket.removeAllListeners('activity:send');
-      socket.on('activity:send', (packet) =>
-        onActivitySend(packet, friendIDs.concat(toID))
-      );
+      // socket.removeAllListeners('activity:send');
+      // socket.on('activity:send', (packet) =>
+      //   onActivitySend(packet, friendIDs.concat(toID))
+      // );
+      console.log('friendrequest:accept ', friendIDs.length);
     });
 
     socket.on('friendrequest:cancel', (packet) => {
@@ -149,16 +155,24 @@ userIo.on('connection', async (socket) => {
       userIo.in(toID).emit('friendrequest:cancelreceive');
     });
 
-    socket.on('disconnecting', (reason) => {
+    socket.on('user:offline', (packet) => {
+      console.log('signing out');
+      delete clients[socket.id];
+      socket.removeAllListeners();
       setUserStatus(user, friendIDs, false, userIo);
+    });
+
+    socket.on('disconnecting', (reason) => {
       console.log('socket disconnecting: ', reason);
     });
     socket.on('disconnect', (reason) => {
+      setUserStatus(user, friendIDs, false, userIo);
+      delete clients[socket.id];
+      socket.removeAllListeners();
       console.log('socket disconnected: ', reason);
     });
 
     userIo.on('disconnecting', (reason) => {
-      setUserStatus(user, friendIDs, false, userIo);
       console.log('io disconnecting: ', reason);
     });
     userIo.on('disconnect', (reason) => {

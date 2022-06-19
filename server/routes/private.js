@@ -29,8 +29,8 @@ router.route('/').get(protect, getPrivateData);
 router.route('/searchUsers').post(protect, searchUsers);
 
 router.route('/getFriends').post(protect, getFriends);
-router.route('/getConversations').post(getConversations);
-router.route('/getMessages').post(getMessages);
+router.route('/getConversations').post(protect, getConversations);
+router.route('/getMessages').post(protect, getMessages);
 router.route('/sendMessage').post(protect, sendMessage);
 
 router.route('/sendFriendRequest').post(protect, sendFriendRequest);
@@ -49,8 +49,8 @@ router
 
 router.route('/setUsername').post(protect, setUsername);
 router.route('/setEmail').post(protect, setEmail);
-router.route('/setProfilePicture').post(upload, setProfilePicture);
+router.route('/setProfilePicture').post(protect, upload, setProfilePicture);
 
-router.route('/getUser').post(getUser);
+router.route('/getUser').post(protect, getUser);
 
 module.exports = router;
