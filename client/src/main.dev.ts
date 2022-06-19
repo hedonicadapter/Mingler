@@ -74,45 +74,6 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-// const createFindFriendsWindow = async () => {
-//   findFriendsWindow = new BrowserWindow({
-//     show: false,
-//     // frame: false,
-//     // transparent: true,
-//     width: 560,
-//     webPreferences: {
-//       nodeIntegration: true,
-//       enableRemoteModule: true,
-//     },
-//   });
-
-//   findFriendsWindow.loadURL(`file://${__dirname}/index.html#findfriends`);
-
-//   findFriendsWindow.webContents.on('ready-to-show', () => {
-//     console.log('READY TO SHOW');
-//     if (!findFriendsWindow) {
-//       throw new Error('"findFriendsWindow" is not defined');
-//     }
-//     findFriendsWindow.show();
-//     findFriendsWindow.focus();
-
-//     ipcMain.on('findFriendsWindow:toggle', () => {
-//       console.log('YOOOOOO');
-//       if (findFriendsWindow?.isVisible()) {
-//         console.log('ISVISIBLE');
-//         findFriendsWindow.show();
-//         findFriendsWindow.focus();
-//       } else {
-//         console.log('ISINVISIBLE');
-//         findFriendsWindow.hide();
-//         findFriendsWindow.blur();
-//       }
-//     });
-//   });
-
-//   findFriendsWindow.webContents.once('dom-ready', () => {});
-// };
-
 const createWindow = async () => {
   if (
     process.env.NODE_ENV === 'development' ||
@@ -296,28 +257,6 @@ const createWindow = async () => {
           return;
         });
       });
-
-      // const usersRef = db.collection('Users');
-
-      // Delete current user from their friends' OnlineFriend collections
-      // usersRef
-      //   .doc(data)
-      //   .get()
-      //   .then((doc) => {
-      //     doc.data().Friends.forEach((friend) => {
-      //       usersRef
-      //         .doc(friend)
-      //         .collection('OnlineFriends')
-      //         .doc(data)
-      //         .delete()
-      //         .then(() => {
-      //           mainWindow.destroy();
-      //         })
-      //         .catch((error) => {
-      //           console.error('Error removing document: ', error);
-      //         });
-      //     });
-      //   });
     });
   });
 
