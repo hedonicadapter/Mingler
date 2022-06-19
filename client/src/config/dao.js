@@ -256,20 +256,6 @@ privateRoute.interceptors.response.use(
                 .catch((e) => Promise.reject(e));
             })
             .catch((e) => console.log(e));
-
-          //     // axios(ogRequest)
-          //     //   .then()
-          //     //   .catch((e) => Promise.reject(e));
-          //     // try {
-          //     //   await axios(ogRequest);
-          //     // } catch (e) {
-          //     //   console.log('eeee');
-          //     //   return Promise.reject(e);
-          //     // }
-          //   })
-          //   .catch((e) => {
-          //     return Promise.reject(e);
-          //   });
         });
     } else {
       return Promise.reject(error);

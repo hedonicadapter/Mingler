@@ -93,9 +93,9 @@ export function authAndy({ children }) {
   };
 
   const signOut = () => {
+    ipcRenderer.send('currentUser:signedOut');
     setSignedIn(false);
     dispatch(setCurrentUserMain(null));
-    ipcRenderer.send('currentUser:signedOut');
   };
 
   const signIn = async (email, password, keepMeSignedIn) => {

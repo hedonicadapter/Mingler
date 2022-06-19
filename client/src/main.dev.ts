@@ -227,7 +227,6 @@ const createWindow = async () => {
         const authIo = io.of('/auth');
 
         ipcMain.on('currentUser:signedOut', () => {
-          console.log('SIGNED OUT');
           // socket.disconnect();
           httpServer.close();
           console.log('Socket closed');

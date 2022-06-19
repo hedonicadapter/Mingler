@@ -31,6 +31,7 @@ const menuButtonStyle = css({
 
 export default function MenuButton() {
   const { signOut } = useAuth();
+
   const currentUser = useSelector((state) => getCurrentUser(state));
 
   const [menuVisibility, setMenuVisibility] = useState(false);

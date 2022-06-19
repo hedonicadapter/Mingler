@@ -40,38 +40,39 @@ export function ClientSocketProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!socket) return;
+    if (socket) {
+      socket.on('connect', () => {
+        console.log('Client socket connected');
+      });
+      // User receives yt time request, and sends get request to ipcMain,
+      // which forwards the request through the host to chromium to get the time
+      // Packet contains url and tab title to find the right tab
+      socket.on('youtubetimerequest:receive', (packet) => {
+        ipcRenderer.send('getYouTubeTime', packet);
+      });
 
-    socket.on('connect', () => {
-      console.log('Client socket connected');
-    });
-    // User receives yt time request, and sends get request to ipcMain,
-    // which forwards the request through the host to chromium to get the time
-    // Packet contains url and tab title to find the right tab
-    socket.on('youtubetimerequest:receive', (packet) => {
-      ipcRenderer.send('getYouTubeTime', packet);
-    });
+      socket.io.on('error', (error) => {
+        console.log(error);
+      });
+      socket.io.on('reconnect', (attempt) => {
+        console.log(attempt);
+      });
 
-    socket.io.on('error', (error) => {
-      console.log(error);
-    });
-    socket.io.on('reconnect', (attempt) => {
-      console.log(attempt);
-    });
+      socket.on('disconnect', (reason) => {
+        console.log('disconnected ', reason);
+      });
 
-    socket.on('disconnect', (reason) => {
-      console.log('disconnected ', reason);
-    });
-
-    socket.on('connect_error', () => {
-      console.log('connect_error');
-    });
+      socket.on('connect_error', () => {
+        console.log('connect_error');
+      });
+    }
 
     return () => {
-      socket.io.off('error');
-      socket.io.off('reconnect');
-      socket.off('youtubetimerequest:receive');
-      socket.off('connect');
+      socket?.disconnect();
+      socket?.io.off('error');
+      socket?.io.off('reconnect');
+      socket?.off('youtubetimerequest:receive');
+      socket?.off('connect');
     };
   }, [socket]);
 
@@ -107,6 +108,7 @@ export function ClientSocketProvider({ children }) {
 
   const sendActivity = (data) => {
     const packet = { data, userID: currentUser._id };
+
     socket.emit('activity:send', packet);
   };
 
