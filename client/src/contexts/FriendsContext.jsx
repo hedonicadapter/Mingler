@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { useSelector } from 'react-redux';
+import { notify } from '../components/reusables/notifications';
 
 import DAO from '../config/DAO';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
@@ -113,6 +114,7 @@ export function FriendsProvider({ children }) {
       setFriends((prevState) => {
         return prevState.map((friend) => {
           if (friend._id === userID) {
+            notify(friend.username, 'Now online.');
             return {
               ...friend,
               online: true,
@@ -142,6 +144,7 @@ export function FriendsProvider({ children }) {
     // socket.removeAllListeners('friendrequest:cancelreceive');
 
     socket.on('friendrequest:receive', () => {
+      notify('New friend request');
       getFriendRequests();
     });
 
@@ -152,6 +155,11 @@ export function FriendsProvider({ children }) {
 
   const setConversationListeners = () => {
     socket.on('message:receive', ({ fromID, message }) => {
+      notify(
+        friends?.find((friend) => friend._id === fromID),
+        message
+      );
+
       setConversations((prevState) =>
         prevState.map((convoObject) =>
           convoObject._id === receiver
