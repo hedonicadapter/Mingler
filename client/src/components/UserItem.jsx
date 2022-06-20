@@ -27,7 +27,6 @@ const text = css({
 });
 
 const header = css({ paddingLeft: 5, paddingTop: 5, paddingBottom: 5 });
-const avatar = css({});
 
 const friendRequestButtonStyle = css({
   // opacity: 0,
@@ -123,6 +122,7 @@ const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
 
 export default function UserItem({
   user,
+  profilePicture,
   index,
   alreadyFriends,
   handleSendRequestButton,
@@ -161,7 +161,7 @@ export default function UserItem({
         className={header()}
       >
         <motion.div className={container()}>
-          <Avatar round className={avatar()} name={user.username} size="34" />
+          <Avatar round name={user.username} size="34" src={profilePicture} />
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user.username}</div>
             {alreadyFriends ? (

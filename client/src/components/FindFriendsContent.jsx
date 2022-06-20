@@ -21,6 +21,7 @@ import {
   setFindFriendsSearchValue,
 } from '../mainState/features/appSlice';
 import { makeClickthrough } from '../config/clickthrough';
+import { profilePictureToJSXImg } from '../helpers/fileManager';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -33,6 +34,7 @@ const container = css({
   flexDirection: 'column',
   flexWrap: 'nowrap',
   pointerEvents: 'auto',
+  backgroundColor: colors.offWhite,
 });
 const header = css({ flexShrink: 0 });
 const body = css({ flexGrow: '1', overflow: 'auto' });
@@ -108,6 +110,18 @@ export default function FindFriendsContent() {
       DAO.searchUsers(value, currentUser.accessToken)
         .then((res) => {
           const users = res.data.filter((user) => user._id != currentUser._id);
+
+          users.forEach((object, index) => {
+            object.key = index;
+
+            // format profile picture objects to JSX img elements
+            if (object.profilePicture) {
+              object.profilePicture = profilePictureToJSXImg(
+                object.profilePicture
+              );
+            }
+          });
+
           setFoundFriends(users);
         })
         .catch((e) => console.log(e));
@@ -161,44 +175,44 @@ export default function FindFriendsContent() {
   };
 
   return (
-    <div className="clickable">
-      <div className={container()}>
-        <header className={header()}>
-          <WindowFrame />
-          <div style={{}} onKeyDown={handleEscapeKey}>
-            <motion.input
-              className={[searchInputStyle(), 'undraggable', 'clickable'].join(
-                ' '
-              )}
-              whileHover={{
-                color: colors.darkmodeLightBlack,
-              }}
-              whileFocus={{ color: colors.darkmodeBlack }}
-              transition={{ duration: 0.1 }}
-              placeholder="Find friends..."
-              type="text"
-              value={appState?.findFriendsSearchValue || ''}
-              onChange={handleSearchInput}
-              style={{ backgroundColor: colors.offWhite }}
-            />
-          </div>
-        </header>
-        <div className={body()}>
-          {foundFriends?.map((user, index) => (
-            <UserItem
-              user={user}
-              requestSent={sentFriendRequests.includes(user._id)}
-              alreadyFriends={
-                !Array.isArray(friends) || !friends.length
-                  ? false
-                  : friends.some((friend) => friend._id === user._id)
-              }
-              index={index}
-              handleSendRequestButton={handleSendRequestButton}
-              handleCancelRequestButton={handleCancelRequestButton}
-            />
-          ))}
+    <div className={container()}>
+      <header className={header()}>
+        <WindowFrame></WindowFrame>
+        <div onKeyDown={handleEscapeKey}>
+          <motion.input
+            className={[searchInputStyle(), 'undraggable', 'clickable'].join(
+              ' '
+            )}
+            whileHover={{
+              color: colors.darkmodeLightBlack,
+            }}
+            whileFocus={{ color: colors.darkmodeBlack }}
+            transition={{ duration: 0.1 }}
+            placeholder="Find friends..."
+            type="text"
+            value={appState?.findFriendsSearchValue || ''}
+            onChange={handleSearchInput}
+            style={{ backgroundColor: colors.offWhite }}
+          />
         </div>
+      </header>
+      <div className={body()}>
+        {foundFriends?.map((user, index) => (
+          <UserItem
+            key={index}
+            user={user}
+            requestSent={sentFriendRequests.includes(user._id)}
+            profilePicture={user.profilePicture}
+            alreadyFriends={
+              !Array.isArray(friends) || !friends.length
+                ? false
+                : friends.some((friend) => friend._id === user._id)
+            }
+            index={index}
+            handleSendRequestButton={handleSendRequestButton}
+            handleCancelRequestButton={handleCancelRequestButton}
+          />
+        ))}
       </div>
     </div>
   );
