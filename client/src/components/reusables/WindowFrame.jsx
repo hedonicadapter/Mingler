@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 
@@ -30,7 +30,7 @@ const FrameButtons = () => {
   };
 
   const handleClose = () => {
-    remote.getCurrentWindow().close();
+    remote.getCurrentWindow().hide();
   };
 
   return (

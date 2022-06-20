@@ -44,7 +44,9 @@ export default function FriendRequestsAccordion({
   }, [expandedMasterToggle]);
 
   useEffect(() => {
-    setTimeout(() => setError(null), 3000);
+    const errorTimeout = setTimeout(() => setError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
   }, [error]);
 
   const toggleExpansion = () => {

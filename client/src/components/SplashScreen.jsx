@@ -621,12 +621,12 @@ export default function SplashScreen({}) {
         setPassword(justRegistered.password);
       }
 
-      // Surely it's ok to just store the password client-side momentarily
+      // TODO: Surely it's ok to just store the password client-side momentarily
       return () => setJustRegistered(null);
     }, []);
 
     useEffect(() => {
-      emailInput?.current?.focus(); //this and autoFocus not working
+      emailInput?.current?.focus(); //TODO: this and autoFocus not working
     }, [emailInput]);
 
     useEffect(() => {

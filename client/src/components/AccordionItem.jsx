@@ -90,12 +90,15 @@ export default function AccordionItem({
   useEffect(() => {
     ipcRenderer.on(
       'context-menu:friendcard-command',
-      (e, { menuItem, friendID }) => {
-        if (menuItem === 'deleteFriend') {
-          deleteFriend(friendID);
-        }
-      }
+      contextMenuDeleteFriendHandler
     );
+
+    return () => {
+      ipcRenderer.removeAllListeners(
+        'context-menu:friendcard-command',
+        contextMenuDeleteFriendHandler
+      );
+    };
   }, []);
 
   useEffect(() => {
@@ -125,6 +128,12 @@ export default function AccordionItem({
 
     if (!expanded) {
       toggleExpansion();
+    }
+  };
+
+  const contextMenuDeleteFriendHandler = (e, { menuItem, friendID }) => {
+    if (menuItem === 'deleteFriend') {
+      deleteFriend(friendID);
     }
   };
 

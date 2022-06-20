@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 const { styled } = require('@stitches/react');
 
 import colors from '../../config/colors';

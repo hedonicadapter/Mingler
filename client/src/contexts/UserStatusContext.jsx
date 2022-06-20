@@ -187,11 +187,11 @@ export function UserStatusProvider({ children }) {
       spotifyExpiryDate > now ? timeout : 0
     );
 
-    console.log(
-      'set spotify refresh timeout for ',
-      spotifyExpiryDate > now ? Math.floor(timeout / 60000) : 0,
-      ' minutes.'
-    );
+    // console.log(
+    //   'set spotify refresh timeout for ',
+    //   spotifyExpiryDate > now ? Math.floor(timeout / 60000) : 0,
+    //   ' minutes.'
+    // );
   }, [currentUser?.spotifyExpiryDate]);
 
   useEffect(() => {

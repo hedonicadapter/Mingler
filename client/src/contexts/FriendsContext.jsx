@@ -38,10 +38,6 @@ export function FriendsProvider({ children }) {
   const [filteredFriends, setFilteredFriends] = useState([]);
 
   useEffect(() => {
-    console.log('cccc ', conversations);
-  }, [conversations]);
-
-  useEffect(() => {
     if (!currentUser?.accessToken) return;
 
     getFriends();
@@ -56,14 +52,16 @@ export function FriendsProvider({ children }) {
     setConversationListeners();
     setActivityListeners();
 
-    // return () => {
-    //   socket.removeAllListeners('friendrequest:receive');
-    //   socket.removeAllListeners('friendrequest:cancelreceive');
-    //   socket.removeAllListeners('message:receive');
-    //   socket.removeAllListeners('activity:receive');
-    //   socket.removeAllListeners('user:online');
-    //   socket.removeAllListeners('user:offline');
-    // };
+    // socket is cleaned up anyway with removeAllListeners() in ClientSocketContext.jsx?
+    return () => {
+      // socket.removeAllListeners('friendrequest:receive');
+      // socket.removeAllListeners('friendrequest:cancelreceive');
+      // socket.removeAllListeners('message:receive');
+      // socket.removeAllListeners('activity:receive');
+      // socket.removeAllListeners('user:online');
+      // socket.removeAllListeners('user:offline');
+      socket?.removeAllListeners();
+    };
   }, [socket]);
 
   const getConversations = () => {

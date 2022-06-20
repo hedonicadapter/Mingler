@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { css, styled } from '@stitches/react';
 import { GoPrimitiveDot } from 'react-icons/go';
 

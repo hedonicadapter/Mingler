@@ -84,21 +84,75 @@ export function BrowserWindowProvider({ children }) {
     new BrowserWindow(connectSpotifyWindowConfig)
   );
 
+  const settingsWindowFocusHandler = () => {
+    dispatch(settingsFocusedTrue());
+    electron.remote.getCurrentWindow().moveTop();
+  };
+
+  const settingsWindowBlurHandler = () => {
+    dispatch(settingsFocusedFalse());
+    if (!electron.remote.getCurrentWindow().isFocused()) {
+      dispatch(appVisibleFalse());
+    }
+  };
+
+  const settingsWindowCloseHandler = () => {
+    dispatch(settingsOpenFalse());
+    // setSettingsWindow(null);
+  };
+  const settingsWindowClosedHandler = () => {
+    // setSettingsWindow(new BrowserWindow(settingsWindowConfig));
+    dispatch(settingsOpenFalse());
+  };
+
+  const findFriendsWindowCloseHandler = () => {
+    dispatch(findFriendsOpenFalse());
+    // setFindFriendsWindow(null);
+  };
+  const findFriendsWindowClosedHandler = () => {
+    // setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
+    dispatch(findFriendsOpenFalse());
+  };
+
+  const toggleConnectSpotifyHandler = () => {
+    toggleConnectSpotify();
+  };
+
   useEffect(() => {
-    settingsWindow?.removeAllListeners();
+    if (!settingsWindow) return;
 
-    settingsWindow?.on('focus', () => {
-      dispatch(settingsFocusedTrue());
-      electron.remote.getCurrentWindow().moveTop();
-    });
+    loadSettingsContent();
 
-    settingsWindow?.on('blur', (e) => {
-      dispatch(settingsFocusedFalse());
-      if (!electron.remote.getCurrentWindow().isFocused()) {
-        dispatch(appVisibleFalse());
-      }
-    });
+    settingsWindow.on('focus', settingsWindowFocusHandler);
+    settingsWindow.on('blur', settingsWindowBlurHandler);
+
+    settingsWindow.on('close', settingsWindowCloseHandler);
+    settingsWindow.on('closed', settingsWindowClosedHandler);
+
+    return () => {
+      settingsWindow.removeListener('focus', settingsWindowFocusHandler);
+      settingsWindow.removeListener('blur', settingsWindowBlurHandler);
+      settingsWindow.removeListener('close', settingsWindowCloseHandler);
+      settingsWindow.removeListener('closed', settingsWindowClosedHandler);
+    };
   }, [settingsWindow]);
+
+  useEffect(() => {
+    if (!findFriendsWindow) return;
+
+    loadFindFriendsContent();
+
+    findFriendsWindow.on('close', findFriendsWindowCloseHandler);
+    findFriendsWindow.on('closed', findFriendsWindowClosedHandler);
+
+    return () => {
+      findFriendsWindow.removeListener('close', findFriendsWindowCloseHandler);
+      findFriendsWindow.removeListener(
+        'closed',
+        findFriendsWindowClosedHandler
+      );
+    };
+  }, [findFriendsWindow]);
 
   useEffect(() => {
     if (findFriendsWindow?.isVisible())
@@ -106,23 +160,30 @@ export function BrowserWindowProvider({ children }) {
   }, [friends, findFriendsWindow]);
 
   useEffect(() => {
-    ipcRenderer.on('toggleconnectspotify:frommain', () => {
-      toggleConnectSpotify();
-    });
+    ipcRenderer.on(
+      'toggleconnectspotify:frommain',
+      toggleConnectSpotifyHandler
+    );
+
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'toggleconnectspotify:frommain',
+        toggleConnectSpotifyHandler
+      );
   }, []);
 
-  useEffect(() => {
-    if (!currentUser?.accessToken) {
-      settingsWindow?.close();
-      findFriendsWindow?.close();
-      connectSpotifyWindow?.close();
-      setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-      setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-      setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
-    }
-  }, [currentUser?.accessToken]);
+  // useEffect(() => {
+  //   if (!currentUser?.accessToken) {
+  //     settingsWindow?.close();
+  //     findFriendsWindow?.close();
+  //     connectSpotifyWindow?.close();
+  //     setSettingsWindow(new BrowserWindow(settingsWindowConfig));
+  //     setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
+  //     setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
+  //   }
+  // }, [currentUser?.accessToken]);
 
-  const loadSettingsContent = (quickSetting) => {
+  const loadSettingsContent = () => {
     settingsWindow
       .loadURL(`file://${app.getAppPath()}/index.html#/settings`)
       .then()
@@ -130,22 +191,6 @@ export function BrowserWindowProvider({ children }) {
 
     settingsWindow.once('ready-to-show', () => {
       settingsWindow.setTitle('Settings');
-
-      settingsWindow.show();
-      dispatch(settingsOpenTrue());
-
-      if (!quickSetting) return;
-      settingsWindow.webContents.send('quickSetting', quickSetting);
-    });
-
-    settingsWindow.on('close', function () {
-      dispatch(settingsOpenFalse());
-      setSettingsWindow(null);
-    });
-
-    settingsWindow.on('closed', function () {
-      setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-      dispatch(settingsOpenFalse());
     });
   };
 
@@ -153,10 +198,14 @@ export function BrowserWindowProvider({ children }) {
     dispatch(setSettingsContentMain(page));
 
     if (!appState.settingsOpen) {
-      loadSettingsContent(quickSetting);
+      settingsWindow.show();
+      dispatch(settingsOpenTrue());
     } else if (appState.settingsOpen && !settingsWindow?.isVisible()) {
-      loadSettingsContent(quickSetting);
+      settingsWindow.show();
     } else settingsWindow.focus();
+
+    if (!quickSetting) return;
+    settingsWindow.webContents.send('quickSetting', quickSetting);
   };
 
   const loadFindFriendsContent = () => {
@@ -167,35 +216,22 @@ export function BrowserWindowProvider({ children }) {
 
     findFriendsWindow.once('ready-to-show', () => {
       findFriendsWindow.setTitle('Find friends');
-
-      findFriendsWindow.show();
-      dispatch(findFriendsOpenTrue());
-    });
-
-    findFriendsWindow.on('close', function () {
-      dispatch(findFriendsOpenFalse());
-      setFindFriendsWindow(null);
-    });
-
-    findFriendsWindow.on('closed', function () {
-      setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-      dispatch(findFriendsOpenFalse());
     });
   };
 
   const toggleFindFriends = () => {
     // ipcRenderer.send('findFriendsWindow:toggle');
     if (!appState.findFriendsOpen) {
-      loadFindFriendsContent();
+      findFriendsWindow.show();
+      dispatch(findFriendsOpenTrue());
     } else if (appState.findFriendsOpen && !findFriendsWindow?.isVisible()) {
-      loadFindFriendsContent();
+      findFriendsWindow.show();
     } else findFriendsWindow.focus();
   };
 
   const loadConnectSpotifyContent = () => {
     DAO.createSpotifyURL(currentUser.accessToken)
       .then((res) => {
-        console.log('res.data ', res.data);
         connectSpotifyWindow.loadURL(res.data).then().catch(console.warn);
 
         connectSpotifyWindow.once('ready-to-show', () => {
@@ -241,14 +277,6 @@ export function BrowserWindowProvider({ children }) {
         });
       })
       .catch(console.log);
-
-    connectSpotifyWindow.on('close', function () {
-      setConnectSpotifyWindow(null);
-    });
-
-    connectSpotifyWindow.on('closed', function () {
-      setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
-    });
   };
 
   const toggleConnectSpotify = () => {

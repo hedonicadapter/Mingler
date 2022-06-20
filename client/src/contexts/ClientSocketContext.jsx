@@ -16,16 +16,7 @@ export function ClientSocketProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const [socket, setSocket] = useState(null);
 
-  useEffect(() => {
-    ipcRenderer.on('sendfriendrequest:frommain', ({ toID }) => {
-      sendFriendRequest(toID);
-    });
-    ipcRenderer.on('cancelfriendrequest:frommain', ({ toID }) => {
-      cancelFriendRequest(toID);
-    });
-  }, []);
-
-  useEffect(() => {
+  const connectSocket = () => {
     const newSocket = io('ws://127.0.0.1:8080/user', {
       auth: {
         accessToken: currentUser && currentUser.accessToken,
@@ -35,8 +26,40 @@ export function ClientSocketProvider({ children }) {
       },
     });
     setSocket(newSocket);
+  };
 
-    // if (!currentUser || !currentUser._id) socket?.close();
+  const sendFriendRequestFromMainHandler = ({ toID }) => {
+    sendFriendRequest(toID);
+  };
+
+  const cancelFriendRequestFromMainHandler = ({ toID }) => {
+    cancelFriendRequest(toID);
+  };
+
+  useEffect(() => {
+    ipcRenderer.on(
+      'sendfriendrequest:frommain',
+      sendFriendRequestFromMainHandler
+    );
+    ipcRenderer.on(
+      'cancelfriendrequest:frommain',
+      cancelFriendRequestFromMainHandler
+    );
+
+    return () => {
+      ipcRenderer.removeAllListeners(
+        'sendfriendrequest:frommain',
+        sendFriendRequestFromMainHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'cancelfriendrequest:frommain',
+        cancelFriendRequestFromMainHandler
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    connectSocket();
   }, []);
 
   useEffect(() => {
@@ -73,6 +96,8 @@ export function ClientSocketProvider({ children }) {
       socket?.io.off('reconnect');
       socket?.off('youtubetimerequest:receive');
       socket?.off('connect');
+      socket?.removeAllListeners();
+      socket?.close();
     };
   }, [socket]);
 

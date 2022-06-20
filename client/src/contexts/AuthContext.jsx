@@ -141,6 +141,10 @@ export function authAndy({ children }) {
       });
   };
 
+  const refreshTokenFromMainHandler = (e, { currentUser }) => {
+    dispatch(setCurrentUserMain(currentUser));
+  };
+
   useEffect(() => {
     if (
       !signedIn &&
@@ -167,9 +171,13 @@ export function authAndy({ children }) {
   }, [currentUser, signedIn]);
 
   useEffect(() => {
-    ipcRenderer.on('refreshtoken:frommain', (e, { currentUser }) => {
-      dispatch(setCurrentUserMain(currentUser));
-    });
+    ipcRenderer.on('refreshtoken:frommain', refreshTokenFromMainHandler);
+
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'refreshtoken:frommain',
+        refreshTokenFromMainHandler
+      );
   }, []);
 
   const value = {

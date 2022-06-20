@@ -119,7 +119,6 @@ export default function Marky({
   const [marqueeWidth, setMarqueeWidth] = useState();
 
   useEffect(() => {
-    console.log(appState.windowWidth);
     if (marqueeRef.current) {
       setMarqueeWidth(
         // Width of overflowing text

@@ -72,7 +72,6 @@ export default function FindFriendsContent() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // this seems to make it work when the token updates for some reason smh
     console.log('friends ', foundFriends);
   }, [foundFriends]);
 
@@ -94,9 +93,14 @@ export default function FindFriendsContent() {
   useEffect(() => {
     getSentFriendRequests();
 
-    ipcRenderer.on('friends', (e, friends) => {
-      setFriends(friends);
-    });
+    ipcRenderer.on('friends', setFriendsFromOtherWindowHandler);
+
+    return () => {
+      ipcRenderer.removeAllListeners(
+        'friends',
+        setFriendsFromOtherWindowHandler
+      );
+    };
   }, []);
 
   ipcRenderer.once('initialValue', (event, value) => {
@@ -171,6 +175,10 @@ export default function FindFriendsContent() {
     if (event.keyCode === 27) {
       BrowserWindow.getFocusedWindow().close();
     }
+  };
+
+  const setFriendsFromOtherWindowHandler = (e, friends) => {
+    setFriends(friends);
   };
 
   return (

@@ -307,13 +307,6 @@ export const ChatBox = ({ receiver, expanded }) => {
     anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [anchorRef]);
 
-  useEffect(() => {
-    console.log(
-      'convo ',
-      conversations?.find((convo) => convo._id === receiver)
-    );
-  }, [conversations]);
-
   return (
     <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>

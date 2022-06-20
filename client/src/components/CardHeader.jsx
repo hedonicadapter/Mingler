@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
 import { AnimatePresence, motion } from 'framer-motion';

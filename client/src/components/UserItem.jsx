@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
@@ -135,14 +135,6 @@ export default function UserItem({
   const [hovered, setHovered] = useState(false);
 
   const alternatingColor = [colors.offWhiteHovered, colors.offWhite];
-
-  useEffect(() => {
-    console.log('alreadyFriends ', user);
-  }, [user]);
-
-  useEffect(() => {
-    console.log('alreadyFriends ', user._id, ' ', alreadyFriends);
-  }, [alreadyFriends]);
 
   return (
     <motion.div

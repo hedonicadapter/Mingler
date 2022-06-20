@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { css } from '@stitches/react';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 
@@ -62,9 +62,9 @@ export default function CardBody({
           >
             <div className={playerContainer()}>
               <ReactPlayer
+                url={playerURL}
                 playing={true}
                 controls={true}
-                url={playerURL}
                 width="100%"
                 height="100%"
                 style={{
