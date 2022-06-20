@@ -71,6 +71,52 @@ exports.getFriends = async (req, res, next) => {
     next(e);
   }
 };
+
+exports.deleteFriend = async (req, res, next) => {
+  const { userID, friendID } = req.body;
+
+  const session = await User.startSession();
+
+  try {
+    const transactionResults = await session.withTransaction(async () => {
+      const me = await User.findOneAndUpdate(
+        { _id: userID },
+        { $pull: { friends: friendID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      const you = await User.findOneAndUpdate(
+        { _id: friendID },
+        { $pull: { friends: userID } },
+        { session, new: true, safe: true, lean: true }
+      );
+
+      if (!me) {
+        console.log('Aborting delete friend transaction, check me.');
+        await session.abortTransaction();
+      }
+
+      if (!you) {
+        console.log('Aborting delete friend transaction, check you.');
+        await session.abortTransaction();
+      }
+    });
+
+    if (transactionResults) {
+      return res.status(201).json({
+        status: 'Success',
+        data: transactionResults,
+      });
+    } else {
+      return next(new ErrorResponse('Delete friend transaction error', 500));
+    }
+  } catch (e) {
+    next(e);
+  } finally {
+    await session.endSession();
+  }
+};
+
 exports.getConversations = async (req, res, next) => {
   const { userID } = req.body;
 

@@ -26,7 +26,7 @@ const Pane = ({ children }) => {
 
   return (
     <motion.div
-      onContextMenu={(e) => e.preventDefault()}
+      // onContextMenu={(e) => e.preventDefault()}
       animate={appState?.appVisible ? 'show' : 'hide'}
       variants={{
         show: {

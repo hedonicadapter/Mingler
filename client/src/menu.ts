@@ -4,6 +4,7 @@ import {
   shell,
   BrowserWindow,
   MenuItemConstructorOptions,
+  ipcMain,
 } from 'electron';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -23,7 +24,8 @@ export default class MenuBuilder {
       process.env.NODE_ENV === 'development' ||
       process.env.DEBUG_PROD === 'true'
     ) {
-      this.setupDevelopmentEnvironment();
+      // this.setupDevelopmentEnvironment();
+      this.setupEnvironment();
     }
 
     const template =
@@ -46,6 +48,22 @@ export default class MenuBuilder {
           label: 'Inspect element',
           click: () => {
             this.mainWindow.webContents.inspectElement(x, y);
+          },
+        },
+      ]).popup({ window: this.mainWindow });
+    });
+  }
+
+  setupEnvironment(): void {
+    ipcMain.on('context-menu:friendcard', (evt, { username, friendID }) => {
+      Menu.buildFromTemplate([
+        {
+          label: 'Delete ' + username,
+          click: () => {
+            evt.sender.send('context-menu:friendcard-command', {
+              menuItem: 'deleteFriend',
+              friendID,
+            });
           },
         },
       ]).popup({ window: this.mainWindow });

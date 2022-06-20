@@ -27,6 +27,7 @@ const header = css({
 export default function FriendRequestsAccordion({
   friendRequests,
   getFriends,
+  getConversations,
   getFriendRequests,
   expandedMasterToggle,
   acceptFriendRequest,
@@ -53,18 +54,19 @@ export default function FriendRequestsAccordion({
   };
 
   const handleAcceptRequestButton = (fromID) => {
-    // DAO.acceptFriendRequest(fromID, currentUser._id, currentUser.accessToken)
-    //   .then((res) => {
-    //     // Refresh friends list
-    //     getFriends();
-    //     getFriendRequests();
-    //     acceptFriendRequest(fromID);
-    //     setError(null);
-    //   })
-    //   .catch((e) => {
-    //     setError(e);
-    //     console.error(e);
-    //   });
+    DAO.acceptFriendRequest(fromID, currentUser._id, currentUser.accessToken)
+      .then((res) => {
+        // Refresh friends list
+        getFriends();
+        getConversations();
+        getFriendRequests();
+        acceptFriendRequest(fromID);
+        setError(null);
+      })
+      .catch((e) => {
+        setError(e);
+        console.error(e);
+      });
     acceptFriendRequest(fromID);
   };
 

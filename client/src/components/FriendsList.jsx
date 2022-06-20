@@ -45,10 +45,11 @@ export default function FriendsList() {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
 
-  const { socket, acceptFriendRequest } = useClientSocket();
+  const { acceptFriendRequest } = useClientSocket();
   const {
     friends,
     getFriends,
+    getConversations,
     findFriends,
     filteredFriends,
     getFriendRequests,
@@ -69,12 +70,6 @@ export default function FriendsList() {
     setName(evt.target.value);
   };
 
-  // useEffect(() => {
-  //   if (friends && socket) {
-  //     setActivityListeners();
-  //   }
-  // }, [friends, socket]);
-
   return (
     <>
       <MenuButton />
@@ -89,6 +84,7 @@ export default function FriendsList() {
 
           {friendRequests?.length > 0 && (
             <FriendRequestsAccordion
+              getConversations={getConversations}
               friendRequests={friendRequests}
               getFriends={getFriends} // To refresh friends list after accepting a friend request
               getFriendRequests={getFriendRequests} // Same thing here

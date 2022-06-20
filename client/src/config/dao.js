@@ -75,6 +75,16 @@ export class DAO {
     });
   };
 
+  deleteFriend = (userID, friendID, token) => {
+    const data = { userID, friendID };
+
+    return privateRoute.post(`/deleteFriend`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   getConversations = (userID, token) => {
     const data = { userID };
 

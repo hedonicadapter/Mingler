@@ -9,6 +9,9 @@ import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
 import Marky from './Marky';
+import { useFriends } from '../contexts/FriendsContext';
+
+const ipcRenderer = require('electron').ipcRenderer;
 
 const header = css({
   zIndex: 5,
@@ -73,6 +76,8 @@ export default function AccordionItem({
   handleNameChange,
   expandedMasterToggle,
 }) {
+  const { deleteFriend } = useFriends();
+
   const [expanded, setExpanded] = useState(false);
   const [cardHovered, setCardHovered] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
@@ -81,6 +86,17 @@ export default function AccordionItem({
   const [activityLength, setActivityLength] = useState(null);
 
   const cardHeaderRef = useRef(null);
+
+  useEffect(() => {
+    ipcRenderer.on(
+      'context-menu:friendcard-command',
+      (e, { menuItem, friendID }) => {
+        if (menuItem === 'deleteFriend') {
+          deleteFriend(friendID);
+        }
+      }
+    );
+  }, []);
 
   useEffect(() => {
     setActivityLength(friend?.activity?.length);
@@ -127,7 +143,16 @@ export default function AccordionItem({
   });
 
   return (
-    <>
+    <div
+      onContextMenu={() =>
+        friend?.username &&
+        friend?._id &&
+        ipcRenderer.send('context-menu:friendcard', {
+          username: friend.username,
+          friendID: friend._id,
+        })
+      }
+    >
       {!isWidgetHeader && friend?.online && (
         <OnlineStatusIndicator
           activityLength={activityLength}
@@ -226,6 +251,6 @@ export default function AccordionItem({
           </motion.section>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

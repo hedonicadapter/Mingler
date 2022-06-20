@@ -141,6 +141,8 @@ userIo.on('connection', async (socket) => {
     socket.on('friendrequest:accept', (packet) => {
       const { toID } = packet;
       friendIDs.push(toID);
+
+      // TODO: might be an issue if you accept and immediately go offline
       userIo.in(toID).emit('user:online', user._id);
       // reset activity listener to include new friendIDs
       // socket.removeAllListeners('activity:send');

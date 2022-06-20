@@ -116,7 +116,7 @@ export const ChatBox = ({ receiver, expanded }) => {
   const dispatch = useDispatch();
 
   const { socket } = useClientSocket();
-  const { conversations, setConversations } = useFriends();
+  const { conversations, setConversations, getMessages } = useFriends();
 
   const anchorRef = useRef();
 
@@ -298,37 +298,7 @@ export const ChatBox = ({ receiver, expanded }) => {
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
 
-      const convoObject = conversations.find(
-        (convo) => convo._id === receiver
-      )?.conversation;
-
-      DAO.getMessages(
-        convoObject._id,
-        convoObject.messages.length,
-        currentUser?.accessToken
-      )
-        .then((res) => {
-          if (!res.data) return;
-          console.log(res.data);
-
-          setConversations((prevState) =>
-            prevState.map((convoObject) =>
-              convoObject._id === receiver
-                ? {
-                    ...convoObject,
-                    conversation: {
-                      messages: res.data.concat(
-                        convoObject.conversation.messages
-                      ),
-                    },
-                  }
-                : { ...convoObject }
-            )
-          );
-        })
-        .catch((e) => {
-          console.error(e);
-        });
+      getMessages(receiver);
     } else setScrollTop(false);
   };
 

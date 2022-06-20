@@ -4,6 +4,7 @@ const { protect } = require('../middleware/auth');
 const {
   getPrivateData,
   getFriends,
+  deleteFriend,
   searchUsers,
   sendFriendRequest,
   acceptFriendRequest,
@@ -38,6 +39,7 @@ router.route('/acceptFriendRequest').post(protect, acceptFriendRequest);
 router.route('/getFriendRequests').post(protect, getFriendRequests);
 router.route('/getSentFriendRequests').post(protect, getSentFriendRequests);
 router.route('/cancelFriendRequest').post(protect, cancelFriendRequest);
+router.route('/deleteFriend').post(protect, deleteFriend);
 
 router.route('/createSpotifyURL').post(protect, createSpotifyURL);
 router.route('/authorizeSpotify').post(protect, authorizeSpotify);

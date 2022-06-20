@@ -74,6 +74,51 @@ export function FriendsProvider({ children }) {
     );
   };
 
+  const getMessages = (friendID) => {
+    const convoObject = conversations.find(
+      (convo) => convo._id === friendID
+    )?.conversation;
+    console.log('convoObject ', convoObject);
+
+    DAO.getMessages(
+      convoObject._id,
+      convoObject.messages.length,
+      currentUser?.accessToken
+    )
+      .then((res) => {
+        if (!res.data) return;
+
+        setConversations((prevState) =>
+          prevState.map((convoObject) =>
+            convoObject._id === friendID
+              ? {
+                  ...convoObject,
+                  conversation: {
+                    messages: res.data.concat(
+                      convoObject.conversation.messages
+                    ),
+                  },
+                }
+              : { ...convoObject }
+          )
+        );
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  const deleteFriend = (friendID) => {
+    DAO.deleteFriend(currentUser._id, friendID, currentUser.accessToken)
+      .then((res) => {
+        console.log('delete ', res);
+        getFriends();
+      })
+      .catch((e) => {
+        console.log(e);
+      });
+  };
+
   const getFriends = () => {
     DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
@@ -111,17 +156,18 @@ export function FriendsProvider({ children }) {
 
   const setUserStatusListener = () => {
     socket.on('user:online', (userID) => {
-      setFriends((prevState) => {
-        return prevState.map((friend) => {
-          if (friend._id === userID) {
-            notify(friend.username, 'Now online.');
-            return {
-              ...friend,
-              online: true,
-            };
-          }
-          return friend;
-        });
+      // TODO:
+      // Better way to do this would be to send the friend object through the socket and add it to friends
+      // this way is slower and does unnecessary API calls
+      getFriends();
+
+      // TODO:
+      // Replace with getMessages(userID). Is not appropariate right now because in a use case
+      // where a user has just accepted a friend request there is no existing "convoObject"
+      getConversations();
+
+      friends?.find((friend) => {
+        friend._id === userID && notify(friend.username, 'Now online.');
       });
     });
     socket.on('user:offline', (userID) => {
@@ -262,9 +308,6 @@ export function FriendsProvider({ children }) {
       return new Date(b.Date) - new Date(a.Date);
     });
   };
-  useEffect(() => {
-    console.log('found friends ', filteredFriends);
-  }, [filteredFriends]);
 
   const findFriends = (searchTerm) => {
     console.log(
@@ -291,7 +334,9 @@ export function FriendsProvider({ children }) {
     friendRequests,
     getFriendRequests,
     getConversations,
+    deleteFriend,
     conversations,
+    getMessages,
     setConversations,
   };
 
