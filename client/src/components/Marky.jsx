@@ -143,6 +143,14 @@ export default function Marky({
       (YouTubeTitle && setMarkyType('YouTubeVideo'));
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeTitle]);
 
+  useEffect(() => {
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'chromiumHostData:YouTubeTime',
+        youTubeTimeHandler
+      );
+  }, []);
+
   const handleClick = (evt) => {
     evt.stopPropagation();
     if (WindowTitle) {
@@ -157,14 +165,16 @@ export default function Marky({
 
         togglePlayer();
         // Wait for response from ipcMain, which is connected to the server socket
-        ipcRenderer.once('chromiumHostData:YouTubeTime', (event, data) => {
-          setPlayerURL(YouTubeURL + '&t=' + data.time + 's');
-          // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
-        });
+        ipcRenderer.once('chromiumHostData:YouTubeTime', youTubeTimeHandler);
       }
     } else if (TabURL) {
       shell.openExternal(TabURL);
     }
+  };
+
+  const youTubeTimeHandler = (event, data) => {
+    setPlayerURL(YouTubeURL + '&t=' + data.time + 's');
+    // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
   };
 
   const ActivityIcon = () => {

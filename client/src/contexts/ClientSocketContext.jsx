@@ -28,12 +28,16 @@ export function ClientSocketProvider({ children }) {
     setSocket(newSocket);
   };
 
-  const sendFriendRequestFromMainHandler = ({ toID }) => {
-    sendFriendRequest(toID);
+  const sendFriendRequestFromMainHandler = (evt, toID) => {
+    const packet = { toID, fromID: currentUser._id };
+
+      socket?.emit('friendrequest:send', packet);
   };
 
-  const cancelFriendRequestFromMainHandler = ({ toID }) => {
-    cancelFriendRequest(toID);
+  const cancelFriendRequestFromMainHandler = (evt, toID) => {
+    const packet = { toID, fromID: currentUser._id };
+
+      socket?.emit('friendrequest:cancel', packet);
   };
 
   useEffect(() => {
@@ -149,11 +153,11 @@ export function ClientSocketProvider({ children }) {
     socket.emit('youtubetimerequest:answer', packet);
   };
 
-  const sendFriendRequest = (toID) => {
-    const packet = { toID, fromID: currentUser._id };
+  // const sendFriendRequest = (toID) => {
+  //   const packet = { toID, fromID: currentUser._id };
 
-    socket.emit('friendrequest:send', packet);
-  };
+  //   socket.emit('friendrequest:send', packet);
+  // };
 
   const acceptFriendRequest = (toID) => {
     const packet = { toID, fromID: currentUser._id };
@@ -161,17 +165,15 @@ export function ClientSocketProvider({ children }) {
     socket.emit('friendrequest:accept', packet);
   };
 
-  const cancelFriendRequest = (toID) => {
-    const packet = { toID, fromID: currentUser._id };
+  // const cancelFriendRequest = (toID) => {
+  //   const packet = { toID, fromID: currentUser._id };
 
-    socket.emit('friendrequest:cancel', packet);
-  };
+  //   socket.emit('friendrequest:cancel', packet);
+  // };
 
   const value = {
     sendActivity,
-    sendFriendRequest,
     acceptFriendRequest,
-    cancelFriendRequest,
     sendActivityToLocalStorage,
     sendYouTubeTimeRequest,
     answerYouTubeTimeRequest,

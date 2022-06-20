@@ -178,20 +178,22 @@ export function UserStatusProvider({ children }) {
 
     let now = new Date();
     let spotifyExpiryDate = new Date(currentUser?.spotifyExpiryDate);
-    let timeout = spotifyExpiryDate - now;
+    let time = spotifyExpiryDate - now;
 
-    setTimeout(
+    const refreshTimeout = setTimeout(
       () => {
         refreshSpotify();
       },
-      spotifyExpiryDate > now ? timeout : 0
+      spotifyExpiryDate > now ? time : 0
     );
 
     // console.log(
     //   'set spotify refresh timeout for ',
-    //   spotifyExpiryDate > now ? Math.floor(timeout / 60000) : 0,
+    //   spotifyExpiryDate > now ? Math.floor(time / 60000) : 0,
     //   ' minutes.'
     // );
+
+    return () => clearTimeout(refreshTimeout);
   }, [currentUser?.spotifyExpiryDate]);
 
   useEffect(() => {

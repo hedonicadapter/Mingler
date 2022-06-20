@@ -95,18 +95,19 @@ export default function FindFriendsContent() {
 
     ipcRenderer.on('friends', setFriendsFromOtherWindowHandler);
 
+    ipcRenderer.once('initialValue', findFriendsInitialSearchValueHandler);
+
     return () => {
       ipcRenderer.removeAllListeners(
         'friends',
         setFriendsFromOtherWindowHandler
       );
+      ipcRenderer.removeAllListeners(
+        'initialValue',
+        findFriendsInitialSearchValueHandler
+      );
     };
   }, []);
-
-  ipcRenderer.once('initialValue', (event, value) => {
-    dispatch(setFindFriendsSearchValue(value));
-    search(value);
-  });
 
   const search = (value) => {
     if (value) {
@@ -149,7 +150,7 @@ export default function FindFriendsContent() {
     DAO.sendFriendRequest(toID, currentUser._id, currentUser.accessToken)
       .then((res) => {
         setSentFriendRequests((oldValue) => [...oldValue, toID]);
-        ipcRenderer.send('sendfriendrequest:fromrenderer', { toID });
+        ipcRenderer.send('sendfriendrequest:fromrenderer', toID);
       })
       .catch((e) => {
         console.log(e);
@@ -164,7 +165,7 @@ export default function FindFriendsContent() {
         );
 
         setSentFriendRequests(updatedRequests);
-        ipcRenderer.send('cancelfriendrequest:fromrenderer', { toID });
+        ipcRenderer.send('cancelfriendrequest:fromrenderer', toID);
       })
       .catch((e) => {
         console.log(e);
@@ -179,6 +180,11 @@ export default function FindFriendsContent() {
 
   const setFriendsFromOtherWindowHandler = (e, friends) => {
     setFriends(friends);
+  };
+
+  const findFriendsInitialSearchValueHandler = (event, value) => {
+    dispatch(setFindFriendsSearchValue(value));
+    search(value);
   };
 
   return (
