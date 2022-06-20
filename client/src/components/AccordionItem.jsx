@@ -8,7 +8,6 @@ import { IoChatbubblesOutline } from 'react-icons/io5';
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
-import Marky from './Marky';
 import { useFriends } from '../contexts/FriendsContext';
 
 const ipcRenderer = require('electron').ipcRenderer;
@@ -82,8 +81,8 @@ export default function AccordionItem({
   const [expanded, setExpanded] = useState(false);
   const [cardHovered, setCardHovered] = useState(false);
   const [chatVisible, setChatVisible] = useState(false);
-  const [markyToReplaceWithYouTubeVideo, setMarkyToReplaceWithYouTubeVideo] =
-    useState(null);
+  const [playerVisible, setPlayerVisible] = useState(false);
+  const [playerURL, setPlayerURL] = useState(null);
   const [activityLength, setActivityLength] = useState(null);
 
   const cardHeaderRef = useRef(null);
@@ -115,6 +114,14 @@ export default function AccordionItem({
   const toggleChat = (e) => {
     e.stopPropagation();
     setChatVisible(!chatVisible);
+
+    if (!expanded) {
+      toggleExpansion();
+    }
+  };
+
+  const togglePlayer = () => {
+    setPlayerVisible(!playerVisible);
 
     if (!expanded) {
       toggleExpansion();
@@ -192,6 +199,8 @@ export default function AccordionItem({
         onMouseLeave={() => setCardHovered(false)}
       >
         <CardHeader
+          togglePlayer={togglePlayer}
+          setPlayerURL={setPlayerURL}
           cardHeaderRef={cardHeaderRef}
           online={friend?.online}
           key={friend?.key}
@@ -201,8 +210,6 @@ export default function AccordionItem({
           mainActivity={friend?.activity?.[0]}
           activity={friend?.activity}
           expanded={expanded}
-          markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-          setMarkyToReplaceWithYouTubeVideo={setMarkyToReplaceWithYouTubeVideo}
           handleNameChange={handleNameChange}
           toggleChat={toggleChat}
           chatVisible={chatVisible}
@@ -243,12 +250,10 @@ export default function AccordionItem({
             <CardBody
               activity={friend?.activity}
               userID={friend?._id}
-              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
-              setMarkyToReplaceWithYouTubeVideo={
-                setMarkyToReplaceWithYouTubeVideo
-              }
               expanded={expanded}
               chatVisible={chatVisible}
+              playerURL={playerURL}
+              playerVisible={playerVisible}
             />
           </motion.section>
         )}

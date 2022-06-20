@@ -80,8 +80,8 @@ export default function CardHeader({
   expanded,
   mainActivity,
   activity,
-  setMarkyToReplaceWithYouTubeVideo,
-  markyToReplaceWithYouTubeVideo,
+  setPlayerURL,
+  togglePlayer,
   toggleChat,
   chatVisible,
   cardHovered,
@@ -181,12 +181,11 @@ export default function CardHeader({
           >
             <Marky
               {...mainActivity}
-              setMarkyToReplaceWithYouTubeVideo={
-                setMarkyToReplaceWithYouTubeVideo
-              }
-              markyToReplaceWithYouTubeVideo={markyToReplaceWithYouTubeVideo}
+              userID={userID}
               marKey={1}
               expanded={expanded}
+              togglePlayer={togglePlayer}
+              setPlayerURL={setPlayerURL}
             />
             <AnimatePresence>
               {expanded &&
@@ -206,6 +205,8 @@ export default function CardHeader({
                           userID={userID}
                           marKey={index}
                           expanded={expanded}
+                          togglePlayer={togglePlayer}
+                          setPlayerURL={setPlayerURL}
                         />
                       </motion.div>
                     )

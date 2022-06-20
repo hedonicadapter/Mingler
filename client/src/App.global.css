@@ -31,6 +31,7 @@ body {
   /* font-family: Helvetica Neue, Helvetica, Arial, sans-serif; */
   overflow-y: hidden;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   margin: auto;
   pointer-events: none;
   cursor: default;
@@ -141,8 +142,7 @@ h2 {
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: rgba(196, 196, 196, 0.2);
-  border-radius: 20px; /* roundness of the scroll thumb */
+  background-color: rgba(253, 245, 241, 1);
 }
 
 /* Handle */

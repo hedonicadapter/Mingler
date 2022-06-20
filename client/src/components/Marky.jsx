@@ -3,7 +3,7 @@ import * as electron from 'electron';
 import { css, styled } from '@stitches/react';
 import { BiPlanet } from 'react-icons/bi';
 import { RiWindow2Fill, RiArrowDropUpLine } from 'react-icons/ri';
-import { BsSpotify } from 'react-icons/bs';
+import { BsSpotify, BsYoutube } from 'react-icons/bs';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
@@ -24,7 +24,7 @@ const buttonVariants = {
 };
 
 const MarkyDiv = styled('div', {
-  zIndex: 50,
+  zIndex: 80,
   flexDirection: 'row',
   display: 'flex',
   transition: 'color .25s ease',
@@ -99,14 +99,13 @@ export default function Marky({
 
   YouTubeURL,
   YouTubeTitle,
+  togglePlayer,
+  setPlayerURL,
 
   userID,
 
   expanded,
 
-  // used to set the marky to be replaced with youtube player
-  setMarkyToReplaceWithYouTubeVideo,
-  markyToReplaceWithYouTubeVideo,
   marKey,
 }) {
   const { sendYouTubeTimeRequest } = useClientSocket();
@@ -118,23 +117,6 @@ export default function Marky({
 
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState();
-
-  useEffect(() => {
-    // marKey of this specific Marky changes when the
-    // user changes activity. If:
-    // 1. this Marky has setMarkyToReplaceWithYouTubeVideo as a function
-    // 2. the marKey isn't the one in the header (0)
-    // 3. markyToReplaceWithYouTubeVideo isn't null (meaning the user hasn't clicked a video activity)
-    // 4. the marKey is already correctly set
-    if (
-      setMarkyToReplaceWithYouTubeVideo &&
-      marKey != 0 &&
-      markyToReplaceWithYouTubeVideo != null &&
-      markyToReplaceWithYouTubeVideo != marKey
-    ) {
-      setMarkyToReplaceWithYouTubeVideo(marKey);
-    }
-  }, [marKey]);
 
   useEffect(() => {
     console.log(appState.windowWidth);
@@ -162,22 +144,23 @@ export default function Marky({
       (YouTubeTitle && setMarkyType('YouTubeVideo'));
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeTitle]);
 
-  const handleClick = () => {
+  const handleClick = (evt) => {
+    evt.stopPropagation();
     if (WindowTitle) {
       return;
     } else if (TrackTitle) {
       shell.openExternal(TrackURL);
     } else if (YouTubeURL) {
-      setMarkyToReplaceWithYouTubeVideo(
-        markyToReplaceWithYouTubeVideo ? null : marKey
-      );
+      setPlayerURL(YouTubeURL);
       if (userID) {
         //Send yt time request to a user through server socket
         sendYouTubeTimeRequest(userID, YouTubeTitle, YouTubeURL);
 
+        togglePlayer();
         // Wait for response from ipcMain, which is connected to the server socket
         ipcRenderer.once('chromiumHostData:YouTubeTime', (event, data) => {
-          shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
+          setPlayerURL(YouTubeURL + '&t=' + data.time + 's');
+          // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
         });
       }
     } else if (TabURL) {
@@ -199,13 +182,14 @@ export default function Marky({
     }
 
     if (YouTubeTitle || YouTubeURL) {
-      return markyToReplaceWithYouTubeVideo ? (
-        <motion.div variants={buttonVariants} whileHover="hover">
-          <RiArrowDropUpLine className={closeIconStyle()} />
-        </motion.div>
-      ) : (
-        <CgYoutube className={activityIconStyle()} />
-      );
+      return <BsYoutube className={activityIconStyle()} />;
+      // return markyToReplaceWithYouTubeVideo ? (
+      //   <motion.div variants={buttonVariants} whileHover="hover">
+      //     <RiArrowDropUpLine className={closeIconStyle()} />
+      //   </motion.div>
+      // ) : (
+      //   <BsYoutube className={activityIconStyle()} />
+      // );
     }
 
     return null;
@@ -216,7 +200,7 @@ export default function Marky({
       return <a>{TabTitle}</a>;
     }
     if (YouTubeURL) {
-      return markyToReplaceWithYouTubeVideo == null && YouTubeTitle;
+      return YouTubeTitle;
     }
     if (WindowTitle) {
       return WindowTitle;
@@ -226,19 +210,10 @@ export default function Marky({
     }
 
     return null;
-    // {
-    //   TabURL ? (
-    //     <a>{TabTitle}</a>
-    //   ) : YouTubeURL ? (
-    //     markyToReplaceWithYouTubeVideo == null && YouTubeTitle
-    //   ) : (
-    //     WindowTitle
-    //   );
-    // }
   };
 
   return (
-    <MarkyDiv markyType={markyType} onClick={() => handleClick()}>
+    <MarkyDiv markyType={markyType} onClick={(evt) => handleClick(evt)}>
       <ActivityIcon />
       <motion.div
         ref={marqueeRef}
