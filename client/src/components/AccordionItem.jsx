@@ -72,6 +72,7 @@ const CardSeparator = ({ cardHovered, expanded }) => {
 export default function AccordionItem({
   username,
   friend,
+  isMe,
   isWidgetHeader,
   handleNameChange,
   expandedMasterToggle,
@@ -145,6 +146,7 @@ export default function AccordionItem({
   return (
     <div
       onContextMenu={() =>
+        !isMe &&
         friend?.username &&
         friend?._id &&
         ipcRenderer.send('context-menu:friendcard', {

@@ -100,6 +100,7 @@ export default function FriendsList() {
                   key={index}
                   friend={friend}
                   expandedMasterToggle={expandedMasterToggle}
+                  isMe={friend._id === currentUser?._id}
                 />
               ))
             : friends.length
@@ -108,6 +109,7 @@ export default function FriendsList() {
                   key={index}
                   friend={friend}
                   expandedMasterToggle={expandedMasterToggle}
+                  isMe={friend._id === currentUser?._id}
                 />
               ))
             : null}

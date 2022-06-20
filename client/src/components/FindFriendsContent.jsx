@@ -177,7 +177,7 @@ export default function FindFriendsContent() {
   return (
     <div className={container()}>
       <header className={header()}>
-        <WindowFrame></WindowFrame>
+        <WindowFrame />
         <div onKeyDown={handleEscapeKey}>
           <motion.input
             className={[searchInputStyle(), 'undraggable', 'clickable'].join(
