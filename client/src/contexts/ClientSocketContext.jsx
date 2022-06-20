@@ -131,8 +131,8 @@ export function ClientSocketProvider({ children }) {
     localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
   };
 
-  const sendActivity = (data) => {
-    const packet = { data, userID: currentUser._id };
+  const sendActivity = (data, userID) => {
+    const packet = { data, userID };
 
     socket.emit('activity:send', packet);
   };

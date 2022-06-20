@@ -34,20 +34,6 @@ export function UserStatusProvider({ children }) {
 
   const { sendActivity } = useClientSocket();
 
-  ipcRenderer.on('chromiumHostData', function (event, data) {
-    sendActivity(
-      {
-        //Either tabdata or youtube data is sent, never both
-        TabTitle: data?.TabTitle,
-        TabURL: data?.TabURL,
-        YouTubeTitle: data?.YouTubeTitle,
-        YouTubeURL: data?.YouTubeURL,
-        Date: new Date(),
-      },
-      currentUser?._id
-    );
-  });
-
   const activeWindowListener = () => {
     let process;
     let exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
@@ -70,7 +56,7 @@ export function UserStatusProvider({ children }) {
       ) {
         sendActivity(
           { WindowTitle: activeWindow, Date: new Date() },
-          currentUser._id
+          currentUser?._id
         );
       }
     });
@@ -133,7 +119,7 @@ export function UserStatusProvider({ children }) {
               TrackURL: trackInfo.link,
               Date: new Date(),
             },
-            currentUser._id
+            currentUser?._id
           );
         }
       } catch (e) {
@@ -168,6 +154,20 @@ export function UserStatusProvider({ children }) {
       });
   };
 
+  const chromiumHostDataHandler = (event, data) => {
+    sendActivity(
+      {
+        //Either tabdata or youtube data is sent, never both
+        TabTitle: data?.TabTitle,
+        TabURL: data?.TabURL,
+        YouTubeTitle: data?.YouTubeTitle,
+        YouTubeURL: data?.YouTubeURL,
+        Date: new Date(),
+      },
+      currentUser?._id
+    );
+  };
+
   const exitListeners = () => {
     trackProcess?.close();
     process.exit();
@@ -195,9 +195,16 @@ export function UserStatusProvider({ children }) {
   }, [currentUser?.spotifyExpiryDate]);
 
   useEffect(() => {
+    ipcRenderer.on('chromiumHostData', chromiumHostDataHandler);
+
     activeWindowListener();
     activeTrackListener(currentUser?.spotifyAccessToken);
-    // return () => exitListeners();
+
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'chromiumHostData',
+        chromiumHostDataHandler
+      );
   }, []);
 
   const value = { activeTrackListener };

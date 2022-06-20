@@ -98,19 +98,15 @@ export function BrowserWindowProvider({ children }) {
 
   const settingsWindowCloseHandler = () => {
     dispatch(settingsOpenFalse());
-    // setSettingsWindow(null);
   };
   const settingsWindowClosedHandler = () => {
-    // setSettingsWindow(new BrowserWindow(settingsWindowConfig));
     dispatch(settingsOpenFalse());
   };
 
   const findFriendsWindowCloseHandler = () => {
     dispatch(findFriendsOpenFalse());
-    // setFindFriendsWindow(null);
   };
   const findFriendsWindowClosedHandler = () => {
-    // setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
     dispatch(findFriendsOpenFalse());
   };
 
@@ -134,6 +130,7 @@ export function BrowserWindowProvider({ children }) {
       settingsWindow.removeListener('blur', settingsWindowBlurHandler);
       settingsWindow.removeListener('close', settingsWindowCloseHandler);
       settingsWindow.removeListener('closed', settingsWindowClosedHandler);
+      settingsWindow.close();
     };
   }, [settingsWindow]);
 
@@ -151,6 +148,7 @@ export function BrowserWindowProvider({ children }) {
         'closed',
         findFriendsWindowClosedHandler
       );
+      findFriendsWindow.close();
     };
   }, [findFriendsWindow]);
 
@@ -171,17 +169,6 @@ export function BrowserWindowProvider({ children }) {
         toggleConnectSpotifyHandler
       );
   }, []);
-
-  // useEffect(() => {
-  //   if (!currentUser?.accessToken) {
-  //     settingsWindow?.close();
-  //     findFriendsWindow?.close();
-  //     connectSpotifyWindow?.close();
-  //     setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-  //     setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-  //     setConnectSpotifyWindow(new BrowserWindow(connectSpotifyWindowConfig));
-  //   }
-  // }, [currentUser?.accessToken]);
 
   const loadSettingsContent = () => {
     settingsWindow
@@ -220,7 +207,6 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const toggleFindFriends = () => {
-    // ipcRenderer.send('findFriendsWindow:toggle');
     if (!appState.findFriendsOpen) {
       findFriendsWindow.show();
       dispatch(findFriendsOpenTrue());
@@ -257,7 +243,6 @@ export function BrowserWindowProvider({ children }) {
             );
           }
 
-          // TODO: dateBySecondsFromNow is formatted server-side, might not need this here if mongodb sends dates as is
           DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
             .then((result) => {
               dispatch(

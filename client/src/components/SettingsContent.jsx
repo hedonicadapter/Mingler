@@ -219,10 +219,6 @@ export default function SettingsContent() {
 
   const fileInputRef = useRef(null);
 
-  ipcRenderer.on('quickSetting', (e, quickSetting) => {
-    if (quickSetting === 'profilePictureClicked') fileInputRef?.current.click();
-  });
-
   const handleEscapeKey = (evt) => {
     if (evt.keyCode === 27) {
       BrowserWindow.getFocusedWindow().close();
@@ -264,6 +260,17 @@ export default function SettingsContent() {
 
     setEmail(evt.target.value);
   };
+
+  const quickSettingHandler = (e, quickSetting) => {
+    if (quickSetting === 'profilePictureClicked') fileInputRef?.current.click();
+  };
+
+  useEffect(() => {
+    ipcRenderer.on('quickSetting', quickSettingHandler);
+
+    return () =>
+      ipcRenderer.removeAllListeners('quickSetting', quickSettingHandler);
+  }, []);
 
   return (
     <div className={container()} onKeyDown={handleEscapeKey}>
