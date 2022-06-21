@@ -28,18 +28,6 @@ export function ClientSocketProvider({ children }) {
     setSocket(newSocket);
   };
 
-  const sendFriendRequestFromMainHandler = (evt, toID) => {
-    const packet = { toID, fromID: currentUser._id };
-
-      socket?.emit('friendrequest:send', packet);
-  };
-
-  const cancelFriendRequestFromMainHandler = (evt, toID) => {
-    const packet = { toID, fromID: currentUser._id };
-
-      socket?.emit('friendrequest:cancel', packet);
-  };
-
   useEffect(() => {
     ipcRenderer.on(
       'sendfriendrequest:frommain',
@@ -133,6 +121,18 @@ export function ClientSocketProvider({ children }) {
   const cleanUpLocalStorageActivities = (userID, latestActivityParsed) => {
     latestActivityParsed.pop();
     localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
+  };
+
+  const sendFriendRequestFromMainHandler = (evt, toID) => {
+    const packet = { toID, fromID: currentUser._id };
+
+    socket.emit('friendrequest:send', packet);
+  };
+
+  const cancelFriendRequestFromMainHandler = (evt, toID) => {
+    const packet = { toID, fromID: currentUser._id };
+
+    socket.emit('friendrequest:cancel', packet);
   };
 
   const sendActivity = (data, userID) => {

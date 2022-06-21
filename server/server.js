@@ -135,6 +135,7 @@ userIo.on('connection', async (socket) => {
 
     socket.on('friendrequest:send', (packet) => {
       const { toID } = packet;
+      console.log('friend request send ', packet);
       userIo.in(toID).emit('friendrequest:receive');
     });
 

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { css } from '@stitches/react';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
+import ReactPlayer from 'react-player';
+import { RiArrowDropUpLine } from 'react-icons/ri';
 
 import colors from '../config/colors';
 import { ChatBox } from './ChatBox';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
-import ReactPlayer from 'react-player';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
@@ -34,6 +35,14 @@ const playerContainer = css({
   paddingTop: '56.25%', // As said to do by react-player readme
 });
 
+const closePlayerButton = css({
+  width: 22,
+  height: 22,
+  color: colors.darkmodeLightBlack,
+  marginLeft: 'auto',
+  cursor: 'pointer',
+});
+
 export default function CardBody({
   activity,
   userID,
@@ -41,6 +50,7 @@ export default function CardBody({
   chatVisible,
   playerURL,
   playerVisible,
+  closePlayer,
   setFriends,
 }) {
   return (
@@ -58,8 +68,17 @@ export default function CardBody({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            style={{ padding: 10 }}
+            style={{
+              padding: 10,
+              paddingTop: 2,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
+            <RiArrowDropUpLine
+              className={closePlayerButton()}
+              onClick={() => closePlayer()}
+            />
             <div className={playerContainer()}>
               <ReactPlayer
                 url={playerURL}

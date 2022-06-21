@@ -131,6 +131,10 @@ export default function AccordionItem({
     }
   };
 
+  const closePlayer = () => {
+    setPlayerVisible(false);
+  };
+
   const contextMenuDeleteFriendHandler = (e, { menuItem, friendID }) => {
     if (menuItem === 'deleteFriend') {
       deleteFriend(friendID);
@@ -263,6 +267,7 @@ export default function AccordionItem({
               chatVisible={chatVisible}
               playerURL={playerURL}
               playerVisible={playerVisible}
+              closePlayer={closePlayer}
             />
           </motion.section>
         )}
