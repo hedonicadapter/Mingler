@@ -67,7 +67,7 @@ export function FriendsProvider({ children }) {
   const getConversations = () => {
     DAO.getConversations(currentUser._id, currentUser.accessToken).then(
       (res) => {
-        setConversations(res?.data?.reverse());
+        setConversations(res?.data?.conversationByID?.reverse());
       }
     );
   };
@@ -84,7 +84,7 @@ export function FriendsProvider({ children }) {
       currentUser?.accessToken
     )
       .then((res) => {
-        if (!res.data) return;
+        if (!res.data || !res.data?.messages) return;
 
         setConversations((prevState) =>
           prevState.map((convoObject) =>
@@ -92,7 +92,7 @@ export function FriendsProvider({ children }) {
               ? {
                   ...convoObject,
                   conversation: {
-                    messages: res.data.concat(
+                    messages: res.data.messages?.concat(
                       convoObject.conversation.messages
                     ),
                   },
@@ -141,7 +141,8 @@ export function FriendsProvider({ children }) {
   const getFriendRequests = () => {
     DAO.getFriendRequests(currentUser?._id, currentUser?.accessToken)
       .then((res) => {
-        res.data.friendRequests.forEach((object, index) => {
+        console.log('friend requests ', res);
+        res.data.friendRequests?.forEach((object, index) => {
           object.key = index;
         });
 

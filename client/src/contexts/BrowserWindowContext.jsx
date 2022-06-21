@@ -218,7 +218,10 @@ export function BrowserWindowProvider({ children }) {
   const loadConnectSpotifyContent = () => {
     DAO.createSpotifyURL(currentUser.accessToken)
       .then((res) => {
-        connectSpotifyWindow.loadURL(res.data).then().catch(console.warn);
+        connectSpotifyWindow
+          .loadURL(res.data.authorizeURL)
+          .then()
+          .catch(console.warn);
 
         connectSpotifyWindow.once('ready-to-show', () => {
           connectSpotifyWindow.setTitle('Connect to Spotify');
@@ -245,6 +248,7 @@ export function BrowserWindowProvider({ children }) {
 
           DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
             .then((result) => {
+              console.log('spotiffff ', result);
               dispatch(
                 setSpotifyAccessTokenMain(result.data.body['access_token'])
               );

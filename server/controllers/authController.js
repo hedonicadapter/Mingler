@@ -60,6 +60,10 @@ exports.signUpGuest = async (req, res, next) => {
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(process.env.ANONYMOUS_PASSWORD, salt);
 
+  if (!passowrd) {
+    return next(new ErrorResponse('Error processing password.', 500));
+  }
+
   try {
     const user = await User.create({
       username,
@@ -68,9 +72,14 @@ exports.signUpGuest = async (req, res, next) => {
       guest: true,
     });
 
+    if (!user) {
+      return next(new ErrorResponse('Error creating guest user.', 500));
+    }
+
     sendToken(user, 201, res);
+    return;
   } catch (e) {
-    console.log(e);
+    console.error(e);
     next(e);
   }
 };
@@ -94,7 +103,6 @@ exports.signInRememberedUser = async (req, res, next) => {
       }
 
       sendToken(user, 200, res);
-
       return;
     });
     return;
@@ -128,7 +136,6 @@ exports.signIn = async (req, res, next) => {
     await user.save();
 
     sendToken(user, 200, res);
-
     return;
   } catch (e) {
     next(e);
@@ -178,7 +185,10 @@ exports.forgotPassword = async (req, res, next) => {
 
     const resetToken = user.getResetPasswordToken();
 
-    await user.save();
+    await user
+      .save()
+      .then()
+      .catch((e) => next(e));
 
     // Frontend url
     const resetUrl = 'http://localhost:8080/passwordreset/' + resetToken;
@@ -227,7 +237,10 @@ exports.resetPassword = async (req, res, next) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
-    await user.save();
+    await user
+      .save()
+      .then()
+      .catch((e) => next(e));
 
     res.status(201).json({ success: true, data: 'Password reset successful.' });
   } catch (e) {

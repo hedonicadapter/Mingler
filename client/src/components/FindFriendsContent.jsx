@@ -110,7 +110,9 @@ export default function FindFriendsContent() {
     if (value) {
       DAO.searchUsers(value, currentUser.accessToken)
         .then((res) => {
-          const users = res.data.filter((user) => user._id != currentUser._id);
+          const users = res.data?.searchResults?.filter(
+            (user) => user._id != currentUser._id
+          );
 
           users.forEach((object, index) => {
             object.key = index;

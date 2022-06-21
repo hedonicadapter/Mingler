@@ -109,7 +109,13 @@ const AccountSettingsContent = ({
   settingsState,
   fileInputRef,
 }) => {
-  const connectedToSpotify = settingsState.currentUser?.spotifyAccessToken;
+  const [connectedToSpotify, setConnectedToSpotify] = useState(
+    settingsState.currentUser?.spotifyAccessToken
+  );
+
+  useEffect(() => {
+    setConnectedToSpotify(settingsState.currentUser?.spotifyAccessToken);
+  }, [settingsState.currentUser?.spotifyAccessToken]);
 
   const handleFileUpload = (evt) => {
     const file = Array.from(evt.target.files)[0];
@@ -122,7 +128,7 @@ const AccountSettingsContent = ({
       settingsDao
         .setProfilePicture(formData, settingsState.currentUser.accessToken)
         .then((res) => {
-          dispatch(setProfilePictureMain(res.data));
+          dispatch(setProfilePictureMain(res.data.profilePicture));
         })
         .catch((e) => console.error(e));
     }
@@ -244,7 +250,7 @@ export default function SettingsContent() {
         settingsState.currentUser.accessToken
       )
       .then((res) => {
-        dispatch(setUsernameMain(res.data));
+        dispatch(setUsernameMain(res.data.username));
       })
       .catch((e) => console.error(e));
 
@@ -263,7 +269,7 @@ export default function SettingsContent() {
         settingsState.currentUser.accessToken
       )
       .then((res) => {
-        dispatch(setEmailMain(res.data));
+        dispatch(setEmailMain(res.data.email));
       })
       .catch((e) => console.error(e));
 

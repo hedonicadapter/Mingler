@@ -63,7 +63,7 @@ exports.getFriends = async (req, res, next) => {
           if (err)
             return next(new ErrorResponse('Could not find friends.', 404));
 
-          res.send({ friends });
+          res.status(200).json({ success: true, friends });
         }
       );
     });
@@ -105,7 +105,7 @@ exports.deleteFriend = async (req, res, next) => {
     if (transactionResults) {
       return res.status(201).json({
         status: 'Success',
-        data: transactionResults,
+        transactionResults,
       });
     } else {
       return next(new ErrorResponse('Delete friend transaction error', 500));
@@ -125,7 +125,7 @@ exports.getConversations = async (req, res, next) => {
       if (err) return next(new ErrorResponse('Could not find friends.', 404));
       if (!result) return next(new ErrorResponse('Invalid body.', 400));
       if (!result.friends) {
-        return res.status(201).json({
+        return res.status(200).json({
           status: 'Success',
           message: 'No friends',
           data: null,
@@ -143,14 +143,6 @@ exports.getConversations = async (req, res, next) => {
 
           result.conversations.forEach((conversation) => {
             conversation.messages?.reverse();
-            // .forEach((msg) => {
-            //   console.log(
-            //     moment(msg.createdAt).format('YYYY-MM-DD--HH:MM:SS'),
-            //     ' ',
-            //     msg.message
-            //   );
-            //   msg.createdAt = new Date(msg.createdAt);
-            // });
 
             friends.forEach((friend) => {
               if (
@@ -162,7 +154,10 @@ exports.getConversations = async (req, res, next) => {
               }
             });
           });
-          res.send(conversationByID);
+          return res.status(200).json({
+            status: 'Success',
+            conversationByID,
+          });
         }
       );
     }).populate({
@@ -189,7 +184,10 @@ exports.getUser = async (req, res, next) => {
       function (err, result) {
         if (err) return next(new ErrorResponse('Could not find friends.', 404));
         if (!result) return next(new ErrorResponse('Invalid body.', 400));
-        return res.send(result);
+        return res.status(200).json({
+          status: 'Success',
+          user: result,
+        });
       }
     );
   } catch (e) {
@@ -201,7 +199,7 @@ exports.searchUsers = async (req, res, next) => {
   const { searchTerm } = req.body;
 
   try {
-    let result = await User.aggregate([
+    let searchResults = await User.aggregate([
       {
         $search: {
           compound: {
@@ -230,7 +228,10 @@ exports.searchUsers = async (req, res, next) => {
       },
     ]);
 
-    res.send(result);
+    return res.status(200).json({
+      status: 'Success',
+      searchResults,
+    });
   } catch (e) {
     next(e);
   }
@@ -268,7 +269,7 @@ exports.sendFriendRequest = async (req, res, next) => {
     if (transactionResults) {
       return res.status(201).json({
         status: 'Success',
-        data: transactionResults,
+        transactionResults,
       });
     } else {
       return next(new ErrorResponse('Friend request transaction error', 500));
@@ -292,6 +293,7 @@ exports.acceptFriendRequest = async (req, res, next) => {
         { $push: { friends: fromID } },
         { session, new: true, safe: true, lean: true }
       );
+
       const newFriend2 = await User.findOneAndUpdate(
         { _id: fromID },
         { $push: { friends: userID } },
@@ -329,7 +331,7 @@ exports.acceptFriendRequest = async (req, res, next) => {
     if (transactionResults) {
       return res.status(201).json({
         status: 'Success',
-        data: transactionResults,
+        transactionResults,
       });
     } else {
       return next(new ErrorResponse('Accept request transaction error', 500));
@@ -373,7 +375,7 @@ exports.cancelFriendRequest = async (req, res, next) => {
     if (transactionResults) {
       return res.status(201).json({
         status: 'Success',
-        data: transactionResults,
+        transactionResults,
       });
     } else {
       return next(new ErrorResponse('Cancel request transaction error', 500));
@@ -391,10 +393,13 @@ exports.getFriendRequests = async (req, res, next) => {
   try {
     await User.findOne({ _id: userID }, 'friendRequests')
       .populate('friendRequests', 'username _id')
-      .exec(function (err, friends) {
+      .exec(function (err, user) {
         if (err) return next(new ErrorResponse('Database error'), 500);
 
-        return res.send(friends);
+        return res.status(201).json({
+          status: 'Success',
+          friendRequests: user?.friendRequests,
+        });
       });
   } catch (e) {
     next(e);
@@ -408,9 +413,13 @@ exports.getSentFriendRequests = async (req, res, next) => {
     await User.findOne(
       { _id: userID },
       'sentFriendRequests',
-      function (err, result) {
+      function (err, user) {
         if (err) return next(new ErrorResponse('Database error'), 500);
-        return res.send(result);
+
+        return res.status(201).json({
+          status: 'Success',
+          sentFriendRequests: user?.sentFriendRequests,
+        });
       }
     );
   } catch (e) {
@@ -427,7 +436,10 @@ exports.getMessages = async (req, res, next) => {
       'messages -_id',
       function (err, result) {
         if (err) return next(new ErrorResponse('Database Error'), 500);
-        return res.send(result?.messages.reverse());
+        return res.status(201).json({
+          status: 'Success',
+          messages: result?.messages?.reverse(),
+        });
       }
     ).populate({
       path: 'messages',
@@ -480,7 +492,7 @@ exports.sendMessage = async (req, res, next) => {
     if (transactionResults) {
       return res.status(201).json({
         status: 'Success',
-        data: transactionResults,
+        transactionResults,
       });
     } else {
       return next(new ErrorResponse('Unable to send message.', 500));
@@ -501,7 +513,14 @@ exports.createSpotifyURL = async (req, res, next) => {
 
   const authorizeURL = spotifyApi.createAuthorizeURL(scopes);
 
-  return res.send(authorizeURL);
+  if (authorizeURL) {
+    return res.status(201).json({
+      status: 'Success',
+      authorizeURL,
+    });
+  } else {
+    return new ErrorResponse('Error creating spotify authorization URL. ', 500);
+  }
 };
 
 exports.authorizeSpotify = async (req, res, next) => {
@@ -524,14 +543,23 @@ exports.authorizeSpotify = async (req, res, next) => {
 
       // TODO: Make this a user function?
       const user = await User.findById(userID);
+
+      if (!user) return new ErrorResponse('User not found. ', 404);
+
       user.spotifyAccessToken = accessToken;
       user.spotifyRefreshToken = refreshToken;
       user.spotifyExpiryDate = spotifyExpiryDate;
-      await user.save();
+      await user
+        .save()
+        .then()
+        .catch((e) => next(e));
 
       newData.body.spotifyExpiryDate = spotifyExpiryDate;
 
-      return res.send(newData);
+      return res.status(201).json({
+        status: 'Success',
+        ...newData,
+      });
     },
     function (e) {
       console.log('Spotify authorization code grant error: ', e);
@@ -566,17 +594,26 @@ exports.refreshSpotify = async (req, res, next) => {
 
       // TODO: Make this a user function?
       const user = await User.findById(userID);
+
+      if (!user) return new ErrorResponse('User not found. ', 404);
+
       user.spotifyAccessToken = newAccessToken;
       user.spotifyRefreshToken = refreshToken;
       user.spotifyExpiryDate = dateBySecondsFromCurrentClientTime(
         currentClientTime,
         expiresIn
       );
-      await user.save();
+      await user
+        .save()
+        .then()
+        .catch((e) => next(e));
 
       newData.body.spotifyExpiryDate = spotifyExpiryDate;
 
-      return res.send(newData);
+      return res.status(201).json({
+        status: 'Success',
+        ...newData,
+      });
     },
     function (e) {
       next(e);
@@ -618,7 +655,10 @@ exports.setUsername = async (req, res, next) => {
     user
       .save()
       .then((user) => {
-        return res.send(user.username);
+        return res.status(201).json({
+          status: 'Success',
+          username: user.username,
+        });
       })
       .catch((e) => next(e));
   } catch (e) {
@@ -639,7 +679,10 @@ exports.setEmail = async (req, res, next) => {
     user
       .save()
       .then((user) => {
-        return res.send(user.email);
+        return res.status(201).json({
+          status: 'Success',
+          email: user.email,
+        });
       })
       .catch((e) => next(e));
   } catch (e) {
@@ -673,7 +716,10 @@ exports.setProfilePicture = async (req, res, next) => {
     user
       .save()
       .then(() => {
-        return res.send(user.profilePicture);
+        return res.status(201).json({
+          status: 'Success',
+          profilePicture: user.profilePicture,
+        });
       })
       .catch((e) => next(e));
   } catch (e) {

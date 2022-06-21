@@ -200,6 +200,7 @@ const createWindow = async () => {
             // if data = time send time not chromiumhostdata
             // Picked up by Marky which then opens a browser tab for the video with the correct time
             if (data.time) {
+              console.log('data.time ', data.time);
               mainWindow?.webContents.send(
                 'chromiumHostData:YouTubeTime',
                 data
