@@ -18,6 +18,7 @@ import {
   setFindFriendsSearchValue,
 } from '../mainState/features/appSlice';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
+import useDebounce from '../helpers/useDebounce';
 
 const container = css({
   display: 'flex',
@@ -61,9 +62,11 @@ export default function FriendsList() {
   const handleSearchInput = (evt) => {
     let searchValue = evt.target.value;
     dispatch(setFindFriendsSearchValue(searchValue));
-
-    findFriends(searchValue);
   };
+
+  useDebounce(() => findFriends(appState?.findFriendsSearchValue), 1000, [
+    appState?.findFriendsSearchValue,
+  ]);
 
   const handleNameChange = (evt) => {
     setUserName(evt.target.value);

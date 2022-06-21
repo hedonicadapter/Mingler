@@ -22,6 +22,7 @@ import {
 } from '../mainState/features/appSlice';
 import { makeClickthrough } from '../config/clickthrough';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
+import useDebounce from '../helpers/useDebounce';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -75,20 +76,15 @@ export default function FindFriendsContent() {
     console.log('friends ', foundFriends);
   }, [foundFriends]);
 
-  let timeouts = [];
-
   useEffect(() => {
-    timeouts.push(
-      setTimeout(() => search(appState?.findFriendsSearchValue), 150)
-    );
-
     if (!appState?.findFriendsSearchValue) {
-      timeouts.forEach((item) => clearTimeout(item));
       setFoundFriends(null);
     }
-
-    return () => timeouts.forEach((item) => clearTimeout(item));
   }, [appState?.findFriendsSearchValue]);
+
+  useDebounce(() => search(appState?.findFriendsSearchValue), 350, [
+    appState?.findFriendsSearchValue,
+  ]);
 
   useEffect(() => {
     getSentFriendRequests();
