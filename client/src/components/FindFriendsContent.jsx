@@ -82,6 +82,7 @@ export default function FindFriendsContent() {
     }
   }, [appState?.findFriendsSearchValue]);
 
+  // TODO: react 18 - replace with useDeferredValue
   useDebounce(() => search(appState?.findFriendsSearchValue), 350, [
     appState?.findFriendsSearchValue,
   ]);

@@ -22,6 +22,7 @@ import {
 import settingsDao from '../config/settingsDao';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
+import animations from '../config/animations';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -108,6 +109,8 @@ const AccountSettingsContent = ({
   settingsState,
   fileInputRef,
 }) => {
+  const connectedToSpotify = settingsState.currentUser?.spotifyAccessToken;
+
   const handleFileUpload = (evt) => {
     const file = Array.from(evt.target.files)[0];
 
@@ -179,11 +182,16 @@ const AccountSettingsContent = ({
       </div>
       <motion.div
         style={{
-          border: '2px solid ' + colors.offWhitePressed2,
+          // border:
+          //   '2px solid ' + connectedToSpotify
+          //     ? colors.offWhitePressed2
+          //     : colors.pastelGreen,
+          color: connectedToSpotify
+            ? colors.pastelGreen
+            : colors.offWhitePressed2,
           borderRadius: '2px',
           padding: 6,
           paddingRight: 6,
-          color: colors.offWhitePressed2,
           display: 'flex',
           flexDirection: 'row',
           // justifyContent: 'space-between',
@@ -195,11 +203,12 @@ const AccountSettingsContent = ({
           color: colors.pastelGreen,
           cursor: 'pointer',
         }}
+        whileTap={animations.whileTap}
         transition={{ duration: 0.15 }}
         onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
       >
         <BsSpotify size={'18px'} style={{ paddingRight: 6 }} />
-        connect
+        {connectedToSpotify ? 'connected' : 'connect'}
       </motion.div>
     </>
   );

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { VscChromeMinimize } from 'react-icons/vsc';
 import { IoIosClose } from 'react-icons/io';
 import colors from '../../config/colors';
+import animations from '../../config/animations';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -15,13 +16,6 @@ const buttonColor = colors.darkmodeLightBlack;
 const hoverAnimation = {
   opacity: 0.5,
   transition: { duration: 0.1 },
-};
-
-const tapAnimation = {
-  opacity: 0.3,
-  transition: {
-    duration: 0.1,
-  },
 };
 
 const FrameButtons = () => {
@@ -38,7 +32,7 @@ const FrameButtons = () => {
       <motion.span
         className="undraggable"
         whileHover={hoverAnimation}
-        whileTap={tapAnimation}
+        whileTap={animations.whileTap}
         onClick={() => handleMinimize()}
       >
         <VscChromeMinimize color={buttonColor} />
@@ -46,7 +40,7 @@ const FrameButtons = () => {
       <motion.span
         className="undraggable"
         whileHover={hoverAnimation}
-        whileTap={tapAnimation}
+        whileTap={animations.whileTap}
         onClick={() => handleClose()}
       >
         <IoIosClose color={buttonColor} />

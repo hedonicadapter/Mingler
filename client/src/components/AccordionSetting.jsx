@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
 import colors from '../config/colors';
+import animations from '../config/animations';
 
 const container = css({ width: '100%' });
 const header = css({
@@ -55,7 +56,7 @@ export default function AccordionSetting({
           color: colors.darkmodeLightBlack,
           cursor: 'pointer',
         }}
-        whileTap={{ opacity: 0.8 }}
+        whileTap={animations.whileTap}
         transition={{ duration: 0.1 }}
         onClick={() => toggleExpansion()}
         className={header()}

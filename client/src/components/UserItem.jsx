@@ -5,6 +5,7 @@ import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
 
 import colors from '../config/colors';
+import animations from '../config/animations';
 
 const container = css({
   flexDirection: 'row',
@@ -64,13 +65,6 @@ const cancelRequestHoverAnimation = {
   borderColor: colors.samDeepRed,
 };
 
-const tapAnimation = {
-  opacity: 0.3,
-  transition: {
-    duration: 0.15,
-  },
-};
-
 const AcceptRejectButtons = ({
   handleAcceptRequestButton,
   handleRejectRequestButton,
@@ -81,7 +75,7 @@ const AcceptRejectButtons = ({
       <motion.div
         initial={{ borderColor: 'rgba(131,133,140,1)' }}
         whileHover={friendRequestHoverAnimation}
-        whileTap={tapAnimation}
+        whileTap={animations.whileTap}
         className={friendRequestButtonStyle()}
         onClick={() => handleAcceptRequestButton(userID)}
       >
@@ -90,7 +84,7 @@ const AcceptRejectButtons = ({
       <motion.div
         initial={{ borderColor: 'rgba(131,133,140,1)' }}
         whileHover={friendRequestHoverAnimation}
-        whileTap={tapAnimation}
+        whileTap={animations.whileTap}
         className={friendRequestButtonStyle()}
         onClick={() => handleRejectRequestButton(userID)}
       >
@@ -105,7 +99,7 @@ const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
     <motion.div
       initial={{ borderColor: 'rgba(131,133,140,1)' }}
       whileHover={friendRequestHoverAnimation}
-      whileTap={tapAnimation}
+      whileTap={animations.whileTap}
       className={friendRequestButtonStyle()}
       style={
         !accept && {
@@ -177,7 +171,7 @@ export default function UserItem({
               <motion.div
                 initial={{ borderColor: 'rgba(131,133,140,1)' }}
                 whileHover={cancelRequestHoverAnimation}
-                whileTap={tapAnimation}
+                whileTap={animations.whileTap}
                 className={cancelRequestButtonStyle()}
                 onClick={() => handleCancelRequestButton(user._id)}
               >

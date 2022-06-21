@@ -14,6 +14,7 @@ import {
   turnOffShowWelcomeMain,
 } from '../mainState/features/settingsSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import animations from '../config/animations';
 
 const container = css({
   pointerEvents: 'auto',
@@ -223,10 +224,7 @@ export default function SplashScreen({}) {
         <AnimationWrapper>
           <motion.div
             whileHover={{ color: colors.darkmodeHighWhite }}
-            whileTap={{
-              opacity: 0.4,
-              transition: { duration: 0.1 },
-            }}
+            whileTap={animations.whileTap}
             className={[buttonStyle(), availableButtonStyle()].join(' ')}
             style={{ backgroundColor: colors.coffeePink }}
             onClick={() => handleServiceButtonClick('Email')}
@@ -248,12 +246,7 @@ export default function SplashScreen({}) {
                       transition: { duration: 0.1 },
                     }
                   }
-                  whileTap={
-                    service.available && {
-                      opacity: 0.4,
-                      transition: { duration: 0.1 },
-                    }
-                  }
+                  whileTap={service.available && animations.whileTap}
                   className={[
                     buttonStyle(),
                     service.available
@@ -281,10 +274,7 @@ export default function SplashScreen({}) {
               color: colors.darkmodeHighWhite,
               transition: { duration: 0.1 },
             }}
-            whileTap={{
-              opacity: 0.4,
-              transition: { duration: 0.1 },
-            }}
+            whileTap={animations.whileTap}
             className={[buttonStyle(), availableButtonStyle()].join(' ')}
             style={{
               backgroundColor: colors.coffeeBrown,
@@ -402,10 +392,8 @@ export default function SplashScreen({}) {
             variants={formFilledVariants}
             whileTap={
               formFilled != 'false' &&
-              formFilled != 'loading' && {
-                opacity: 0.4,
-                transition: { duration: 0.1 },
-              }
+              formFilled != 'loading' &&
+              animations.whileTap
             }
             className={buttonStyle()}
             style={{ width: '20%', minWidth: '60px', opacity: 0 }}
@@ -584,10 +572,8 @@ export default function SplashScreen({}) {
             variants={formFilledVariants}
             whileTap={
               formFilled != 'false' &&
-              formFilled != 'loading' && {
-                opacity: 0.4,
-                transition: { duration: 0.1 },
-              }
+              formFilled != 'loading' &&
+              animations.whileTap
             }
             className={buttonStyle()}
             style={{ width: '20%', minWidth: '60px', opacity: 0 }}
@@ -777,10 +763,8 @@ export default function SplashScreen({}) {
             variants={formFilledVariants}
             whileTap={
               formFilled != 'false' &&
-              formFilled != 'loading' && {
-                opacity: 0.4,
-                transition: { duration: 0.1 },
-              }
+              formFilled != 'loading' &&
+              animations.whileTap
             }
             className={buttonStyle()}
             style={{
@@ -808,12 +792,7 @@ export default function SplashScreen({}) {
               whileHover={
                 option.available && { color: colors.darkmodeHighWhite }
               }
-              whileTap={
-                option.available && {
-                  opacity: 0.4,
-                  transition: { duration: 0.1 },
-                }
-              }
+              whileTap={option.available && animations.whileTap}
               className={[
                 buttonStyle(),
                 option.available
