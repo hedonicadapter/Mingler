@@ -14,11 +14,11 @@ exports.signUpWithEmail = async (req, res, next) => {
   }
 
   if (!email) {
-    return next(new ErrorResponse("We didn't receive a username.", 400));
+    return next(new ErrorResponse("We didn't receive an email.", 400));
   }
 
   if (!password) {
-    return next(new ErrorResponse("We didn't receive a username.", 400));
+    return next(new ErrorResponse("We didn't receive a password.", 400));
   }
 
   const user = await User.findOne({
@@ -60,7 +60,7 @@ exports.signUpGuest = async (req, res, next) => {
   const salt = await bcrypt.genSalt(10);
   const password = await bcrypt.hash(process.env.ANONYMOUS_PASSWORD, salt);
 
-  if (!passowrd) {
+  if (!password) {
     return next(new ErrorResponse('Error processing password.', 500));
   }
 
@@ -103,9 +103,7 @@ exports.signInRememberedUser = async (req, res, next) => {
       }
 
       sendToken(user, 200, res);
-      return;
     });
-    return;
   } catch (e) {
     next(e);
   }

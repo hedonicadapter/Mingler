@@ -69,11 +69,25 @@ const profilePictureFormContainer = css({
   borderRadius: '2px',
   display: 'flex',
   flexDirection: 'row',
-  width: '100%',
+  // width: '100%',
+  justifyContent: 'start',
   marginBottom: 8,
 });
+const profilePictureErrorContainer = css({
+  paddingRight: 8,
+  margin: 8,
+  width: '100%',
+  height: '100%',
+  marginRight: 'auto',
+  alignSelf: 'center',
+  color: colors.coffeeRed,
+  fontSize: '0.9em',
+});
 const avatarContainer = css({
-  margin: 'auto',
+  marginRight: 'auto',
+  alignSelf: 'center',
+
+  padding: 6,
   paddingLeft: 6,
   '&:hover': {
     cursor: 'pointer',
@@ -83,7 +97,22 @@ const avatarContainer = css({
 const inputsContainer = css({
   flexDirection: 'row',
   paddingRight: 8,
-  margin: 6,
+  margin: 5,
+});
+const connectSpotifyContainer = css({
+  borderRadius: '2px',
+  padding: 6,
+  paddingRight: 6,
+  display: 'flex',
+  flexDirection: 'row',
+  // alignItems: 'center', connect text looks more centered without this lmao
+  fontSize: '0.9em',
+
+  '&:hover': {
+    borderColor: colors.pastelGreen,
+    color: colors.pastelGreen,
+    cursor: 'pointer',
+  },
 });
 const genericInput = css({
   width: '100%',
@@ -91,7 +120,6 @@ const genericInput = css({
   paddingBottom: 5,
   paddingLeft: 5,
   transition: 'background-color 0.15s ease',
-  color: colors.darkmodeLightBlack,
   fontFamily: 'inherit',
 
   '&:hover, &:focus': {
@@ -103,11 +131,16 @@ const genericInput = css({
 const AccountSettingsContent = ({
   username,
   email,
+  handleProfilePictureChange,
   handleNameChange,
   handleEmailChange,
   dispatch,
   settingsState,
   fileInputRef,
+  profilePictureError,
+  usernameError,
+  emailError,
+  spotifyError,
 }) => {
   const [connectedToSpotify, setConnectedToSpotify] = useState(
     settingsState.currentUser?.spotifyAccessToken
@@ -116,23 +149,6 @@ const AccountSettingsContent = ({
   useEffect(() => {
     setConnectedToSpotify(settingsState.currentUser?.spotifyAccessToken);
   }, [settingsState.currentUser?.spotifyAccessToken]);
-
-  const handleFileUpload = (evt) => {
-    const file = Array.from(evt.target.files)[0];
-
-    if (file) {
-      let formData = new FormData();
-      formData.append('userID', settingsState.currentUser._id);
-      formData.append('profilePicture', file, file.name);
-
-      settingsDao
-        .setProfilePicture(formData, settingsState.currentUser.accessToken)
-        .then((res) => {
-          dispatch(setProfilePictureMain(res.data.profilePicture));
-        })
-        .catch((e) => console.error(e));
-    }
-  };
 
   return (
     <>
@@ -152,7 +168,7 @@ const AccountSettingsContent = ({
             />
           </motion.label>
           <input
-            onChange={handleFileUpload}
+            onChange={handleProfilePictureChange}
             onFocus={(evt) => evt.preventDefault()}
             accept="image/*"
             id="file-upload"
@@ -165,56 +181,83 @@ const AccountSettingsContent = ({
             }}
           />
         </motion.div>
-        <div className={inputsContainer()}>
-          <TextareaAutosize
-            spellCheck="false"
-            placeholder="Username"
-            maxLength={25}
-            maxRows={1}
-            value={username || ''}
-            className={genericInput()}
-            onChange={handleNameChange}
-          />
-          <TextareaAutosize
-            spellCheck="false"
-            placeholder="Email"
-            maxLength={25}
-            maxRows={1}
-            value={email || ''}
-            className={genericInput()}
-            onChange={handleEmailChange}
-          />
-        </div>
+
+        {profilePictureError ? (
+          <div className={profilePictureErrorContainer()}>
+            {profilePictureError}
+          </div>
+        ) : (
+          <div className={inputsContainer()}>
+            <TextareaAutosize
+              spellCheck="false"
+              placeholder="Username"
+              maxLength={25}
+              maxRows={1}
+              className={genericInput()}
+              readOnly={usernameError ? true : false}
+              value={usernameError ? usernameError : username || ''}
+              style={{
+                color: usernameError
+                  ? colors.coffeeRed
+                  : colors.darkmodeLightBlack,
+                cursor: usernameError ? 'default' : 'auto',
+              }}
+              onChange={handleNameChange}
+            />
+            <TextareaAutosize
+              spellCheck="false"
+              placeholder="Email"
+              maxLength={25}
+              maxRows={1}
+              className={genericInput()}
+              readOnly={emailError ? true : false}
+              value={emailError ? emailError : email || ''}
+              style={{
+                color: emailError
+                  ? colors.coffeeRed
+                  : colors.darkmodeLightBlack,
+                cursor: emailError ? 'default' : 'auto',
+                '&:hover, &:focus': {
+                  color: usernameError
+                    ? colors.coffeeRed
+                    : colors.darkmodeBlack,
+                },
+              }}
+              onChange={handleEmailChange}
+            />
+          </div>
+        )}
       </div>
       <motion.div
+        className={connectSpotifyContainer()}
         style={{
-          // border:
-          //   '2px solid ' + connectedToSpotify
-          //     ? colors.offWhitePressed2
-          //     : colors.pastelGreen,
-          color: connectedToSpotify
+          color: spotifyError
+            ? colors.coffeeRed
+            : connectedToSpotify
             ? colors.pastelGreen
             : colors.offWhitePressed2,
-          borderRadius: '2px',
-          padding: 6,
-          paddingRight: 6,
-          display: 'flex',
-          flexDirection: 'row',
-          // justifyContent: 'space-between',
-          // alignItems: 'center', connect text looks more centered without this lmao
-          fontSize: '0.9em',
         }}
-        whileHover={{
-          borderColor: colors.pastelGreen,
-          color: colors.pastelGreen,
-          cursor: 'pointer',
-        }}
+        whileHover={
+          spotifyError
+            ? {
+                color: colors.coffeeRed,
+                cursor: 'default',
+              }
+            : {
+                color: colors.pastelGreen,
+                cursor: 'pointer',
+              }
+        }
         whileTap={animations.whileTap}
         transition={{ duration: 0.15 }}
         onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
       >
         <BsSpotify size={'18px'} style={{ paddingRight: 6 }} />
-        {connectedToSpotify ? 'connected' : 'connect'}
+        {spotifyError
+          ? spotifyError
+          : connectedToSpotify
+          ? 'connected'
+          : 'connect'}
       </motion.div>
     </>
   );
@@ -232,6 +275,35 @@ export default function SettingsContent() {
   );
   const [email, setEmail] = useState(settingsState?.currentUser?.email);
 
+  const [profilePictureError, setProfilePictureError] = useState(null);
+  const [usernameError, setUsernameError] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [spotifyError, setSpotifyError] = useState(null);
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setProfilePictureError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [profilePictureError]);
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setEmailError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [emailError]);
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setUsernameError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [usernameError]);
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setSpotifyError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [spotifyError]);
+
   const fileInputRef = useRef(null);
 
   const handleEscapeKey = (evt) => {
@@ -240,8 +312,29 @@ export default function SettingsContent() {
     }
   };
 
+  const handleProfilePictureChange = (evt) => {
+    const file = Array.from(evt.target.files)[0];
+
+    if (file) {
+      let formData = new FormData();
+      formData.append('userID', settingsState.currentUser._id);
+      formData.append('profilePicture', file, file.name);
+
+      settingsDao
+        .setProfilePicture(formData, settingsState.currentUser.accessToken)
+        .then((res) => {
+          if (res?.data?.success) {
+            dispatch(setProfilePictureMain(res.data.profilePicture));
+            setProfilePictureError(null);
+          }
+        })
+        .catch((e) => setProfilePictureError(e.response.data.error));
+    }
+  };
+
   const handleNameChange = (evt) => {
     let newUsername = evt.target.value;
+    setUsername(evt.target.value);
 
     settingsDao
       .setUsername(
@@ -250,17 +343,20 @@ export default function SettingsContent() {
         settingsState.currentUser.accessToken
       )
       .then((res) => {
-        dispatch(setUsernameMain(res.data.username));
+        if (res?.data?.success) {
+          dispatch(setUsernameMain(res.data.username));
+          setUsernameError(null);
+        }
       })
-      .catch((e) => console.error(e));
-
-    setUsername(evt.target.value);
+      .catch((e) => setUsernameError(e.response.data.error));
   };
 
   const handleEmailChange = (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
     let newEmail = evt.target.value;
+
+    setEmail(evt.target.value);
 
     settingsDao
       .setEmail(
@@ -269,22 +365,35 @@ export default function SettingsContent() {
         settingsState.currentUser.accessToken
       )
       .then((res) => {
-        dispatch(setEmailMain(res.data.email));
+        if (res?.data?.success) {
+          dispatch(setEmailMain(res.data.email));
+          setEmailError(null);
+        }
       })
-      .catch((e) => console.error(e));
-
-    setEmail(evt.target.value);
+      .catch((e) => setEmailError(e.response.data.error));
   };
 
   const quickSettingHandler = (e, quickSetting) => {
     if (quickSetting === 'profilePictureClicked') fileInputRef?.current.click();
   };
+  const toggleConnectSpotifyErrorHandler = (e, error) => {
+    setSpotifyError(error);
+  };
 
   useEffect(() => {
     ipcRenderer.on('quickSetting', quickSettingHandler);
+    ipcRenderer.on(
+      'toggleconnectspotifyerror:fromrenderer',
+      toggleConnectSpotifyErrorHandler
+    );
 
-    return () =>
+    return () => {
       ipcRenderer.removeAllListeners('quickSetting', quickSettingHandler);
+      ipcRenderer.removeAllListeners(
+        'toggleconnectspotifyerror:fromrenderer',
+        toggleConnectSpotifyErrorHandler
+      );
+    };
   }, []);
 
   return (
@@ -318,12 +427,17 @@ export default function SettingsContent() {
             {settingsState.settingsContent === 'Account' && (
               <AccountSettingsContent
                 fileInputRef={fileInputRef}
+                handleProfilePictureChange={handleProfilePictureChange}
                 handleNameChange={handleNameChange}
                 handleEmailChange={handleEmailChange}
                 username={username}
                 email={email}
                 dispatch={dispatch}
                 settingsState={settingsState}
+                profilePictureError={profilePictureError}
+                usernameError={usernameError}
+                emailError={emailError}
+                spotifyError={spotifyError}
               />
             )}
           </div>

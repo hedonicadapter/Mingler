@@ -6,7 +6,6 @@ import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 import { app } from '../config/realmDB';
-import { notify } from '../components/reusables/notifications';
 import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -41,6 +40,7 @@ export function authAndy({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const dispatch = useDispatch();
 
+  const [error, setError] = useState(null);
   const [signedIn, setSignedIn] = useState(false);
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
@@ -72,24 +72,23 @@ export function authAndy({ children }) {
   const signUpGuest = async (username) => {
     return await DAO.signUpGuest(username, clientFingerprint)
       .then((result) => {
-        if (result?.data?.success) {
+        if (result.data.success) {
+          dispatch(setCurrentUserMain(result.data));
+
           //set fingerprint
           return { success: true, _id: result.data._id };
         }
       })
       .catch((e) => {
-        return { error: e?.response?.data?.error };
+        return { error: e.response.data.error };
       });
   };
 
-  const signInGuest = async (userID) => {
+  const signInGuest = async (userID = currentUser?._id) => {
     return await DAO.signInGuest(userID, clientFingerprint)
       .then((result) => {
         if (result.data.success) {
           dispatch(setCurrentUserMain(result.data));
-
-          //for the socket in main
-          ipcRenderer.send('currentUser:signedIn', result.data._id);
 
           setSignedIn(true);
           return { success: true, email: result.data.email };
@@ -144,11 +143,13 @@ export function authAndy({ children }) {
           ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
           setSignedIn(true);
+
+          return { success: true };
         }
       })
       .catch((e) => {
         setSignedIn(false);
-        notify("Couldn't sign in.", e?.response?.data?.error);
+        return { error: e.response.data.error };
       });
   };
 
@@ -163,7 +164,13 @@ export function authAndy({ children }) {
       currentUser.keepMeSignedIn &&
       currentUser.refreshToken
     ) {
-      signInRememberedUser(currentUser?.refreshToken).then().catch();
+      signInRememberedUser(currentUser?.refreshToken)
+        .then((res) => {
+          if (res?.data?.success) {
+            setError(null);
+          }
+        })
+        .catch((e) => setError(e?.response?.data.error));
     } else if (
       !signedIn &&
       currentUser &&
@@ -171,8 +178,12 @@ export function authAndy({ children }) {
       currentUser.refreshToken
     ) {
       signInGuest(currentUser._id)
-        .then()
-        .catch((e) => notify("Couldn't sign in.", e?.response?.data?.error));
+        .then((res) => {
+          if (res?.data?.success) {
+            setError(null);
+          }
+        })
+        .catch((e) => window.alert(e.response.data.error));
     }
   }, []);
 

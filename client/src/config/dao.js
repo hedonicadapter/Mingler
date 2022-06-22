@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import { app } from './realmDB';
 import { ipcRenderer } from 'electron';
 
 const auth = axios.create({
@@ -274,6 +273,3 @@ privateRoute.interceptors.response.use(
 );
 
 export default new DAO();
-
-// TODO:
-// OnlineFriends and stuff

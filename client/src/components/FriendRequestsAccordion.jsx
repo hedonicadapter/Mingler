@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
@@ -55,33 +54,42 @@ export default function FriendRequestsAccordion({
     }
   };
 
-  const handleAcceptRequestButton = (fromID) => {
-    DAO.acceptFriendRequest(fromID, currentUser._id, currentUser.accessToken)
+  const handleAcceptRequestButton = async (fromID) => {
+    return await DAO.acceptFriendRequest(
+      fromID,
+      currentUser._id,
+      currentUser.accessToken
+    )
       .then((res) => {
-        // Refresh friends list
-        getFriends();
-        getConversations();
-        getFriendRequests();
-        acceptFriendRequest(fromID);
-        setError(null);
+        if (res?.data?.success) {
+          // Refresh friends list
+          getFriends();
+          getConversations();
+          getFriendRequests();
+          acceptFriendRequest(fromID);
+          return { success: true };
+        }
       })
       .catch((e) => {
-        setError(e);
-        console.error(e);
+        return { error: e.response.data.error };
       });
-    acceptFriendRequest(fromID);
   };
 
-  const handleRejectRequestButton = (toID) => {
-    DAO.cancelFriendRequest(currentUser._id, toID, currentUser.accessToken)
+  const handleRejectRequestButton = async (toID) => {
+    return await DAO.cancelFriendRequest(
+      currentUser._id,
+      toID,
+      currentUser.accessToken
+    )
       .then((res) => {
-        // Refresh
-        getFriendRequests();
-        setError(null);
+        if (res?.data?.success) {
+          // Refresh
+          getFriendRequests();
+          return { success: true };
+        }
       })
       .catch((e) => {
-        setError(e);
-        console.error(e);
+        return { error: e.response.data.error };
       });
   };
 

@@ -105,7 +105,6 @@ const inputBox = css({
   paddingTop: 8,
   marginLeft: 4,
   marginRight: 4,
-  color: colors.darkmodeBlack,
   flex: 1,
   fontFamily: 'inherit',
 });
@@ -121,11 +120,19 @@ export const ChatBox = ({ receiver, expanded }) => {
   const anchorRef = useRef();
 
   const [inputText, setInputText] = useState('');
+  const [error, setError] = useState(null);
   const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
   const [scrollTop, setScrollTop] = useState(null);
 
   const inputBoxRef = useRef(null);
+
+  useEffect(() => {
+    console.log('errorrrrrr ', error);
+    const errorTimeout = setTimeout(() => setError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [error]);
 
   const handleInput = (evt) => {
     setInputText(evt.target.value);
@@ -198,30 +205,6 @@ export const ChatBox = ({ receiver, expanded }) => {
 
   const sendMessage = () => {
     if (!inputText || !receiver || inputText === '') return;
-    const newMessage = {
-      fromID: currentUser?._id,
-      message: inputText,
-      sentDate: new Date(),
-    };
-
-    socket.emit('message:send', {
-      toID: receiver,
-      fromID: currentUser?._id,
-      message: newMessage,
-    });
-
-    setConversations((prevState) =>
-      prevState.map((convoObject) =>
-        convoObject._id === receiver
-          ? {
-              ...convoObject,
-              conversation: {
-                messages: convoObject.conversation.messages?.concat(newMessage),
-              },
-            }
-          : { ...convoObject }
-      )
-    );
 
     DAO.sendMessage(
       receiver,
@@ -231,12 +214,41 @@ export const ChatBox = ({ receiver, expanded }) => {
       currentUser?.accessToken
     )
       .then((res) => {
-        setInputText('');
-        inputBoxRef.current?.focus();
-        anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (res?.data?.success) {
+          const newMessage = {
+            fromID: currentUser?._id,
+            message: inputText,
+            sentDate: new Date(),
+          };
+
+          socket.emit('message:send', {
+            toID: receiver,
+            fromID: currentUser?._id,
+            message: newMessage,
+          });
+
+          setConversations((prevState) =>
+            prevState.map((convoObject) =>
+              convoObject._id === receiver
+                ? {
+                    ...convoObject,
+                    conversation: {
+                      messages:
+                        convoObject.conversation.messages?.concat(newMessage),
+                    },
+                  }
+                : { ...convoObject }
+            )
+          );
+
+          setInputText('');
+          inputBoxRef.current?.focus();
+          anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
+          setError(null);
+        }
       })
       .catch((e) => {
-        console.error(e);
+        setError(e.response.data.error);
         inputBoxRef.current?.focus();
       });
   };
@@ -245,9 +257,6 @@ export const ChatBox = ({ receiver, expanded }) => {
     if (evt.key === 'Enter') {
       sendMessage();
     }
-
-    console.log('key pressed: ', evt.key);
-    console.log('shiftKey: ', evt.shiftKey);
     // if (evt.key === 'Enter' && evt.key !== 'Shift') {
     //   sendMessage();
     // }
@@ -298,7 +307,14 @@ export const ChatBox = ({ receiver, expanded }) => {
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
 
-      getMessages(receiver);
+      getMessages(receiver)
+        .then(({ success, error }) => {
+          if (success) {
+            setError(null);
+          }
+          if (error) setError(error);
+        })
+        .catch((e) => setError(e));
     } else setScrollTop(false);
   };
 
@@ -339,7 +355,9 @@ export const ChatBox = ({ receiver, expanded }) => {
             placeholder="Aa"
             rows={1}
             className={inputBox()}
-            value={inputText}
+            style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
+            value={error ? error : inputText}
+            readOnly={error ? true : false}
             onChange={handleInput}
             onKeyUp={handleInputKeyUp}
             onKeyDown={handleInputKeyDown}

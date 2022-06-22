@@ -15,6 +15,7 @@ import {
 } from '../mainState/features/settingsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import animations from '../config/animations';
+import { useIsMounted } from '../helpers/useIsMounted';
 
 const container = css({
   pointerEvents: 'auto',
@@ -118,7 +119,7 @@ const formFilledVariants = {
   },
 };
 
-export default function SplashScreen({}) {
+export default function SplashScreen() {
   const { currentUser, signInGuest, signUpGuest, signUpWithEmail, signIn } =
     useAuth();
 
@@ -298,10 +299,18 @@ export default function SplashScreen({}) {
   };
 
   const GuestSlide = () => {
+    const isMounted = useIsMounted();
     const [name, setName] = useState('');
     const [nameFieldFocused, setNameFieldFocused] = useState(true);
     const [formFilled, setFormFilled] = useState('false');
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+      console.log('signinguest ', error);
+      const errorTimeout = setTimeout(() => setError(null), 3000);
+
+      return () => clearTimeout(errorTimeout);
+    }, [error]);
 
     useEffect(() => {
       if (!name) {
@@ -339,7 +348,11 @@ export default function SplashScreen({}) {
         }
         if (success) {
           setError(null);
-          signInGuest(_id);
+          signInGuest(_id).then(({ success, error }) => {
+            console.log('allo ', success, error); // prints the correct error message
+            setError(error);
+            setFormFilled('true');
+          });
         }
       });
     };
@@ -396,17 +409,25 @@ export default function SplashScreen({}) {
               animations.whileTap
             }
             className={buttonStyle()}
-            style={{ width: '20%', minWidth: '60px', opacity: 0 }}
+            style={{ minWidth: '60px', opacity: 0 }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
               handleContinueButton()
             }
           >
-            <LoadingAnimation formFilled={formFilled} buttonText={'continue'} />
+            {error ? (
+              <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
+                {error}
+              </div>
+            ) : (
+              <LoadingAnimation
+                formFilled={formFilled}
+                buttonText={'continue'}
+              />
+            )}
           </motion.div>
         </div>
-        {error}
       </AnimationWrapper>
     );
   };
@@ -420,6 +441,12 @@ export default function SplashScreen({}) {
     const [passwordFieldFocused, setPasswordFieldFocused] = useState();
     const [formFilled, setFormFilled] = useState('false');
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+      const errorTimeout = setTimeout(() => setError(null), 3000);
+
+      return () => clearTimeout(errorTimeout);
+    }, [error]);
 
     useEffect(() => {
       if (!name || !email || !password) {
@@ -466,17 +493,19 @@ export default function SplashScreen({}) {
     const handleSignUpButton = () => {
       setFormFilled('loading');
 
-      signUpWithEmail(name, email, password).then(({ success, error }) => {
-        if (error) {
-          setError(error);
-          setFormFilled('true');
+      signUpWithEmail(name, email, password).then(
+        ({ success, email, error }) => {
+          if (error) {
+            setError(error);
+            setFormFilled('true');
+          }
+          if (success) {
+            setJustRegistered({ email, password });
+            setError(null);
+            setSlide('SignIn');
+          }
         }
-        if (success) {
-          setJustRegistered({ email, password });
-          setError(null);
-          setSlide('SignIn');
-        }
-      });
+      );
     };
 
     const buttonsContainer = css({
@@ -576,17 +605,25 @@ export default function SplashScreen({}) {
               animations.whileTap
             }
             className={buttonStyle()}
-            style={{ width: '20%', minWidth: '60px', opacity: 0 }}
+            style={{ minWidth: '60px', opacity: 0 }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
               handleSignUpButton()
             }
           >
-            <LoadingAnimation formFilled={formFilled} buttonText={'Sign up!'} />
+            {error ? (
+              <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
+                {error}
+              </div>
+            ) : (
+              <LoadingAnimation
+                formFilled={formFilled}
+                buttonText={'Sign up!'}
+              />
+            )}
           </motion.div>
         </div>
-        {error}
       </AnimationWrapper>
     );
   };
@@ -600,6 +637,12 @@ export default function SplashScreen({}) {
     const [formFilled, setFormFilled] = useState('false');
     const [error, setError] = useState(null);
     const [keepMeSignedIn, setKeepMeSignedIn] = useState(true);
+
+    useEffect(() => {
+      const errorTimeout = setTimeout(() => setError(null), 3000);
+
+      return () => clearTimeout(errorTimeout);
+    }, [error]);
 
     useEffect(() => {
       if (justRegistered) {
@@ -768,7 +811,6 @@ export default function SplashScreen({}) {
             }
             className={buttonStyle()}
             style={{
-              width: '20%',
               minWidth: '60px',
               opacity: 0,
               opacity: formFilled === 'false' ? 0 : 1,
@@ -780,10 +822,18 @@ export default function SplashScreen({}) {
               handleSignInButton()
             }
           >
-            <LoadingAnimation formFilled={formFilled} buttonText={'Sign in'} />
+            {error ? (
+              <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
+                {error}
+              </div>
+            ) : (
+              <LoadingAnimation
+                formFilled={formFilled}
+                buttonText={'Sign in'}
+              />
+            )}
           </motion.div>
         </div>
-        {error}
         <Separator>or</Separator>
         {signInOptions.map((option) => {
           return (

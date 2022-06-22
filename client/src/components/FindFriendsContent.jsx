@@ -52,7 +52,8 @@ const searchInputStyle = css({
 
   width: '100%',
   padding: 14,
-  color: colors.darkmodeDisabledText,
+
+  backgroundColor: colors.offWhite,
 });
 
 const searchResultsStyle = css({
@@ -66,11 +67,18 @@ export default function FindFriendsContent() {
   const [friends, setFriends] = useState([]);
   const [foundFriends, setFoundFriends] = useState([]);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
+  const [error, setError] = useState(null);
 
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [error]);
 
   useEffect(() => {
     console.log('friends ', foundFriends);
@@ -107,9 +115,11 @@ export default function FindFriendsContent() {
   }, []);
 
   const search = (value) => {
-    if (value) {
-      DAO.searchUsers(value, currentUser.accessToken)
-        .then((res) => {
+    if (!value) return;
+
+    DAO.searchUsers(value, currentUser.accessToken)
+      .then((res) => {
+        if (res?.data?.success) {
           const users = res.data?.searchResults?.filter(
             (user) => user._id != currentUser._id
           );
@@ -126,18 +136,22 @@ export default function FindFriendsContent() {
           });
 
           setFoundFriends(users);
-        })
-        .catch((e) => console.log(e));
-    }
+          setError(null);
+        }
+      })
+      .catch((e) => setError(e?.response?.data?.error));
   };
 
   const getSentFriendRequests = () => {
     DAO.getSentFriendRequests(currentUser._id, currentUser.accessToken)
       .then((res) => {
-        setSentFriendRequests(res.data.sentFriendRequests || 'none');
+        if (res?.data?.success) {
+          setSentFriendRequests(res.data.sentFriendRequests || 'none');
+          setError(null);
+        }
       })
       .catch((e) => {
-        console.log(e);
+        setError(e?.response?.data?.error);
       });
   };
 
@@ -145,29 +159,46 @@ export default function FindFriendsContent() {
     dispatch(setFindFriendsSearchValue(evt.target.value));
   };
 
-  const handleSendRequestButton = (toID) => {
-    DAO.sendFriendRequest(toID, currentUser._id, currentUser.accessToken)
+  const handleSendRequestButton = async (toID) => {
+    return await DAO.sendFriendRequest(
+      toID,
+      currentUser._id,
+      currentUser.accessToken
+    )
       .then((res) => {
-        setSentFriendRequests((oldValue) => [...oldValue, toID]);
-        ipcRenderer.send('sendfriendrequest:fromrenderer', toID);
+        console.log('send request ', res);
+        if (res?.data?.success) {
+          setSentFriendRequests((oldValue) => [...oldValue, toID]);
+          ipcRenderer.send('sendfriendrequest:fromrenderer', toID);
+
+          return { success: true };
+        }
       })
       .catch((e) => {
-        console.log(e);
+        return { error: e?.response?.data?.error };
       });
   };
 
-  const handleCancelRequestButton = (toID) => {
-    DAO.cancelFriendRequest(toID, currentUser._id, currentUser.accessToken)
+  const handleCancelRequestButton = async (toID) => {
+    return await DAO.cancelFriendRequest(
+      toID,
+      currentUser._id,
+      currentUser.accessToken
+    )
       .then((res) => {
-        const updatedRequests = sentFriendRequests.filter(
-          (item) => item !== toID
-        );
+        if (res?.data?.success) {
+          const updatedRequests = sentFriendRequests.filter(
+            (item) => item !== toID
+          );
 
-        setSentFriendRequests(updatedRequests);
-        ipcRenderer.send('cancelfriendrequest:fromrenderer', toID);
+          setSentFriendRequests(updatedRequests);
+          ipcRenderer.send('cancelfriendrequest:fromrenderer', toID);
+
+          return { success: true };
+        }
       })
       .catch((e) => {
-        console.log(e);
+        return { error: e?.response?.data?.error };
       });
   };
 
@@ -196,15 +227,21 @@ export default function FindFriendsContent() {
               ' '
             )}
             whileHover={{
-              color: colors.darkmodeLightBlack,
+              color: error ? colors.coffeeRed : colors.darkmodeLightBlack,
             }}
-            whileFocus={{ color: colors.darkmodeBlack }}
+            whileFocus={{
+              color: error ? colors.coffeeRed : colors.darkmodeBlack,
+            }}
             transition={{ duration: 0.1 }}
             placeholder="Find friends..."
             type="text"
-            value={appState?.findFriendsSearchValue || ''}
+            value={error ? error : appState?.findFriendsSearchValue || ''}
+            readOnly={error ? true : false}
             onChange={handleSearchInput}
-            style={{ backgroundColor: colors.offWhite }}
+            style={{
+              color: error ? colors.coffeeRed : colors.darkmodeDisabledText,
+              cursor: error ? 'default' : 'auto',
+            }}
           />
         </div>
       </header>

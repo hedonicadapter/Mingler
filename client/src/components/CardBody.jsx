@@ -7,7 +7,6 @@ import { RiArrowDropUpLine } from 'react-icons/ri';
 import colors from '../config/colors';
 import { ChatBox } from './ChatBox';
 import { useLocalStorage } from '../helpers/localStorageManager';
-import DAO from '../config/DAO';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;

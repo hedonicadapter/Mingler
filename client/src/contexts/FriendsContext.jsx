@@ -65,20 +65,22 @@ export function FriendsProvider({ children }) {
   }, [socket]);
 
   const getConversations = () => {
-    DAO.getConversations(currentUser._id, currentUser.accessToken).then(
-      (res) => {
+    DAO.getConversations(currentUser._id, currentUser.accessToken)
+      .then((res) => {
         setConversations(res?.data?.conversationByID?.reverse());
-      }
-    );
+      })
+      .catch((e) =>
+        notify('Error getting conversations.', e.response.data.error)
+      );
   };
 
-  const getMessages = (friendID) => {
+  const getMessages = async (friendID) => {
     const convoObject = conversations.find(
       (convo) => convo._id === friendID
     )?.conversation;
     console.log('convoObject ', convoObject);
 
-    DAO.getMessages(
+    return await DAO.getMessages(
       convoObject._id,
       convoObject.messages.length,
       currentUser?.accessToken
@@ -86,23 +88,27 @@ export function FriendsProvider({ children }) {
       .then((res) => {
         if (!res.data || !res.data?.messages) return;
 
-        setConversations((prevState) =>
-          prevState.map((convoObject) =>
-            convoObject._id === friendID
-              ? {
-                  ...convoObject,
-                  conversation: {
-                    messages: res.data.messages?.concat(
-                      convoObject.conversation.messages
-                    ),
-                  },
-                }
-              : { ...convoObject }
-          )
-        );
+        if (res?.data?.success) {
+          setConversations((prevState) =>
+            prevState.map((convoObject) =>
+              convoObject._id === friendID
+                ? {
+                    ...convoObject,
+                    conversation: {
+                      messages: res.data.messages?.concat(
+                        convoObject.conversation.messages
+                      ),
+                    },
+                  }
+                : { ...convoObject }
+            )
+          );
+
+          return { success: true };
+        }
       })
       .catch((e) => {
-        console.error(e);
+        return { error: e?.response?.data?.error };
       });
   };
 
@@ -117,24 +123,26 @@ export function FriendsProvider({ children }) {
       });
   };
 
-  const getFriends = () => {
-    DAO.getFriends(currentUser._id, currentUser.accessToken)
+  const getFriends = async () => {
+    return await DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
-        res.data?.friends.forEach((object, index) => {
-          object.key = index;
+        if (res?.data?.success) {
+          res.data?.friends.forEach((object, index) => {
+            object.key = index;
 
-          // format profile picture objects to JSX img elements
-          if (object.profilePicture) {
-            object.profilePicture = profilePictureToJSXImg(
-              object.profilePicture
-            );
-          }
-        });
+            // format profile picture objects to JSX img elements
+            if (object.profilePicture) {
+              object.profilePicture = profilePictureToJSXImg(
+                object.profilePicture
+              );
+            }
+          });
 
-        setFriends(res.data?.friends);
+          setFriends(res.data?.friends);
+        }
       })
       .catch((e) => {
-        console.log(e);
+        notify('Error getting friends.', e?.response?.data?.error);
       });
   };
 

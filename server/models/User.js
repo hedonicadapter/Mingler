@@ -7,10 +7,7 @@ const RefreshToken = require('./RefreshToken');
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: function () {
-      if (this.guest) return false;
-      else return [true, 'We need a username.'];
-    },
+    required: [true, 'We need a username.'],
   },
   email: {
     type: String,
@@ -27,7 +24,7 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'We need a password.'],
-    minlength: 6,
+    minlength: [6, 'We need a longer password.'],
     select: false,
   },
   profilePicture: {

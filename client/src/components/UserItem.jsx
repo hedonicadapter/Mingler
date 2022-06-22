@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
@@ -55,6 +54,12 @@ const AcceptRejectButtonsContainer = css({
   flexDirection: 'row',
 });
 
+const errorStyle = css({
+  fontSize: '0.9em',
+  color: colors.coffeeRed,
+  padding: 3,
+});
+
 const friendRequestHoverAnimation = {
   color: 'rgba(100, 245, 141, 1)',
   borderColor: 'rgba(100, 245, 141, 1)',
@@ -65,37 +70,41 @@ const cancelRequestHoverAnimation = {
   borderColor: colors.samDeepRed,
 };
 
-const AcceptRejectButtons = ({
-  handleAcceptRequestButton,
-  handleRejectRequestButton,
-  userID,
-}) => {
+const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
   return (
     <div className={AcceptRejectButtonsContainer()}>
-      <motion.div
-        initial={{ borderColor: 'rgba(131,133,140,1)' }}
-        whileHover={friendRequestHoverAnimation}
-        whileTap={animations.whileTap}
-        className={friendRequestButtonStyle()}
-        onClick={() => handleAcceptRequestButton(userID)}
-      >
-        Accept
-      </motion.div>
-      <motion.div
-        initial={{ borderColor: 'rgba(131,133,140,1)' }}
-        whileHover={friendRequestHoverAnimation}
-        whileTap={animations.whileTap}
-        className={friendRequestButtonStyle()}
-        onClick={() => handleRejectRequestButton(userID)}
-      >
-        X
-      </motion.div>
+      {error ? (
+        <div className={errorStyle()}>{error}</div>
+      ) : (
+        <>
+          <motion.div
+            initial={{ borderColor: 'rgba(131,133,140,1)' }}
+            whileHover={friendRequestHoverAnimation}
+            whileTap={animations.whileTap}
+            className={friendRequestButtonStyle()}
+            onClick={() => handleAccept()}
+          >
+            Accept
+          </motion.div>
+          <motion.div
+            initial={{ borderColor: 'rgba(131,133,140,1)' }}
+            whileHover={friendRequestHoverAnimation}
+            whileTap={animations.whileTap}
+            className={friendRequestButtonStyle()}
+            onClick={() => handleReject()}
+          >
+            X
+          </motion.div>
+        </>
+      )}
     </div>
   );
 };
 
-const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
-  return (
+const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
+  return error ? (
+    <div className={errorStyle()}>{error}</div>
+  ) : (
     <motion.div
       initial={{ borderColor: 'rgba(131,133,140,1)' }}
       whileHover={friendRequestHoverAnimation}
@@ -107,7 +116,7 @@ const AddButton = ({ handleSendRequestButton, userID, accept, hovered }) => {
           opacity: hovered ? 1 : 0,
         }
       }
-      onClick={() => handleSendRequestButton(userID)}
+      onClick={() => handleSendRequest()}
     >
       Add
     </motion.div>
@@ -127,6 +136,44 @@ export default function UserItem({
   accept, // Flag to show accept or add button for each item
 }) {
   const [hovered, setHovered] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => setError(null), 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [error]);
+
+  const errorCallback = ({ success, error }) => {
+    if (success) {
+      setError(null);
+    }
+    if (error) {
+      setError(error);
+    }
+  };
+
+  const handleAccept = () => {
+    handleAcceptRequestButton(user._id)
+      .then(errorCallback)
+      .catch(console.error);
+  };
+
+  const handleReject = () => {
+    handleRejectRequestButton(user._id)
+      .then(errorCallback)
+      .catch(console.error);
+  };
+
+  const handleSendRequest = () => {
+    handleSendRequestButton(user._id).then(errorCallback).catch(console.error);
+  };
+
+  const handleCancelRequest = () => {
+    handleCancelRequestButton(user._id)
+      .then(errorCallback)
+      .catch(console.error);
+  };
 
   const alternatingColor = [colors.offWhiteHovered, colors.offWhite];
 
@@ -155,28 +202,33 @@ export default function UserItem({
             ) : !requestSent ? (
               accept ? (
                 <AcceptRejectButtons
-                  handleAcceptRequestButton={handleAcceptRequestButton}
-                  handleRejectRequestButton={handleRejectRequestButton}
-                  userID={user._id}
+                  error={error}
+                  handleAccept={handleAccept}
+                  handleReject={handleReject}
                 />
               ) : (
                 <AddButton
+                  error={error}
                   hovered={hovered}
                   accept={accept}
-                  handleSendRequestButton={handleSendRequestButton}
-                  userID={user._id}
+                  handleSendRequest={handleSendRequest}
                 />
               )
             ) : (
-              <motion.div
-                initial={{ borderColor: 'rgba(131,133,140,1)' }}
-                whileHover={cancelRequestHoverAnimation}
-                whileTap={animations.whileTap}
-                className={cancelRequestButtonStyle()}
-                onClick={() => handleCancelRequestButton(user._id)}
-              >
-                Cancel request
-              </motion.div>
+              <div onClick={() => handleCancelRequest()}>
+                {error ? (
+                  <div className={errorStyle()}>{error}</div>
+                ) : (
+                  <motion.div
+                    initial={{ borderColor: 'rgba(131,133,140,1)' }}
+                    whileHover={cancelRequestHoverAnimation}
+                    whileTap={animations.whileTap}
+                    className={cancelRequestButtonStyle()}
+                  >
+                    Cancel request
+                  </motion.div>
+                )}
+              </div>
             )}
           </div>
         </motion.div>
