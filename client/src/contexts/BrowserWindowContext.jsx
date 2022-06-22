@@ -102,6 +102,7 @@ export function BrowserWindowProvider({ children }) {
     dispatch(settingsOpenFalse());
   };
   const settingsWindowClosedHandler = () => {
+    setSettingsWindow(new BrowserWindow(settingsWindowConfig));
     dispatch(settingsOpenFalse());
   };
 
@@ -109,6 +110,7 @@ export function BrowserWindowProvider({ children }) {
     dispatch(findFriendsOpenFalse());
   };
   const findFriendsWindowClosedHandler = () => {
+    setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
     dispatch(findFriendsOpenFalse());
   };
 
@@ -132,7 +134,7 @@ export function BrowserWindowProvider({ children }) {
       settingsWindow.removeListener('blur', settingsWindowBlurHandler);
       settingsWindow.removeListener('close', settingsWindowCloseHandler);
       settingsWindow.removeListener('closed', settingsWindowClosedHandler);
-      settingsWindow.close();
+      !settingsWindow.isDestroyed() && settingsWindow.close();
     };
   }, [settingsWindow]);
 
@@ -150,7 +152,7 @@ export function BrowserWindowProvider({ children }) {
         'closed',
         findFriendsWindowClosedHandler
       );
-      findFriendsWindow.close();
+      !findFriendsWindow.isDestroyed() && findFriendsWindow.close();
     };
   }, [findFriendsWindow]);
 
