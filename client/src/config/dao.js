@@ -1,9 +1,11 @@
 import React from 'react';
 import axios from 'axios';
 import { ipcRenderer } from 'electron';
+// import { AbortController } from 'node-abort-controller';
 
 const auth = axios.create({
   baseURL: 'http://localhost:8080/api/auth/',
+  timeout: 6000,
   headers: {
     'Content-type': 'application/json',
   },
@@ -11,6 +13,7 @@ const auth = axios.create({
 
 export const privateRoute = axios.create({
   baseURL: 'http://localhost:8080/api/private/',
+  timeout: 6000,
   withCredentials: true,
   headers: {
     'Content-type': 'application/json',
@@ -19,11 +22,15 @@ export const privateRoute = axios.create({
 
 export const token = axios.create({
   baseURL: 'http://localhost:8080/api/token/',
+  timeout: 4000,
   withCredentials: true,
   headers: {
     'Content-type': 'application/json',
   },
 });
+
+// const controller = new AbortController();
+// const signal = controller.signal;
 
 export class DAO {
   signUpWithEmail = (name, email, password, clientFingerprint) => {
@@ -57,6 +64,7 @@ export class DAO {
   };
 
   logout = () => {
+    // TODO:
     return;
   };
 
@@ -224,6 +232,29 @@ const getNewToken = (refreshToken) => {
   return token.post('/refreshToken', data);
 };
 
+// privateRoute.interceptors.request.use((req) => {
+//   const controller = new AbortController();
+//   const request = {
+//     ...req,
+//     signal: controller.signal,
+//   };
+
+//   setTimeout(() => controller.abort('private route cancel'), 5000);
+
+//   return request;
+// });
+// auth.interceptors.request.use(function (req) {
+//   const controller = new AbortController();
+//   const request = {
+//     ...req,
+//     signal: controller.signal,
+//   };
+
+//   setTimeout(() => controller.abort('auth route cancel'), 5000);
+
+//   return request;
+// });
+
 privateRoute.interceptors.response.use(
   function (response) {
     return response;
@@ -231,7 +262,6 @@ privateRoute.interceptors.response.use(
   function (error) {
     const ogRequest = error.config;
     if (401 === error.response.status && !ogRequest.retry) {
-      console.log('retrying spotify ');
       const oldAccessToken = ogRequest.headers.Authorization.replace(
         /^Bearer\s+/,
         ''
@@ -245,7 +275,6 @@ privateRoute.interceptors.response.use(
 
           getNewToken(refreshToken)
             .then((tokens) => {
-              console.log(tokens);
               const access = tokens.data.accessToken;
 
               ogRequest.headers.Authorization = 'Bearer ' + access;
@@ -259,9 +288,7 @@ privateRoute.interceptors.response.use(
               );
 
               return axios(ogRequest)
-                .then((res) => {
-                  console.log('spotify res? ', res);
-                })
+                .then()
                 .catch((e) => Promise.reject(e));
             })
             .catch((e) => console.log(e));

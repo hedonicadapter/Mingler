@@ -23,6 +23,7 @@ import {
 import { makeClickthrough } from '../config/clickthrough';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
 import useDebounce from '../helpers/useDebounce';
+import genericErrorHandler from '../helpers/genericErrorHandler';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -139,7 +140,7 @@ export default function FindFriendsContent() {
           setError(null);
         }
       })
-      .catch((e) => setError(e?.response?.data?.error));
+      .catch(genericErrorHandler);
   };
 
   const getSentFriendRequests = () => {
@@ -174,9 +175,7 @@ export default function FindFriendsContent() {
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e?.response?.data?.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const handleCancelRequestButton = async (toID) => {
@@ -197,9 +196,7 @@ export default function FindFriendsContent() {
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e?.response?.data?.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const handleEscapeKey = (event) => {

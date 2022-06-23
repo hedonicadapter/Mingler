@@ -220,11 +220,22 @@ export function BrowserWindowProvider({ children }) {
     } else findFriendsWindow.focus();
   };
 
-  const sendSpotifyError = (e) => {
-    settingsWindow.webContents.send(
-      'toggleconnectspotifyerror:fromrenderer',
-      e?.response?.data?.error
-    );
+  const sendSpotifyError = (e = '') => {
+    const error = e?.response?.data?.error;
+
+    if (error) {
+      settingsWindow.webContents.send(
+        'toggleconnectspotifyerror:fromrenderer',
+        error
+      );
+      // if 'error' isn't defined, it means the client didn't receive a response,
+      // and the error is elsewhere, like a client side network error
+    } else {
+      settingsWindow.webContents.send(
+        'toggleconnectspotifyerror:fromrenderer',
+        e?.message
+      );
+    }
   };
 
   const loadConnectSpotifyContent = () => {

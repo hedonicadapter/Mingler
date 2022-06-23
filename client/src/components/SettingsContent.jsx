@@ -328,7 +328,7 @@ export default function SettingsContent() {
             setProfilePictureError(null);
           }
         })
-        .catch((e) => setProfilePictureError(e.response.data.error));
+        .catch((e) => setProfilePictureError(e?.response?.data?.error));
     }
   };
 
@@ -348,7 +348,7 @@ export default function SettingsContent() {
           setUsernameError(null);
         }
       })
-      .catch((e) => setUsernameError(e.response.data.error));
+      .catch((e) => setUsernameError(e?.response?.data?.error));
   };
 
   const handleEmailChange = (evt) => {
@@ -370,7 +370,7 @@ export default function SettingsContent() {
           setEmailError(null);
         }
       })
-      .catch((e) => setEmailError(e.response.data.error));
+      .catch((e) => setEmailError(e?.response?.data?.error));
   };
 
   const quickSettingHandler = (e, quickSetting) => {

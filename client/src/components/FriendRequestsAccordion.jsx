@@ -8,6 +8,7 @@ import { useLocalStorage } from '../helpers/localStorageManager';
 import DAO from '../config/DAO';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
+import genericErrorHandler from '../helpers/genericErrorHandler';
 
 const generalPadding = 12;
 
@@ -70,9 +71,7 @@ export default function FriendRequestsAccordion({
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const handleRejectRequestButton = async (toID) => {
@@ -88,9 +87,7 @@ export default function FriendRequestsAccordion({
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   return (

@@ -5,6 +5,7 @@ import { notify } from '../components/reusables/notifications';
 
 import DAO from '../config/DAO';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
+import genericErrorHandler from '../helpers/genericErrorHandler';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 import { useClientSocket } from './ClientSocketContext';
 
@@ -107,9 +108,7 @@ export function FriendsProvider({ children }) {
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e?.response?.data?.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const deleteFriend = (friendID) => {

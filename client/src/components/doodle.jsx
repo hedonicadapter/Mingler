@@ -15,6 +15,7 @@ import {
   setCurrentUserMain,
   setKeepMeSignedInMain,
 } from '../mainState/features/settingsSlice';
+import genericErrorHandler from '../helpers/genericErrorHandler';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
@@ -64,9 +65,7 @@ export function authAndy({ children }) {
           return { success: true, email: result.data.email };
         }
       })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const signUpGuest = async (username) => {
@@ -94,9 +93,7 @@ export function authAndy({ children }) {
           return { success: true, email: result.data.email };
         }
       })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const signOut = () => {
@@ -129,9 +126,7 @@ export function authAndy({ children }) {
           return { success: true };
         }
       })
-      .catch((e) => {
-        return { error: e.response.data.error };
-      });
+      .catch(genericErrorHandler);
   };
 
   const signInRememberedUser = async (refreshToken) => {
@@ -149,7 +144,7 @@ export function authAndy({ children }) {
       })
       .catch((e) => {
         setSignedIn(false);
-        return { error: e.response.data.error };
+        return genericErrorHandler(e);
       });
   };
 

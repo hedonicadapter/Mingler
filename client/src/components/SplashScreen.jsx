@@ -406,13 +406,19 @@ export default function SplashScreen() {
             whileTap={
               formFilled != 'false' &&
               formFilled != 'loading' &&
+              !error &&
               animations.whileTap
             }
             className={buttonStyle()}
-            style={{ minWidth: '60px', opacity: 0 }}
+            style={{
+              minWidth: '60px',
+              opacity: 0,
+              cursor: error ? 'default' : 'auto',
+            }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
+              !error &&
               handleContinueButton()
             }
           >
