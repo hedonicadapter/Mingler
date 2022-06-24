@@ -295,7 +295,7 @@ export const ChatBox = ({ receiver, expanded }) => {
           variants={{ true: { opacity: 1 }, false: { opacity: 0 } }}
           transition={{ duration: 0.15 }}
         >
-          <MdSend color={colors.samBlue} className={sendIcon()} />
+          <MdSend color={colors.coffeePink} className={sendIcon()} />
         </motion.div>
       </motion.div>
     );

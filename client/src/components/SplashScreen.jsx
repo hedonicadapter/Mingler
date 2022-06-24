@@ -28,23 +28,15 @@ const container = css({
   flexDirection: 'column',
 });
 const header = css({
-  fontSize: '1.4em',
+  fontFamily: 'Times New Roman',
+  fontSize: '1.2em',
   textAlign: 'center',
+  textTransform: 'uppercase',
   // paddingInline: 20,
-  paddingBottom: 14,
+  paddingBottom: 22,
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'center',
-});
-
-const buttonStyle = css({
-  margin: 4,
-  padding: 10,
-  textAlign: 'left',
-  fontSize: '0.8em',
-
-  borderRadius: 2,
-  // border: '1px solid black',
 });
 
 const inputStyle = css({
@@ -63,38 +55,56 @@ const inputStyle = css({
   flex: 1,
 });
 
-const Separator = styled('h5', {
+const Separator = styled('h6', {
   display: 'flex',
   flexDirection: 'row',
-  paddingInline: '10%',
-  color: colors.darkmodeDisabledText,
+  paddingInline: '2%',
+  color: colors.darkmodeLightBlack,
   opacity: 0.2,
 
   '&:before': {
+    // height: 1,
     content: '',
     flex: '1 1',
-    borderBottom: '1px solid ' + colors.darkmodeDisabledText,
+    // borderTop: '1px solid ' + colors.darkmodeBlack,
+    borderBottom: '1px solid ' + colors.darkmodeBlack,
     margin: 'auto',
-    marginRight: '10px',
+    marginRight: '14px',
   },
   '&:after': {
+    // height: 1,
     content: '',
     flex: '1 1',
-    borderBottom: '1px solid ' + colors.darkmodeDisabledText,
+    // borderTop: '1px solid ' + colors.darkmodeBlack,
+    borderBottom: '1px solid ' + colors.darkmodeBlack,
     margin: 'auto',
-    marginLeft: '10px',
+    marginLeft: '14px',
   },
 });
 
+const buttonStyle = css({
+  padding: 10,
+  textAlign: 'left',
+  fontSize: '0.8em',
+  maxWidth: '72%',
+  margin: 'auto',
+  // margin: 'auto',
+
+  // fontStyle: 'italic',
+
+  // borderRadius: 2,
+  // border: '1px solid black',
+});
+
 const availableButtonStyle = css({
-  color: colors.darkmodeMediumWhite,
-  backgroundColor: colors.coffeeBlue,
+  color: colors.darkmodeLightBlack,
+  // backgroundColor: colors.coffeeBlue,
   cursor: 'pointer',
 });
 
 const unavailableButtonStyle = css({
-  color: colors.darkmodeDisabledText,
-  backgroundColor: colors.darkmodeDisabledBlack,
+  color: colors.offWhitePressed2,
+  // backgroundColor: colors.darkmodeDisabledBlack,
   cursor: 'auto',
 });
 
@@ -124,7 +134,7 @@ export default function SplashScreen() {
     useAuth();
 
   const [loading, setLoading] = useState(false);
-  const [slide, setSlide] = useState('Init');
+  const [slide, setSlide] = useState('init');
   // const [showSuccessScreen, setShowSuccessScreen] = useState(false);
   const [justRegistered, setJustRegistered] = useLocalStorage('justRegistered');
   const appSettings = useSelector(getSettings);
@@ -159,8 +169,7 @@ export default function SplashScreen() {
             duration: 0.35,
           }}
           style={{
-            maxWidth: '72%',
-            marginInline: 'auto',
+            marginInline: '10%',
           }}
         >
           {children}
@@ -171,7 +180,7 @@ export default function SplashScreen() {
 
   const BackButton = () => {
     const handleBackButton = () => {
-      slide !== 'Init' && setSlide('Init');
+      slide !== 'init' && setSlide('init');
     };
 
     const backButton = css({
@@ -183,13 +192,13 @@ export default function SplashScreen() {
       fontWeight: 'bold',
       fontSize: '0.6em',
       transition: 'opacity 0.15s ease',
-      opacity: slide === 'Init' ? 0.2 : 1,
+      opacity: slide === 'init' ? 0.2 : 1,
     });
 
     return (
       <motion.div
         whileHover={{
-          cursor: slide !== 'Init' && 'pointer',
+          cursor: slide !== 'init' && 'pointer',
         }}
         className={backButton()}
         onClick={handleBackButton}
@@ -203,8 +212,7 @@ export default function SplashScreen() {
     const container = css({
       textAlign: 'center',
       paddingInline: 20,
-
-      width: '100%',
+      width: '100vw',
     });
 
     const handleServiceButtonClick = (serviceSelection) => {
@@ -212,31 +220,42 @@ export default function SplashScreen() {
     };
 
     const slides = [
-      { key: 0, title: 'Init' },
-      { key: 1, title: 'Guest', available: true },
-      { key: 2, title: 'Discord', available: false },
-      { key: 3, title: 'Google', available: false },
-      { key: 4, title: 'Facebook', available: false },
-      { key: 5, title: 'Email' },
+      { key: 0, title: 'init' },
+      { key: 1, title: 'guest', available: true },
+      { key: 2, title: 'discord', available: false },
+      { key: 3, title: 'google', available: false },
+      { key: 4, title: 'facebook', available: false },
+      { key: 5, title: 'email' },
     ];
 
     const ServiceSelector = () => {
       return (
         <AnimationWrapper>
           <motion.div
-            whileHover={{ color: colors.darkmodeHighWhite }}
+            whileHover={{
+              borderTopColor: colors.darkmodeBlack,
+              transition: { duration: 0.1 },
+            }}
             whileTap={animations.whileTap}
-            className={[buttonStyle(), availableButtonStyle()].join(' ')}
-            style={{ backgroundColor: colors.coffeePink }}
-            onClick={() => handleServiceButtonClick('Email')}
+            className={[
+              buttonStyle(),
+              // inputStyle(),
+              availableButtonStyle(),
+            ].join(' ')}
+            // style={{ backgroundColor: colors.coffeePink }}
+            style={{
+              borderTop: '1px solid ' + colors.offWhitePressed2,
+              margin: 'auto',
+            }}
+            onClick={() => handleServiceButtonClick('email')}
           >
-            {'Sign up with Email'}
+            {'sign up with email'}
           </motion.div>
           {slides.map((service) => {
             if (
-              service.title !== 'Init' &&
-              service.title !== 'Email' &&
-              service.title !== 'Guest'
+              service.title !== 'init' &&
+              service.title !== 'email' &&
+              service.title !== 'guest'
             ) {
               return (
                 <motion.div
@@ -245,44 +264,55 @@ export default function SplashScreen() {
                     service.available && {
                       color: colors.darkmodeHighWhite,
                       transition: { duration: 0.1 },
+                      borderTopColor: colors.darkmodeBlack,
                     }
                   }
+                  whileFocus={{
+                    color: service.available
+                      ? colors.darkmodeBlack
+                      : colors.darkmodeLightBlack,
+                  }}
                   whileTap={service.available && animations.whileTap}
                   className={[
                     buttonStyle(),
+                    // inputStyle(),
                     service.available
                       ? availableButtonStyle()
                       : unavailableButtonStyle(),
                   ].join(' ')}
+                  disabled={service.available ? true : false}
+                  // style={{
+                  //   backgroundColor:
+                  //     service.title === 'guest' && colors.coffeeBrown,
+                  // }}
                   style={{
-                    backgroundColor:
-                      service.title === 'Guest' && colors.coffeeBrown,
+                    borderTop: service.available
+                      ? '1px solid ' + colors.darkmodeBlack
+                      : '1px solid ' + colors.offWhitePressed2,
                   }}
                   onClick={() =>
                     service.available && handleServiceButtonClick(service.title)
                   }
                 >
-                  {service.title === 'Guest'
-                    ? 'Continue as guest '
-                    : 'Sign up with ' + service.title}
+                  {'Sign up with ' + service.title}
                 </motion.div>
               );
             }
           })}
           <Separator>or</Separator>
           <motion.div
-            whileHover={{
-              color: colors.darkmodeHighWhite,
-              transition: { duration: 0.1 },
-            }}
-            whileTap={animations.whileTap}
             className={[buttonStyle(), availableButtonStyle()].join(' ')}
-            style={{
-              backgroundColor: colors.coffeeBrown,
+            whileHover={{
+              color: colors.darkmodeBlack,
+              transition: { duration: 0.1 },
+              borderTopColor: colors.darkmodeBlack,
             }}
-            onClick={() => handleServiceButtonClick('Guest')}
+            whileFocus={{ color: colors.darkmodeBlack }}
+            style={{ borderTop: '1px solid ' + colors.offWhitePressed2 }}
+            whileTap={animations.whileTap}
+            onClick={() => handleServiceButtonClick('guest')}
           >
-            {'Continue as guest '}
+            {'continue as guest '}
           </motion.div>
         </AnimationWrapper>
       );
@@ -290,10 +320,11 @@ export default function SplashScreen() {
 
     return (
       <div className={container()}>
-        {slide === 'Init' && <ServiceSelector />}
-        {slide === 'Guest' && <GuestSlide />}
-        {slide === 'Email' && <EmailSlide />}
-        {slide === 'SignIn' && <SigninSlide />}
+        {slide === 'init' && <ServiceSelector />}
+        {slide === 'guest' && <GuestSlide />}
+        {slide === 'email' && <EmailSlide />}
+        {slide === 'signIn' && <SigninSlide />}
+        <Footer />
       </div>
     );
   };
@@ -375,7 +406,7 @@ export default function SplashScreen() {
         >
           <input
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Name"
+            placeholder="name"
             type="name"
             value={name || ''}
             onChange={handleNameInput}
@@ -411,9 +442,10 @@ export default function SplashScreen() {
             }
             className={buttonStyle()}
             style={{
-              minWidth: '60px',
+              minWidth: '80px',
               opacity: 0,
               cursor: error ? 'default' : 'auto',
+              marginRight: 0,
             }}
             onClick={() =>
               formFilled != 'false' &&
@@ -479,7 +511,7 @@ export default function SplashScreen() {
       if (evt.key === 'Enter') {
         if (formFilled === 'true') handleSignUpButton();
       } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
-        if (fieldName === 'Email') {
+        if (fieldName === 'email') {
           setEmail(evt.target.value);
         } else if (fieldName === 'password') {
           setPassword(evt.target.value);
@@ -529,7 +561,7 @@ export default function SplashScreen() {
         >
           <input
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Name"
+            placeholder="name"
             type="name"
             value={name || ''}
             onChange={handleNameInput}
@@ -554,11 +586,11 @@ export default function SplashScreen() {
           />
           <input
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Email adress"
+            placeholder="email adress"
             type="email"
             value={email || ''}
             onChange={handleEmailInput}
-            onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'Email')}
+            onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
             className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
             style={{
               borderTop: email
@@ -578,7 +610,7 @@ export default function SplashScreen() {
           />
           <input
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Password"
+            placeholder="password"
             type="password"
             value={password || ''}
             onChange={handlePasswordInput}
@@ -611,7 +643,7 @@ export default function SplashScreen() {
               animations.whileTap
             }
             className={buttonStyle()}
-            style={{ minWidth: '60px', opacity: 0 }}
+            style={{ minWidth: '80px', opacity: 0 }}
             onClick={() =>
               formFilled != 'false' &&
               formFilled != 'loading' &&
@@ -625,7 +657,7 @@ export default function SplashScreen() {
             ) : (
               <LoadingAnimation
                 formFilled={formFilled}
-                buttonText={'Sign up!'}
+                buttonText={'sign up!'}
               />
             )}
           </motion.div>
@@ -686,7 +718,7 @@ export default function SplashScreen() {
       if (evt.key === 'Enter') {
         if (formFilled === 'true') handleSignInButton();
       } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
-        if (fieldName === 'Email') {
+        if (fieldName === 'email') {
           setEmail(evt.target.value);
         } else if (fieldName === 'password') {
           setPassword(evt.target.value);
@@ -732,6 +764,16 @@ export default function SplashScreen() {
       fontSize: '0.8em',
     });
 
+    const keeepMeSignedInCheckboxStyle = css({
+      // color: colors.darkmodeLightBlack,
+    });
+    const keeepMeSignedInLabelStyle = css({
+      // color: 'light gray',
+      color: keepMeSignedIn
+        ? colors.darkmodeLightBlack
+        : colors.defaultPlaceholderTextColor,
+    });
+
     const checkboxAndSignInButtonContainer = css({
       display: 'flex',
       flexDirection: 'row',
@@ -747,7 +789,7 @@ export default function SplashScreen() {
             ref={emailInput}
             autoFocus={true}
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Email address"
+            placeholder="email address"
             type="email"
             value={email || ''}
             onChange={handleEmailInput}
@@ -771,7 +813,7 @@ export default function SplashScreen() {
           />
           <input
             disabled={formFilled === 'loading' ? true : false}
-            placeholder="Password"
+            placeholder="password"
             type="password"
             value={password || ''}
             onChange={handlePasswordInput}
@@ -803,9 +845,14 @@ export default function SplashScreen() {
               type="checkbox"
               name="keepMeSignedIn"
               checked={keepMeSignedIn}
-              onChange={() => {}}
+              className={keeepMeSignedInCheckboxStyle()}
             />
-            <label htmlFor="keepMeSignedIn">&nbsp;Keep me signed in</label>
+            <label
+              className={keeepMeSignedInLabelStyle()}
+              htmlFor="keepMeSignedIn"
+            >
+              &nbsp;keep me signed in
+            </label>
           </div>
           <motion.div
             animate={formFilled}
@@ -815,10 +862,12 @@ export default function SplashScreen() {
               formFilled != 'loading' &&
               animations.whileTap
             }
-            className={buttonStyle()}
             style={{
               minWidth: '60px',
               opacity: 0,
+              paddingRight: 12,
+              alignSelf: 'center',
+              fontSize: '0.8em',
               opacity: formFilled === 'false' ? 0 : 1,
             }}
             // formFilled={formFilled}
@@ -835,7 +884,7 @@ export default function SplashScreen() {
             ) : (
               <LoadingAnimation
                 formFilled={formFilled}
-                buttonText={'Sign in'}
+                buttonText={'sign in'}
               />
             )}
           </motion.div>
@@ -859,7 +908,7 @@ export default function SplashScreen() {
                 option.available && handleoptionButtonClick(option.title)
               }
             >
-              {'Sign in with ' + option.title}
+              {'sign in with ' + option.title}
             </motion.div>
           );
         })}
@@ -920,15 +969,18 @@ export default function SplashScreen() {
       fontSize: '0.9em',
       display: 'flex',
       flexDireciton: 'row',
-      justifyContent: 'flex-start',
+      justifyContent: 'center',
+      letterSpacing: '1px',
+      width: '100vw',
+      // justifyContent:'',
     });
 
     const handleAlreadyAMemberButton = () => {
-      setSlide('SignIn');
+      setSlide('signIn');
     };
 
     const handleNotAMemberButton = () => {
-      setSlide('Init');
+      setSlide('init');
     };
 
     const Prompt = ({
@@ -940,14 +992,14 @@ export default function SplashScreen() {
         textDecoration: 'underline',
         textDecorationColor: 'transparent',
         cursor: 'pointer',
-        color: colors.coffeeBlue,
+        color: colors.coffeeOrange,
       });
 
       return (
         <motion.div
           className={footerLink()}
           whileHover={{
-            textDecorationColor: colors.coffeeBlue,
+            textDecorationColor: colors.coffeeOrange,
             transition: { duration: 0.15 },
           }}
           onClick={handleAlreadyAMemberButton || handleNotAMemberButton}
@@ -960,9 +1012,9 @@ export default function SplashScreen() {
     const AlreadyAMember = () => {
       return (
         <>
-          Already a member?&nbsp;
+          already a member?&nbsp;
           <Prompt handleAlreadyAMemberButton={handleAlreadyAMemberButton}>
-            Sign in
+            sign in
           </Prompt>
         </>
       );
@@ -971,9 +1023,9 @@ export default function SplashScreen() {
     const NotAMember = () => {
       return (
         <>
-          Not a member yet?&nbsp;
+          not a member yet?&nbsp;
           <Prompt handleNotAMemberButton={handleNotAMemberButton}>
-            Sign up!
+            sign up!
           </Prompt>
         </>
       );
@@ -981,8 +1033,8 @@ export default function SplashScreen() {
 
     return (
       <motion.div className={footer()}>
-        {slide !== 'SignIn' && <AlreadyAMember />}
-        {slide === 'SignIn' && <NotAMember />}
+        {slide !== 'signIn' && <AlreadyAMember />}
+        {slide === 'signIn' && <NotAMember />}
       </motion.div>
     );
   };
@@ -990,13 +1042,73 @@ export default function SplashScreen() {
   return (
     <AnimatePresence>
       <motion.div className={container()}>
-        <MenuButton />
-        <Header />
+        <div style={{ zIndex: 1 }}>
+          <MenuButton />
+          <Header />
 
-        <Slider />
-        {/* <PostRegistrationScreen /> */}
-
-        <Footer />
+          <Slider />
+          {/* <PostRegistrationScreen /> */}
+        </div>
+        <svg
+          id="svg"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            height: '100%',
+            width: '100%',
+            position: 'fixed',
+            top: '0px',
+            left: '0px',
+            right: '0px',
+            bottom: '0px',
+            pointerEvents: 'none',
+          }}
+        >
+          <defs>
+            <filter id="noise" y="0" x="0">
+              <feTurbulence
+                class="basefrequency"
+                stitchTiles="stitch"
+                baseFrequency=".75"
+                type="fractalNoise"
+              />
+            </filter>
+            <pattern
+              id="pattern"
+              class="tile1"
+              patternUnits="userSpaceOnUse"
+              height="100"
+              width="100"
+              y="0"
+              x="0"
+            >
+              <rect
+                class="bg"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                fill="transparent"
+              />
+              <rect
+                class="opacity"
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                filter="url(#noise)"
+                opacity=".55"
+              />
+            </pattern>
+          </defs>
+          <rect
+            id="rect"
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#pattern)"
+          />
+        </svg>
       </motion.div>
     </AnimatePresence>
   );

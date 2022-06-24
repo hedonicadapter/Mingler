@@ -19,12 +19,12 @@ import {
 } from '../mainState/features/appSlice';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import useDebounce from '../helpers/useDebounce';
+import { makeClickthrough } from '../config/clickthrough';
 
 const container = css({
   display: 'flex',
   flexFlow: 'column',
   height: '100vh',
-  pointerEvents: 'auto',
   backgroundColor: 'transparent',
 });
 
@@ -41,6 +41,18 @@ export const EmptySpaceFiller = ({
 };
 
 export default function FriendsList() {
+  // const setIgnoreMouseEvents =
+  //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
+  // addEventListener('pointerover', function mousePolicy(event) {
+  //   mousePolicy._canClick =
+  //     event.target === document.documentElement
+  //       ? mousePolicy._canClick && setIgnoreMouseEvents(true, { forward: true })
+  //       : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
+  // });
+  // setIgnoreMouseEvents(true, { forward: true });
+
+  makeClickthrough();
+
   const dispatch = useDispatch();
 
   const currentUser = useSelector(getCurrentUser);
@@ -131,6 +143,68 @@ export default function FriendsList() {
           />
         </div>
       </div>
+      <svg
+        id="svg"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          height: '100%',
+          width: '100%',
+          position: 'fixed',
+          top: '0px',
+          left: '0px',
+          right: '0px',
+          bottom: '0px',
+          pointerEvents: 'none',
+          zIndex: 90,
+        }}
+      >
+        <defs>
+          <filter id="noise" y="0" x="0">
+            <feTurbulence
+              class="basefrequency"
+              stitchTiles="stitch"
+              baseFrequency=".75"
+              type="fractalNoise"
+            />
+          </filter>
+          <pattern
+            id="pattern"
+            class="tile1"
+            patternUnits="userSpaceOnUse"
+            height="100"
+            width="100"
+            y="0"
+            x="0"
+          >
+            <rect
+              class="bg"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="transparent"
+            />
+            <rect
+              class="opacity"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              filter="url(#noise)"
+              opacity=".30"
+            />
+          </pattern>
+        </defs>
+        <rect
+          style={{ pointerEvents: 'none' }}
+          id="rect"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="url(#pattern)"
+        />
+      </svg>
     </>
   );
 }

@@ -27,7 +27,7 @@ export const appSlice = createSlice({
       // state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      if (state.settingsOpen) return;
+      // if (state.settingsOpen) return;
       // state.appVisible = false;
     },
     settingsOpenTrue: (state) => {
@@ -58,10 +58,10 @@ export const appSlice = createSlice({
       // state.appVisible = !state.appVisible;
     },
     appVisibleTrue: (state) => {
-      // state.appVisible = true;
+      state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      if (state.settingsOpen) return;
+      // if (state.settingsOpen) return;
       // state.appVisible = false;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {

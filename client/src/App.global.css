@@ -8,6 +8,10 @@ body,
 .App {
   height: 100%;
   user-select: none;
+  pointer-events: none;
+}
+* {
+  pointer-events: all;
 }
 [data-reactroot] {
   height: 100% !important;
@@ -24,6 +28,8 @@ body {
   position: relative;
   color: rgba(18, 18, 18, 0.86);
   font-family: 'Helvetica';
+  letter-spacing: 3px;
+
   /* 'Segoe UI'; */
   /* , Candara, 'Bitstream Vera Sans', 'DejaVu Sans',
     'Bitstream Vera Sans', 'Trebuchet MS', Verdana; */
@@ -35,6 +41,15 @@ body {
   margin: auto;
   pointer-events: none;
   cursor: default;
+}
+
+input,
+select,
+textarea,
+button {
+  letter-spacing: inherit;
+  font-family: inherit;
+  text-transform: inherit;
 }
 
 .clickable {
@@ -150,4 +165,49 @@ h2 {
   border-radius: 20px; /* roundness of the scroll thumb */
   border: 1px solid rgba(14, 14, 14, 0.2);
   /* background-color: rgba(18, 18, 18, 0.7); */
+}
+
+[type='checkbox'] {
+  width: 1.1em;
+  height: 1.1em;
+  /* color: rgba(255, 160, 92, 1); */
+  vertical-align: middle;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  outline: 0;
+  flex-grow: 0;
+  border-radius: 50%;
+  background-color: #242424;
+  transition: background 300ms;
+  cursor: pointer;
+}
+
+/* Pseudo element for check styling */
+[type='checkbox']::before {
+  content: '';
+  color: transparent;
+  display: block;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  border: 0;
+  background-color: #757575;
+  background-size: contain;
+  /* box-shadow: inset 0 0 0 1px #ccd3d8; */
+}
+[type='checkbox']:checked {
+  background-color: currentcolor;
+}
+
+[type='checkbox']:checked::before {
+  box-shadow: none;
+  background-color: #242424;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E %3Cpath d='M15.88 8.29L10 14.17l-1.88-1.88a.996.996 0 1 0-1.41 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7a.996.996 0 0 0 0-1.41c-.39-.39-1.03-.39-1.42 0z' fill='%23fff'/%3E %3C/svg%3E");
+}
+
+[type='checkbox']:disabled {
+  background-color: #8b8b8b;
+  opacity: 0.84;
+  cursor: not-allowed;
 }

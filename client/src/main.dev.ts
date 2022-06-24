@@ -98,6 +98,7 @@ const createWindow = async () => {
     show: false,
     height: height,
     minWidth: 430,
+    alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -141,27 +142,29 @@ const createWindow = async () => {
       mainWindow.show();
     }
 
-    mainWindow.on('blur', () => {
-      if (mainWindow.webContents.isDevToolsFocused()) {
-        return; //ignore
-      } else {
-        store?.dispatch({
-          type: 'appVisibleFalse',
-          payload: {},
-        });
-      }
-    });
+    // ipcMain.on('blur', () => {
+    //   if (mainWindow.webContents.isDevToolsFocused()) {
+    //     return; //ignore
+    //   } else {
+    //     mainWindow?.blur();
+    //     store?.dispatch({
+    //       type: 'appVisibleFalse',
+    //       payload: {},
+    //     });
+    //     mainWindow?.setFocusable(false);
+    //   }
+    // });
 
-    mainWindow.on('focus', () => {
-      if (mainWindow.webContents.isDevToolsFocused()) {
-        return; //ignore
-      } else {
-        store?.dispatch({
-          type: 'appVisibleTrue',
-          payload: {},
-        });
-      }
-    });
+    // mainWindow.on('focus', () => {
+    //   if (mainWindow.webContents.isDevToolsFocused()) {
+    //     return; //ignore
+    //   } else {
+    //     store?.dispatch({
+    //       type: 'appVisibleTrue',
+    //       payload: {},
+    //     });
+    //   }
+    // });
   });
 
   mainWindow.webContents.once('dom-ready', async () => {
@@ -304,7 +307,13 @@ const toggleWidget = () => {
 
   if (appVisible) {
     mainWindow?.blur();
+    store?.dispatch({
+      type: 'appVisibleFalse',
+      payload: {},
+    });
+    mainWindow?.setFocusable(false);
   } else if (!appVisible) {
+    mainWindow?.setFocusable(true);
     mainWindow?.focus(); //activates onblur event further down
   }
 };

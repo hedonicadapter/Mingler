@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import './Widget.css';
 
@@ -18,11 +18,14 @@ import {
 } from '../mainState/features/appSlice';
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
+import { ipcRenderer } from 'electron';
 
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
   const [visible, setVisible] = useState(true);
+
+  // makeClickthrough();
 
   return (
     <motion.div
@@ -45,12 +48,18 @@ const Pane = ({ children }) => {
     </motion.div>
   );
 };
-
 const Memoized = React.memo(Pane);
 
-export default function Widget() {
-  makeClickthrough();
+const blurHandler = () => {
+  ipcRenderer.send('blur');
+};
 
+export default function Widget() {
+  useEffect(() => {
+    window.addEventListener('blur', blurHandler);
+
+    return () => window.removeEventListener('blur', blurHandler);
+  }, []);
   return (
     <AuthProvider>
       <ClientSocketProvider>

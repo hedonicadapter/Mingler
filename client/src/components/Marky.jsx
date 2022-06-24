@@ -237,6 +237,7 @@ export default function Marky({
           style={{
             width: '100%',
             zIndex: 50,
+            letterSpacing: '1px',
           }}
           onMouseOver={() => console.log('hello')} //makes it work for some reason
           whileHover={{

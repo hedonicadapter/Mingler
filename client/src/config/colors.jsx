@@ -13,6 +13,8 @@ export default {
   coffeePink: '#CEA1A1',
   // ==============================
 
+  defaultPlaceholderTextColor: '#757575',
+
   classyWhite: '#fdf5f1',
   depressedWhite: '#f1ebe8',
   samBlue: '#00B2CA',

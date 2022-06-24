@@ -154,7 +154,7 @@ export default function AccordionItem({
         : colors.darkmodeBlack
       : colors.darkmodeBlack,
 
-    opacity: cardHovered ? 1 : 0,
+    opacity: cardHovered ? 0.6 : 0,
     '&:hover': {
       color: colors.darkmodeBlack,
     },

@@ -71,7 +71,7 @@ export function FriendsProvider({ children }) {
         setConversations(res?.data?.conversationByID?.reverse());
       })
       .catch((e) =>
-        notify('Error getting conversations.', e.response.data.error)
+        notify('Error getting conversations.', e?.response?.data?.error)
       );
   };
 

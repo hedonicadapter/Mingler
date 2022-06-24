@@ -1,7 +1,6 @@
 import React from 'react';
 import axios from 'axios';
 import { ipcRenderer } from 'electron';
-// import { AbortController } from 'node-abort-controller';
 
 const auth = axios.create({
   baseURL: 'http://localhost:8080/api/auth/',
@@ -28,9 +27,6 @@ export const token = axios.create({
     'Content-type': 'application/json',
   },
 });
-
-// const controller = new AbortController();
-// const signal = controller.signal;
 
 export class DAO {
   signUpWithEmail = (name, email, password, clientFingerprint) => {
@@ -231,29 +227,6 @@ const getNewToken = (refreshToken) => {
 
   return token.post('/refreshToken', data);
 };
-
-// privateRoute.interceptors.request.use((req) => {
-//   const controller = new AbortController();
-//   const request = {
-//     ...req,
-//     signal: controller.signal,
-//   };
-
-//   setTimeout(() => controller.abort('private route cancel'), 5000);
-
-//   return request;
-// });
-// auth.interceptors.request.use(function (req) {
-//   const controller = new AbortController();
-//   const request = {
-//     ...req,
-//     signal: controller.signal,
-//   };
-
-//   setTimeout(() => controller.abort('auth route cancel'), 5000);
-
-//   return request;
-// });
 
 privateRoute.interceptors.response.use(
   function (response) {

@@ -16,9 +16,9 @@ const nameContainer = css({
 });
 
 const text = css({
-  fontSize: '1.1em',
-  textTransform: 'capitalize',
-  fontWeight: 'lighter',
+  fontSize: '1.3em',
+  letterSpacing: '1px',
+  fontFamily: 'Cormorant SC',
 });
 
 const statusIndicatorContainer = css({
