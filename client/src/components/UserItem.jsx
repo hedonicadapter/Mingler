@@ -20,6 +20,10 @@ const nameAndActivityContainer = css({
   justifyContent: 'space-between',
 });
 
+const buttonsContainer = css({
+  paddingRight: 6,
+});
+
 const text = css({
   paddingLeft: '10px',
   color: colors.darkmodeBlack,
@@ -31,29 +35,29 @@ const text = css({
 const header = css({ paddingLeft: 5, paddingTop: 5, paddingBottom: 5 });
 
 const friendRequestButtonStyle = css({
-  // opacity: 0,
-  fontSize: '0.9em',
-  fontWeight: 700,
-  color: colors.darkmodeDisabledText,
-  padding: 3,
-  borderRadius: 3,
-  border: '2px solid',
-  borderColor: colors.darkmodeDisabledText,
+  padding: 10,
+  textAlign: 'left',
+  fontSize: '0.8em',
+  maxWidth: '72%',
+  margin: 'auto',
+  color: colors.darkmodeLightBlack,
+  cursor: 'pointer',
 });
 
 const cancelRequestButtonStyle = css({
-  fontSize: '0.9em',
-  fontWeight: 700,
-  color: colors.darkmodeDisabledText,
-  padding: 3,
-  borderRadius: 3,
-  border: '2px solid',
-  borderColor: colors.darkmodeDisabledText,
+  padding: 10,
+  textAlign: 'left',
+  fontSize: '0.8em',
+  margin: 'auto',
+  color: colors.darkmodeLightBlack,
+  cursor: 'pointer',
 });
 
 const AcceptRejectButtonsContainer = css({
   display: 'flex',
   flexDirection: 'row',
+  marginTop: -6,
+  paddingRight: 4,
 });
 
 const errorStyle = css({
@@ -61,16 +65,6 @@ const errorStyle = css({
   color: colors.coffeeRed,
   padding: 3,
 });
-
-const friendRequestHoverAnimation = {
-  color: 'rgba(100, 245, 141, 1)',
-  borderColor: 'rgba(100, 245, 141, 1)',
-};
-
-const cancelRequestHoverAnimation = {
-  color: colors.samDeepRed,
-  borderColor: colors.samDeepRed,
-};
 
 const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
   return (
@@ -80,22 +74,35 @@ const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
       ) : (
         <>
           <motion.div
-            initial={{ borderColor: 'rgba(131,133,140,1)' }}
-            whileHover={friendRequestHoverAnimation}
+            whileHover={{
+              borderTopColor: colors.darkmodeBlack,
+              transition: { duration: 0.1 },
+            }}
             whileTap={animations.whileTap}
+            style={{
+              borderTop: '1px solid ' + colors.offWhitePressed2,
+              margin: 'auto',
+            }}
             className={friendRequestButtonStyle()}
             onClick={() => handleAccept()}
           >
-            Accept
+            accept
           </motion.div>
           <motion.div
-            initial={{ borderColor: 'rgba(131,133,140,1)' }}
-            whileHover={friendRequestHoverAnimation}
+            whileHover={{
+              borderTopColor: colors.coffeeRed,
+              color: colors.coffeeRed,
+              transition: { duration: 0.1 },
+            }}
             whileTap={animations.whileTap}
+            style={{
+              borderTop: '1px solid ' + colors.offWhitePressed2,
+              margin: 'auto',
+            }}
             className={friendRequestButtonStyle()}
             onClick={() => handleReject()}
           >
-            X
+            x
           </motion.div>
         </>
       )}
@@ -108,19 +115,33 @@ const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
     <div className={errorStyle()}>{error}</div>
   ) : (
     <motion.div
-      initial={{ borderColor: 'rgba(131,133,140,1)' }}
-      whileHover={friendRequestHoverAnimation}
-      whileTap={animations.whileTap}
-      className={friendRequestButtonStyle()}
-      style={
-        !accept && {
-          transition: 'opacity 0.15s',
-          opacity: hovered ? 1 : 0,
-        }
-      }
-      onClick={() => handleSendRequest()}
+      variants={{
+        true: {
+          opacity: 1,
+        },
+        false: {
+          opacity: 0,
+        },
+      }}
+      animate={hovered ? 'true' : 'false'}
+      transition={{ duration: 0.15 }}
+      className={buttonsContainer()}
     >
-      Add
+      <motion.div
+        whileHover={{
+          borderTopColor: colors.darkmodeBlack,
+          transition: { duration: 0.1 },
+        }}
+        whileTap={animations.whileTap}
+        style={{
+          borderTop: '1px solid ' + colors.offWhitePressed2,
+          margin: 'auto',
+        }}
+        className={friendRequestButtonStyle()}
+        onClick={() => handleSendRequest()}
+      >
+        add
+      </motion.div>
     </motion.div>
   );
 };
@@ -199,6 +220,7 @@ export default function UserItem({
           <Avatar round name={user.username} size="34" src={profilePicture} />
           <div className={nameAndActivityContainer()}>
             <div className={text()}>{user.username}</div>
+
             {alreadyFriends ? (
               <></>
             ) : !requestSent ? (
@@ -222,12 +244,19 @@ export default function UserItem({
                   <div className={errorStyle()}>{error}</div>
                 ) : (
                   <motion.div
-                    initial={{ borderColor: 'rgba(131,133,140,1)' }}
-                    whileHover={cancelRequestHoverAnimation}
+                    whileHover={{
+                      borderTopColor: colors.coffeeRed,
+                      color: colors.coffeeRed,
+                      transition: { duration: 0.1 },
+                    }}
                     whileTap={animations.whileTap}
+                    style={{
+                      borderTop: '1px solid ' + colors.offWhitePressed2,
+                      margin: 'auto',
+                    }}
                     className={cancelRequestButtonStyle()}
                   >
-                    Cancel request
+                    cancel request
                   </motion.div>
                 )}
               </div>

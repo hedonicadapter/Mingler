@@ -16,10 +16,11 @@ const conversationText = css({
   fontSize: '0.8em',
 });
 const sentTime = css({
-  color: colors.darkmodeLightBlack,
+  color: colors.defaultPlaceholderTextColor,
   padding: 8,
   marginInline: 3,
   fontSize: '0.6em',
+  letterSpacing: '1px',
 });
 
 export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
@@ -36,7 +37,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
     justifyContent: sentByMe ? 'flex-end' : 'flex-start',
   });
   const bubble = css({
-    backgroundColor: sentByMe ? '#e6ccb2' : '#60463B',
+    backgroundColor: sentByMe ? colors.darkmodeLightBlack : colors.coffeeBrown,
     borderRadius: '15px',
     marginRight: 10,
   });

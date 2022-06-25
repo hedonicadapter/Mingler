@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 
 const container = css({
-  fontSize: '1.0em',
+  fontSize: '0.9em',
   backgroundColor: 'transparent',
   // flex: 1,
   // height: '100%',
@@ -27,7 +27,7 @@ const container = css({
   justifyContent: 'space-between',
 });
 const searchInputStyle = css({
-  fontSize: '1.0em',
+  fontSize: '0.9em',
   letterSpacing: '1px',
 
   transition: 'opacity 0.15s ease',
@@ -52,6 +52,7 @@ const searchInputStyle = css({
   marginBottom: 18,
 });
 const button = css({
+  fontSize: '0.9em',
   letterSpacing: '1px',
   cursor: 'pointer',
   backgroundColor: 'transparent',

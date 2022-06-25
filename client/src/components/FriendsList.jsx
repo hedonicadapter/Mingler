@@ -51,7 +51,9 @@ export const EmptySpaceFiller = ({}) => {
   return (
     <div
       style={{ flex: '1 1 auto', backgroundColor: colors.offWhite, zIndex: 60 }}
-      onClick={contextMenuCollapseAllHandler}
+      onClick={() => {
+        contextMenuCollapseAllHandler();
+      }}
     />
   );
 };
@@ -207,7 +209,7 @@ export default function FriendsList() {
               width="100%"
               height="100%"
               filter="url(#noise)"
-              opacity=".30"
+              opacity=".32"
             />
           </pattern>
         </defs>

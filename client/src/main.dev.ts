@@ -98,7 +98,7 @@ const createWindow = async () => {
     show: false,
     height: height,
     minWidth: 430,
-    alwaysOnTop: true,
+    // alwaysOnTop: true,
     icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
     // icon: ,
     webPreferences: {

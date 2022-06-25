@@ -13,14 +13,14 @@ import genericErrorHandler from '../helpers/genericErrorHandler';
 const generalPadding = 12;
 
 const header = css({
+  fontSize: '0.9em',
+
   alignSelf: 'center',
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
   padding: generalPadding,
-  paddingInline: 20,
-
-  fontSize: '1em',
+  paddingInline: 26,
 
   zIndex: 5,
 });
@@ -91,12 +91,15 @@ export default function FriendRequestsAccordion({
       <motion.header
         style={{
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
-          color: hasRequests
-            ? colors.darkmodeLightBlack
+          color: expanded
+            ? colors.darkmodeBlack
+            : hasRequests
+            ? colors.defaultPlaceholderTextColor
             : colors.darkmodeDisabledBlack,
           fontWeight: hasRequests ? 'normal' : '700',
         }}
         whileHover={{
+          color: colors.darkmodeBlack,
           cursor: hasRequests ? 'pointer' : 'auto',
         }}
         transition={{ duration: 0.15 }}
@@ -104,7 +107,9 @@ export default function FriendRequestsAccordion({
         className={header()}
       >
         <span>friend requests</span>
-        <span>{friendRequests?.length}</span>
+        <span style={{ fontSize: '0.8em', padding: 3, paddingRight: 0 }}>
+          {friendRequests?.length}
+        </span>
       </motion.header>
       <AnimatePresence initial={false}>
         {expanded && (

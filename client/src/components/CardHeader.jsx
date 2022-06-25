@@ -82,7 +82,6 @@ export default function CardHeader({
   activity,
   setPlayerURL,
   togglePlayer,
-  toggleChat,
   chatVisible,
   cardHovered,
   cardHeaderRef,
@@ -130,7 +129,7 @@ export default function CardHeader({
           }
         }
       >
-        <div style={{ float: 'left', paddingRight: '16px' }}>
+        <div style={{ float: 'left', paddingRight: '12px' }}>
           <AvatarContainer
             expanded={expanded}
             name={name}

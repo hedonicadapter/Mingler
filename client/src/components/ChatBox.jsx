@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
-import { MdSend } from 'react-icons/md';
+import { BsDot } from 'react-icons/bs';
 
 import colors from '../config/colors';
 import { useClientSocket } from '../contexts/ClientSocketContext';
@@ -270,12 +270,16 @@ export const ChatBox = ({ receiver, expanded }) => {
 
   const SendButton = () => {
     const iconContainer = css({
-      marginTop: 8,
+      marginTop: 4,
+      paddingRight: 8,
+      paddingTop: 4,
     });
 
     const sendIcon = css({
-      width: 22,
-      height: 22,
+      width: 10,
+      height: 10,
+      borderRadius: '50%',
+      backgroundColor: colors.coffeeBlue,
       transition: 'opacity 0.15s ease',
       opacity: inputText ? 1 : 0,
     });
@@ -295,7 +299,12 @@ export const ChatBox = ({ receiver, expanded }) => {
           variants={{ true: { opacity: 1 }, false: { opacity: 0 } }}
           transition={{ duration: 0.15 }}
         >
-          <MdSend color={colors.coffeePink} className={sendIcon()} />
+          {/*
+          think of it like a status indicator, indicating that a message is ready to be sent.
+          It makes sense because people dont tend to use send buttons for messages anymore,
+          rather than just pressing enter 
+          */}
+          <div className={sendIcon()} />
         </motion.div>
       </motion.div>
     );

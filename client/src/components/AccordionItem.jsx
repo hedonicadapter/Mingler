@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { css } from '@stitches/react';
 
-import { IoChatbubblesOutline } from 'react-icons/io5';
+import { BiConversation } from 'react-icons/bi';
 
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
@@ -30,7 +30,7 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
           position: 'absolute',
           height: '50px',
           width: '50px',
-          backgroundColor: colors.samBlue,
+          backgroundColor: colors.coffeeGreen,
           clipPath: 'circle(9px at 36px)',
           display: 'inline-block',
           minHeight: activityLength >= 2 ? 104 : 84,
@@ -106,6 +106,19 @@ export default function AccordionItem({
     setExpanded(false);
   }, [cardExpandedMasterToggle]);
 
+  const handleOnContextMenu = (evt) => {
+    if (isMe || isWidgetHeader) {
+      evt.stopPropagation();
+      ipcRenderer.send('context-menu');
+    } else if (friend?.username && friend?._id) {
+      evt.stopPropagation();
+      ipcRenderer.send('context-menu', {
+        username: friend.username,
+        friendID: friend._id,
+      });
+    }
+  };
+
   const toggleExpansion = (evt) => {
     evt?.stopPropagation();
     setExpanded(!expanded);
@@ -140,8 +153,8 @@ export default function AccordionItem({
 
   const messageIcon = css({
     transform: 'scaleX(-1)',
-    height: 26,
-    width: 26,
+    height: 24,
+    width: 24,
     transition: 'color 0.15s ease',
     transition: 'opacity 0.15s ease',
 
@@ -161,15 +174,7 @@ export default function AccordionItem({
   });
 
   return (
-    <div
-      onContextMenu={(evt) => {
-        !isMe && friend?.username && friend?._id && evt.stopPropagation();
-        ipcRenderer.send('context-menu', {
-          username: friend.username,
-          friendID: friend._id,
-        });
-      }}
-    >
+    <div onContextMenu={handleOnContextMenu}>
       {!isWidgetHeader && friend?.online && (
         <OnlineStatusIndicator
           activityLength={activityLength}
@@ -219,7 +224,6 @@ export default function AccordionItem({
           activity={friend?.activity}
           expanded={expanded}
           handleNameChange={handleNameChange}
-          toggleChat={toggleChat}
           chatVisible={chatVisible}
           isWidgetHeader={isWidgetHeader}
           cardHovered={cardHovered}
@@ -229,7 +233,7 @@ export default function AccordionItem({
           <div
             style={{
               position: 'absolute',
-              right: 15,
+              right: 16,
               top: '25%',
               bottom: '75%',
               float: 'right',
@@ -238,7 +242,7 @@ export default function AccordionItem({
             }}
             onClick={(e) => toggleChat(e)}
           >
-            <IoChatbubblesOutline className={messageIcon()} />
+            <BiConversation className={messageIcon()} />
           </div>
         )}
       </motion.header>

@@ -171,6 +171,7 @@ export default function SplashScreen() {
           style={{
             marginInline: '10%',
           }}
+          spellCheck="false"
         >
           {children}
         </motion.div>

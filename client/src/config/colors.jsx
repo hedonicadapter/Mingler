@@ -11,6 +11,7 @@ export default {
   coffeeBlue: '#62B6CB',
   coffeeRed: '#8D3F3F',
   coffeePink: '#CEA1A1',
+  coffeeGreen: '#73A580',
   // ==============================
 
   defaultPlaceholderTextColor: '#757575',
