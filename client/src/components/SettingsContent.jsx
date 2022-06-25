@@ -328,7 +328,10 @@ export default function SettingsContent() {
             setProfilePictureError(null);
           }
         })
-        .catch((e) => setProfilePictureError(e?.response?.data?.error));
+        .catch((e) => {
+          console.log(e?.response?.data);
+          setProfilePictureError(e?.response?.data?.error);
+        });
     }
   };
 

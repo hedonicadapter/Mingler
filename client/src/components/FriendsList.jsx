@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { css } from '@stitches/react';
 
 import '../App.global.css';
@@ -16,10 +16,12 @@ import MenuButton from './MenuButton';
 import {
   getApp,
   setFindFriendsSearchValue,
+  toggleCardExpandedMasterToggle,
 } from '../mainState/features/appSlice';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import useDebounce from '../helpers/useDebounce';
 import { makeClickthrough } from '../config/clickthrough';
+import { ipcRenderer } from 'electron';
 
 const container = css({
   display: 'flex',
@@ -28,14 +30,28 @@ const container = css({
   backgroundColor: 'transparent',
 });
 
-export const EmptySpaceFiller = ({
-  setExpandedMasterToggle,
-  expandedMasterToggle,
-}) => {
+export const EmptySpaceFiller = ({}) => {
+  const dispatch = useDispatch();
+
+  const contextMenuCollapseAllHandler = () => {
+    dispatch(toggleCardExpandedMasterToggle());
+  };
+
+  useEffect(() => {
+    ipcRenderer.on('context-menu:collapse-all', contextMenuCollapseAllHandler);
+
+    return () => {
+      ipcRenderer.removeAllListeners(
+        'context-menu:collapse-all',
+        contextMenuCollapseAllHandler
+      );
+    };
+  }, []);
+
   return (
     <div
       style={{ flex: '1 1 auto', backgroundColor: colors.offWhite, zIndex: 60 }}
-      onClick={() => setExpandedMasterToggle(!expandedMasterToggle)}
+      onClick={contextMenuCollapseAllHandler}
     />
   );
 };
@@ -69,8 +85,6 @@ export default function FriendsList() {
     friendRequests,
   } = useFriends();
 
-  const [expandedMasterToggle, setExpandedMasterToggle] = useState(false);
-
   const handleSearchInput = (evt) => {
     let searchValue = evt.target.value;
     dispatch(setFindFriendsSearchValue(searchValue));
@@ -89,13 +103,18 @@ export default function FriendsList() {
   return (
     <>
       <MenuButton />
-      <div className={container()} spellCheck="false">
+      <div
+        onContextMenu={() => ipcRenderer.send('context-menu')}
+        className={container()}
+        spellCheck="false"
+      >
         <div style={{ flex: '0 1 auto' }}>
           <AccordionItem
             username={currentUser?.username}
             friend={friends?.find((friend) => friend._id === currentUser?._id)}
             isWidgetHeader={true}
             handleNameChange={handleNameChange}
+            cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
           />
 
           {friendRequests?.length > 0 && (
@@ -104,7 +123,7 @@ export default function FriendsList() {
               friendRequests={friendRequests}
               getFriends={getFriends} // To refresh friends list after accepting a friend request
               getFriendRequests={getFriendRequests} // Same thing here
-              expandedMasterToggle={expandedMasterToggle}
+              // cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
               acceptFriendRequest={acceptFriendRequest}
             />
           )}
@@ -115,8 +134,8 @@ export default function FriendsList() {
                 <AccordionItem
                   key={index}
                   friend={friend}
-                  expandedMasterToggle={expandedMasterToggle}
                   isMe={friend._id === currentUser?._id}
+                  cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
                 />
               ))
             : friends.length
@@ -124,17 +143,14 @@ export default function FriendsList() {
                 <AccordionItem
                   key={index}
                   friend={friend}
-                  expandedMasterToggle={expandedMasterToggle}
                   isMe={friend._id === currentUser?._id}
+                  cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
                 />
               ))
             : null}
         </div>
 
-        <EmptySpaceFiller
-          setExpandedMasterToggle={setExpandedMasterToggle}
-          expandedMasterToggle={expandedMasterToggle}
-        />
+        <EmptySpaceFiller />
         <div style={{ flex: '0 1 40px' }}>
           <WidgetFooter
             handleSearchInput={handleSearchInput}

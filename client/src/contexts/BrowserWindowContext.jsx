@@ -33,6 +33,8 @@ export function useBrowserWindow() {
   return useContext(BrowserWindowContext);
 }
 
+const favicon = __dirname + '../../assets/icons/minglerReversed.ico';
+
 const settingsWindowConfig = {
   title: 'Settings',
   show: false,
@@ -40,10 +42,11 @@ const settingsWindowConfig = {
   transparent: true,
   width: 475,
   height: 510,
+  icon: favicon,
   webPreferences: {
     nodeIntegration: true,
     enableRemoteModule: true,
-    devTools: false,
+    // devTools: false,
   },
 };
 
@@ -53,15 +56,17 @@ const findFriendsWindowConfig = {
   transparent: true,
   width: 460,
   // height: 634,
+  icon: favicon,
   webPreferences: {
     nodeIntegration: true,
     enableRemoteModule: true,
-    // devTools: false,
+    devTools: false,
   },
 };
 
 const connectSpotifyWindowConfig = {
   show: false,
+  icon: favicon,
 };
 
 export function BrowserWindowProvider({ children }) {

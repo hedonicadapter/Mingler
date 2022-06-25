@@ -949,7 +949,7 @@ export default function SplashScreen() {
         <BackButton />
         {appSettings.showWelcome ? (
           <h2>
-            Welcome to <h1>Mingler!</h1>
+            Welcome to <h1>Mingler</h1>
           </h2>
         ) : (
           <h1>Mingler</h1>

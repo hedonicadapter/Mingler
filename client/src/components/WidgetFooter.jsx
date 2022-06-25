@@ -28,6 +28,7 @@ const container = css({
 });
 const searchInputStyle = css({
   fontSize: '1.0em',
+  letterSpacing: '1px',
 
   transition: 'opacity 0.15s ease',
   '&::placeholder': {
@@ -51,6 +52,7 @@ const searchInputStyle = css({
   marginBottom: 18,
 });
 const button = css({
+  letterSpacing: '1px',
   cursor: 'pointer',
   backgroundColor: 'transparent',
   color: colors.darkmodeBlack,

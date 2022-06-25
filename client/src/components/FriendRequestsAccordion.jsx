@@ -18,6 +18,7 @@ const header = css({
   flexDirection: 'row',
   justifyContent: 'space-between',
   padding: generalPadding,
+  paddingInline: 20,
 
   fontSize: '1em',
 
@@ -29,7 +30,6 @@ export default function FriendRequestsAccordion({
   getFriends,
   getConversations,
   getFriendRequests,
-  expandedMasterToggle,
   acceptFriendRequest,
 }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
@@ -38,10 +38,6 @@ export default function FriendRequestsAccordion({
   const [error, setError] = useState(null);
 
   const hasRequests = friendRequests?.length > 0;
-
-  useEffect(() => {
-    setExpanded(false);
-  }, [expandedMasterToggle]);
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => setError(null), 3000);
@@ -107,7 +103,7 @@ export default function FriendRequestsAccordion({
         onClick={() => toggleExpansion()}
         className={header()}
       >
-        <span>Friend requests</span>
+        <span>friend requests</span>
         <span>{friendRequests?.length}</span>
       </motion.header>
       <AnimatePresence initial={false}>

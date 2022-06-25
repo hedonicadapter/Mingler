@@ -21,9 +21,11 @@ const nameAndActivityContainer = css({
 });
 
 const text = css({
-  paddingLeft: '7px',
+  paddingLeft: '10px',
   color: colors.darkmodeBlack,
   fontSize: '1.2em',
+  letterSpacing: '1px',
+  fontFamily: 'Cormorant SC',
 });
 
 const header = css({ paddingLeft: 5, paddingTop: 5, paddingBottom: 5 });

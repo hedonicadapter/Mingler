@@ -713,6 +713,13 @@ exports.setProfilePicture = async (req, res, next) => {
       mimetype,
     };
 
+    const fileSize = Buffer.byteLength(newProfilePictureBuffer);
+
+    // MongoDB max field size is 16mb
+    if (fileSize > 16000000) {
+      return next(new ErrorResponse('File must be 16mb or below.', 413));
+    }
+
     user.profilePicture = newProfilePicture;
 
     user

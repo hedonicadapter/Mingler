@@ -314,7 +314,7 @@ export const ChatBox = ({ receiver, expanded }) => {
           }
           if (error) setError(error);
         })
-        .catch((e) => setError(e));
+        .catch((e) => {});
     } else setScrollTop(false);
   };
 

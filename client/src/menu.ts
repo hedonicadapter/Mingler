@@ -55,18 +55,38 @@ export default class MenuBuilder {
   }
 
   setupEnvironment(): void {
-    ipcMain.on('context-menu:friendcard', (evt, { username, friendID }) => {
-      Menu.buildFromTemplate([
-        {
-          label: 'Delete ' + username,
-          click: () => {
-            evt.sender.send('context-menu:friendcard-command', {
-              menuItem: 'deleteFriend',
-              friendID,
-            });
-          },
-        },
-      ]).popup({ window: this.mainWindow });
+    ipcMain.on('context-menu', (evt, data) => {
+      console.log(data);
+      const { username, friendID } = data || {};
+
+      Menu.buildFromTemplate(
+        friendID
+          ? [
+              {
+                label: 'Delete ' + username,
+                click: () => {
+                  evt.sender.send('context-menu:delete', {
+                    menuItem: 'deleteFriend',
+                    friendID,
+                  });
+                },
+              },
+              {
+                label: 'Collapse all',
+                click: () => {
+                  evt.sender.send('context-menu:collapse-all');
+                },
+              },
+            ]
+          : [
+              {
+                label: 'Collapse all',
+                click: () => {
+                  evt.sender.send('context-menu:collapse-all');
+                },
+              },
+            ]
+      ).popup({ window: this.mainWindow });
     });
   }
 

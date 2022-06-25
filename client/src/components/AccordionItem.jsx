@@ -74,7 +74,7 @@ export default function AccordionItem({
   isMe,
   isWidgetHeader,
   handleNameChange,
-  expandedMasterToggle,
+  cardExpandedMasterToggle,
 }) {
   const { deleteFriend } = useFriends();
 
@@ -88,14 +88,11 @@ export default function AccordionItem({
   const cardHeaderRef = useRef(null);
 
   useEffect(() => {
-    ipcRenderer.on(
-      'context-menu:friendcard-command',
-      contextMenuDeleteFriendHandler
-    );
+    ipcRenderer.on('context-menu:delete', contextMenuDeleteFriendHandler);
 
     return () => {
       ipcRenderer.removeAllListeners(
-        'context-menu:friendcard-command',
+        'context-menu:delete',
         contextMenuDeleteFriendHandler
       );
     };
@@ -107,7 +104,7 @@ export default function AccordionItem({
 
   useEffect(() => {
     setExpanded(false);
-  }, [expandedMasterToggle]);
+  }, [cardExpandedMasterToggle]);
 
   const toggleExpansion = (evt) => {
     evt?.stopPropagation();
@@ -165,15 +162,13 @@ export default function AccordionItem({
 
   return (
     <div
-      onContextMenu={() =>
-        !isMe &&
-        friend?.username &&
-        friend?._id &&
-        ipcRenderer.send('context-menu:friendcard', {
+      onContextMenu={(evt) => {
+        !isMe && friend?.username && friend?._id && evt.stopPropagation();
+        ipcRenderer.send('context-menu', {
           username: friend.username,
           friendID: friend._id,
-        })
-      }
+        });
+      }}
     >
       {!isWidgetHeader && friend?.online && (
         <OnlineStatusIndicator

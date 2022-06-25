@@ -3,6 +3,7 @@ import { createAliasedAction } from 'electron-redux';
 
 interface AppState {
   appVisible: Boolean;
+  cardExpandedMasterToggle: Boolean;
   settingsOpen: Boolean;
   settingsFocused: Boolean;
   findFriendsOpen: Boolean;
@@ -12,6 +13,7 @@ interface AppState {
 
 const initialState: AppState = {
   appVisible: true,
+  cardExpandedMasterToggle: false,
   settingsOpen: false,
   settingsFocused: false,
   findFriendsOpen: false,
@@ -29,6 +31,9 @@ export const appSlice = createSlice({
     appVisibleFalse: (state) => {
       // if (state.settingsOpen) return;
       // state.appVisible = false;
+    },
+    toggleCardExpandedMasterToggle: (state) => {
+      state.cardExpandedMasterToggle = !state.cardExpandedMasterToggle;
     },
     settingsOpenTrue: (state) => {
       state.settingsOpen = true;
@@ -72,6 +77,7 @@ export const appSlice = createSlice({
 
 export const { appVisibleTrue } = appSlice.actions;
 export const { appVisibleFalse } = appSlice.actions;
+export const { toggleCardExpandedMasterToggle } = appSlice.actions;
 export const { settingsOpenTrue } = appSlice.actions;
 export const { settingsOpenFalse } = appSlice.actions;
 export const { findFriendsOpenTrue } = appSlice.actions;

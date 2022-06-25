@@ -45,6 +45,7 @@
       "target": [
         "dmg"
       ],
+      "icon": "./assets/icons/minglerReversed.icns",
       "type": "distribution",
       "hardenedRuntime": true,
       "entitlements": "assets/entitlements.mac.plist",
@@ -68,7 +69,8 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "./assets/icons/minglerReversed.ico"
     },
     "nsis": {
       "oneClick": "false",
@@ -78,6 +80,7 @@
       "target": [
         "AppImage"
       ],
+      "icon": "./assets/icons/minglerReversed.ico",
       "category": "Development"
     },
     "directories": {
