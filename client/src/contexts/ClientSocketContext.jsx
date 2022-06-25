@@ -48,7 +48,7 @@ export function ClientSocketProvider({ children }) {
         cancelFriendRequestFromMainHandler
       );
     };
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     connectSocket();
