@@ -30,6 +30,8 @@ const AvatarContainer = ({
   name,
   isWidgetHeader,
   profilePicture,
+  online,
+  activityLength,
 }) => {
   const { toggleSettings } = useBrowserWindow();
 
@@ -60,6 +62,12 @@ const AvatarContainer = ({
         }
       }
     >
+      {!isWidgetHeader && online && (
+        <OnlineStatusIndicator
+          activityLength={activityLength}
+          isWidgetHeader={isWidgetHeader}
+        />
+      )}
       <Avatar
         name={name}
         size={isWidgetHeader ? '68' : '58'}
@@ -70,7 +78,36 @@ const AvatarContainer = ({
   );
 };
 
+const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
+  return (
+    <motion.span
+      style={{
+        pointerEvents: 'none',
+        position: 'relative',
+      }}
+    >
+      <span
+        style={{
+          zIndex: 80,
+          position: 'absolute',
+          height: '50px',
+          width: '50px',
+          marginLeft: 'auto',
+          backgroundColor: colors.coffeeGreen,
+          clipPath: 'circle(8.6px at 20px)',
+          // display: 'inline-block',
+          // minHeight: activityLength >= 2 ? 104 : 84,
+          // paddingTop: isWidgetHeader ? 35 : 28,
+          left: -38,
+          top: -15,
+        }}
+      />
+    </motion.span>
+  );
+};
+
 export default function CardHeader({
+  activityLength,
   isWidgetHeader,
   online,
   name,
@@ -116,7 +153,7 @@ export default function CardHeader({
   const markyContainer = css({
     marginTop: 4,
     paddingLeft: 5,
-    marginLeft: isWidgetHeader ? 27 : 22,
+    marginLeft: isWidgetHeader ? 25 : 20,
   });
 
   return (
@@ -135,6 +172,8 @@ export default function CardHeader({
             name={name}
             profilePicture={profilePicture}
             isWidgetHeader={isWidgetHeader}
+            online={online}
+            activityLength={activityLength}
           />
         </div>
         <div className={nameAndActivityContainer()}>
@@ -172,12 +211,7 @@ export default function CardHeader({
             /> */}
             </motion.div>
           </div>
-          <motion.div
-            // animate={expanded ? 'true' : 'false'}
-            // variants={{ true: { opacity: 0 }, false: { opacity: 1 } }}
-            transition={{ duration: 0.15 }}
-            className={markyContainer()}
-          >
+          <div className={markyContainer()}>
             <Marky
               {...mainActivity}
               userID={userID}
@@ -211,7 +245,8 @@ export default function CardHeader({
                     )
                 )}
             </AnimatePresence>
-          </motion.div>
+            <div style={{ height: 10 }}></div>
+          </div>
         </div>
       </div>
     </div>

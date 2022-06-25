@@ -299,6 +299,7 @@ export default function SettingsContent() {
   }, [usernameError]);
 
   useEffect(() => {
+    console.log('useEffect ', spotifyError);
     const errorTimeout = setTimeout(() => setSpotifyError(null), 3000);
 
     return () => clearTimeout(errorTimeout);
@@ -329,7 +330,6 @@ export default function SettingsContent() {
           }
         })
         .catch((e) => {
-          console.log(e?.response?.data);
           setProfilePictureError(e?.response?.data?.error);
         });
     }

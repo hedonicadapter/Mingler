@@ -34,7 +34,8 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
           clipPath: 'circle(9px at 36px)',
           display: 'inline-block',
           minHeight: activityLength >= 2 ? 104 : 84,
-          paddingTop: isWidgetHeader ? 35 : 28,
+          // paddingTop: isWidgetHeader ? 35 : 28,
+          top: 5,
         }}
       />
     </motion.span>
@@ -175,12 +176,6 @@ export default function AccordionItem({
 
   return (
     <div onContextMenu={handleOnContextMenu}>
-      {!isWidgetHeader && friend?.online && (
-        <OnlineStatusIndicator
-          activityLength={activityLength}
-          isWidgetHeader={isWidgetHeader}
-        />
-      )}
       <motion.header
         // user.offline ? 'transparent'
         style={{
@@ -212,6 +207,7 @@ export default function AccordionItem({
         onMouseLeave={() => setCardHovered(false)}
       >
         <CardHeader
+          activityLength={activityLength}
           togglePlayer={togglePlayer}
           setPlayerURL={setPlayerURL}
           cardHeaderRef={cardHeaderRef}

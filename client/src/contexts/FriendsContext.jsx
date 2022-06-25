@@ -53,7 +53,8 @@ export function FriendsProvider({ children }) {
     setConversationListeners();
     setActivityListeners();
 
-    // socket is cleaned up anyway with removeAllListeners() in ClientSocketContext.jsx?
+    // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
+    // it isn't cleaned up there every time 'friends' changes
     return () => {
       socket.off('friendrequest:receive', friendRequestReceiveHandler);
       socket.off(
@@ -64,11 +65,6 @@ export function FriendsProvider({ children }) {
       socket.off('user:offline', userOfflineHandler);
       socket.off('message:receive', messageReceiveHandler);
       socket.off('activity:receive', activityReceiveHandler);
-      // socket.removeAllListeners('friendrequest:cancelreceive');
-      // socket.removeAllListeners('message:receive');
-      // socket.removeAllListeners('activity:receive');
-      // socket.removeAllListeners('user:online');
-      // socket.removeAllListeners('user:offline');
       socket?.removeAllListeners();
     };
   }, [socket, friends]);
@@ -87,7 +83,6 @@ export function FriendsProvider({ children }) {
     const convoObject = conversations.find(
       (convo) => convo._id === friendID
     )?.conversation;
-    console.log('convoObject ', convoObject);
 
     return await DAO.getMessages(
       convoObject._id,
@@ -122,11 +117,12 @@ export function FriendsProvider({ children }) {
   const deleteFriend = (friendID) => {
     DAO.deleteFriend(currentUser._id, friendID, currentUser.accessToken)
       .then((res) => {
-        console.log('delete ', res);
-        getFriends();
+        if (res.data.success) {
+          getFriends();
+        }
       })
       .catch((e) => {
-        console.log(e);
+        notify('Error deleting friend.', e?.response?.data?.error);
       });
   };
 
