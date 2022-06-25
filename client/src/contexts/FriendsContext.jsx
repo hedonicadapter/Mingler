@@ -55,7 +55,15 @@ export function FriendsProvider({ children }) {
 
     // socket is cleaned up anyway with removeAllListeners() in ClientSocketContext.jsx?
     return () => {
-      // socket.removeAllListeners('friendrequest:receive');
+      socket.off('friendrequest:receive', friendRequestReceiveHandler);
+      socket.off(
+        'friendrequest:cancelreceive',
+        friendRequestCancelReceiveHandler
+      );
+      socket.off('user:online', userOnlineHandler);
+      socket.off('user:offline', userOfflineHandler);
+      socket.off('message:receive', messageReceiveHandler);
+      socket.off('activity:receive', activityReceiveHandler);
       // socket.removeAllListeners('friendrequest:cancelreceive');
       // socket.removeAllListeners('message:receive');
       // socket.removeAllListeners('activity:receive');
@@ -63,7 +71,7 @@ export function FriendsProvider({ children }) {
       // socket.removeAllListeners('user:offline');
       socket?.removeAllListeners();
     };
-  }, [socket]);
+  }, [socket, friends]);
 
   const getConversations = () => {
     DAO.getConversations(currentUser._id, currentUser.accessToken)
@@ -161,91 +169,24 @@ export function FriendsProvider({ children }) {
   };
 
   const setUserStatusListener = () => {
-    socket.on('user:online', (userID) => {
-      // TODO:
-      // Better way to do this would be to send the friend object through the socket and add it to friends
-      // this way is slower and does unnecessary API calls
-      getFriends();
-
-      // TODO:
-      // Replace with getMessages(userID). Is not appropariate right now because in a use case
-      // where a user has just accepted a friend request there is no existing "convoObject"
-      getConversations();
-
-      friends?.find((friend) => {
-        friend._id === userID && notify(friend.username, 'Now online.');
-      });
-    });
-    socket.on('user:offline', (userID) => {
-      setFriends((prevState) => {
-        return prevState.map((friend) => {
-          if (friend._id === userID) {
-            return {
-              ...friend,
-              online: false,
-            };
-          }
-          return friend;
-        });
-      });
-    });
+    socket.on('user:online', userOnlineHandler);
+    socket.on('user:offline', userOfflineHandler);
   };
 
   const setFriendRequestListeners = () => {
     // socket.removeAllListeners('friendrequest:receive');
     // socket.removeAllListeners('friendrequest:cancelreceive');
 
-    socket.on('friendrequest:receive', () => {
-      notify('New friend request');
-      getFriendRequests();
-    });
-
-    socket.on('friendrequest:cancelreceive', () => {
-      getFriendRequests();
-    });
+    socket.on('friendrequest:receive', friendRequestReceiveHandler);
+    socket.on('friendrequest:cancelreceive', friendRequestCancelReceiveHandler);
   };
 
   const setConversationListeners = () => {
-    socket.on('message:receive', ({ fromID, message }) => {
-      notify(
-        friends?.find((friend) => friend._id === fromID),
-        message
-      );
-
-      setConversations((prevState) =>
-        prevState.map((convoObject) =>
-          convoObject._id === receiver
-            ? {
-                ...convoObject,
-                conversation: {
-                  messages: convoObject.conversation.messages?.concat(message),
-                },
-              }
-            : { ...convoObject }
-        )
-      );
-    });
+    socket.on('message:receive', messageReceiveHandler);
   };
 
   const setActivityListeners = () => {
-    socket.on('activity:receive', (packet) => {
-      console.log('received ', packet);
-      // Set activities in friends array
-      setFriends((prevState) => {
-        return prevState.map((friend) => {
-          if (friend._id === packet.userID) {
-            manageActivities(friend.activity, packet.data);
-            sortActivities(friend.activity);
-
-            return {
-              ...friend,
-              activity: friend.activity ? friend.activity : [packet.data],
-            };
-          }
-          return friend;
-        });
-      });
-    });
+    socket.on('activity:receive', activityReceiveHandler);
   };
 
   // Ensure activities remain unique.
@@ -329,6 +270,83 @@ export function FriendsProvider({ children }) {
           )
         : []
     );
+  };
+
+  const friendRequestReceiveHandler = () => {
+    notify('New friend request');
+    getFriendRequests();
+  };
+  const friendRequestCancelReceiveHandler = () => {
+    getFriendRequests();
+  };
+
+  const userOnlineHandler = (userID) => {
+    // TODO:
+    // Better way to do this would be to send the friend object through the socket and add it to friends
+    // this way is slower and does unnecessary API calls
+    getFriends();
+
+    // TODO:
+    // Replace with getMessages(userID). Is not appropariate right now because in a use case
+    // where a user has just accepted a friend request there is no existing "convoObject"
+    getConversations();
+
+    friends?.find((friend) => {
+      friend._id === userID && notify(friend.username, 'Now online.');
+    });
+  };
+  const userOfflineHandler = (userID) => {
+    setFriends((prevState) => {
+      return prevState.map((friend) => {
+        if (friend._id === userID) {
+          return {
+            ...friend,
+            online: false,
+          };
+        }
+        return friend;
+      });
+    });
+  };
+
+  const messageReceiveHandler = ({ fromID, messageObject }) => {
+    notify(
+      friends?.find((friend) => friend._id === messageObject.fromID)?.username,
+      messageObject.message
+    );
+
+    setConversations((prevState) =>
+      prevState.map((convoObject) =>
+        convoObject._id === messageObject.fromID
+          ? {
+              ...convoObject,
+              conversation: {
+                messages:
+                  convoObject.conversation.messages?.concat(messageObject),
+              },
+            }
+          : { ...convoObject }
+      )
+    );
+  };
+
+  const activityReceiveHandler = (packet) => {
+    console.log('received ', packet);
+    // Set activities in friends array
+    setFriends((prevState) => {
+      return prevState.map((friend) => {
+        if (friend._id === packet.userID) {
+          manageActivities(friend.activity, packet.data);
+          sortActivities(friend.activity);
+
+          return {
+            ...friend,
+            activity: friend.activity ? friend.activity : [packet.data],
+          };
+        }
+        return friend;
+      });
+    });
   };
 
   const value = {

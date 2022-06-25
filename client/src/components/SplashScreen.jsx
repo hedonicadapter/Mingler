@@ -540,8 +540,8 @@ export default function SplashScreen() {
           }
           if (success) {
             setJustRegistered({ email, password });
-            setError(null);
-            setSlide('SignIn');
+            error && setError(null);
+            setSlide('signIn');
           }
         }
       );
@@ -732,11 +732,14 @@ export default function SplashScreen() {
       setFormFilled('loading');
 
       signIn(email, password, keepMeSignedIn).then(({ success, error }) => {
+        console.log('allo ');
         if (error) {
+          console.log('allo error');
           setError(error);
           setFormFilled('true');
         }
         if (success) {
+          console.log('allo success');
           setError(null);
         }
       });
@@ -846,6 +849,7 @@ export default function SplashScreen() {
               type="checkbox"
               name="keepMeSignedIn"
               checked={keepMeSignedIn}
+              onChange={() => {}}
               className={keeepMeSignedInCheckboxStyle()}
             />
             <label
@@ -1067,7 +1071,7 @@ export default function SplashScreen() {
           <defs>
             <filter id="noise" y="0" x="0">
               <feTurbulence
-                class="basefrequency"
+                className="basefrequency"
                 stitchTiles="stitch"
                 baseFrequency=".75"
                 type="fractalNoise"
@@ -1075,7 +1079,7 @@ export default function SplashScreen() {
             </filter>
             <pattern
               id="pattern"
-              class="tile1"
+              className="tile1"
               patternUnits="userSpaceOnUse"
               height="100"
               width="100"
@@ -1083,7 +1087,7 @@ export default function SplashScreen() {
               x="0"
             >
               <rect
-                class="bg"
+                className="bg"
                 x="0"
                 y="0"
                 width="100%"
@@ -1091,7 +1095,7 @@ export default function SplashScreen() {
                 fill="transparent"
               />
               <rect
-                class="opacity"
+                className="opacity"
                 x="0"
                 y="0"
                 width="100%"

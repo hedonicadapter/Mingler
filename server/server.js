@@ -111,8 +111,8 @@ userIo.on('connection', async (socket) => {
       console.log('activity:send ', friendIDs.length);
     });
 
-    socket.on('message:send', ({ toID, fromID, message }) => {
-      userIo.to(toID).emit('message:receive', { fromID, message });
+    socket.on('message:send', ({ toID, fromID, messageObject }) => {
+      userIo.to(toID).emit('message:receive', { fromID, messageObject });
     });
 
     // User wants to send time request to a friend

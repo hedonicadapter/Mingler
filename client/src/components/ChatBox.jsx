@@ -224,7 +224,7 @@ export const ChatBox = ({ receiver, expanded }) => {
           socket.emit('message:send', {
             toID: receiver,
             fromID: currentUser?._id,
-            message: newMessage,
+            messageObject: newMessage,
           });
 
           setConversations((prevState) =>

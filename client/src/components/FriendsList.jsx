@@ -179,7 +179,7 @@ export default function FriendsList() {
         <defs>
           <filter id="noise" y="0" x="0">
             <feTurbulence
-              class="basefrequency"
+              className="basefrequency"
               stitchTiles="stitch"
               baseFrequency=".75"
               type="fractalNoise"
@@ -187,7 +187,7 @@ export default function FriendsList() {
           </filter>
           <pattern
             id="pattern"
-            class="tile1"
+            className="tile1"
             patternUnits="userSpaceOnUse"
             height="100"
             width="100"
@@ -195,7 +195,7 @@ export default function FriendsList() {
             x="0"
           >
             <rect
-              class="bg"
+              className="bg"
               x="0"
               y="0"
               width="100%"
@@ -203,7 +203,7 @@ export default function FriendsList() {
               fill="transparent"
             />
             <rect
-              class="opacity"
+              className="opacity"
               x="0"
               y="0"
               width="100%"

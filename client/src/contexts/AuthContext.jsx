@@ -59,7 +59,8 @@ export function authAndy({ children }) {
   const signUpWithEmail = async (name, email, password) => {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
       .then((result) => {
-        if (result.data.success) {
+        console.log('sign up with email result ', result);
+        if (result?.data?.success) {
           dispatch(setCurrentUserMain(result.data));
 
           return { success: true, email: result.data.email };
