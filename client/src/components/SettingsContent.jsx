@@ -32,6 +32,7 @@ const settings = [{ title: 'General' }, { title: 'Account' }];
 
 const container = css({
   backgroundColor: colors.offWhite,
+  letterSpacing: '1px',
 });
 
 const menuAndContentContainer = css({
@@ -39,7 +40,7 @@ const menuAndContentContainer = css({
   flexDirection: 'row',
 });
 const menu = css({
-  paddingTop: 12,
+  // paddingTop: 12,
   flexDirection: 'column',
   width: '120px',
   backgroundColor: colors.offWhitePressed,
@@ -59,7 +60,7 @@ const contentContainer = css({
 });
 const contentHeader = css({
   // fontWeight: 'bold',
-  fontSize: '1.2em',
+  fontSize: '1.1em',
   color: colors.darkmodeLightBlack,
   paddingBottom: 12,
 });
@@ -404,7 +405,7 @@ export default function SettingsContent() {
       <WindowFrame>
         <div className={menuAndContentContainer()}>
           <div className={menu()}>
-            <div className={menuHeader()}>SETTINGS</div>
+            {/* <div className={menuHeader()}>SETTINGS</div> */}
             {settings.map((setting, index) => {
               return (
                 <div
@@ -442,6 +443,16 @@ export default function SettingsContent() {
                 emailError={emailError}
                 spotifyError={spotifyError}
               />
+            )}
+            {settingsState.settingsContent === 'General' && (
+              <div
+                style={{
+                  fontSize: '0.9em',
+                  color: colors.defaultPlaceholderTextColor,
+                }}
+              >
+                Nothing to see here yet.
+              </div>
             )}
           </div>
         </div>

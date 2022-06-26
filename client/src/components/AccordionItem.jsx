@@ -154,8 +154,8 @@ export default function AccordionItem({
 
   const messageIcon = css({
     transform: 'scaleX(-1)',
-    height: 24,
-    width: 24,
+    height: 22,
+    width: 22,
     transition: 'color 0.15s ease',
     transition: 'opacity 0.15s ease',
 

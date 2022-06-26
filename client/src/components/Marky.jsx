@@ -29,6 +29,7 @@ const MarkyDiv = styled('div', {
   display: 'flex',
   transition: 'color .25s ease',
   color: colors.darkmodeBlack,
+  alignItems: 'center',
   variants: {
     markyType: {
       Window: { cursor: 'default' },
@@ -67,29 +68,31 @@ const closeText = css({
   fontSize: '0.9em',
   color: colors.darkmodeDisabledText,
 });
+
 const windowIconStyle = css({
-  width: '20px; !important',
-  height: '20px; !important',
-  paddingRight: 4,
-  paddingLeft: 1,
-});
-const trackIconStyle = css({
   width: '19px; !important',
   height: '19px; !important',
   paddingRight: 5,
   paddingLeft: 1,
 });
-const tabIconStyle = css({
-  width: '22px; !important',
-  height: '22px; !important',
-  paddingRight: 2,
-});
-const yotubeIconStyle = css({
-  width: '18px; !important',
-  height: '18px; !important',
-  paddingRight: 4,
+const trackIconStyle = css({
+  width: '17px; !important',
+  height: '17px; !important',
+  paddingRight: 6,
   paddingLeft: 1,
 });
+const tabIconStyle = css({
+  width: '21px; !important',
+  height: '21px; !important',
+  paddingRight: 4,
+});
+const yotubeIconStyle = css({
+  width: '17px; !important',
+  height: '17px; !important',
+  paddingRight: 7,
+  paddingLeft: 1,
+});
+
 const closeIconStyle = css({
   float: 'right',
   width: 20,
@@ -256,6 +259,7 @@ export default function Marky({
             width: '100%',
             zIndex: 50,
             letterSpacing: '1px',
+            fontSize: '0.8em',
           }}
           onMouseOver={() => console.log('hello')} //makes it work for some reason
           whileHover={{

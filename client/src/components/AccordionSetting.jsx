@@ -6,18 +6,18 @@ import { css } from '@stitches/react';
 import colors from '../config/colors';
 import animations from '../config/animations';
 
-const container = css({ width: '100%' });
+const container = css({ width: '100%', textAlign: 'right' });
 const header = css({
   width: '100%',
   paddingBlock: 8,
 
   color: colors.darkmodeBlack,
 });
-const settingText = css({ fontSize: '0.9em', paddingLeft: 16 });
+const settingText = css({ fontSize: '0.8em', paddingRight: 12 });
 const subSettings = css({
   color: colors.darkmodeLightBlack,
-  fontSize: '0.9em',
-  paddingLeft: 20,
+  fontSize: '0.7em',
+  paddingRight: 12,
 
   paddingBlock: 4,
 });
@@ -60,6 +60,7 @@ export default function AccordionSetting({
         transition={{ duration: 0.1 }}
         onClick={() => toggleExpansion()}
         className={header()}
+        style={index === 0 ? { paddingTop: 30 } : {}}
       >
         <div className={settingText()}> {setting.title}</div>
       </motion.header>
@@ -77,7 +78,7 @@ export default function AccordionSetting({
               transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
               className={body()}
             >
-              <div className={subSettings()}> other setting</div>
+              {/* <div className={subSettings()}> other setting</div> */}
             </motion.section>
           )}
         </AnimatePresence>
