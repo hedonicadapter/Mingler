@@ -74,7 +74,6 @@ export default function AccordionItem({
   friend,
   isMe,
   isWidgetHeader,
-  handleNameChange,
   cardExpandedMasterToggle,
 }) {
   const { deleteFriend } = useFriends();
@@ -220,7 +219,6 @@ export default function AccordionItem({
             mainActivity={friend?.activity?.[0]}
             activity={friend?.activity}
             expanded={expanded}
-            handleNameChange={handleNameChange}
             chatVisible={chatVisible}
             isWidgetHeader={isWidgetHeader}
             cardHovered={cardHovered}

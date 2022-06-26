@@ -97,11 +97,6 @@ export default function FriendsList() {
     appState?.findFriendsSearchValue,
   ]);
 
-  const handleNameChange = (evt) => {
-    setUserName(evt.target.value);
-    setName(evt.target.value);
-  };
-
   return (
     <>
       <MenuButton />
@@ -115,7 +110,6 @@ export default function FriendsList() {
             username={currentUser?.username}
             friend={friends?.find((friend) => friend._id === currentUser?._id)}
             isWidgetHeader={true}
-            handleNameChange={handleNameChange}
             cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
           />
 

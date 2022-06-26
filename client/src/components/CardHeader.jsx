@@ -113,7 +113,6 @@ export default function CardHeader({
   name,
   profilePicture,
   userID,
-  handleNameChange,
   expanded,
   mainActivity,
   activity,
@@ -201,20 +200,6 @@ export default function CardHeader({
               >
                 {name}
               </div>
-
-              {/* <StyledInput
-              onFocus={setFocus}
-              onBlur={setBlur}
-              onChange={handleNameChange}
-              onMouseEnter={setEnter}
-              onMouseLeave={setLeave}
-              // onMouseLeave={inputHoverToggle}
-              focus={inputStyle}
-              className={text()}
-              value={name}
-              type="text"
-              spellCheck={false}
-            /> */}
             </motion.div>
           </div>
           <div className={markyContainer()}>

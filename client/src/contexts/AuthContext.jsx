@@ -2,10 +2,8 @@ import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { connect } from 'react-redux';
 import { assert } from 'console';
-import * as Realm from 'realm-web';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-import { app } from '../config/realmDB';
 import { notify } from '../components/reusables/notifications';
 import SplashScreen from '../components/SplashScreen';
 import DAO from '../config/DAO';
@@ -45,16 +43,6 @@ export function authAndy({ children }) {
   const [signedIn, setSignedIn] = useState(false);
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
-
-  // deprecated: realm
-  const refreshCustomUserData = async () => {
-    await app.currentUser.refreshCustomData();
-  };
-
-  // deprecated: realm
-  function setName(newName) {
-    refreshCustomUserData();
-  }
 
   const signUpWithEmail = async (name, email, password) => {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
@@ -188,7 +176,6 @@ export function authAndy({ children }) {
   }, []);
 
   const value = {
-    setName,
     signOut,
     signUpWithEmail,
     signUpGuest,
