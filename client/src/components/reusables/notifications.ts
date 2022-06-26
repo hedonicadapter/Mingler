@@ -1,3 +1,5 @@
+import icon from '../../../assets/icons/icon.ico';
+
 export const notify = (
   title: string = '',
   body: string = '',
@@ -6,5 +8,6 @@ export const notify = (
   new Notification(title, {
     body,
     silent,
+    icon,
   }).onclick = () => ({});
 };

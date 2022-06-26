@@ -16,6 +16,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import animations from '../config/animations';
 import { useIsMounted } from '../helpers/useIsMounted';
+import { notify } from './reusables/notifications';
 
 const container = css({
   pointerEvents: 'auto',
@@ -684,6 +685,8 @@ export default function SplashScreen() {
     }, [error]);
 
     useEffect(() => {
+      notify('hello', 'no');
+
       if (justRegistered) {
         setEmail(justRegistered.email);
         setPassword(justRegistered.password);
