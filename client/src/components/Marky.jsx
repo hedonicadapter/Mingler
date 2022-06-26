@@ -67,10 +67,28 @@ const closeText = css({
   fontSize: '0.9em',
   color: colors.darkmodeDisabledText,
 });
-const activityIconStyle = css({
+const windowIconStyle = css({
+  width: '20px; !important',
+  height: '20px; !important',
+  paddingRight: 4,
+  paddingLeft: 1,
+});
+const trackIconStyle = css({
   width: '19px; !important',
   height: '19px; !important',
   paddingRight: 5,
+  paddingLeft: 1,
+});
+const tabIconStyle = css({
+  width: '22px; !important',
+  height: '22px; !important',
+  paddingRight: 2,
+});
+const yotubeIconStyle = css({
+  width: '18px; !important',
+  height: '18px; !important',
+  paddingRight: 4,
+  paddingLeft: 1,
 });
 const closeIconStyle = css({
   float: 'right',
@@ -179,19 +197,19 @@ export default function Marky({
 
   const ActivityIcon = () => {
     if (WindowTitle) {
-      return <RiWindow2Fill className={activityIconStyle()} />;
+      return <RiWindow2Fill className={windowIconStyle()} />;
     }
 
     if (TrackTitle) {
-      return <BsSpotify className={activityIconStyle()} />;
+      return <BsSpotify className={trackIconStyle()} />;
     }
 
     if (TabTitle || TabURL) {
-      return <BiPlanet className={activityIconStyle()} />;
+      return <BiPlanet className={tabIconStyle()} style={{ paddingTop: 1 }} />;
     }
 
     if (YouTubeTitle || YouTubeURL) {
-      return <BsYoutube className={activityIconStyle()} />;
+      return <BsYoutube className={yotubeIconStyle()} />;
       // return markyToReplaceWithYouTubeVideo ? (
       //   <motion.div variants={buttonVariants} whileHover="hover">
       //     <RiArrowDropUpLine className={closeIconStyle()} />

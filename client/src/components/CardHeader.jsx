@@ -151,9 +151,15 @@ export default function CardHeader({
   };
 
   const markyContainer = css({
-    marginTop: 4,
     paddingLeft: 5,
     marginLeft: isWidgetHeader ? 25 : 20,
+    marginTop: 4,
+    marginBottom: -4,
+  });
+  const markyContainerTwo = css({
+    paddingLeft: 5,
+    marginLeft: isWidgetHeader ? 55 : 45,
+    marginTop: 6,
   });
 
   return (
@@ -220,33 +226,33 @@ export default function CardHeader({
               togglePlayer={togglePlayer}
               setPlayerURL={setPlayerURL}
             />
-            <AnimatePresence>
-              {expanded &&
-                activity?.map(
-                  (activity, index) =>
-                    index != 0 && (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className={markyContainer()}
-                      >
-                        <Marky
-                          {...activity}
-                          userID={userID}
-                          marKey={index}
-                          expanded={expanded}
-                          togglePlayer={togglePlayer}
-                          setPlayerURL={setPlayerURL}
-                        />
-                      </motion.div>
-                    )
-                )}
-            </AnimatePresence>
-            <div style={{ height: 10 }}></div>
           </div>
+          <AnimatePresence>
+            {expanded &&
+              activity?.map(
+                (activity, index) =>
+                  index != 0 && (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className={markyContainerTwo()}
+                    >
+                      <Marky
+                        {...activity}
+                        userID={userID}
+                        marKey={index}
+                        expanded={expanded}
+                        togglePlayer={togglePlayer}
+                        setPlayerURL={setPlayerURL}
+                      />
+                    </motion.div>
+                  )
+              )}
+          </AnimatePresence>
+          <div style={{ height: 10 }} />
         </div>
       </div>
     </div>

@@ -177,7 +177,6 @@ export default function AccordionItem({
   return (
     <div onContextMenu={handleOnContextMenu}>
       <motion.header
-        // user.offline ? 'transparent'
         style={{
           // margin: 'auto',
           position: 'relative',
@@ -188,7 +187,8 @@ export default function AccordionItem({
           // paddingTop: '55px',
           // paddingBottom: '55px',
           // height: expanded ? cardHeaderRef.current?.clientHeight + 10 : 84,
-          minHeight: activityLength >= 2 ? 104 : 84,
+          // minHeight: activityLength >= 2 ? 104 : 84,
+          minHeight: 86,
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
@@ -197,8 +197,8 @@ export default function AccordionItem({
           // backgroundColor: expanded
           //   ? colors.offWhite //used to be rgba(241,235,232,1)
           //   : 'rgba(36,36,36,0)', //transparent used to be rgba(253,245,241, 1)
-          paddingLeft: isWidgetHeader ? 23 : 54,
-          paddingTop: isWidgetHeader ? 35 : 28,
+          paddingLeft: isWidgetHeader ? 32 : 54,
+          paddingTop: isWidgetHeader ? 35 : 25,
           // paddingBottom: expanded ? 24 : 0,
         }}
         onClick={toggleExpansion}
@@ -206,41 +206,43 @@ export default function AccordionItem({
         onMouseEnter={() => setCardHovered(true)}
         onMouseLeave={() => setCardHovered(false)}
       >
-        <CardHeader
-          activityLength={activityLength}
-          togglePlayer={togglePlayer}
-          setPlayerURL={setPlayerURL}
-          cardHeaderRef={cardHeaderRef}
-          online={friend?.online}
-          key={friend?.key}
-          name={username ? username : friend?.username}
-          profilePicture={friend?.profilePicture}
-          userID={friend?._id}
-          mainActivity={friend?.activity?.[0]}
-          activity={friend?.activity}
-          expanded={expanded}
-          handleNameChange={handleNameChange}
-          chatVisible={chatVisible}
-          isWidgetHeader={isWidgetHeader}
-          cardHovered={cardHovered}
-        />
+        <div style={{ opacity: !friend?.online && 0.4 }}>
+          <CardHeader
+            activityLength={activityLength}
+            togglePlayer={togglePlayer}
+            setPlayerURL={setPlayerURL}
+            cardHeaderRef={cardHeaderRef}
+            online={friend?.online}
+            key={friend?.key}
+            name={username ? username : friend?.username}
+            profilePicture={friend?.profilePicture}
+            userID={friend?._id}
+            mainActivity={friend?.activity?.[0]}
+            activity={friend?.activity}
+            expanded={expanded}
+            handleNameChange={handleNameChange}
+            chatVisible={chatVisible}
+            isWidgetHeader={isWidgetHeader}
+            cardHovered={cardHovered}
+          />
 
-        {!isWidgetHeader && (
-          <div
-            style={{
-              position: 'absolute',
-              right: 16,
-              top: '25%',
-              bottom: '75%',
-              float: 'right',
-              verticalAlign: 'middle',
-              lineHeight: '100%',
-            }}
-            onClick={(e) => toggleChat(e)}
-          >
-            <BiConversation className={messageIcon()} />
-          </div>
-        )}
+          {!isWidgetHeader && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 16,
+                top: '25%',
+                bottom: '75%',
+                float: 'right',
+                verticalAlign: 'middle',
+                lineHeight: '100%',
+              }}
+              onClick={(e) => toggleChat(e)}
+            >
+              <BiConversation className={messageIcon()} />
+            </div>
+          )}
+        </div>
       </motion.header>
       <CardSeparator cardHovered={cardHovered} expanded={expanded} />
       <AnimatePresence initial={'collapsed'}>

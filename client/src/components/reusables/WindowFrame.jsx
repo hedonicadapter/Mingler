@@ -8,15 +8,19 @@ import colors from '../../config/colors';
 import animations from '../../config/animations';
 
 const { remote } = require('electron');
-const BrowserWindow = remote.BrowserWindow;
 
 const frameColor = colors.offWhite;
-const buttonColor = colors.darkmodeLightBlack;
+const buttonColor = colors.defaultPlaceholderTextColor;
 
 const hoverAnimation = {
-  opacity: 0.5,
+  color: colors.darkmodeBlack,
   transition: { duration: 0.1 },
 };
+
+const frameButton = css({
+  color: colors.defaultPlaceholderTextColor,
+  padding: 2,
+});
 
 const FrameButtons = () => {
   const handleMinimize = () => {
@@ -28,30 +32,47 @@ const FrameButtons = () => {
   };
 
   return (
-    <>
+    <div>
       <motion.span
-        className="undraggable"
-        whileHover={hoverAnimation}
-        whileTap={animations.whileTap}
-        onClick={() => handleMinimize()}
-      >
-        <VscChromeMinimize color={buttonColor} />
-      </motion.span>
-      <motion.span
-        className="undraggable"
+        className={[frameButton(), 'undraggable'].join(' ')}
         whileHover={hoverAnimation}
         whileTap={animations.whileTap}
         onClick={() => handleClose()}
       >
-        <IoIosClose color={buttonColor} />
+        <IoIosClose />
       </motion.span>
-    </>
+      <motion.span
+        className={[frameButton(), 'undraggable'].join(' ')}
+        whileHover={hoverAnimation}
+        whileTap={animations.whileTap}
+        onClick={() => handleMinimize()}
+      >
+        <VscChromeMinimize />
+      </motion.span>
+    </div>
   );
+};
+
+const WindowTitle = () => {
+  const windowTitle = remote.getCurrentWindow().getTitle().toLowerCase();
+
+  const windowTitleStyle = {
+    letterSpacing: '1px',
+    fontSize: '0.9em',
+    color: colors.defaultPlaceholderTextColor,
+    padding: 2,
+  };
+
+  return <div style={windowTitleStyle}>{windowTitle}</div>;
 };
 
 const frame = css({
   flexShrink: 0,
   backgroundColor: frameColor,
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  padding: 6,
 });
 
 const body = css({
@@ -64,6 +85,7 @@ export const WindowFrame = ({ children }) => {
     <div>
       <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
         <FrameButtons />
+        <WindowTitle />
       </div>
       <div className={[body(), 'clickable'].join(' ')}>{children}</div>
     </div>
