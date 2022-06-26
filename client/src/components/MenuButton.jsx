@@ -13,9 +13,9 @@ const container = css({
   top: 0,
   right: 0,
   margin: 10,
-  width: 90,
-  backgroundColor: 'black',
-  color: 'white',
+  width: 110,
+  backgroundColor: colors.darkmodeBlack,
+  color: colors.offWhite,
   zIndex: 55,
 });
 const menuButtonStyle = css({
@@ -23,10 +23,23 @@ const menuButtonStyle = css({
   top: 0,
   right: 0,
   margin: 16,
-  height: 12,
-  width: 12,
+  height: 10,
+  width: 10,
   borderRadius: '50%',
   zIndex: 55,
+});
+const list = css({
+  listStyleType: 'none',
+  listStyle: 'none',
+  width: '100%',
+  padding: 10,
+  paddingTop: 20,
+  paddingRight: 15,
+  margin: 0,
+});
+const listItem = css({
+  fontSize: '0.8em',
+  letterSpacing: '1px',
 });
 
 export default function MenuButton() {
@@ -70,17 +83,13 @@ export default function MenuButton() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ staggerChildren: 0.25 }}
+            transition={{ staggerChildren: 0.25, duration: 0.15 }}
+            whileHover={{ backgroundColor: colors.darkmodeBlack }}
             onMouseEnter={() => setMenuVisibility(true)}
             onMouseLeave={() => setMenuVisibility(false)}
           >
             <motion.ol
-              style={{
-                listStyleType: 'none',
-                paddingLeft: 0,
-                listStyle: 'none',
-                paddingLeft: 10,
-              }}
+              className={list()}
               variants={{
                 hidden: { opacity: 0 },
                 show: {
@@ -107,21 +116,25 @@ export default function MenuButton() {
               >
                 Close
               </motion.li> */}
-              <hr />
+              {/* <hr /> */}
               {currentUser && (
                 <motion.li
-                  whileHover={{ color: 'rgba(255,255,255,0.7)' }}
+                  className={listItem()}
+                  whileHover={{ color: colors.offWhitePressed2 }}
+                  transition={{ duration: 0.15 }}
                   variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
                   onClick={handleSignoutButton}
                 >
-                  Sign out
+                  sign out
                 </motion.li>
               )}
               <motion.li
-                whileHover={{ color: 'rgba(255,255,255,0.7)' }}
+                className={listItem()}
+                whileHover={{ color: colors.offWhitePressed2 }}
+                transition={{ duration: 0.15 }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
               >
-                Exit
+                exit
               </motion.li>
             </motion.ol>
           </motion.div>
@@ -131,8 +144,8 @@ export default function MenuButton() {
         className={menuButtonStyle()}
         animate={menuVisibility ? 'visible' : 'hidden'}
         variants={{
-          visible: { backgroundColor: 'rgba(255,255,255,1)' },
-          hidden: { backgroundColor: 'rgba(0,0,0,1)' },
+          visible: { backgroundColor: colors.offWhite },
+          hidden: { backgroundColor: colors.darkmodeLightBlack },
         }}
         onMouseEnter={() => setMenuVisibility(true)}
         onMouseLeave={() => setMenuVisibility(false)}
