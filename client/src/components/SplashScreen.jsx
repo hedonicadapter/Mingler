@@ -953,9 +953,11 @@ export default function SplashScreen() {
       <div className={header()}>
         <BackButton />
         {appSettings.showWelcome ? (
-          <h2>
-            Welcome to <h1>Mingler</h1>
-          </h2>
+          <>
+            <h4 style={{ margin: 0, padding: 0 }}>
+              Welcome to <h1>Mingler</h1>
+            </h4>
+          </>
         ) : (
           <h1>Mingler</h1>
         )}
@@ -997,7 +999,7 @@ export default function SplashScreen() {
         textDecoration: 'underline',
         textDecorationColor: 'transparent',
         cursor: 'pointer',
-        color: colors.coffeeOrange,
+        color: colors.coffeeGreen,
       });
 
       return (

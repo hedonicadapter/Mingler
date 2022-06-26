@@ -98,9 +98,9 @@ const createWindow = async () => {
     show: false,
     height: height,
     minWidth: 430,
+    width: 430,
     // alwaysOnTop: true,
     icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
-    // icon: ,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
