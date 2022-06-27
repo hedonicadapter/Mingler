@@ -199,7 +199,7 @@ exports.forgotPassword = async (req, res, next) => {
     try {
       await sendEmail({
         to: user.email,
-        subject: 'ShareHub reset request',
+        subject: 'Mingler reset request',
         html: message,
       });
 

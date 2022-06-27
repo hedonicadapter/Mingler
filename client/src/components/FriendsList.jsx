@@ -71,6 +71,8 @@ export default function FriendsList() {
 
   makeClickthrough();
 
+  const [greeting, setGreeting] = useState(true);
+
   const dispatch = useDispatch();
 
   const currentUser = useSelector(getCurrentUser);
@@ -97,9 +99,42 @@ export default function FriendsList() {
     appState?.findFriendsSearchValue,
   ]);
 
+  useEffect(() => {
+    const greetUser = setTimeout(() => setGreeting(false), 1000);
+
+    return () => clearTimeout(greetUser);
+  }, []);
+
   return (
     <>
-      <MenuButton />
+      <AnimatePresence>
+        {greeting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              zIndex: 80,
+              position: 'absolute',
+              height: '100vh',
+              width: '100%',
+              textAlign: 'center',
+              backgroundColor: colors.offWhite,
+            }}
+          >
+            <div
+              style={{
+                position: 'relative',
+                top: '50%',
+                transform: 'translateY(-50%)',
+              }}
+            >
+              Hello
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div
         onContextMenu={() => ipcRenderer.send('context-menu')}
         className={container()}

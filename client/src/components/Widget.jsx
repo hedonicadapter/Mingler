@@ -19,6 +19,11 @@ import {
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
+import { css } from '@stitches/react';
+
+const Border = () => {
+  return <div style={{ float: 'left', minWidth: 8 }}>&nbsp;</div>;
+};
 
 const Pane = ({ children }) => {
   const appState = useSelector(getApp);
@@ -30,6 +35,7 @@ const Pane = ({ children }) => {
   return (
     <motion.div
       // onContextMenu={(e) => e.preventDefault()}
+      transition={{ duration: 0.15 }}
       animate={appState?.appVisible ? 'show' : 'hide'}
       variants={{
         show: {
@@ -67,7 +73,9 @@ export default function Widget() {
           <UserStatusProvider>
             <BrowserWindowProvider>
               <Memoized>
-                {/* <MenuButton /> */}
+                <Border />
+                <MenuButton />
+
                 <FriendsList />
               </Memoized>
             </BrowserWindowProvider>

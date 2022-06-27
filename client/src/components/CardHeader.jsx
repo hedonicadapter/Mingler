@@ -32,6 +32,7 @@ const AvatarContainer = ({
   profilePicture,
   online,
   activityLength,
+  isMe,
 }) => {
   const { toggleSettings } = useBrowserWindow();
 
@@ -62,8 +63,10 @@ const AvatarContainer = ({
         }
       }
     >
-      {!isWidgetHeader && online && (
+      {!isWidgetHeader && (
         <OnlineStatusIndicator
+          online={online}
+          isMe={isMe}
           activityLength={activityLength}
           isWidgetHeader={isWidgetHeader}
         />
@@ -78,7 +81,13 @@ const AvatarContainer = ({
   );
 };
 
-const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
+const OnlineStatusIndicator = ({
+  activityLength,
+  isWidgetHeader,
+  online,
+  isMe,
+}) => {
+  if (!online || !isMe) return null;
   return (
     <motion.span
       style={{
@@ -95,7 +104,6 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
           marginLeft: 'auto',
           backgroundColor: colors.coffeeGreen,
           clipPath: 'circle(8.6px at 20px)',
-          // display: 'inline-block',
           // minHeight: activityLength >= 2 ? 104 : 84,
           // paddingTop: isWidgetHeader ? 35 : 28,
           left: -38,
@@ -121,6 +129,7 @@ export default function CardHeader({
   chatVisible,
   cardHovered,
   cardHeaderRef,
+  isMe,
 }) {
   const el = useRef(undefined);
   const [refresh, setRefresh] = useState(true);
@@ -179,6 +188,7 @@ export default function CardHeader({
             isWidgetHeader={isWidgetHeader}
             online={online}
             activityLength={activityLength}
+            isMe={isMe}
           />
         </div>
         <div className={nameAndActivityContainer()}>

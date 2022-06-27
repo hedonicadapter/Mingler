@@ -1,7 +1,7 @@
 {
   "name": "chromiumhostspawner",
   "version": "1.0.0",
-  "description": "what spawns the host for native messaging between chromium and sharehub",
+  "description": "what spawns the host for native messaging between chromium and Mingler",
   "bin": {
     "chromiumhostspawner": "index.js"
   },

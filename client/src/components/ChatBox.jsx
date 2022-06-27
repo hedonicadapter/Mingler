@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
@@ -109,6 +109,132 @@ const inputBox = css({
   fontFamily: 'inherit',
 });
 
+const iconContainer = css({
+  marginTop: 4,
+  paddingRight: 8,
+  paddingTop: 4,
+});
+const sendIcon = css({
+  width: 10,
+  height: 10,
+  borderRadius: '50%',
+  backgroundColor: colors.coffeeBlue,
+  transition: 'opacity 0.15s ease',
+});
+
+const SendButton = ({ inputText, handleSendButton }) => {
+  return (
+    <motion.div
+      className={iconContainer()}
+      whileHover={{ cursor: inputText ? 'pointer' : 'auto' }}
+      onClick={handleSendButton}
+    >
+      <motion.div
+        animate={inputText ? 'true' : 'false'}
+        variants={{ true: { opacity: 1 }, false: { opacity: 0 } }}
+        transition={{ duration: 0.15 }}
+      >
+        {/*
+        think of it like a status indicator, indicating that a message is ready to be sent.
+        It makes sense because people dont tend to use send buttons for messages anymore,
+        rather than just pressing enter 
+        */}
+        <div className={sendIcon()} style={{ opacity: inputText ? 1 : 0 }} />
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const ChatInput = ({
+  inputText,
+  inputBoxRef,
+  settingsFocused,
+  error,
+  handleInput,
+  handleInputKeyDown,
+}) => {
+  return (
+    <TextareaAutosize
+      ref={inputBoxRef}
+      rows={1}
+      maxRows={10}
+      autoFocus={settingsFocused ? false : true}
+      placeholder="Aa"
+      className={inputBox()}
+      style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
+      value={error ? error : inputText || ''}
+      readOnly={error ? true : false}
+      onChange={handleInput}
+      onKeyDown={handleInputKeyDown}
+    />
+  );
+};
+
+const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const defaultChatClient = 'Mingler'; //change to useLocalStorage value later
+
+  const chatClientDropdown = css({
+    marginRight: 8,
+    border: 'none',
+    outline: 'none',
+    backgroundColor: colors.darkmodeBlack,
+    color: dropdownVisible
+      ? colors.darkmodeMediumWhite
+      : colors.darkmodeLightBlack,
+    fontWeight: 'bold',
+    marginTop: 6,
+    padding: 3,
+    paddingRight: 5,
+    transition: 'color .15 ease',
+    borderRadius: '2px',
+    boxShadow: 'none',
+  });
+  const dropdownItem = css({
+    outline: 'none',
+  });
+
+  const handleChatClientSelection = (evt) => {
+    setChatClientSelection(evt.target.value);
+  };
+
+  const toggleChatClientDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
+  };
+
+  return (
+    <select
+      onClick={toggleChatClientDropdown}
+      className={chatClientDropdown()}
+      value={chatClientSelection}
+      onChange={handleChatClientSelection}
+    >
+      <option
+        className={dropdownItem()}
+        value="Discord"
+        // onMouseOver={{ color: colors.darkmodeHighWhite }}
+      >
+        Discord
+      </option>
+      <option
+        disabled
+        className={dropdownItem()}
+        value="Messenger"
+        // onMouseOver={{ color: colors.darkmodeHighWhite }}
+      >
+        Messenger
+      </option>
+      <option
+        className={dropdownItem()}
+        value="Mingler"
+        // onMouseOver={{ color: colors.darkmodeHighWhite }}
+      >
+        Mingler
+      </option>
+    </select>
+  );
+};
+
 export const ChatBox = ({ receiver, expanded }) => {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
@@ -121,9 +247,10 @@ export const ChatBox = ({ receiver, expanded }) => {
 
   const [inputText, setInputText] = useState('');
   const [error, setError] = useState(null);
-  const [chatClientSelection, setChatClientSelection] = useState('ShareHub');
+  const [chatClientSelection, setChatClientSelection] = useState('Mingler');
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
   const [scrollTop, setScrollTop] = useState(null);
+  const [currentConvo, setCurrentConvo] = useState(null);
 
   const inputBoxRef = useRef(null);
 
@@ -134,79 +261,26 @@ export const ChatBox = ({ receiver, expanded }) => {
     return () => clearTimeout(errorTimeout);
   }, [error]);
 
+  useEffect(() => {
+    console.log('receiver: ', receiver, 'currentUser: ', currentUser._id);
+    console.log(conversations);
+    setCurrentConvo(
+      conversations?.find((convo) => convo._id === receiver)?.conversation
+    );
+  }, [conversations]);
+
   const handleInput = (evt) => {
     setInputText(evt.target.value);
   };
 
-  const Dropdown = () => {
-    const [dropdownVisible, setDropdownVisible] = useState(false);
-    const defaultChatClient = 'ShareHub'; //change to useLocalStorage value later
-
-    const chatClientDropdown = css({
-      marginRight: 8,
-      border: 'none',
-      outline: 'none',
-      backgroundColor: colors.darkmodeBlack,
-      color: dropdownVisible
-        ? colors.darkmodeMediumWhite
-        : colors.darkmodeLightBlack,
-      fontWeight: 'bold',
-      marginTop: 6,
-      padding: 3,
-      paddingRight: 5,
-      transition: 'color .15 ease',
-      borderRadius: '2px',
-      boxShadow: 'none',
-    });
-    const dropdownItem = css({
-      outline: 'none',
-    });
-
-    const handleChatClientSelection = (evt) => {
-      setChatClientSelection(evt.target.value);
-    };
-
-    const toggleChatClientDropdown = () => {
-      setDropdownVisible(!dropdownVisible);
-    };
-
-    return (
-      <select
-        onClick={toggleChatClientDropdown}
-        className={chatClientDropdown()}
-        value={chatClientSelection}
-        onChange={handleChatClientSelection}
-      >
-        <option
-          className={dropdownItem()}
-          value="Discord"
-          // onMouseOver={{ color: colors.darkmodeHighWhite }}
-        >
-          Discord
-        </option>
-        <option
-          disabled
-          className={dropdownItem()}
-          value="Messenger"
-          // onMouseOver={{ color: colors.darkmodeHighWhite }}
-        >
-          Messenger
-        </option>
-        <option
-          className={dropdownItem()}
-          value="ShareHub"
-          // onMouseOver={{ color: colors.darkmodeHighWhite }}
-        >
-          ShareHub
-        </option>
-      </select>
-    );
+  const handleSendButton = () => {
+    sendMessage();
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputText || !receiver || inputText === '') return;
 
-    DAO.sendMessage(
+    await DAO.sendMessage(
       receiver,
       currentUser?._id,
       inputText,
@@ -227,19 +301,26 @@ export const ChatBox = ({ receiver, expanded }) => {
             messageObject: newMessage,
           });
 
-          setConversations((prevState) =>
-            prevState.map((convoObject) =>
-              convoObject._id === receiver
-                ? {
-                    ...convoObject,
-                    conversation: {
-                      messages:
-                        convoObject.conversation.messages?.concat(newMessage),
-                    },
-                  }
-                : { ...convoObject }
-            )
-          );
+          setCurrentConvo((prevState) => {
+            return {
+              ...prevState,
+              messages: prevState?.messages?.concat(newMessage),
+            };
+          });
+
+          // setConversations((prevState) =>
+          //   prevState.map((convoObject) =>
+          //     convoObject._id === receiver
+          //       ? {
+          //           ...convoObject,
+          //           conversation: {
+          //             messages:
+          //               convoObject.conversation.messages?.concat(newMessage),
+          //           },
+          //         }
+          //       : { ...convoObject }
+          //   )
+          // );
 
           setInputText('');
           inputBoxRef.current?.focus();
@@ -253,8 +334,9 @@ export const ChatBox = ({ receiver, expanded }) => {
       });
   };
 
-  const handleInputKeyUp = (evt) => {
+  const handleInputKeyDown = (evt) => {
     if (evt.key === 'Enter') {
+      evt.preventDefault();
       sendMessage();
     }
     // if (evt.key === 'Enter' && evt.key !== 'Shift') {
@@ -262,56 +344,8 @@ export const ChatBox = ({ receiver, expanded }) => {
     // }
   };
 
-  const handleInputKeyDown = (evt) => {
-    // if (evt.key === 'Enter' && !evt.key === 'Shift') {
-    //   evt.preventDefault();
-    // }
-  };
-
-  const SendButton = () => {
-    const iconContainer = css({
-      marginTop: 4,
-      paddingRight: 8,
-      paddingTop: 4,
-    });
-
-    const sendIcon = css({
-      width: 10,
-      height: 10,
-      borderRadius: '50%',
-      backgroundColor: colors.coffeeBlue,
-      transition: 'opacity 0.15s ease',
-      opacity: inputText ? 1 : 0,
-    });
-
-    const handleSendButton = () => {
-      sendMessage();
-    };
-
-    return (
-      <motion.div
-        className={iconContainer()}
-        whileHover={{ cursor: inputText ? 'pointer' : 'auto' }}
-        onClick={handleSendButton}
-      >
-        <motion.div
-          animate={inputText ? 'true' : 'false'}
-          variants={{ true: { opacity: 1 }, false: { opacity: 0 } }}
-          transition={{ duration: 0.15 }}
-        >
-          {/*
-          think of it like a status indicator, indicating that a message is ready to be sent.
-          It makes sense because people dont tend to use send buttons for messages anymore,
-          rather than just pressing enter 
-          */}
-          <div className={sendIcon()} />
-        </motion.div>
-      </motion.div>
-    );
-  };
-
   const handleMessageAreaScroll = (evt) => {
-    if (!conversations) return;
+    if (!currentConvo) return;
 
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
@@ -323,7 +357,9 @@ export const ChatBox = ({ receiver, expanded }) => {
           }
           if (error) setError(error);
         })
-        .catch((e) => {});
+        .catch((e) => {
+          console.log(e);
+        });
     } else setScrollTop(false);
   };
 
@@ -335,47 +371,38 @@ export const ChatBox = ({ receiver, expanded }) => {
   return (
     <div className={chatContainer()}>
       <div className={messageArea()} onScroll={handleMessageAreaScroll}>
-        {conversations
-          ?.find((convo) => convo._id === receiver)
-          ?.conversation.messages?.map((message, index) => {
-            return (
-              <motion.div
-                key={index}
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <ConversationBubble
-                  fromID={message.fromID}
-                  message={message.message}
-                  sent={message.sentDate}
-                />
-              </motion.div>
-            );
-          })}
+        {currentConvo?.messages?.map((message, index) => {
+          return (
+            <ConversationBubble
+              key={index}
+              fromID={message.fromID}
+              message={message.message}
+              sent={message.sentDate}
+            />
+          );
+        })}
         <div ref={anchorRef} />
       </div>
       <div className={inputContainer()}>
-        {chatClientSelection === 'ShareHub' ? (
-          <TextareaAutosize
-            ref={inputBoxRef}
-            maxRows={10}
-            autoFocus={appState?.settingsFocused ? false : true}
-            placeholder="Aa"
-            rows={1}
-            className={inputBox()}
-            style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
-            value={error ? error : inputText}
-            readOnly={error ? true : false}
-            onChange={handleInput}
-            onKeyUp={handleInputKeyUp}
-            onKeyDown={handleInputKeyDown}
-          />
+        {chatClientSelection === 'Mingler' ? (
+          useMemo(
+            () => (
+              <ChatInput
+                inputText={inputText}
+                inputBoxRef={inputBoxRef}
+                settingsFocused={appState?.settingsFocused}
+                error={error}
+                handleInput={handleInput}
+                handleInputKeyDown={handleInputKeyDown}
+              />
+            ),
+            [inputText, inputBoxRef, appState?.settingsFocused, error]
+          )
         ) : (
           <ConnectButton />
         )}
         {/* <Dropdown /> */}
-        <SendButton />
+        <SendButton inputText={inputText} handleSendButton={handleSendButton} />
       </div>
     </div>
   );

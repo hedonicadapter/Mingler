@@ -51,6 +51,7 @@ const settingsWindowConfig = {
 };
 
 const findFriendsWindowConfig = {
+  title: 'Find friends',
   show: false,
   frame: false,
   transparent: true,
@@ -65,6 +66,7 @@ const findFriendsWindowConfig = {
 };
 
 const connectSpotifyWindowConfig = {
+  title: 'Connect to Spotify',
   show: false,
   icon: favicon,
 };
@@ -186,9 +188,7 @@ export function BrowserWindowProvider({ children }) {
       .then()
       .catch(console.warn);
 
-    settingsWindow.once('ready-to-show', () => {
-      settingsWindow.setTitle('Settings');
-    });
+    settingsWindow.once('ready-to-show', () => {});
   };
 
   const toggleSettings = (page = 'General', quickSetting = false) => {
@@ -211,9 +211,7 @@ export function BrowserWindowProvider({ children }) {
       .then()
       .catch(console.warn);
 
-    findFriendsWindow.once('ready-to-show', () => {
-      findFriendsWindow.setTitle('Find friends');
-    });
+    findFriendsWindow.once('ready-to-show', () => {});
   };
 
   const toggleFindFriends = () => {
@@ -253,8 +251,6 @@ export function BrowserWindowProvider({ children }) {
             .catch((e) => sendSpotifyError(e));
 
           await connectSpotifyWindow.once('ready-to-show', () => {
-            connectSpotifyWindow.setTitle('Connect to Spotify');
-
             connectSpotifyWindow.show();
 
             let currentUrl = connectSpotifyWindow.webContents.getURL();

@@ -1,7 +1,7 @@
 {
-  "name": "sharehub",
-  "productName": "ShareHub",
-  "description": "ShareHub",
+  "name": "mingler",
+  "productName": "Mingler",
+  "description": "Mingler",
   "scripts": {
     "build": "concurrently \"yarn build:main\" \"yarn build:renderer\"",
     "build:main": "cross-env NODE_ENV=production webpack --config ./.erb/configs/webpack.config.main.prod.babel.js",
@@ -30,8 +30,8 @@
     ]
   },
   "build": {
-    "productName": "ShareHub",
-    "appId": "com.samba.sharehub",
+    "productName": "Mingler",
+    "appId": "com.samba.mingler",
     "files": [
       "dist/",
       "node_modules/",

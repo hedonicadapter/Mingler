@@ -221,6 +221,7 @@ export default function AccordionItem({
             expanded={expanded}
             chatVisible={chatVisible}
             isWidgetHeader={isWidgetHeader}
+            isMe={isMe}
             cardHovered={cardHovered}
           />
 

@@ -93,6 +93,7 @@ const createWindow = async () => {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
   mainWindow = new BrowserWindow({
+    title: 'Mingler',
     frame: false,
     transparent: true,
     show: false,

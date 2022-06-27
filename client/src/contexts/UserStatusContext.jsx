@@ -49,7 +49,7 @@ export function UserStatusProvider({ children }) {
       // Second comparison doesn't work for some reason
       if (
         activeWindow &&
-        activeWindow !== 'Sharehub' &&
+        activeWindow !== 'Mingler' &&
         activeWindow !== 'Task Switching' &&
         activeWindow !== 'Snap Assist' &&
         activeWindow !== 'Spotify Free'

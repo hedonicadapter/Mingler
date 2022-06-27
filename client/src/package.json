@@ -2,12 +2,12 @@
   "name": "electron-react-boilerplate",
   "productName": "electron-react-boilerplate",
   "version": "2.3.0",
-  "description": "ShareHub",
+  "description": "Mingler",
   "main": "./main.prod.js",
   "author": {
     "name": "Samba",
     "email": "thethebatsam@gmail.com",
-    "url": "https://github.com/YungMilky/ShareHub"
+    "url": "https://github.com/YungMilky/Mingler"
   },
   "scripts": {
     "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",

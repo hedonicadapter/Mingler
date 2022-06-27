@@ -185,32 +185,8 @@ export function authAndy({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      <AnimatePresence>
-        {!signedIn ? (
-          <motion.div
-            key={0}
-            initial={{ opacity: 0, x: '120%' }}
-            animate={{ opacity: 1, x: '0%' }}
-            exit={{ opacity: 0, x: '120%' }}
-            duration={0.1}
-            style={{ height: '100%' }}
-          >
-            <SplashScreen />
-          </motion.div>
-        ) : (
-          currentUser && (
-            <div
-              style={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              {children}
-            </div>
-          )
-        )}
-      </AnimatePresence>
+      {currentUser && signedIn && <div>{children}</div>}
+      {!signedIn && <SplashScreen />}
     </AuthContext.Provider>
   );
 }

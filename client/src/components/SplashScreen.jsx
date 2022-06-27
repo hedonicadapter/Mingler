@@ -16,7 +16,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import animations from '../config/animations';
 import { useIsMounted } from '../helpers/useIsMounted';
-import { notify } from './reusables/notifications';
 
 const container = css({
   pointerEvents: 'auto',
@@ -685,8 +684,6 @@ export default function SplashScreen() {
     }, [error]);
 
     useEffect(() => {
-      notify('hello', 'no');
-
       if (justRegistered) {
         setEmail(justRegistered.email);
         setPassword(justRegistered.password);
@@ -928,8 +925,6 @@ export default function SplashScreen() {
     return (
       <motion.div
         style={{
-          height: window.innerHeight,
-          width: window.innerWidth,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -937,16 +932,14 @@ export default function SplashScreen() {
         initial={{
           x: '120%',
           opacity: 0,
-          backgroundColor: 'rgba(0,0,0,0)',
         }}
         animate={{
           x: '0%',
           opacity: 1,
-          backgroundColor: 'rgba(0,0,0,1)',
         }}
         transition={{ duration: 0.35 }}
       >
-        <h1>Here we go.</h1>
+        <h1>Enjoy your stay.</h1>
       </motion.div>
     );
   };
@@ -1050,76 +1043,74 @@ export default function SplashScreen() {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div className={container()}>
-        <div style={{ zIndex: 1 }}>
-          <MenuButton />
-          <Header />
+    <div className={container()}>
+      <div style={{ zIndex: 1 }}>
+        <MenuButton />
+        <Header />
 
-          <Slider />
-          {/* <PostRegistrationScreen /> */}
-        </div>
-        <svg
-          id="svg"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            height: '100%',
-            width: '100%',
-            position: 'fixed',
-            top: '0px',
-            left: '0px',
-            right: '0px',
-            bottom: '0px',
-            pointerEvents: 'none',
-          }}
-        >
-          <defs>
-            <filter id="noise" y="0" x="0">
-              <feTurbulence
-                className="basefrequency"
-                stitchTiles="stitch"
-                baseFrequency=".75"
-                type="fractalNoise"
-              />
-            </filter>
-            <pattern
-              id="pattern"
-              className="tile1"
-              patternUnits="userSpaceOnUse"
-              height="100"
-              width="100"
-              y="0"
-              x="0"
-            >
-              <rect
-                className="bg"
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                fill="transparent"
-              />
-              <rect
-                className="opacity"
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                filter="url(#noise)"
-                opacity=".55"
-              />
-            </pattern>
-          </defs>
-          <rect
-            id="rect"
-            x="0"
+        <Slider />
+        {/* <PostRegistrationScreen /> */}
+      </div>
+      <svg
+        id="svg"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          height: '100%',
+          width: '100%',
+          position: 'fixed',
+          top: '0px',
+          left: '0px',
+          right: '0px',
+          bottom: '0px',
+          pointerEvents: 'none',
+        }}
+      >
+        <defs>
+          <filter id="noise" y="0" x="0">
+            <feTurbulence
+              className="basefrequency"
+              stitchTiles="stitch"
+              baseFrequency=".75"
+              type="fractalNoise"
+            />
+          </filter>
+          <pattern
+            id="pattern"
+            className="tile1"
+            patternUnits="userSpaceOnUse"
+            height="100"
+            width="100"
             y="0"
-            width="100%"
-            height="100%"
-            fill="url(#pattern)"
-          />
-        </svg>
-      </motion.div>
-    </AnimatePresence>
+            x="0"
+          >
+            <rect
+              className="bg"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              fill="transparent"
+            />
+            <rect
+              className="opacity"
+              x="0"
+              y="0"
+              width="100%"
+              height="100%"
+              filter="url(#noise)"
+              opacity=".55"
+            />
+          </pattern>
+        </defs>
+        <rect
+          id="rect"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="url(#pattern)"
+        />
+      </svg>
+    </div>
   );
 }

@@ -90,28 +90,33 @@ export function FriendsProvider({ children }) {
       currentUser?.accessToken
     )
       .then((res) => {
-        if (!res.data || !res.data?.messages) return;
-
         if (res?.data?.success) {
-          setConversations((prevState) =>
-            prevState.map((convoObject) =>
-              convoObject._id === friendID
-                ? {
-                    ...convoObject,
-                    conversation: {
-                      messages: res.data.messages?.concat(
-                        convoObject.conversation.messages
-                      ),
-                    },
-                  }
-                : { ...convoObject }
-            )
-          );
+          if (!res.data?.messages) return { success: true };
+
+          addMessagesToConversations(res.data.messages, friendID);
 
           return { success: true };
         }
       })
       .catch(genericErrorHandler);
+  };
+
+  const addMessagesToConversations = (messageArray, friendID) => {
+    setConversations((prevState) =>
+      prevState.map((convoObject) =>
+        convoObject._id === friendID
+          ? {
+              ...convoObject,
+              conversation: {
+                ...convoObject?.conversation,
+                messages: messageArray.concat(
+                  convoObject.conversation.messages
+                ),
+              },
+            }
+          : { ...convoObject }
+      )
+    );
   };
 
   const deleteFriend = (friendID) => {
