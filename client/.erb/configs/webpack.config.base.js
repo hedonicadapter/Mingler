@@ -5,6 +5,7 @@
 import path from 'path';
 import webpack from 'webpack';
 import { dependencies as externals } from '../../src/package.json';
+const nodeExternals = require('webpack-node-externals');
 
 export default {
   externals: [...Object.keys(externals || {})],
