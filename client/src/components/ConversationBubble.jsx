@@ -1,46 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 
+import styles from './ConversationBubble.module.css';
 import colors from '../config/colors';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
-
-const conversationText = css({
-  margin: 0,
-  padding: 10,
-  maxWidth: '100%',
-  wordWrap: 'break-all',
-  whiteSpace: 'break-spaces',
-  textOverflow: ' ',
-  fontSize: '0.8em',
-});
-const sentTime = css({
-  color: colors.defaultPlaceholderTextColor,
-  padding: 8,
-  marginInline: 3,
-  fontSize: '0.6em',
-  letterSpacing: '1px',
-});
 
 export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
   const currentUser = useSelector((state) => getCurrentUser(state));
 
   const sentByMe = fromID === currentUser?._id;
-
-  const bubbleContainer = css({
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    padding: 3,
-    justifyContent: sentByMe ? 'flex-end' : 'flex-start',
-  });
-  const bubble = css({
-    backgroundColor: sentByMe ? colors.darkmodeLightBlack : colors.coffeeBrown,
-    borderRadius: '15px',
-    marginRight: 10,
-  });
 
   return (
     <motion.div
@@ -48,25 +17,40 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       duration={{ transition: 0.15 }}
-      className={bubbleContainer()}
+      className={styles.bubbleContainer}
+      style={{ justifyContent: sentByMe ? 'flex-end' : 'flex-start' }}
     >
       {sentByMe ? (
         <>
-          <div className={sentTime()}>
+          <div className={styles.sentTime}>
             {new Date(sent).toLocaleTimeString('en-US', {
               timeStyle: 'short',
             })}
           </div>
-          <div className={bubble()}>
-            <p className={conversationText()}>{message}</p>
+          <div
+            className={styles.bubble}
+            style={{
+              backgroundColor: sentByMe
+                ? colors.darkmodeLightBlack
+                : colors.coffeeBrown,
+            }}
+          >
+            <p className={styles.conversationText}>{message}</p>
           </div>
         </>
       ) : (
         <>
-          <div className={bubble()}>
-            <p className={conversationText()}>{message}</p>
+          <div
+            className={styles.bubble}
+            style={{
+              backgroundColor: sentByMe
+                ? colors.darkmodeLightBlack
+                : colors.coffeeBrown,
+            }}
+          >
+            <p className={styles.conversationText}>{message}</p>
           </div>
-          <div className={sentTime()} style={{ padding: 0 }}>
+          <div className={styles.sentTime} style={{ padding: 0 }}>
             {new Date(sent).toLocaleTimeString('en-US', {
               timeStyle: 'short',
             })}

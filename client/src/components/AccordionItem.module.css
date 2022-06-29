@@ -1,0 +1,30 @@
+.header {
+  z-index: 5;
+}
+
+.separatorContainer {
+  z-index: 80;
+  position: relative;
+}
+
+.separator {
+  position: absolute;
+  outline: 1px solid var(--off-white-hovered);
+  width: 100%;
+  transition: opacity 0.15s ease;
+  filter: blur(1px);
+}
+
+.messageIcon {
+  transform: scaleX(-1);
+  height: 22px;
+  width: 22px;
+  transition: color 0.15s ease;
+  transition: opacity 0.15s ease;
+}
+.messageIcon:hover {
+  color: var(--dark-mode-black);
+}
+.messageIcon:active {
+  color: var(--off-white-pressed);
+}

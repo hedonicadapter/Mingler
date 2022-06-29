@@ -1,0 +1,12 @@
+.header {
+  font-size: 0.9em;
+
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px;
+  padding-inline: 26px;
+
+  z-index: 5;
+}

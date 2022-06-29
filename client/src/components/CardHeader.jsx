@@ -1,29 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { css, styled } from '@stitches/react';
 import Avatar from 'react-avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../config/colors';
 import Marky from './Marky';
+import styles from './CardHeader.module.css';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
-
-const nameAndActivityContainer = css({
-  marginLeft: '20px',
-  paddingRight: '20px',
-});
-const nameContainer = css({
-  paddingBottom: 2,
-});
-
-const text = css({
-  fontSize: '1.3em',
-  letterSpacing: '1px',
-  fontFamily: 'Cormorant SC',
-});
-
-const statusIndicatorContainer = css({
-  position: 'absolute',
-});
 
 const AvatarContainer = ({
   expanded,
@@ -158,18 +140,6 @@ export default function CardHeader({
     setRefresh(!refresh);
   };
 
-  const markyContainer = css({
-    paddingLeft: 5,
-    marginLeft: isWidgetHeader ? 25 : 20,
-    marginTop: 4,
-    marginBottom: -4,
-  });
-  const markyContainerTwo = css({
-    paddingLeft: 5,
-    marginLeft: isWidgetHeader ? 55 : 45,
-    marginTop: 6,
-  });
-
   return (
     <div ref={cardHeaderRef}>
       <div
@@ -191,8 +161,8 @@ export default function CardHeader({
             isMe={isMe}
           />
         </div>
-        <div className={nameAndActivityContainer()}>
-          <div className={nameContainer()}>
+        <div className={styles.nameAndActivityContainer}>
+          <div className={styles.nameContainer}>
             <motion.div
             // animate={{
             //   scale: expanded ? 0.8 : 1,
@@ -201,7 +171,7 @@ export default function CardHeader({
             // }}
             >
               <div
-                className={text()}
+                className={styles.text}
                 style={{
                   color: expanded
                     ? colors.darkmodeLightBlack
@@ -212,7 +182,10 @@ export default function CardHeader({
               </div>
             </motion.div>
           </div>
-          <div className={markyContainer()}>
+          <div
+            className={styles.markyContainer}
+            style={{ marginLeft: isWidgetHeader ? 25 : 20 }}
+          >
             <Marky
               {...mainActivity}
               userID={userID}
@@ -233,7 +206,8 @@ export default function CardHeader({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
-                      className={markyContainerTwo()}
+                      className={styles.markyContainerTwo}
+                      style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
                     >
                       <Marky
                         {...activity}

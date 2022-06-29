@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { css } from '@stitches/react';
 
 import '../App.global.css';
+import styles from './FriendsList.module.css';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import AccordionItem from './AccordionItem';
@@ -22,13 +22,6 @@ import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import useDebounce from '../helpers/useDebounce';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
-
-const container = css({
-  display: 'flex',
-  flexFlow: 'column',
-  height: '100vh',
-  backgroundColor: 'transparent',
-});
 
 export const EmptySpaceFiller = ({}) => {
   const dispatch = useDispatch();
@@ -137,7 +130,7 @@ export default function FriendsList() {
       </AnimatePresence>
       <div
         onContextMenu={() => ipcRenderer.send('context-menu')}
-        className={container()}
+        className={styles.container}
         spellCheck="false"
       >
         <div style={{ flex: '0 1 auto' }}>

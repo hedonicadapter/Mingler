@@ -1,46 +1,12 @@
 import React, { useState } from 'react';
-import { css, styled } from '@stitches/react';
 import { GoPrimitiveDot } from 'react-icons/go';
 
+import styles from './MenuButton.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
-
-const container = css({
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  margin: 10,
-  width: 110,
-  backgroundColor: colors.darkmodeBlack,
-  color: colors.offWhite,
-  zIndex: 55,
-});
-const menuButtonStyle = css({
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  margin: 16,
-  height: 10,
-  width: 10,
-  borderRadius: '50%',
-  zIndex: 55,
-});
-const list = css({
-  listStyleType: 'none',
-  listStyle: 'none',
-  width: '100%',
-  padding: 10,
-  paddingTop: 20,
-  paddingRight: 15,
-  margin: 0,
-});
-const listItem = css({
-  fontSize: '0.8em',
-  letterSpacing: '1px',
-});
 
 export default function MenuButton() {
   const { signOut } = useAuth();
@@ -79,7 +45,7 @@ export default function MenuButton() {
       <AnimatePresence>
         {menuVisibility && (
           <motion.div
-            className={container()}
+            className={styles.container}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -89,7 +55,7 @@ export default function MenuButton() {
             onMouseLeave={() => setMenuVisibility(false)}
           >
             <motion.ol
-              className={list()}
+              className={styles.list}
               variants={{
                 hidden: { opacity: 0 },
                 show: {
@@ -119,7 +85,7 @@ export default function MenuButton() {
               {/* <hr /> */}
               {currentUser && (
                 <motion.li
-                  className={listItem()}
+                  className={styles.listItem}
                   whileHover={{ color: colors.offWhitePressed2 }}
                   transition={{ duration: 0.15 }}
                   variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
@@ -129,7 +95,7 @@ export default function MenuButton() {
                 </motion.li>
               )}
               <motion.li
-                className={listItem()}
+                className={styles.listItem}
                 whileHover={{ color: colors.offWhitePressed2 }}
                 transition={{ duration: 0.15 }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
@@ -141,7 +107,7 @@ export default function MenuButton() {
         )}
       </AnimatePresence>
       <motion.div
-        className={menuButtonStyle()}
+        className={styles.menuButtonStyle}
         animate={menuVisibility ? 'visible' : 'hidden'}
         variants={{
           visible: { backgroundColor: colors.offWhite },
@@ -163,7 +129,7 @@ export default function MenuButton() {
     //     width: 100,
     //     // y: 0,
     //   }}
-    //   className={menuButtonStyle()}
+    //   className={styles.menuButtonStyle}
     // >
     //   <div style={{ fontSize: '0.2em' }}>yooo</div>
     // </motion.div>

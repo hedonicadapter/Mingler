@@ -3,7 +3,7 @@ import './App.global.css';
 import Widget from './components/Widget';
 import { ConnectedRouter } from 'connected-react-router';
 import { Route } from 'react-router';
-import ConnectChatClientPopup from './components/ConnectChatClientPopup';
+// import ConnectChatClientPopup from './components/ConnectChatClientPopup';
 import SettingsContent from './components/SettingsContent';
 import FindFriendsContent from './components/FindFriendsContent';
 
@@ -13,11 +13,11 @@ export default function App({ history, context }) {
       <Route path="/" exact component={Widget} />
       <Route path="/findfriends" exact component={FindFriendsContent} />
       <Route path="/settings" exact component={SettingsContent} />
-      <Route
+      {/* <Route
         path="/connectChatClient"
         exact
         component={ConnectChatClientPopup}
-      />
+      /> */}
     </ConnectedRouter>
   );
 }

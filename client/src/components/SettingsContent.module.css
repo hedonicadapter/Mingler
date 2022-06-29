@@ -1,0 +1,93 @@
+.container {
+  background-color: var(--off-white);
+  letter-spacing: 1px;
+}
+
+.menuAndContentContainer {
+  display: flex;
+  flex-direction: row;
+}
+
+.menu {
+  flex-direction: column;
+  width: 120px;
+  background-color: var(--off-white-pressed);
+}
+
+.contentContainer {
+  padding: 24px;
+  flex: 1;
+}
+
+.contentHeader {
+  font-size: 1.1em;
+  color: var(--dark-mode-light-black);
+  padding-bottom: 12px;
+}
+
+.profilePictureFormContainer {
+  background-color: var(--off-white-pressed);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  margin-bottom: 8px;
+}
+
+.profilePictureErrorContainer {
+  padding-right: 8px;
+  margin: 8px;
+  width: 100%;
+  height: 100%;
+  margin-right: auto;
+  align-self: center;
+  color: var(--coffee-red);
+  font-size: 0.9em;
+}
+
+.avatarContainer {
+  margin-right: auto;
+  align-self: center;
+
+  padding: 6px;
+  padding-left: 6px;
+}
+.avatarContainer:hover {
+  cursor: pointer;
+  background-color: var(--off-white-pressed2);
+  border-radius: 50%;
+}
+
+.inputsContainer {
+  flex-direction: row;
+  padding-right: 8px;
+  margin: 5px;
+}
+
+.connectSpotifyContainer {
+  border-radius: 2px;
+  padding: 6px;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.9em;
+}
+.connectSpotifyContainer:hover {
+  border-color: var(--coffee-green);
+  color: var(--coffee-green);
+  cursor: pointer;
+}
+
+.genericInput {
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+.genericInput:hover,
+.genericInput:focus {
+  background-color: var(--off-white-pressed);
+  color: var(--dark-mode-black);
+}

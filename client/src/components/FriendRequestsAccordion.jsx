@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { css } from '@stitches/react';
 
+import styles from './FriendRequestsAccordion.module.css';
 import colors from '../config/colors';
 import UserItem from './UserItem';
 import { useLocalStorage } from '../helpers/localStorageManager';
@@ -11,19 +11,6 @@ import { getCurrentUser } from '../mainState/features/settingsSlice';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 
 const generalPadding = 12;
-
-const header = css({
-  fontSize: '0.9em',
-
-  alignSelf: 'center',
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  padding: generalPadding,
-  paddingInline: 26,
-
-  zIndex: 5,
-});
 
 export default function FriendRequestsAccordion({
   friendRequests,
@@ -104,7 +91,7 @@ export default function FriendRequestsAccordion({
         }}
         transition={{ duration: 0.15 }}
         onClick={() => toggleExpansion()}
-        className={header()}
+        className={styles.header}
       >
         <span>friend requests</span>
         <span style={{ fontSize: '0.8em', padding: 3, paddingRight: 0 }}>

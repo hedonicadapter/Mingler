@@ -1,4 +1,3 @@
-import { css, styled } from '@stitches/react';
 import React, { useState } from 'react';
 import colors from '../config/colors';
 import DAO from '../config/DAO';
@@ -8,6 +7,7 @@ const ipcRenderer = require('electron').ipcRenderer;
 const login = require('facebook-chat-api');
 const fs = require('fs');
 
+import styles from './ConnectChatClientPopup.module.css';
 import messengerLogo from '../../assets/icons/messenger_logo.png';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -41,49 +41,6 @@ export default function ConnectChatClientPopup() {
     setEmailOrPhone(email);
     dispatch(setAccessTokenMain(accessToken));
     set_id(userID);
-  });
-
-  const container = css({
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    color: colors.darkmodeMediumWhite,
-    textAlign: 'center',
-    height: '100%',
-    marginRight: 30,
-    marginLeft: 30,
-  });
-  const containerBg = css({
-    backgroundColor: colors.darkmodeBlack,
-    height: '100%',
-  });
-  const headerText = css({
-    color: colors.darkmodeHighWhite,
-    fontSize: '2em',
-  });
-  const subHeaderText = css({
-    color: colors.darkmodeHighWhite,
-    fontSize: '1.2em',
-    fontWeight: 'lighter',
-  });
-  const inputStyle = css({
-    WebkitAppearance: 'none',
-    outline: 'none',
-    border: '1px solid black',
-    backgroundColor: colors.darkmodeLightBlack,
-
-    margin: 4,
-    padding: 10,
-    borderRadius: 3,
-  });
-  const connectButton = css({
-    margin: 4,
-    padding: 8,
-    borderRadius: 3,
-    border: '1px solid black',
-    fontWeight: 'bold',
-
-    cursor: 'pointer',
   });
 
   const handleEmailInput = (evt) => {
@@ -148,16 +105,18 @@ export default function ConnectChatClientPopup() {
   };
 
   return (
-    <div className={containerBg()}>
-      <div className={[container(), 'clickable'].join(' ')}>
+    <div className={styles.containerBg}>
+      <div className={[styles.container, 'clickable'].join(' ')}>
         <img
           src={messengerLogo}
           width={55}
           height={55}
           style={{ marginLeft: 'auto', marginRight: 'auto', paddingBottom: 30 }}
         />
-        <h1 className={headerText()}>Messenger</h1>
-        <h3 className={subHeaderText()}>Sign in with Facebook to connect.</h3>
+        <h1 className={styles.headerText}>Messenger</h1>
+        <h3 className={styles.subHeaderText}>
+          Sign in with Facebook to connect.
+        </h3>
         <div
           style={{
             color: colors.samSexyRed,
@@ -175,7 +134,7 @@ export default function ConnectChatClientPopup() {
           value={emailOrPhone || ''}
           onChange={handleEmailInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'emailOrPhone')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             color:
               emailOrPhoneFieldFocused && emailOrPhone
@@ -197,7 +156,7 @@ export default function ConnectChatClientPopup() {
           value={password || ''}
           onChange={handlePasswordInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             color:
               passwordFieldFocused && password
@@ -229,7 +188,7 @@ export default function ConnectChatClientPopup() {
             },
           }}
           whileTap={{ opacity: 0.4, transition: { duration: 0.1 } }}
-          className={connectButton()}
+          className={styles.connectButton}
           // formFilled={formFilled}
           onClick={handleConnectButton}
         >

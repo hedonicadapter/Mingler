@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import { VscChromeMinimize } from 'react-icons/vsc';
 import { BsCircle } from 'react-icons/bs';
 import { IoIosClose } from 'react-icons/io';
 
+import styles from './FindFriendsContent.module.css';
 import UserItem from './UserItem';
 import DAO from '../config/DAO';
 import colors from '../config/colors';
@@ -28,39 +28,6 @@ import genericErrorHandler from '../helpers/genericErrorHandler';
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
-
-const container = css({
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  flexWrap: 'nowrap',
-  pointerEvents: 'auto',
-  backgroundColor: colors.offWhite,
-});
-const header = css({ flexShrink: 0 });
-const body = css({ flexGrow: '1', overflow: 'auto' });
-
-const searchInputStyle = css({
-  WebkitAppearance: 'none',
-  outline: 'none',
-  border: 'none',
-
-  fontSize: '1.0em',
-  // fontWeight: 600,
-
-  overflow: 'hidden',
-
-  width: '100%',
-  padding: 14,
-
-  backgroundColor: colors.offWhite,
-});
-
-const searchResultsStyle = css({
-  height: '100vh',
-  overflowY: 'scroll',
-});
 
 export default function FindFriendsContent() {
   makeClickthrough();
@@ -215,14 +182,16 @@ export default function FindFriendsContent() {
   };
 
   return (
-    <div className={container()}>
-      <header className={header()}>
+    <div className={styles.container}>
+      <header className={styles.header}>
         <WindowFrame />
         <div onKeyDown={handleEscapeKey}>
           <motion.input
-            className={[searchInputStyle(), 'undraggable', 'clickable'].join(
-              ' '
-            )}
+            className={[
+              styles.searchInputStyle,
+              'undraggable',
+              'clickable',
+            ].join(' ')}
             whileHover={{
               color: error ? colors.coffeeRed : colors.darkmodeLightBlack,
             }}
@@ -242,7 +211,7 @@ export default function FindFriendsContent() {
           />
         </div>
       </header>
-      <div className={body()}>
+      <div className={styles.body}>
         {foundFriends?.map((user, index) => (
           <UserItem
             key={index}

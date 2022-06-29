@@ -1,76 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { css } from '@stitches/react';
 import Avatar from 'react-avatar';
 
+import styles from './UserItem.module.css';
 import colors from '../config/colors';
 import animations from '../config/animations';
 
-const container = css({
-  flexDirection: 'row',
-  display: 'flex',
-  padding: 6,
-});
-
-const nameAndActivityContainer = css({
-  alignSelf: 'center',
-  display: 'flex',
-  flexDirection: 'row',
-  width: '100%',
-  justifyContent: 'space-between',
-});
-
-const buttonsContainer = css({
-  paddingRight: 6,
-});
-
-const text = css({
-  paddingLeft: '10px',
-  color: colors.darkmodeBlack,
-  fontSize: '1.2em',
-  letterSpacing: '1px',
-  fontFamily: 'Cormorant SC',
-});
-
-const header = css({ paddingLeft: 5, paddingTop: 5, paddingBottom: 5 });
-
-const friendRequestButtonStyle = css({
-  padding: 10,
-  textAlign: 'left',
-  fontSize: '0.8em',
-  maxWidth: '72%',
-  margin: 'auto',
-  color: colors.darkmodeLightBlack,
-  cursor: 'pointer',
-});
-
-const cancelRequestButtonStyle = css({
-  padding: 10,
-  textAlign: 'left',
-  fontSize: '0.8em',
-  margin: 'auto',
-  color: colors.darkmodeLightBlack,
-  cursor: 'pointer',
-});
-
-const AcceptRejectButtonsContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  marginTop: -6,
-  paddingRight: 4,
-});
-
-const errorStyle = css({
-  fontSize: '0.9em',
-  color: colors.coffeeRed,
-  padding: 3,
-});
-
 const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
   return (
-    <div className={AcceptRejectButtonsContainer()}>
+    <div className={styles.AcceptRejectButtonsContainer}>
       {error ? (
-        <div className={errorStyle()}>{error}</div>
+        <div className={styles.errorStyle}>{error}</div>
       ) : (
         <>
           <motion.div
@@ -83,7 +23,7 @@ const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
               borderTop: '1px solid ' + colors.offWhitePressed2,
               margin: 'auto',
             }}
-            className={friendRequestButtonStyle()}
+            className={styles.friendRequestButtonStyle}
             onClick={() => handleAccept()}
           >
             accept
@@ -99,7 +39,7 @@ const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
               borderTop: '1px solid ' + colors.offWhitePressed2,
               margin: 'auto',
             }}
-            className={friendRequestButtonStyle()}
+            className={styles.friendRequestButtonStyle}
             onClick={() => handleReject()}
           >
             x
@@ -112,7 +52,7 @@ const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
 
 const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
   return error ? (
-    <div className={errorStyle()}>{error}</div>
+    <div className={styles.errorStyle}>{error}</div>
   ) : (
     <motion.div
       variants={{
@@ -125,7 +65,7 @@ const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
       }}
       animate={hovered ? 'true' : 'false'}
       transition={{ duration: 0.15 }}
-      className={buttonsContainer()}
+      className={styles.buttonsContainer}
     >
       <motion.div
         whileHover={{
@@ -137,7 +77,7 @@ const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
           borderTop: '1px solid ' + colors.offWhitePressed2,
           margin: 'auto',
         }}
-        className={friendRequestButtonStyle()}
+        className={styles.friendRequestButtonStyle}
         onClick={() => handleSendRequest()}
       >
         add
@@ -214,12 +154,12 @@ export default function UserItem({
         style={{
           backgroundColor: alternatingColor[index % alternatingColor.length],
         }}
-        className={header()}
+        className={styles.header}
       >
-        <motion.div className={container()}>
+        <motion.div className={styles.container}>
           <Avatar round name={user.username} size="34" src={profilePicture} />
-          <div className={nameAndActivityContainer()}>
-            <div className={text()}>{user.username}</div>
+          <div className={styles.nameAndActivityContainer}>
+            <div className={styles.text}>{user.username}</div>
 
             {alreadyFriends ? (
               <></>
@@ -241,7 +181,7 @@ export default function UserItem({
             ) : (
               <div onClick={() => handleCancelRequest()}>
                 {error ? (
-                  <div className={errorStyle()}>{error}</div>
+                  <div className={styles.errorStyle}>{error}</div>
                 ) : (
                   <motion.div
                     whileHover={{
@@ -254,7 +194,7 @@ export default function UserItem({
                       borderTop: '1px solid ' + colors.offWhitePressed2,
                       margin: 'auto',
                     }}
-                    className={cancelRequestButtonStyle()}
+                    className={styles.cancelRequestButtonStyle}
                   >
                     cancel request
                   </motion.div>

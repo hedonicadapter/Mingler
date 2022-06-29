@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { BsDot } from 'react-icons/bs';
 
 import colors from '../config/colors';
+import styles from './ChatBox.module.css';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
 import DAO from '../config/DAO';
@@ -17,15 +17,6 @@ const ConnectButton = () => {
   const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
   const [connectChatClientPopUpWindow, setConnectChatClientPopupWindow] =
     useState(new BrowserWindow(connectChatClientPopUpConfig));
-
-  const connectButtonContainer = css({
-    flex: 1,
-    color: colors.darkmodeMediumWhite,
-    fontWeight: 'bold',
-    fontSize: '0.8em',
-    cursor: 'pointer',
-    borderRadius: 3,
-  });
 
   const connectChatClientPopUp = (chosenClient) => {
     connectChatClientPopUpWindow.setResizable(true);
@@ -59,7 +50,7 @@ const ConnectButton = () => {
 
   return (
     <div
-      className={connectButtonContainer()}
+      className={styles.connectButtonContainer}
       onClick={() => connectChatClientPopUp(chatClientSelection)}
     >
       Connect
@@ -67,65 +58,10 @@ const ConnectButton = () => {
   );
 };
 
-const chatContainer = css({
-  borderRadius: '5px',
-  borderColor: 'grey',
-  display: 'flex',
-  flexDirection: 'column',
-  maxHeight: 200,
-  padding: 10,
-  zIndex: 200,
-});
-const messageArea = css({
-  overflowY: 'scroll',
-  overflowX: 'hidden',
-  flex: 1,
-  // height: 300,
-  marginBottom: 4,
-
-  scrollSnapType: 'y proximity',
-
-  '&> div > div:last-child': {
-    scrollSnapAlign: 'end',
-  },
-});
-const inputContainer = css({
-  borderTop: '1px solid ' + colors.offWhitePressed2,
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginTop: 6,
-});
-const inputBox = css({
-  border: 'none',
-  outline: 'none',
-  resize: 'none',
-  backgroundColor: 'transparent',
-  paddingTop: 8,
-  marginLeft: 4,
-  marginRight: 4,
-  flex: 1,
-  fontFamily: 'inherit',
-});
-
-const iconContainer = css({
-  marginTop: 4,
-  paddingRight: 8,
-  paddingTop: 4,
-});
-const sendIcon = css({
-  width: 10,
-  height: 10,
-  borderRadius: '50%',
-  backgroundColor: colors.coffeeBlue,
-  transition: 'opacity 0.15s ease',
-});
-
 const SendButton = ({ inputText, handleSendButton }) => {
   return (
     <motion.div
-      className={iconContainer()}
+      className={styles.iconContainer}
       whileHover={{ cursor: inputText ? 'pointer' : 'auto' }}
       onClick={handleSendButton}
     >
@@ -139,7 +75,10 @@ const SendButton = ({ inputText, handleSendButton }) => {
         It makes sense because people dont tend to use send buttons for messages anymore,
         rather than just pressing enter 
         */}
-        <div className={sendIcon()} style={{ opacity: inputText ? 1 : 0 }} />
+        <div
+          className={styles.sendIcon}
+          style={{ opacity: inputText ? 1 : 0 }}
+        />
       </motion.div>
     </motion.div>
   );
@@ -160,7 +99,7 @@ const ChatInput = ({
       maxRows={10}
       autoFocus={settingsFocused ? false : true}
       placeholder="Aa"
-      className={inputBox()}
+      className={styles.inputBox}
       style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
       value={error ? error : inputText || ''}
       readOnly={error ? true : false}
@@ -174,26 +113,6 @@ const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const defaultChatClient = 'Mingler'; //change to useLocalStorage value later
 
-  const chatClientDropdown = css({
-    marginRight: 8,
-    border: 'none',
-    outline: 'none',
-    backgroundColor: colors.darkmodeBlack,
-    color: dropdownVisible
-      ? colors.darkmodeMediumWhite
-      : colors.darkmodeLightBlack,
-    fontWeight: 'bold',
-    marginTop: 6,
-    padding: 3,
-    paddingRight: 5,
-    transition: 'color .15 ease',
-    borderRadius: '2px',
-    boxShadow: 'none',
-  });
-  const dropdownItem = css({
-    outline: 'none',
-  });
-
   const handleChatClientSelection = (evt) => {
     setChatClientSelection(evt.target.value);
   };
@@ -205,12 +124,17 @@ const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
   return (
     <select
       onClick={toggleChatClientDropdown}
-      className={chatClientDropdown()}
+      className={styles.chatClientDropdown}
+      style={{
+        color: dropdownVisible
+          ? colors.darkmodeMediumWhite
+          : colors.darkmodeLightBlack,
+      }}
       value={chatClientSelection}
       onChange={handleChatClientSelection}
     >
       <option
-        className={dropdownItem()}
+        className={styles.dropdownItem}
         value="Discord"
         // onMouseOver={{ color: colors.darkmodeHighWhite }}
       >
@@ -218,14 +142,14 @@ const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
       </option>
       <option
         disabled
-        className={dropdownItem()}
+        className={styles.dropdownItem}
         value="Messenger"
         // onMouseOver={{ color: colors.darkmodeHighWhite }}
       >
         Messenger
       </option>
       <option
-        className={dropdownItem()}
+        className={styles.dropdownItem}
         value="Mingler"
         // onMouseOver={{ color: colors.darkmodeHighWhite }}
       >
@@ -369,8 +293,8 @@ export const ChatBox = ({ receiver, expanded }) => {
   }, [anchorRef]);
 
   return (
-    <div className={chatContainer()}>
-      <div className={messageArea()} onScroll={handleMessageAreaScroll}>
+    <div className={styles.chatContainer}>
+      <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
         {currentConvo?.messages?.map((message, index) => {
           return (
             <ConversationBubble
@@ -383,7 +307,7 @@ export const ChatBox = ({ receiver, expanded }) => {
         })}
         <div ref={anchorRef} />
       </div>
-      <div className={inputContainer()}>
+      <div className={styles.inputContainer}>
         {chatClientSelection === 'Mingler' ? (
           useMemo(
             () => (

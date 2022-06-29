@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { css } from '@stitches/react';
+import styles from './AccordionItem.module.css';
 
 import { BiConversation } from 'react-icons/bi';
 
@@ -11,10 +11,6 @@ import colors from '../config/colors';
 import { useFriends } from '../contexts/FriendsContext';
 
 const ipcRenderer = require('electron').ipcRenderer;
-
-const header = css({
-  zIndex: 5,
-});
 
 const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
   return (
@@ -43,24 +39,10 @@ const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
 };
 
 const CardSeparator = ({ cardHovered, expanded }) => {
-  const separatorContainer = css({
-    zIndex: 80,
-    position: 'relative',
-  });
-  const separator = css({
-    position: 'absolute',
-    // height: '2px',
-    outline: '1px solid ' + colors.offWhiteHovered,
-    width: '100%',
-    // backgroundColor: colors.offWhiteHovered,
-    transition: 'opacity 0.15s ease',
-    filter: 'blur(1px)',
-  });
-
   return (
-    <div className={separatorContainer()}>
+    <div className={styles.separatorContainer}>
       <div
-        className={separator()}
+        className={styles.separator}
         style={{
           opacity: cardHovered ? (expanded ? 0 : 1) : 0,
         }}
@@ -151,28 +133,6 @@ export default function AccordionItem({
     }
   };
 
-  const messageIcon = css({
-    transform: 'scaleX(-1)',
-    height: 22,
-    width: 22,
-    transition: 'color 0.15s ease',
-    transition: 'opacity 0.15s ease',
-
-    color: expanded
-      ? chatVisible
-        ? colors.darkmodeLightBlack
-        : colors.darkmodeBlack
-      : colors.darkmodeBlack,
-
-    opacity: cardHovered ? 0.6 : 0,
-    '&:hover': {
-      color: colors.darkmodeBlack,
-    },
-    '&:active': {
-      color: colors.offWhitePressed,
-    },
-  });
-
   return (
     <div onContextMenu={handleOnContextMenu}>
       <motion.header
@@ -201,7 +161,7 @@ export default function AccordionItem({
           // paddingBottom: expanded ? 24 : 0,
         }}
         onClick={toggleExpansion}
-        className={header()}
+        className={styles.header}
         onMouseEnter={() => setCardHovered(true)}
         onMouseLeave={() => setCardHovered(false)}
       >
@@ -238,7 +198,18 @@ export default function AccordionItem({
               }}
               onClick={(e) => toggleChat(e)}
             >
-              <BiConversation className={messageIcon()} />
+              <BiConversation
+                // className={messageIcon()}
+                style={{
+                  color: expanded
+                    ? chatVisible
+                      ? colors.darkmodeLightBlack
+                      : colors.darkmodeBlack
+                    : colors.darkmodeBlack,
+
+                  opacity: cardHovered ? 0.6 : 0,
+                }}
+              />
             </div>
           )}
         </div>

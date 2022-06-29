@@ -1,30 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { css } from '@stitches/react';
+import styles from './AccordionSetting.module.css';
 
 import colors from '../config/colors';
 import animations from '../config/animations';
-
-const container = css({ width: '100%', textAlign: 'right' });
-const header = css({
-  width: '100%',
-  paddingBlock: 8,
-
-  color: colors.darkmodeBlack,
-});
-const settingText = css({ fontSize: '0.8em', paddingRight: 12 });
-const subSettings = css({
-  color: colors.darkmodeLightBlack,
-  fontSize: '0.7em',
-  paddingRight: 12,
-
-  paddingBlock: 4,
-});
-const bodyContainer = css({});
-const body = css({
-  width: '100%',
-});
 
 export default function AccordionSetting({
   setting,
@@ -39,7 +19,7 @@ export default function AccordionSetting({
   };
 
   return (
-    <div className={container()}>
+    <div className={styles.container}>
       <motion.header
         animate={isExpanded ? 'expanded' : 'notExpanded'}
         variants={{
@@ -59,12 +39,18 @@ export default function AccordionSetting({
         whileTap={animations.whileTap}
         transition={{ duration: 0.1 }}
         onClick={() => toggleExpansion()}
-        className={header()}
-        style={index === 0 ? { paddingTop: 30 } : {}}
+        style={
+          index === 0
+            ? { paddingTop: 30, paddingBottom: 8 }
+            : { paddingBlock: 8 }
+        }
+        className={styles.header}
       >
-        <div className={settingText()}> {setting.title}</div>
+        <div className={styles.settingText}> {setting.title}</div>
       </motion.header>
-      <div className={bodyContainer()}>
+      <div
+      // className={styles.bodyContainer}
+      >
         <AnimatePresence initial={false}>
           {isExpanded && (
             <motion.section
@@ -76,7 +62,7 @@ export default function AccordionSetting({
                 collapsed: { height: 0, opacity: 0 },
               }}
               transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
-              className={body()}
+              className={styles.body}
             >
               {/* <div className={subSettings()}> other setting</div> */}
             </motion.section>

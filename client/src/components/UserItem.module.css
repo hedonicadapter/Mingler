@@ -1,0 +1,63 @@
+.container {
+  flex-direction: row;
+  display: flex;
+  padding: 3px;
+}
+
+.nameAndActivityContainer {
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.buttonsContainer {
+  padding-right: 6px;
+}
+
+.text {
+  padding-left: 10px;
+  color: var(--dark-mode-black);
+  font-size: 1.2em;
+  letter-spacing: 1px;
+  font-family: 'Cormorant SC';
+}
+
+.header {
+  padding-left: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.friendRequestButtonStyle {
+  padding: 10px;
+  text-align: left;
+  font-size: 0.8em;
+  max-width: 72%;
+  margin: auto;
+  color: var(--dark-mode-light-black);
+  cursor: pointer;
+}
+
+.cancelRequestButtonStyle {
+  padding: 10px;
+  text-align: left;
+  font-size: 0.8em;
+  margin: auto;
+  color: var(--dark-mode-light-black);
+  cursor: pointer;
+}
+
+.AcceptRejectButtonsContainer {
+  display: flex;
+  flex-direction: row;
+  margin-top: -6px;
+  padding-right: 4px;
+}
+
+.errorStyle {
+  font-size: 0.9em;
+  color: var(--coffee-red);
+  padding: 3px;
+}

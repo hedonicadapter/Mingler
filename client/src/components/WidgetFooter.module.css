@@ -1,0 +1,35 @@
+.container {
+  font-size: 0.9em;
+
+  background-color: var(--off-white);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.searchInputStyle {
+  font-size: 0.9em;
+  letter-spacing: 1px;
+
+  transition: opacity 0.15s ease;
+
+  margin: 15px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 18px;
+}
+.searchInputStyle::placeholder {
+  opacity: 0.7;
+}
+.searchInputStyle:hover::placeholder,
+.searchInputStyle:focus::placeholder {
+  opacity: 1;
+}
+
+.button {
+  font-size: 0.9em;
+  letter-spacing: 1px;
+  cursor: pointer;
+  background-color: transparent;
+  color: var(--dark-mode-black);
+}

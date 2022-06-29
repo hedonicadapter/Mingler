@@ -1,0 +1,47 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--off-white);
+  text-align: center;
+  height: 100%;
+  margin-right: 30px;
+  margin-left: 30px;
+}
+
+.containerBg {
+  background-color: var(--dark-mode-black);
+  height: 100%;
+}
+
+.headerText {
+  color: var(--off-white);
+  font-size: 2em;
+}
+
+.subHeaderText {
+  color: var(--off-white);
+  font-size: 1.2em;
+  font-weight: lighter;
+}
+
+.inputStyle {
+  -webkit-appearance: none;
+  outline: none;
+  border: 1px solid var(--dark-mode-light-black);
+  background-color: var(--dark-mode-light-black);
+
+  margin: 4px;
+  padding: 10px;
+  border-radius: 3px;
+}
+
+.connectButton {
+  margin: 4px;
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid var(--dark-mode-light-black);
+  font-weight: bold;
+
+  cursor: pointer;
+}

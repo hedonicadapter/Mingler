@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import './Widget.css';
-
+import styles from './Widget.module.css';
 import colors from '../config/colors';
 import FriendsList from './FriendsList';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -19,7 +18,6 @@ import {
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
-import { css } from '@stitches/react';
 
 const Border = () => {
   return <div style={{ float: 'left', minWidth: 8 }}>&nbsp;</div>;

@@ -2,6 +2,28 @@
  * @NOTE: Prepend a `~` to css file paths that are in your node_modules
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
+:root {
+  --main-color: #06c;
+  --off-white: rgba(253, 245, 241, 1);
+  --off-white-hovered: rgba(241, 235, 232, 255);
+  --off-white-pressed: rgba(196, 196, 196, 0.2);
+  --off-white-pressed2: rgba(196, 196, 196, 0.3);
+
+  --coffee-brown: rgba(96, 70, 59, 1);
+  --coffee-beige: rgba(230, 204, 178, 1);
+  --coffee-orange: rgba(255, 160, 92, 1);
+  --coffee-blue: #62b6cb;
+  --coffee-red: #8d3f3f;
+  --coffee-pink: #cea1a1;
+  --coffee-green: #73a580;
+
+  --default-placeholder-text-color: #757575;
+
+  --dark-mode-black: rgba(18, 18, 18, 0.86);
+  --dark-mode-light-black: rgba(14, 14, 14, 0.86);
+  --dark-mode-disabled-text: #8b8b8b;
+}
+
 html,
 body,
 #root,
@@ -152,6 +174,7 @@ h2 {
 
 /* width */
 ::-webkit-scrollbar {
+  /* display: none; */
   width: 8px;
 }
 

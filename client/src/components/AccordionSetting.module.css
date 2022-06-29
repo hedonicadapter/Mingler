@@ -1,0 +1,29 @@
+.container {
+  width: 100%;
+  text-align: right;
+}
+
+.header {
+  width: 100%;
+  padding-block: 8px;
+  color: var(--dark-mode-black);
+}
+
+.settingText {
+  padding-right: 12px;
+  font-size: 0.8em;
+}
+
+.subSettings {
+  padding-right: 12px;
+  color: var(--dark-mode-light-black);
+  font-size: 0.7em;
+  padding-block: 4px;
+}
+
+/* .bodyContainer {
+} */
+
+.body {
+  width: 100%;
+}

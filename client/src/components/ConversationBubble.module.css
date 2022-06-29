@@ -1,0 +1,30 @@
+.conversationText {
+  margin: 0px;
+  padding: 10px;
+  max-width: 100%;
+  word-wrap: break-all;
+  white-space: break-spaces;
+  text-overflow: ' ';
+  font-size: 0.8em;
+}
+
+.sentTime {
+  color: var(--default-placeholder-text-color);
+  padding: 8px;
+  margin-inline: 3px;
+  font-size: 0.6em;
+  letter-spacing: 1px;
+}
+
+.bubbleContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 3px;
+}
+
+.bubble {
+  border-radius: 15px;
+  margin-right: 10px;
+}

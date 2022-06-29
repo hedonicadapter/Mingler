@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { BsSpotify } from 'react-icons/bs';
 
-import UserItem from './UserItem';
+import styles from './SettingsContent.module.css';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import colors from '../config/colors';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,105 +29,6 @@ const ipcRenderer = require('electron').ipcRenderer;
 
 const settings = [{ title: 'General' }, { title: 'Account' }];
 
-const container = css({
-  backgroundColor: colors.offWhite,
-  letterSpacing: '1px',
-});
-
-const menuAndContentContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-});
-const menu = css({
-  // paddingTop: 12,
-  flexDirection: 'column',
-  width: '120px',
-  backgroundColor: colors.offWhitePressed,
-});
-const menuHeader = css({
-  color: colors.darkmodeDisabledBlack,
-  fontSize: '0.6em',
-  fontWeight: 'bold',
-  textAlign: 'right',
-  paddingTop: 12,
-  paddingRight: 10,
-  paddingBottom: 4,
-});
-const contentContainer = css({
-  padding: 24,
-  flex: 1,
-});
-const contentHeader = css({
-  // fontWeight: 'bold',
-  fontSize: '1.1em',
-  color: colors.darkmodeLightBlack,
-  paddingBottom: 12,
-});
-
-const profilePictureFormContainer = css({
-  backgroundColor: colors.offWhitePressed,
-  borderRadius: '2px',
-  display: 'flex',
-  flexDirection: 'row',
-  // width: '100%',
-  justifyContent: 'start',
-  marginBottom: 8,
-});
-const profilePictureErrorContainer = css({
-  paddingRight: 8,
-  margin: 8,
-  width: '100%',
-  height: '100%',
-  marginRight: 'auto',
-  alignSelf: 'center',
-  color: colors.coffeeRed,
-  fontSize: '0.9em',
-});
-const avatarContainer = css({
-  marginRight: 'auto',
-  alignSelf: 'center',
-
-  padding: 6,
-  paddingLeft: 6,
-  '&:hover': {
-    cursor: 'pointer',
-    backgroundColor: colors.darkmodeFocused,
-  },
-});
-const inputsContainer = css({
-  flexDirection: 'row',
-  paddingRight: 8,
-  margin: 5,
-});
-const connectSpotifyContainer = css({
-  borderRadius: '2px',
-  padding: 6,
-  paddingRight: 6,
-  display: 'flex',
-  flexDirection: 'row',
-  // alignItems: 'center', connect text looks more centered without this lmao
-  fontSize: '0.9em',
-
-  '&:hover': {
-    borderColor: colors.pastelGreen,
-    color: colors.pastelGreen,
-    cursor: 'pointer',
-  },
-});
-const genericInput = css({
-  width: '100%',
-  paddingTop: 5,
-  paddingBottom: 5,
-  paddingLeft: 5,
-  transition: 'background-color 0.15s ease',
-  fontFamily: 'inherit',
-
-  '&:hover, &:focus': {
-    backgroundColor: colors.offWhitePressed,
-    color: colors.darkmodeBlack,
-  },
-});
-
 const AccountSettingsContent = ({
   username,
   email,
@@ -153,8 +53,8 @@ const AccountSettingsContent = ({
 
   return (
     <>
-      <div className={profilePictureFormContainer()}>
-        <motion.div className={avatarContainer()}>
+      <div className={styles.profilePictureFormContainer}>
+        <motion.div className={styles.avatarContainer}>
           <motion.label
             whileHover={{ cursor: 'pointer' }}
             htmlFor="file-upload"
@@ -184,17 +84,17 @@ const AccountSettingsContent = ({
         </motion.div>
 
         {profilePictureError ? (
-          <div className={profilePictureErrorContainer()}>
+          <div className={styles.profilePictureErrorContainer}>
             {profilePictureError}
           </div>
         ) : (
-          <div className={inputsContainer()}>
+          <div className={styles.inputsContainer}>
             <TextareaAutosize
               spellCheck="false"
               placeholder="Username"
               maxLength={25}
               maxRows={1}
-              className={genericInput()}
+              className={styles.genericInput}
               readOnly={usernameError ? true : false}
               value={usernameError ? usernameError : username || ''}
               style={{
@@ -210,7 +110,7 @@ const AccountSettingsContent = ({
               placeholder="Email"
               maxLength={25}
               maxRows={1}
-              className={genericInput()}
+              className={styles.genericInput}
               readOnly={emailError ? true : false}
               value={emailError ? emailError : email || ''}
               style={{
@@ -230,7 +130,7 @@ const AccountSettingsContent = ({
         )}
       </div>
       <motion.div
-        className={connectSpotifyContainer()}
+        className={styles.connectSpotifyContainer}
         style={{
           color: spotifyError
             ? colors.coffeeRed
@@ -401,11 +301,10 @@ export default function SettingsContent() {
   }, []);
 
   return (
-    <div className={container()} onKeyDown={handleEscapeKey}>
+    <div className={styles.container} onKeyDown={handleEscapeKey}>
       <WindowFrame>
-        <div className={menuAndContentContainer()}>
-          <div className={menu()}>
-            {/* <div className={menuHeader()}>SETTINGS</div> */}
+        <div className={styles.menuAndContentContainer}>
+          <div className={styles.menu}>
             {settings.map((setting, index) => {
               return (
                 <div
@@ -424,8 +323,8 @@ export default function SettingsContent() {
               );
             })}
           </div>
-          <div className={contentContainer()}>
-            <div className={contentHeader()}>
+          <div className={styles.contentContainer}>
+            <div className={styles.contentHeader}>
               {settingsState.settingsContent}
             </div>
             {settingsState.settingsContent === 'Account' && (

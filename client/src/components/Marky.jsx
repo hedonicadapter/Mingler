@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as electron from 'electron';
-import { css, styled } from '@stitches/react';
 import { BiPlanet } from 'react-icons/bi';
 import { RiWindow2Fill, RiArrowDropUpLine } from 'react-icons/ri';
 import { BsSpotify, BsYoutube } from 'react-icons/bs';
 import { CgYoutube } from 'react-icons/cg';
 import { motion } from 'framer-motion';
 
+import styles from './Marky.module.css';
 import colors from '../config/colors';
 import DAO from '../config/DAO';
 import { useStatus } from '../contexts/UserStatusContext';
@@ -23,86 +23,21 @@ const buttonVariants = {
   },
 };
 
-const MarkyDiv = styled('div', {
-  zIndex: 80,
-  flexDirection: 'row',
-  display: 'flex',
-  transition: 'color .25s ease',
-  color: colors.darkmodeBlack,
-  alignItems: 'center',
-  variants: {
-    markyType: {
-      Window: { cursor: 'default' },
-      Track: {
-        '&:hover': {
-          color: colors.pastelGreen,
-          cursor: 'pointer',
-        },
-      },
-      Tab: {
-        '&:hover': {
-          color: colors.pastelBlue,
-          cursor: 'pointer',
-        },
-      },
-      YouTubeVideo: {
-        '&:hover': {
-          color: colors.pastelRed,
-          cursor: 'pointer',
-        },
-      },
-    },
+const markyVariants = {
+  Window: { cursor: 'default' },
+  Track: {
+    color: colors.pastelGreen,
+    cursor: 'pointer',
   },
-});
-const activityText = css({
-  // width: '80vw',
-  fontSize: '0.9em',
-
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-});
-const closeText = css({
-  // float: 'right',
-  fontWeight: '700',
-  fontSize: '0.9em',
-  color: colors.darkmodeDisabledText,
-});
-
-const windowIconStyle = css({
-  width: '19px; !important',
-  height: '19px; !important',
-  paddingRight: 5,
-  paddingLeft: 1,
-});
-const trackIconStyle = css({
-  width: '17px; !important',
-  height: '17px; !important',
-  paddingRight: 6,
-  paddingLeft: 1,
-});
-const tabIconStyle = css({
-  width: '21px; !important',
-  height: '21px; !important',
-  paddingRight: 4,
-});
-const yotubeIconStyle = css({
-  width: '17px; !important',
-  height: '17px; !important',
-  paddingRight: 7,
-  paddingLeft: 1,
-});
-
-const closeIconStyle = css({
-  float: 'right',
-  width: 20,
-  height: 20,
-  paddingRight: 0,
-  color: colors.darkmodeDisabledText,
-});
-const highZIndex = css({
-  zIndex: 15,
-});
+  Tab: {
+    color: colors.pastelBlue,
+    cursor: 'pointer',
+  },
+  YouTubeVideo: {
+    color: colors.pastelRed,
+    cursor: 'pointer',
+  },
+};
 
 // prop: isFromHeader ?
 // if true: use prop setExpanded to toggle the card body
@@ -200,25 +135,27 @@ export default function Marky({
 
   const ActivityIcon = () => {
     if (WindowTitle) {
-      return <RiWindow2Fill className={windowIconStyle()} />;
+      return <RiWindow2Fill className={styles.windowIconStyle} />;
     }
 
     if (TrackTitle) {
-      return <BsSpotify className={trackIconStyle()} />;
+      return <BsSpotify className={styles.trackIconStyle} />;
     }
 
     if (TabTitle || TabURL) {
-      return <BiPlanet className={tabIconStyle()} style={{ paddingTop: 1 }} />;
+      return (
+        <BiPlanet className={styles.tabIconStyle} style={{ paddingTop: 1 }} />
+      );
     }
 
     if (YouTubeTitle || YouTubeURL) {
-      return <BsYoutube className={yotubeIconStyle()} />;
+      return <BsYoutube className={styles.yotubeIconStyle} />;
       // return markyToReplaceWithYouTubeVideo ? (
       //   <motion.div variants={buttonVariants} whileHover="hover">
-      //     <RiArrowDropUpLine className={closeIconStyle()} />
+      //     <RiArrowDropUpLine className={styles.closeIconStyle} />
       //   </motion.div>
       // ) : (
-      //   <BsYoutube className={activityIconStyle()} />
+      //   <BsYoutube className={styles.activityIconStyle} />
       // );
     }
 
@@ -243,15 +180,19 @@ export default function Marky({
   };
 
   return (
-    <MarkyDiv markyType={markyType} onClick={(evt) => handleClick(evt)}>
+    <motion.div
+      className={styles.marky}
+      whileHover={markyType}
+      variants={markyVariants}
+      transition={{ duration: 0.1 }}
+      onClick={(evt) => handleClick(evt)}
+    >
       <ActivityIcon />
       <motion.div
         ref={marqueeRef}
-        className={activityText()}
+        className={styles.activityText}
         style={{
           color: expanded ? colors.darkmodeBlack : colors.darkmodeLightBlack,
-          width: '100%',
-          zIndex: 50,
         }}
       >
         <motion.div
@@ -288,6 +229,6 @@ export default function Marky({
           <ActivityText />
         </motion.div>
       </motion.div>
-    </MarkyDiv>
+    </motion.div>
   );
 }

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { css } from '@stitches/react';
 import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
 import ReactPlayer from 'react-player';
 import { RiArrowDropUpLine } from 'react-icons/ri';
@@ -7,40 +6,11 @@ import { RiArrowDropUpLine } from 'react-icons/ri';
 import colors from '../config/colors';
 import { ChatBox } from './ChatBox';
 import { useLocalStorage } from '../helpers/localStorageManager';
+import styles from './CardBody.module.css';
 
 const electron = require('electron');
 const BrowserWindow = electron.remote.BrowserWindow;
 const app = electron.remote.app;
-
-const markyContainer = css({
-  padding: 6,
-});
-
-const connectChatClientPopUpConfig = {
-  show: false,
-  frame: true,
-  transparent: true,
-  resizable: true,
-  width: 480,
-  webPreferences: {
-    nodeIntegration: true,
-    enableRemoteModule: true,
-  },
-};
-
-const playerContainer = css({
-  position: 'relative',
-
-  paddingTop: '56.25%', // As said to do by react-player readme
-});
-
-const closePlayerButton = css({
-  width: 22,
-  height: 22,
-  color: colors.darkmodeLightBlack,
-  marginLeft: 'auto',
-  cursor: 'pointer',
-});
 
 export default function CardBody({
   activity,
@@ -53,13 +23,7 @@ export default function CardBody({
   setFriends,
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: colors.offWhiteHovered,
-
-        // padding: 10,
-      }}
-    >
+    <div className={styles.container}>
       <AnimatePresence>
         {playerVisible && playerURL && (
           <motion.div
@@ -75,10 +39,10 @@ export default function CardBody({
             }}
           >
             <RiArrowDropUpLine
-              className={closePlayerButton()}
+              className={styles.closePlayerButton}
               onClick={() => closePlayer()}
             />
-            <div className={playerContainer()}>
+            <div className={styles.playerContainer}>
               <ReactPlayer
                 url={playerURL}
                 playing={true}

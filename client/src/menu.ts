@@ -56,7 +56,6 @@ export default class MenuBuilder {
 
   setupEnvironment(): void {
     ipcMain.on('context-menu', (evt, data) => {
-      console.log(data);
       const { username, friendID } = data || {};
 
       Menu.buildFromTemplate(
