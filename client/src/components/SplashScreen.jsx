@@ -3,6 +3,7 @@ import { css, styled } from '@stitches/react';
 import * as electron from 'electron';
 import { IoIosArrowBack } from 'react-icons/io';
 
+import styles from './SplashScreen.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -16,154 +17,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import animations from '../config/animations';
 import { useIsMounted } from '../helpers/useIsMounted';
-
-const container = css({
-  pointerEvents: 'auto',
-  backgroundColor: colors.offWhite,
-  height: window.innerHeight,
-
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexDirection: 'column',
-});
-const header = css({
-  fontFamily: 'Times New Roman',
-  fontSize: '1.2em',
-  textAlign: 'center',
-  textTransform: 'uppercase',
-  // paddingInline: 20,
-  paddingBottom: 22,
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'center',
-});
-
-const inputStyle = css({
-  transition: 'border-top 0.15s ease',
-
-  border: 'none',
-  outline: 'none',
-  resize: 'none',
-  backgroundColor: 'transparent',
-  paddingTop: 14,
-  paddingBottom: 14,
-  paddingLeft: 6,
-  marginLeft: 4,
-  marginRight: 4,
-  color: colors.darkmodeBlack,
-  flex: 1,
-});
-
-const Separator = styled('h6', {
-  display: 'flex',
-  flexDirection: 'row',
-  paddingInline: '2%',
-  color: colors.darkmodeLightBlack,
-  opacity: 0.2,
-
-  '&:before': {
-    // height: 1,
-    content: '',
-    flex: '1 1',
-    // borderTop: '1px solid ' + colors.darkmodeBlack,
-    borderBottom: '1px solid ' + colors.darkmodeBlack,
-    margin: 'auto',
-    marginRight: '14px',
-  },
-  '&:after': {
-    // height: 1,
-    content: '',
-    flex: '1 1',
-    // borderTop: '1px solid ' + colors.darkmodeBlack,
-    borderBottom: '1px solid ' + colors.darkmodeBlack,
-    margin: 'auto',
-    marginLeft: '14px',
-  },
-});
-
-const buttonStyle = css({
-  padding: 10,
-  textAlign: 'left',
-  fontSize: '0.8em',
-  maxWidth: '72%',
-  margin: 'auto',
-  // margin: 'auto',
-
-  // fontStyle: 'italic',
-
-  // borderRadius: 2,
-  // border: '1px solid black',
-});
-
-const availableButtonStyle = css({
-  color: colors.darkmodeLightBlack,
-  // backgroundColor: colors.coffeeBlue,
-  cursor: 'pointer',
-});
-
-const unavailableButtonStyle = css({
-  color: colors.offWhitePressed2,
-  // backgroundColor: colors.darkmodeDisabledBlack,
-  cursor: 'auto',
-});
-
-const backButtonStyle = css({
-  display: 'flex',
-  paddingInline: 8,
-  flexDirection: 'row',
-  alignContent: 'center',
-  alignItems: 'center',
-  fontWeight: 'bold',
-  fontSize: '0.6em',
-  transition: 'opacity 0.15s ease',
-});
-
-const guestSlideButtonsContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'flex-end',
-});
-
-const emailSlideButtonsContainer = css({
-  float: 'right',
-  // display: 'flex',
-  // flexDirection: 'row',
-  // // justifyContent: 'end',
-  // alignContent: 'end',
-});
-
-const keepMeSignedInContainer = css({
-  padding: 2,
-  display: 'flex',
-  justifyContent: 'flex-start',
-  fontSize: '0.8em',
-});
-
-const keeepMeSignedInCheckboxStyle = css({
-  // color: colors.darkmodeLightBlack,
-});
-const keeepMeSignedInLabelStyle = css({
-  // color: 'light gray',
-});
-
-const checkboxAndSignInButtonContainer = css({
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-});
-
-const footer = css({
-  position: 'absolute',
-  bottom: 0,
-  padding: 8,
-  fontSize: '0.9em',
-  display: 'flex',
-  flexDireciton: 'row',
-  justifyContent: 'center',
-  letterSpacing: '1px',
-  width: '100vw',
-});
 
 const formFilledVariants = {
   true: {
@@ -184,6 +37,10 @@ const formFilledVariants = {
     color: colors.darkmodeDisabledText,
     cursor: 'auto',
   },
+};
+
+const Separator = () => {
+  return <h6 className={styles.separator}>or</h6>;
 };
 
 const BackgroundNoise = () => {
@@ -282,7 +139,7 @@ const BackButton = ({ slide, setSlide }) => {
       whileHover={{
         cursor: slide !== 'init' && 'pointer',
       }}
-      className={backButtonStyle()}
+      className={styles.backButtonStyle}
       style={{ opacity: slide === 'init' ? 0.2 : 1 }}
       onClick={handleBackButton}
     >
@@ -305,9 +162,9 @@ const ServiceSelector = ({ slides, setSlide }) => {
         }}
         whileTap={animations.whileTap}
         className={[
-          buttonStyle(),
+          styles.buttonStyle,
           // inputStyle(),
-          availableButtonStyle(),
+          styles.availableButtonStyle,
         ].join(' ')}
         // style={{ backgroundColor: colors.coffeePink }}
         style={{
@@ -341,11 +198,11 @@ const ServiceSelector = ({ slides, setSlide }) => {
               }}
               whileTap={service.available && animations.whileTap}
               className={[
-                buttonStyle(),
+                styles.buttonStyle,
                 // inputStyle(),
                 service.available
-                  ? availableButtonStyle()
-                  : unavailableButtonStyle(),
+                  ? styles.availableButtonStyle
+                  : styles.unavailableButtonStyle,
               ].join(' ')}
               disabled={service.available ? true : false}
               // style={{
@@ -366,9 +223,9 @@ const ServiceSelector = ({ slides, setSlide }) => {
           );
         }
       })}
-      <Separator>or</Separator>
+      <Separator />
       <motion.div
-        className={[buttonStyle(), availableButtonStyle()].join(' ')}
+        className={[styles.buttonStyle, styles.availableButtonStyle].join(' ')}
         whileHover={{
           color: colors.darkmodeBlack,
           transition: { duration: 0.1 },
@@ -391,12 +248,6 @@ const Slider = ({
   justRegistered,
   setJustRegistered,
 }) => {
-  const sliderContainer = css({
-    textAlign: 'center',
-    paddingInline: 20,
-    width: '100vw',
-  });
-
   const slides = [
     { key: 0, title: 'init' },
     { key: 1, title: 'guest', available: true },
@@ -407,7 +258,7 @@ const Slider = ({
   ];
 
   return (
-    <div className={sliderContainer()}>
+    <div className={styles.sliderContainer}>
       {currentSlide === 'init' && (
         <ServiceSelector slides={slides} setSlide={setSlide} />
       )}
@@ -500,7 +351,7 @@ const GuestSlide = () => {
           value={name || ''}
           onChange={handleNameInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt)}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: name
               ? '1px solid ' + colors.darkmodeBlack
@@ -519,7 +370,7 @@ const GuestSlide = () => {
           }}
         />
       </div>
-      <div className={guestSlideButtonsContainer()}>
+      <div className={styles.guestSlideButtonsContainer}>
         <motion.div
           animate={formFilled}
           variants={formFilledVariants}
@@ -529,7 +380,7 @@ const GuestSlide = () => {
             !error &&
             animations.whileTap
           }
-          className={buttonStyle()}
+          className={styles.buttonStyle}
           style={{
             minWidth: '80px',
             opacity: 0,
@@ -642,7 +493,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           value={name || ''}
           onChange={handleNameInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'name')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: name
               ? '1px solid ' + colors.darkmodeBlack
@@ -667,7 +518,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           value={email || ''}
           onChange={handleEmailInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: email
               ? '1px solid ' + colors.darkmodeBlack
@@ -691,7 +542,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           value={password || ''}
           onChange={handlePasswordInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: password
               ? '1px solid ' + colors.darkmodeBlack
@@ -709,7 +560,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           }}
         />
       </div>
-      <div className={emailSlideButtonsContainer()}>
+      <div className={styles.emailSlideButtonsContainer}>
         <motion.div
           animate={formFilled}
           variants={formFilledVariants}
@@ -718,7 +569,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
             formFilled != 'loading' &&
             animations.whileTap
           }
-          className={buttonStyle()}
+          className={styles.buttonStyle}
           style={{ minWidth: '80px', opacity: 0 }}
           onClick={() =>
             formFilled != 'false' &&
@@ -841,7 +692,7 @@ const SigninSlide = ({ justRegistered }) => {
           value={email || ''}
           onChange={handleEmailInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: email
               ? '1px solid ' + colors.darkmodeBlack
@@ -865,7 +716,7 @@ const SigninSlide = ({ justRegistered }) => {
           value={password || ''}
           onChange={handlePasswordInput}
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
-          className={[inputStyle(), 'undraggable', 'clickable'].join(' ')}
+          className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
             borderTop: password
               ? '1px solid ' + colors.darkmodeBlack
@@ -883,20 +734,20 @@ const SigninSlide = ({ justRegistered }) => {
           }}
         />
       </div>
-      <div className={checkboxAndSignInButtonContainer()}>
+      <div className={styles.checkboxAndSignInButtonContainer}>
         <div
           onClick={toggleKeepMeSignedIn}
-          className={keepMeSignedInContainer()}
+          className={styles.keepMeSignedInContainer}
         >
           <input
             type="checkbox"
             name="keepMeSignedIn"
             checked={keepMeSignedIn}
             onChange={() => {}}
-            className={keeepMeSignedInCheckboxStyle()}
+            className={styles.keeepMeSignedInCheckboxStyle}
           />
           <label
-            className={keeepMeSignedInLabelStyle()}
+            className={styles.keeepMeSignedInLabelStyle}
             style={{
               color: keepMeSignedIn
                 ? colors.darkmodeLightBlack
@@ -939,7 +790,7 @@ const SigninSlide = ({ justRegistered }) => {
           )}
         </motion.div>
       </div>
-      <Separator>or</Separator>
+      <Separator />
       {signInOptions.map((option) => {
         return (
           <motion.div
@@ -947,10 +798,10 @@ const SigninSlide = ({ justRegistered }) => {
             whileHover={option.available && { color: colors.darkmodeHighWhite }}
             whileTap={option.available && animations.whileTap}
             className={[
-              buttonStyle(),
+              styles.buttonStyle,
               option.available
-                ? availableButtonStyle()
-                : unavailableButtonStyle(),
+                ? styles.availableButtonStyle
+                : styles.unavailableButtonStyle,
             ].join(' ')}
             onClick={
               () => {}
@@ -967,7 +818,7 @@ const SigninSlide = ({ justRegistered }) => {
 
 const Header = ({ showWelcome, slide, setSlide }) => {
   return (
-    <div className={header()}>
+    <div className={styles.header}>
       <BackButton slide={slide} setSlide={setSlide} />
       {showWelcome ? (
         <>
@@ -999,16 +850,9 @@ const Footer = ({ currentSlide, setSlide }) => {
     handleNotAMemberButton,
     children,
   }) => {
-    const footerLink = css({
-      textDecoration: 'underline',
-      textDecorationColor: 'transparent',
-      cursor: 'pointer',
-      color: colors.coffeeGreen,
-    });
-
     return (
       <motion.div
-        className={footerLink()}
+        className={styles.footerLink}
         whileHover={{
           textDecorationColor: colors.coffeeOrange,
           transition: { duration: 0.15 },
@@ -1043,7 +887,7 @@ const Footer = ({ currentSlide, setSlide }) => {
   };
 
   return (
-    <motion.div className={footer()}>
+    <motion.div className={styles.footer}>
       {currentSlide !== 'signIn' && <AlreadyAMember />}
       {currentSlide === 'signIn' && <NotAMember />}
     </motion.div>
@@ -1080,7 +924,7 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <div className={container()}>
+    <div className={styles.container} style={{ height: window.innerHeight }}>
       <div style={{ zIndex: 1 }}>
         <MenuButton />
         <Header

@@ -1,0 +1,143 @@
+.container {
+  pointer-events: auto;
+  background-color: var(--off-white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.sliderContainer {
+  text-align: center;
+  padding-inline: 20px;
+  width: 100vw;
+}
+
+.header {
+  font-family: Times New Roman;
+  font-size: 1.2em;
+  text-align: center;
+  text-transform: uppercase;
+  padding-bottom: 22px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.inputStyle {
+  transition: border-top 0.15s ease;
+
+  border: none;
+  outline: none;
+  resize: none;
+  background-color: transparent;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 6px;
+  margin-left: 4px;
+  margin-right: 4px;
+  color: var(--dark-mode-black);
+  flex: 1;
+}
+
+.buttonStyle {
+  padding: 10px;
+  text-align: left;
+  font-size: 0.8em;
+  max-width: 72%;
+  margin: auto;
+}
+
+.availableButtonStyle {
+  color: var(--dark-mode-light-black);
+  cursor: pointer;
+}
+
+.unavailableButtonStyle {
+  color: var(--off-white-pressed2);
+  cursor: auto;
+}
+
+.backButtonStyle {
+  display: flex;
+  padding-inline: 8px;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 0.6em;
+  transition: opacity 0.15s ease;
+}
+
+.guestSlideButtonsContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: 'flex-end';
+}
+
+.emailSlideButtonsContainer {
+  float: right;
+}
+
+.keepMeSignedInContainer {
+  padding: 2px;
+  display: flex;
+  justify-content: flex-start;
+  font-size: 0.8em;
+}
+
+/* .keeepMeSignedInCheckboxStyle {
+    // color: colors.darkmodeLightBlack,
+  }
+
+  .keeepMeSignedInLabelStyle {
+    // color: 'light gray',
+  } */
+
+.checkboxAndSignInButtonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: 'space-between';
+}
+
+.footerLink {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  cursor: pointer;
+  color: var(--coffee-green);
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  padding: 8px;
+  font-size: 0.9em;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  letter-spacing: 1px;
+  width: 100vw;
+}
+
+.separator {
+  display: flex;
+  flex-direction: row;
+  padding-inline: 16%;
+  color: var(--dark-mode-light-black);
+  opacity: 0.2;
+}
+.separator:before {
+  content: '';
+  flex: 1 1;
+  border-bottom: 1px solid var(--dark-mode-black);
+  margin: auto;
+  margin-right: 14px;
+}
+.separator:after {
+  content: '';
+  flex: 1 1;
+  border-bottom: 1px solid var(--dark-mode-black);
+  margin: auto;
+  margin-left: 14px;
+}
