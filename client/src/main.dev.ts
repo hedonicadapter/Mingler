@@ -37,6 +37,9 @@ storage.init({ dir: './mainState/persist' });
 
 var Positioner = require('electron-positioner');
 
+// Disable windows default window animations
+app.commandLine.appendSwitch('wm-window-animations-disabled');
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -126,7 +129,16 @@ const createWindow = async () => {
     }
   });
 
-  // mainWindow.setAlwaysOnTop(true, 'status');
+  // mainWindow?.on('show', () => {
+  //   setTimeout(() => {
+  //     mainWindow?.setOpacity(1);
+  //   }, 200);
+  // });
+
+  mainWindow?.on('hide', () => {
+    mainWindow?.setOpacity(0);
+  });
+
   var positioner = new Positioner(mainWindow);
   positioner.move('rightCenter');
 
@@ -145,30 +157,33 @@ const createWindow = async () => {
       mainWindow.show();
     }
 
-    // ipcMain.on('blur', () => {
-    //   if (mainWindow.webContents.isDevToolsFocused()) {
-    //     return; //ignore
-    //   } else {
-    //     mainWindow?.blur();
-    //     store?.dispatch({
-    //       type: 'appVisibleFalse',
-    //       payload: {},
-    //     });
-    //     mainWindow?.setFocusable(false);
-    //   }
-    // });
+    mainWindow.on('blur', () => {
+      mainWindow?.setAlwaysOnTop(true);
+      if (mainWindow.webContents.isDevToolsFocused()) {
+        return; //ignore
+      } else {
+        store?.dispatch({
+          type: 'appVisibleFalse',
+          payload: {},
+        });
 
-    // mainWindow.on('focus', () => {
-    //   if (mainWindow.webContents.isDevToolsFocused()) {
-    //     return; //ignore
-    //   } else {
-    //     store?.dispatch({
-    //       type: 'appVisibleTrue',
-    //       payload: {},
-    //     });
-    //   }
-    // });
+        // const listenerTimeout = setTimeout(() => fallbackBlur(), 200);
+
+        ipcMain.once('animationComplete', () => {
+          hideWindow();
+          // clearTimeout(listenerTimeout);
+        });
+        // mainWindow?.setFocusable(false);
+      }
+    });
   });
+
+  const fallbackBlur = () => {
+    ipcMain.removeAllListeners('animationComplete');
+    if (mainWindow?.isVisible()) {
+      hideWindow();
+    }
+  };
 
   mainWindow.webContents.once('dom-ready', async () => {
     try {
@@ -305,19 +320,46 @@ app.on('window-all-closed', () => {
   }
 });
 
+const hideWindow = () => {
+  mainWindow?.setOpacity(0);
+  if (process.platform == 'win32') mainWindow?.minimize();
+  else if (process.platform == 'darwin') app?.hide();
+  else mainWindow?.hide();
+  mainWindow?.blur();
+};
+
+const showWindow = () => {
+  mainWindow?.show();
+  setTimeout(() => {
+    mainWindow?.setOpacity(1);
+  }, 150);
+
+  store?.dispatch({
+    type: 'appVisibleTrue',
+    payload: {},
+  });
+};
+
 const toggleWidget = () => {
   let appVisible = store?.getState()?.app?.appVisible;
+  ipcMain.removeAllListeners('animationComplete');
+  // const listenerTimeout = setTimeout(
+  //   () => ipcMain.removeAllListeners('animationComplete'),
+  //   200
+  // );
 
   if (appVisible) {
-    mainWindow?.blur();
     store?.dispatch({
       type: 'appVisibleFalse',
       payload: {},
     });
-    mainWindow?.setFocusable(false);
+
+    ipcMain.once('animationComplete', () => {
+      hideWindow();
+      // clearTimeout(listenerTimeout);
+    });
   } else if (!appVisible) {
-    mainWindow?.setFocusable(true);
-    mainWindow?.focus(); //activates onblur event further down
+    showWindow();
   }
 };
 

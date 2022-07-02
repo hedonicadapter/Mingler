@@ -26,11 +26,11 @@ export const appSlice = createSlice({
   initialState,
   reducers: {
     appVisibleTrue: (state) => {
-      // state.appVisible = true;
+      state.appVisible = true;
     },
     appVisibleFalse: (state) => {
       // if (state.settingsOpen) return;
-      // state.appVisible = false;
+      state.appVisible = false;
     },
     toggleCardExpandedMasterToggle: (state) => {
       state.cardExpandedMasterToggle = !state.cardExpandedMasterToggle;
@@ -57,17 +57,20 @@ export const appSlice = createSlice({
     setFindFriendsSearchValue: (state, action: PayloadAction<string>) => {
       state.findFriendsSearchValue = action.payload;
     },
+    toggleAppVisible: (state) => {
+      state.appVisible = !state.appVisible;
+    },
   },
   extraReducers: {
     toggleAppVisible: (state) => {
-      // state.appVisible = !state.appVisible;
+      state.appVisible = !state.appVisible;
     },
     appVisibleTrue: (state) => {
       state.appVisible = true;
     },
     appVisibleFalse: (state) => {
       // if (state.settingsOpen) return;
-      // state.appVisible = false;
+      state.appVisible = false;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
       state.windowWidth = action.payload;
@@ -77,6 +80,7 @@ export const appSlice = createSlice({
 
 export const { appVisibleTrue } = appSlice.actions;
 export const { appVisibleFalse } = appSlice.actions;
+export const { toggleAppVisible } = appSlice.actions;
 export const { toggleCardExpandedMasterToggle } = appSlice.actions;
 export const { settingsOpenTrue } = appSlice.actions;
 export const { settingsOpenFalse } = appSlice.actions;
