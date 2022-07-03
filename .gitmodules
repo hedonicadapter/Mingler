@@ -2,3 +2,7 @@
 	path = MinglerServer
 	url = git@github.com:YungMilky/MinglerServer.git
 	branch = main
+[submodule "Mingler-chromium-extension"]
+	path = Mingler-chromium-extension
+	url = git@github.com:YungMilky/Mingler-chromium-extension.git
+	branch = main
