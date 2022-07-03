@@ -1,0 +1,4 @@
+[submodule "MinglerServer"]
+	path = MinglerServer
+	url = git@github.com:YungMilky/MinglerServer.git
+	branch = main
