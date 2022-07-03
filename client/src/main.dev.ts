@@ -197,6 +197,10 @@ const createWindow = async () => {
         })
         .catch(console.error);
 
+      ipcMain.on('exit:frommenubutton', () => {
+        mainWindow?.webContents.send('exit:frommain');
+        app.quit();
+      });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         const httpServer = createServer();
         const io = new Server(httpServer, {
@@ -270,16 +274,15 @@ const createWindow = async () => {
 
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
-    mainWindow.on('close', async function (e) {
-      e.preventDefault();
-
-      server?.close(() => {
-        dao.logout().then(() => {
-          mainWindow.destroy();
-          return;
-        });
-      });
-    });
+    // mainWindow.on('close', async function () {
+    //   // TODO:
+    //   // server?.close(() => {
+    //   //   dao.logout().then(() => {
+    //   //     mainWindow.destroy();
+    //   //     return;
+    //   //   });
+    //   // });
+    // });
   });
 
   mainWindow.on('closed', () => {
@@ -313,11 +316,13 @@ const createWindow = async () => {
  */
 
 app.on('window-all-closed', () => {
+  console.log('all windows closed');
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
   }
+  return;
 });
 
 const hideWindow = () => {

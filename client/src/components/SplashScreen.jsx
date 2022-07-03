@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { css, styled } from '@stitches/react';
 import * as electron from 'electron';
 import { IoIosArrowBack } from 'react-icons/io';
 

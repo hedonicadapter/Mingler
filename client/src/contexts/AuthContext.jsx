@@ -181,6 +181,7 @@ export function authAndy({ children }) {
     signUpGuest,
     signInGuest,
     signIn,
+    signedIn,
   };
 
   return (

@@ -12,32 +12,6 @@ import { useFriends } from '../contexts/FriendsContext';
 
 const ipcRenderer = require('electron').ipcRenderer;
 
-const OnlineStatusIndicator = ({ activityLength, isWidgetHeader }) => {
-  return (
-    <motion.span
-      style={{
-        pointerEvents: 'none',
-        position: 'relative',
-      }}
-    >
-      <span
-        style={{
-          zIndex: 80,
-          position: 'absolute',
-          height: '50px',
-          width: '50px',
-          backgroundColor: colors.coffeeGreen,
-          clipPath: 'circle(9px at 36px)',
-          display: 'inline-block',
-          minHeight: activityLength >= 2 ? 104 : 84,
-          // paddingTop: isWidgetHeader ? 35 : 28,
-          top: 5,
-        }}
-      />
-    </motion.span>
-  );
-};
-
 const CardSeparator = ({ cardHovered, expanded }) => {
   return (
     <div className={styles.separatorContainer}>
@@ -152,6 +126,7 @@ export default function AccordionItem({
           WebkitMask: isWidgetHeader
             ? 'none'
             : !friend?.online &&
+              !isMe &&
               'radial-gradient(circle 9px at 36px 50%,transparent 88%,#fff)',
           // backgroundColor: expanded
           //   ? colors.offWhite //used to be rgba(241,235,232,1)

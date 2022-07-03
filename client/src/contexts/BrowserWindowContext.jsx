@@ -126,6 +126,28 @@ export function BrowserWindowProvider({ children }) {
   };
 
   useEffect(() => {
+    ipcRenderer.once('exit:frommain', () => {
+      settingsWindow.removeListener('close', settingsWindowCloseHandler);
+      settingsWindow.removeListener('closed', settingsWindowClosedHandler);
+
+      findFriendsWindow.removeListener('close', findFriendsWindowCloseHandler);
+      findFriendsWindow.removeListener(
+        'closed',
+        findFriendsWindowClosedHandler
+      );
+
+      settingsWindow.on('closed', () => setSettingsWindow(null));
+      findFriendsWindow.on('closed', () => setFindFriendsWindow(null));
+
+      settingsWindow?.close();
+      findFriendsWindow?.close();
+      connectSpotifyWindow?.close();
+
+      setConnectSpotifyWindow(null);
+    });
+  }, []);
+
+  useEffect(() => {
     if (!settingsWindow) return;
 
     loadSettingsContent();

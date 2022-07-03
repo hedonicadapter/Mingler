@@ -82,8 +82,6 @@
 
 .keepMeSignedInContainer {
   padding: 2px;
-  display: flex;
-  justify-content: flex-start;
   font-size: 0.8em;
 }
 
@@ -98,7 +96,7 @@
 .checkboxAndSignInButtonContainer {
   display: flex;
   flex-direction: row;
-  justify-content: 'space-between';
+  justify-content: space-between;
 }
 
 .footerLink {

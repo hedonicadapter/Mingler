@@ -69,7 +69,7 @@ const OnlineStatusIndicator = ({
   online,
   isMe,
 }) => {
-  if (!online || !isMe) return null;
+  if (!online && !isMe) return null;
   return (
     <motion.span
       style={{

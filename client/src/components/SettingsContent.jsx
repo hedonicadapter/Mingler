@@ -110,10 +110,17 @@ const AccountSettingsContent = ({
               placeholder="Email"
               maxLength={25}
               maxRows={1}
+              title={
+                settingsState?.currentUser?.guest
+                  ? 'Not currently available for guest users. '
+                  : null
+              }
+              disabled={settingsState?.currentUser?.guest ? true : false}
               className={styles.genericInput}
               readOnly={emailError ? true : false}
               value={emailError ? emailError : email || ''}
               style={{
+                opacity: settingsState?.currentUser?.guest ? 0.4 : 1,
                 color: emailError
                   ? colors.coffeeRed
                   : colors.darkmodeLightBlack,

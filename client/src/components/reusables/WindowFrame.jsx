@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { css } from '@stitches/react';
 import { motion } from 'framer-motion';
 
 import { VscChromeMinimize } from 'react-icons/vsc';
@@ -17,11 +16,6 @@ const hoverAnimation = {
   transition: { duration: 0.1 },
 };
 
-const frameButton = css({
-  color: colors.defaultPlaceholderTextColor,
-  padding: 2,
-});
-
 const FrameButtons = () => {
   const handleMinimize = () => {
     remote.getCurrentWindow().minimize();
@@ -34,7 +28,7 @@ const FrameButtons = () => {
   return (
     <div>
       <motion.span
-        className={[frameButton(), 'undraggable'].join(' ')}
+        className={[styles.frameButton, 'undraggable'].join(' ')}
         whileHover={hoverAnimation}
         whileTap={animations.whileTap}
         onClick={() => handleClose()}
@@ -42,7 +36,7 @@ const FrameButtons = () => {
         <IoIosClose />
       </motion.span>
       <motion.span
-        className={[frameButton(), 'undraggable'].join(' ')}
+        className={[styles.frameButton, 'undraggable'].join(' ')}
         whileHover={hoverAnimation}
         whileTap={animations.whileTap}
         onClick={() => handleMinimize()}
@@ -56,38 +50,20 @@ const FrameButtons = () => {
 const WindowTitle = () => {
   const windowTitle = remote.getCurrentWindow().getTitle().toLowerCase();
 
-  const windowTitleStyle = {
-    letterSpacing: '1px',
-    fontSize: '0.9em',
-    color: colors.defaultPlaceholderTextColor,
-    padding: 2,
-  };
-
-  return <div style={windowTitleStyle}>{windowTitle}</div>;
+  return <div className={styles.windowTitleStyle}>{windowTitle}</div>;
 };
-
-const frame = css({
-  flexShrink: 0,
-  backgroundColor: frameColor,
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  padding: 6,
-});
-
-const body = css({
-  pointerEvents: 'auto',
-  flexShrink: 0,
-});
 
 export const WindowFrame = ({ children }) => {
   return (
     <div>
-      <div className={[frame(), 'draggable', 'clickable'].join(' ')}>
+      <div
+        className={[styles.frame, 'draggable', 'clickable'].join(' ')}
+        style={{ backgroundColor: frameColor }}
+      >
         <FrameButtons />
         <WindowTitle />
       </div>
-      <div className={[body(), 'clickable'].join(' ')}>{children}</div>
+      <div className={[styles.body, 'clickable'].join(' ')}>{children}</div>
     </div>
   );
 };

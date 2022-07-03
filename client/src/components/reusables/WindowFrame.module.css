@@ -1,0 +1,24 @@
+.frameButton {
+  color: var(--default-placeholder-text-color);
+  padding: 2px;
+}
+
+.frame {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 6px;
+}
+
+.body {
+  pointer-events: auto;
+  flex-shrink: 0;
+}
+
+.windowTitleStyle {
+  letter-spacing: 1px;
+  font-size: 0.9em;
+  color: var(--default-placeholder-text-color);
+  padding: 2px;
+}

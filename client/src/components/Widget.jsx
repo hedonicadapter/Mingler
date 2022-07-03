@@ -19,7 +19,6 @@ import {
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
-import { css } from '@stitches/react';
 
 const Border = () => {
   return <div style={{ float: 'left', minWidth: 8 }}>&nbsp;</div>;

@@ -7,9 +7,10 @@ import colors from '../config/colors';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
+const ipcRenderer = require('electron').ipcRenderer;
 
 export default function MenuButton() {
-  const { signOut } = useAuth();
+  const { signOut, signedIn } = useAuth();
 
   const currentUser = useSelector((state) => getCurrentUser(state));
 
@@ -38,6 +39,11 @@ export default function MenuButton() {
         signOut();
       }
     }
+  };
+
+  const handleExitButton = () => {
+    ipcRenderer.send('exit:frommenubutton');
+    window.close();
   };
 
   return (
@@ -83,7 +89,7 @@ export default function MenuButton() {
                 Close
               </motion.li> */}
               {/* <hr /> */}
-              {currentUser && (
+              {currentUser && signedIn && (
                 <motion.li
                   className={styles.listItem}
                   whileHover={{ color: colors.offWhitePressed2 }}
@@ -99,6 +105,7 @@ export default function MenuButton() {
                 whileHover={{ color: colors.offWhitePressed2 }}
                 transition={{ duration: 0.15 }}
                 variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+                onClick={handleExitButton}
               >
                 exit
               </motion.li>
