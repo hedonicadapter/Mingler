@@ -43,6 +43,9 @@ dll
 main.js
 main.js.map
 
+# redux persistence
+mainState/persist
+
 .idea
 npm-debug.log.*
 *.css.d.ts
