@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
+import styles from './WindowFrame.module.css';
 import { VscChromeMinimize } from 'react-icons/vsc';
 import { IoIosClose } from 'react-icons/io';
 import colors from '../../config/colors';

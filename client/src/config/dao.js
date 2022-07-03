@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ipcRenderer } from 'electron';
 
 const auth = axios.create({
-  baseURL: 'http://localhost:8080/api/auth/',
+  baseURL: 'https://menglir.herokuapp.com/api/auth/',
   timeout: 6000,
   headers: {
     'Content-type': 'application/json',
@@ -11,7 +11,7 @@ const auth = axios.create({
 });
 
 export const privateRoute = axios.create({
-  baseURL: 'http://localhost:8080/api/private/',
+  baseURL: 'https://menglir.herokuapp.com/api/private/',
   timeout: 6000,
   withCredentials: true,
   headers: {
@@ -20,7 +20,7 @@ export const privateRoute = axios.create({
 });
 
 export const token = axios.create({
-  baseURL: 'http://localhost:8080/api/token/',
+  baseURL: 'https://menglir.herokuapp.com/api/token/',
   timeout: 4000,
   withCredentials: true,
   headers: {
