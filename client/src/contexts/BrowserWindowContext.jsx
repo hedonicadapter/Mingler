@@ -267,6 +267,10 @@ export function BrowserWindowProvider({ children }) {
     DAO.createSpotifyURL(currentUser.accessToken)
       .then(async (res) => {
         if (res?.data?.success) {
+          console.warn(
+            'spotify authorize url from heroku ',
+            res.data.authorizeURL
+          );
           connectSpotifyWindow
             .loadURL(res.data.authorizeURL)
             .then()
@@ -295,7 +299,7 @@ export function BrowserWindowProvider({ children }) {
 
             DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
               .then((result) => {
-                console.log('spotiffff ', result);
+                console.warn('spotiffff ', result);
                 if (result.data.success) {
                   dispatch(
                     setSpotifyAccessTokenMain(result.data.body['access_token'])

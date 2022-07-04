@@ -140,7 +140,11 @@ export default function AccordionItem({
         onMouseEnter={() => setCardHovered(true)}
         onMouseLeave={() => setCardHovered(false)}
       >
-        <div style={{ opacity: !friend?.online && 0.4 }}>
+        <div
+          style={{
+            opacity: friend?.online || isMe || isWidgetHeader ? 1 : 0.4,
+          }}
+        >
           <CardHeader
             activityLength={activityLength}
             togglePlayer={togglePlayer}

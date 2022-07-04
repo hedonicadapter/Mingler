@@ -57,7 +57,7 @@ const flushChunksQueue = () => {
 };
 
 const processData = () => {
-  // Create one big buffer with all the chunks
+  // Create a buffer with all the chunks
   const stringData = Buffer.concat(chunks);
 
   // The browser will emit the size as a header of the payload,

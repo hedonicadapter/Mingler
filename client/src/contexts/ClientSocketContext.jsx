@@ -17,7 +17,8 @@ export function ClientSocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
 
   const connectSocket = () => {
-    const newSocket = io('ws://127.0.0.1:8080/user', {
+    // ws://127.0.0.1:8080/user
+    const newSocket = io('https://menglir.herokuapp.com/user', {
       auth: {
         accessToken: currentUser && currentUser.accessToken,
       },
@@ -59,12 +60,6 @@ export function ClientSocketProvider({ children }) {
       socket.on('connect', () => {
         console.log('Client socket connected');
       });
-      // User receives yt time request, and sends get request to ipcMain,
-      // which forwards the request through the host to chromium to get the time
-      // Packet contains url and tab title to find the right tab
-      socket.on('youtubetimerequest:receive', (packet) => {
-        ipcRenderer.send('getYouTubeTime', packet);
-      });
 
       socket.io.on('error', (error) => {
         console.log(error);
@@ -86,7 +81,6 @@ export function ClientSocketProvider({ children }) {
       socket?.disconnect();
       socket?.io.off('error');
       socket?.io.off('reconnect');
-      socket?.off('youtubetimerequest:receive');
       socket?.off('connect');
       socket?.removeAllListeners();
       socket?.close();
@@ -142,13 +136,13 @@ export function ClientSocketProvider({ children }) {
   };
 
   const sendYouTubeTimeRequest = (toID, YouTubeTitle, YouTubeURL) => {
-    const packet = { toID, YouTubeTitle, YouTubeURL };
+    const packet = { toID, fromID: currentUser?._id, YouTubeTitle, YouTubeURL };
 
     socket.emit('youtubetimerequest:send', packet);
   };
 
-  const answerYouTubeTimeRequest = (toID, time) => {
-    const packet = { toID, time };
+  const answerYouTubeTimeRequest = (fromID, time) => {
+    const packet = { fromID, time };
 
     socket.emit('youtubetimerequest:answer', packet);
   };

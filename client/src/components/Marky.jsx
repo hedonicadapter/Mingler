@@ -64,7 +64,7 @@ export default function Marky({
 
   marKey,
 }) {
-  const { sendYouTubeTimeRequest } = useClientSocket();
+  const { socket, sendYouTubeTimeRequest } = useClientSocket();
 
   const appState = useSelector(getApp);
 
@@ -100,11 +100,7 @@ export default function Marky({
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeTitle]);
 
   useEffect(() => {
-    return () =>
-      ipcRenderer.removeAllListeners(
-        'chromiumHostData:YouTubeTime',
-        youTubeTimeHandler
-      );
+    return () => socket.off('youtubetime:receive', youTubeTimeHandler);
   }, []);
 
   const handleClick = (evt) => {
@@ -121,14 +117,15 @@ export default function Marky({
 
         togglePlayer();
         // Wait for response from ipcMain, which is connected to the server socket
-        ipcRenderer.once('chromiumHostData:YouTubeTime', youTubeTimeHandler);
+        socket.once('youtubetime:receive', youTubeTimeHandler);
       }
     } else if (TabURL) {
       shell.openExternal(TabURL);
     }
   };
 
-  const youTubeTimeHandler = (event, data) => {
+  const youTubeTimeHandler = (data) => {
+    console.log('received time ', data);
     setPlayerURL(YouTubeURL + '&t=' + data.time + 's');
     // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
   };

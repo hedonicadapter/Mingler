@@ -30,7 +30,7 @@ const useGetSetFriends = (initialValue = []) => {
 
 export function FriendsProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
-  const { socket } = useClientSocket();
+  const { socket, answerYouTubeTimeRequest } = useClientSocket();
 
   // const [friends, setFriends] = useState([]);
   const [friends, setFriends] = useGetSetFriends([]);
@@ -52,6 +52,8 @@ export function FriendsProvider({ children }) {
     setUserStatusListener();
     setConversationListeners();
     setActivityListeners();
+    setYouTubeTimeRequestListeners();
+    setChromiumHostDataTimeReplyListeners();
 
     // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
     // it isn't cleaned up there every time 'friends' changes
@@ -65,6 +67,11 @@ export function FriendsProvider({ children }) {
       socket.off('user:offline', userOfflineHandler);
       socket.off('message:receive', messageReceiveHandler);
       socket.off('activity:receive', activityReceiveHandler);
+      socket.off('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
+      ipcRenderer.off(
+        'chromiumHostData:YouTubeTime',
+        setChromiumHostDataTimeReplyHandler
+      );
       socket?.removeAllListeners();
     };
   }, [socket, friends]);
@@ -188,6 +195,20 @@ export function FriendsProvider({ children }) {
 
   const setActivityListeners = () => {
     socket.on('activity:receive', activityReceiveHandler);
+  };
+
+  const setYouTubeTimeRequestListeners = () => {
+    // User receives yt time request, and sends get request to ipcMain,
+    // which forwards the request through the host to chromium to get the time
+    // Packet contains url and tab title to find the right tab
+    socket.on('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
+  };
+
+  const setChromiumHostDataTimeReplyListeners = () => {
+    ipcRenderer.on(
+      'chromiumHostData:YouTubeTime',
+      setChromiumHostDataTimeReplyHandler
+    );
   };
 
   // Ensure activities remain unique.
@@ -348,6 +369,16 @@ export function FriendsProvider({ children }) {
         return friend;
       });
     });
+  };
+
+  const setYouTubeTimeRequestHandler = (packet) => {
+    ipcRenderer.send('getYouTubeTime', packet);
+  };
+
+  const setChromiumHostDataTimeReplyHandler = (evt, packet) => {
+    console.log('friendscontext handler ', packet);
+
+    answerYouTubeTimeRequest(packet?.fromID, packet?.time);
   };
 
   const value = {

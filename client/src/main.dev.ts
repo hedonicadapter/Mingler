@@ -32,6 +32,9 @@ import installExtension, {
 import dao from './config/dao';
 import configureStore from './mainState/newStore';
 
+const execFile = require('child_process').execFile;
+const JSON5 = require('json5');
+
 const storage = require('node-persist');
 storage.init({ dir: './mainState/persist' });
 
@@ -48,9 +51,23 @@ export default class AppUpdater {
   }
 }
 
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  // path: '/auth',
+  pingInterval: 10000,
+  pingTimeout: 5000,
+  cookie: false,
+});
+const authIo = io.of('/auth');
+const PORT = 8081;
+httpServer.listen(PORT);
+
 let store;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
+let exePath = path.resolve(__dirname, '../scripts/ActiveTrackListener.py');
+let trackProcess;
+let refreshRetryLimit = 0;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -75,6 +92,101 @@ const installExtensions = async () => {
       { forceDownload, loadExtensionOptions: { allowFileAccess: true } }
     )
     .catch(console.log);
+};
+
+const initActiveTrackListenerProcess = (spotifyAccessToken) => {
+  try {
+    trackProcess?.close();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  if (!spotifyAccessToken) return;
+
+  trackProcess = execFile('python', [exePath, spotifyAccessToken]);
+
+  trackProcess.on('exit', () =>
+    console.warn('trackprocess exited ', trackProcess)
+  );
+
+  trackProcess.stdout.on('data', function (data) {
+    let processedData = data.toString().trim();
+    if (processedData === '401') {
+      trackProcess.stdin.end();
+      trackProcess.stdout.destroy();
+      trackProcess.stderr.destroy();
+      try {
+        trackProcess?.close();
+      } catch (e) {
+        console.log(e);
+      }
+      return;
+    }
+
+    try {
+      console.log('processedData1', processedData);
+      if (processedData === 401) return;
+      let trackInfo = JSON5.parse(processedData);
+
+      console.log('trackinfo3 ', trackInfo);
+
+      if (trackInfo) {
+        mainWindow?.webContents.send('trackinfo:frommain', {
+          Artists: trackInfo.artists,
+          TrackTitle: trackInfo.name,
+          TrackURL: trackInfo.link,
+          Date: new Date(),
+        });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  trackProcess.stderr.on('data', function (data) {
+    console.warn('stderr activeTrackListener: ', data);
+  });
+
+  trackProcess.on('error', function (err) {
+    if (err) return console.error('trackprocess error: ', err);
+  });
+};
+
+// This socket is for local real-time communication between
+// 1) main and renderer process, 2) mingler and the host, and by extension, the chromium extension
+const initSocket = (userID) => {
+  ipcMain.on('currentUser:signedOut', () => {
+    // socket.disconnect();
+    httpServer.close();
+    console.log('Socket closed');
+  });
+
+  authIo.on('connection', (socket) => {
+    authIo.emit('fromAppToHost:userID', userID);
+
+    socket.on('fromHostToApp:data', (data) => {
+      console.log('data ', data);
+      // if data = time send time not chromiumhostdata
+      // Picked up by Marky which then opens a browser tab for the video with the correct time
+      if (data.time) {
+        // TODO: this sends to yourself if you've got a time request.
+        // Needs to get data.fromID and do a mainWindow.webcontents.send(chromiumHostData:YouTubeTime)
+        // which is picked up by clientSocketContext, which is sent to the server with the data and fromID, which sends it to fromID through socket,
+        // which picks it up and runs setPlayerURL
+        mainWindow?.webContents.send('chromiumHostData:YouTubeTime', data);
+      } else {
+        mainWindow?.webContents.send('chromiumHostData', data);
+      }
+    });
+
+    ipcMain.on('getYouTubeTime', (event, packet) => {
+      socket.emit('getYouTubeTime', packet);
+    });
+  });
+
+  authIo.on('disconnect', (reason) => {
+    console.log('Host socket dc reason: ', reason);
+  });
 };
 
 const createWindow = async () => {
@@ -202,60 +314,20 @@ const createWindow = async () => {
         app.quit();
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
-        const httpServer = createServer();
-        const io = new Server(httpServer, {
-          // path: '/auth',
-          pingInterval: 10000,
-          pingTimeout: 5000,
-          cookie: false,
-        });
-
-        const authIo = io.of('/auth');
-
-        ipcMain.on('currentUser:signedOut', () => {
-          // socket.disconnect();
-          httpServer.close();
-          console.log('Socket closed');
-        });
-
-        authIo.on('connection', (socket) => {
-          authIo.emit('fromAppToHost:userID', userID);
-
-          socket.on('fromHostToApp:data', (data) => {
-            // if data = time send time not chromiumhostdata
-            // Picked up by Marky which then opens a browser tab for the video with the correct time
-            if (data.time) {
-              console.log('data.time ', data.time);
-              mainWindow?.webContents.send(
-                'chromiumHostData:YouTubeTime',
-                data
-              );
-            } else {
-              mainWindow?.webContents.send('chromiumHostData', data);
-            }
-          });
-
-          ipcMain.on('getYouTubeTime', (event, packet) => {
-            const { YouTubeTitle, YouTubeURL } = packet;
-
-            socket.emit('getYouTubeTime', {
-              YouTubeTitle,
-              YouTubeURL,
-            });
-          });
-        });
-
-        authIo.on('disconnect', (reason) => {
-          console.log('Host socket dc reason: ', reason);
-        });
-
-        const PORT = 8081;
-        httpServer.listen(PORT);
+        initSocket(userID);
       });
     } catch (exception) {
       console.log('Creating host socket server exception: ', exception);
     }
   });
+
+  ipcMain.handle(
+    'initActiveTrackListener:fromrenderer',
+    (event, spotifyAccessToken) => {
+      initActiveTrackListenerProcess(spotifyAccessToken);
+      return true;
+    }
+  );
 
   ipcMain.on('sendfriendrequest:fromrenderer', async (event, data) => {
     mainWindow?.webContents.send('sendfriendrequest:frommain', data);

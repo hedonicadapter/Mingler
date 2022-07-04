@@ -13,8 +13,7 @@ import {
   setSpotifyExpiryDate,
   setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
-
-const JSON5 = require('json5');
+import { notify } from '../components/reusables/notifications';
 
 const { ipcRenderer } = require('electron');
 
@@ -70,70 +69,20 @@ export function UserStatusProvider({ children }) {
     });
   };
 
-  let trackProcess;
-  let refreshRetryLimit = 0;
-  const activeTrackListener = (spotifyAccessToken) => {
-    console.log('before close ', trackProcess);
-    try {
-      trackProcess?.close();
-    } catch (e) {
-      console.warn(e);
-    }
-
-    if (!spotifyAccessToken) return;
-
-    let exePath = path.resolve(__dirname, '../scripts/ActiveTrackListener.py');
-
-    trackProcess = execFile('python', [exePath, spotifyAccessToken]);
-
-    trackProcess.on('exit', () =>
-      console.warn('trackprocess exited ', trackProcess)
+  const activeTrackListener = async (spotifyAccessToken) => {
+    ipcRenderer.removeAllListeners(
+      'trackinfo:frommain',
+      trackInfoFromMainHandler
+    );
+    const result = await ipcRenderer.invoke(
+      'initActiveTrackListener:fromrenderer',
+      spotifyAccessToken
     );
 
-    trackProcess.stdout.on('data', function (data) {
-      let processedData = data.toString().trim();
-      if (processedData === '401') {
-        trackProcess.stdin.end();
-        trackProcess.stdout.destroy();
-        trackProcess.stderr.destroy();
-        try {
-          trackProcess?.close();
-        } catch (e) {
-          console.log(e);
-        }
-        return;
-      }
-
-      try {
-        console.log('processedData1', processedData);
-        if (processedData === 401) return;
-        let trackInfo = JSON5.parse(processedData);
-
-        console.log('trackinfo3 ', trackInfo);
-
-        if (trackInfo) {
-          sendActivity(
-            {
-              Artists: trackInfo.artists,
-              TrackTitle: trackInfo.name,
-              TrackURL: trackInfo.link,
-              Date: new Date(),
-            },
-            currentUser?._id
-          );
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
-    trackProcess.stderr.on('data', function (data) {
-      console.warn('stderr activeTrackListener: ', data);
-    });
-
-    trackProcess.on('error', function (err) {
-      if (err) return console.error('trackprocess error: ', err);
-    });
+    if (result)
+      return ipcRenderer.on('trackinfo:frommain', trackInfoFromMainHandler);
+    console.log('no result');
+    return notify('Error', 'Failed to initialize Spotify.');
   };
 
   const refreshSpotify = () => {
@@ -154,6 +103,10 @@ export function UserStatusProvider({ children }) {
       });
   };
 
+  const trackInfoFromMainHandler = (evt, trackInfo) => {
+    sendActivity(trackInfo, currentUser?._id);
+  };
+
   const chromiumHostDataHandler = (event, data) => {
     sendActivity(
       {
@@ -166,11 +119,6 @@ export function UserStatusProvider({ children }) {
       },
       currentUser?._id
     );
-  };
-
-  const exitListeners = () => {
-    trackProcess?.close();
-    process.exit();
   };
 
   useEffect(() => {
@@ -202,11 +150,16 @@ export function UserStatusProvider({ children }) {
     activeWindowListener();
     activeTrackListener(currentUser?.spotifyAccessToken);
 
-    return () =>
+    return () => {
       ipcRenderer.removeAllListeners(
         'chromiumHostData',
         chromiumHostDataHandler
       );
+      ipcRenderer.removeAllListeners(
+        'trackinfo:frommain',
+        trackInfoFromMainHandler
+      );
+    };
   }, []);
 
   const value = { activeTrackListener };
