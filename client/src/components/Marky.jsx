@@ -126,7 +126,7 @@ export default function Marky({
 
   const youTubeTimeHandler = (time) => {
     console.log('received time ', time);
-    setPlayerURL(YouTubeURL + '&t=' + time + 's');
+    setPlayerURL(YouTubeURL + '&t=' + time + 1 + 's'); // +1 second to offset delay
     // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
   };
 
