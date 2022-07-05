@@ -12,6 +12,10 @@ socket.on('fromAppToHost:userID', (packet) => {
   setTimeout(() => sendToChromium(packet), 1);
 });
 
+socket.on('fromAppToHost:signedOut', (packet) => {
+  setTimeout(() => sendToChromium('request:awaitnewclient'), 1);
+});
+
 socket.on('getYouTubeTime', (packet) => {
   sendToChromium(packet);
 });
@@ -80,6 +84,14 @@ const processData = () => {
 
     const json = JSON.parse(contentWithoutSize);
 
+    // socket.timeout(1000).emit('fromHostToApp:data', json, (err, response) => {
+    //   sendToChromium(response);
+    //   // if no response within 5000ms, it might mean that the client has closed mingler
+    //   // if client has closed mingler, reset chromium extension to await a new client and spawn a new host
+    //   if (err) {
+    //     sendToChromium('request:awaitnewclient');
+    //   }
+    // });
     socket.emit('fromHostToApp:data', json);
   }
 };

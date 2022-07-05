@@ -155,39 +155,45 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 // This socket is for local real-time communication between
 // 1) main and renderer process, 2) mingler and the host, and by extension, the chromium extension
 const initSocket = (userID) => {
-  ipcMain.on('currentUser:signedOut', () => {
-    // socket.disconnect();
-    httpServer.close();
-    console.log('Socket closed');
-  });
-
-  authIo.on('connection', (socket) => {
-    authIo.emit('fromAppToHost:userID', userID);
-
-    socket.on('fromHostToApp:data', (data) => {
-      console.log('data ', data);
-      // if data = time send time not chromiumhostdata
-      // Picked up by Marky which then opens a browser tab for the video with the correct time
-      if (data.time) {
-        // TODO: this sends to yourself if you've got a time request.
-        // Needs to get data.fromID and do a mainWindow.webcontents.send(chromiumHostData:YouTubeTime)
-        // which is picked up by clientSocketContext, which is sent to the server with the data and fromID, which sends it to fromID through socket,
-        // which picks it up and runs setPlayerURL
-        mainWindow?.webContents.send('chromiumHostData:YouTubeTime', data);
-      } else {
-        mainWindow?.webContents.send('chromiumHostData', data);
-      }
-    });
-
-    ipcMain.on('getYouTubeTime', (event, packet) => {
-      socket.emit('getYouTubeTime', packet);
-    });
-  });
-
-  authIo.on('disconnect', (reason) => {
-    console.log('Host socket dc reason: ', reason);
-  });
+  authIo.emit('fromAppToHost:userID', userID);
 };
+
+authIo.on('connection', (socket) => {
+  ipcMain.once('currentUser:signedOut', () => {
+    socket.emit('fromAppToHost:signedOut');
+    ipcMain.removeAllListeners('getYouTubeTime');
+    socket.removeAllListeners('fromHostToApp:data');
+    // socket.disconnect();
+    // httpServer.close();
+    console.log('Signed out - socket channels closed. ');
+  });
+
+  console.log('authIo connected, rand: ', Math.random());
+
+  socket.on('fromHostToApp:data', (data, callback) => {
+    // callback('roger roger');
+    console.log('data ', data);
+    // if data = time send time not chromiumhostdata
+    // Picked up by Marky which then opens a browser tab for the video with the correct time
+    if (data.time) {
+      // TODO: this sends to yourself if you've got a time request.
+      // Needs to get data.fromID and do a mainWindow.webcontents.send(chromiumHostData:YouTubeTime)
+      // which is picked up by clientSocketContext, which is sent to the server with the data and fromID, which sends it to fromID through socket,
+      // which picks it up and runs setPlayerURL
+      mainWindow?.webContents.send('chromiumHostData:YouTubeTime', data);
+    } else {
+      mainWindow?.webContents.send('chromiumHostData', data);
+    }
+  });
+
+  ipcMain.on('getYouTubeTime', (event, packet) => {
+    socket.emit('getYouTubeTime', packet);
+  });
+});
+
+authIo.on('disconnect', (reason) => {
+  console.log('Host socket dc reason: ', reason);
+});
 
 const createWindow = async () => {
   if (
@@ -314,6 +320,7 @@ const createWindow = async () => {
         app.quit();
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
+        console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
       });
     } catch (exception) {

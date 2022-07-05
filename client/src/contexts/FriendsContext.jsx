@@ -47,7 +47,6 @@ export function FriendsProvider({ children }) {
   }, [currentUser, socket]);
 
   useEffect(() => {
-    console.log('friends ', friends);
     if (!socket || !friends) return;
     setFriendRequestListeners();
     setUserStatusListener();
