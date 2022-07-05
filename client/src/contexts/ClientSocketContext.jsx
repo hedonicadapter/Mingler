@@ -16,14 +16,14 @@ export function ClientSocketProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const [socket, setSocket] = useState(null);
 
-  const connectSocket = () => {
+  const connectSocket = (user) => {
     // ws://127.0.0.1:8080/user
     const newSocket = io('https://menglir.herokuapp.com/user', {
       auth: {
-        accessToken: currentUser && currentUser.accessToken,
+        accessToken: user && user.accessToken,
       },
-      query: currentUser && {
-        userID: currentUser._id?.replace(/['"]+/g, ''),
+      query: user && {
+        userID: user._id?.replace(/['"]+/g, ''),
       },
     });
     setSocket(newSocket);
@@ -52,8 +52,8 @@ export function ClientSocketProvider({ children }) {
   }, [socket]);
 
   useEffect(() => {
-    connectSocket();
-  }, []);
+    connectSocket(currentUser);
+  }, [currentUser._id]);
 
   useEffect(() => {
     if (socket) {
