@@ -124,9 +124,9 @@ export default function Marky({
     }
   };
 
-  const youTubeTimeHandler = (data) => {
-    console.log('received time ', data);
-    setPlayerURL(YouTubeURL + '&t=' + data.time + 's');
+  const youTubeTimeHandler = (time) => {
+    console.log('received time ', time);
+    setPlayerURL(YouTubeURL + '&t=' + time + 's');
     // shell.openExternal(YouTubeURL + '&t=' + data.time + 's');
   };
 
