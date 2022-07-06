@@ -10,7 +10,6 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from '../scripts/CheckNodeEnv';
 import DeleteSourceMaps from '../scripts/DeleteSourceMaps';
-// const CopyPlugin = require('copy-webpack-plugin');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
@@ -45,13 +44,6 @@ export default merge(baseConfig, {
   },
 
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [
-    //     { from: 'source', to: 'dest' },
-    //     { from: 'other', to: 'public' },
-    //   ],
-    // }),
-
     new BundleAnalyzerPlugin({
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',

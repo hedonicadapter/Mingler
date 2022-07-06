@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { BsSpotify } from 'react-icons/bs';
 
@@ -43,13 +43,53 @@ const AccountSettingsContent = ({
   emailError,
   spotifyError,
 }) => {
-  const [connectedToSpotify, setConnectedToSpotify] = useState(
-    settingsState.currentUser?.spotifyAccessToken
-  );
+  const [connectedToSpotify, setConnectedToSpotify] = useState();
+  const [spotifyHovered, setSpotifyHovered] = useState(false);
+
+  const spotifyTextAnimationControls = useAnimation();
 
   useEffect(() => {
-    setConnectedToSpotify(settingsState.currentUser?.spotifyAccessToken);
-  }, [settingsState.currentUser?.spotifyAccessToken]);
+    let now = new Date();
+    let spotifyExpiryDate = new Date(
+      settingsState.currentUser?.spotifyExpiryDate
+    );
+
+    if (
+      // If access token exists and hasnt expired
+      settingsState.currentUser?.spotifyAccessToken &&
+      now < spotifyExpiryDate
+    ) {
+      setConnectedToSpotify(true);
+    } else setConnectedToSpotify(false);
+  }, [
+    settingsState.currentUser?.spotifyAccessToken,
+    settingsState.currentUser?.spotifyExpiryDate,
+  ]);
+
+  const animationSequence = async () => {
+    await spotifyTextAnimationControls.start({
+      opacity: 0,
+      transition: { duration: 0 },
+    });
+    return await spotifyTextAnimationControls.start({
+      opacity: 1,
+      transition: { duration: 0.3, color: colors.defaultPlaceholderTextColor },
+    });
+  };
+
+  useEffect(() => {
+    animationSequence();
+  }, [spotifyError, connectedToSpotify, spotifyHovered]);
+
+  const SpotifyText = () => {
+    if (spotifyError) {
+      if (spotifyHovered) return 'reconnect';
+      return spotifyError;
+    } else if (connectedToSpotify) {
+      if (spotifyHovered) return 'reconnect';
+      return 'connected';
+    } else return 'connect';
+  };
 
   return (
     <>
@@ -159,13 +199,13 @@ const AccountSettingsContent = ({
         whileTap={animations.whileTap}
         transition={{ duration: 0.15 }}
         onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
+        onMouseEnter={() => setSpotifyHovered(true)}
+        onMouseLeave={() => setSpotifyHovered(false)}
       >
         <BsSpotify size={'18px'} style={{ paddingRight: 6 }} />
-        {spotifyError
-          ? spotifyError
-          : connectedToSpotify
-          ? 'connected'
-          : 'connect'}
+        <motion.div animate={spotifyTextAnimationControls}>
+          <SpotifyText />
+        </motion.div>
       </motion.div>
     </>
   );

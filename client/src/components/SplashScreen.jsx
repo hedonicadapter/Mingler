@@ -385,6 +385,7 @@ const GuestSlide = () => {
             opacity: 0,
             cursor: error ? 'default' : 'auto',
             marginRight: 0,
+            textAlign: 'right',
           }}
           onClick={() =>
             formFilled != 'false' &&
@@ -569,7 +570,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
             animations.whileTap
           }
           className={styles.buttonStyle}
-          style={{ minWidth: '80px', opacity: 0 }}
+          style={{ minWidth: '80px', opacity: 0, textAlign: 'right' }}
           onClick={() =>
             formFilled != 'false' &&
             formFilled != 'loading' &&
@@ -772,6 +773,7 @@ const SigninSlide = ({ justRegistered }) => {
             alignSelf: 'center',
             fontSize: '0.8em',
             opacity: formFilled === 'false' ? 0 : 1,
+            textAlign: 'right',
           }}
           // formFilled={formFilled}
           onClick={() =>
