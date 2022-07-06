@@ -65,7 +65,15 @@ httpServer.listen(PORT);
 let store;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
-let exePath = path.resolve(__dirname, '../scripts/ActiveTrackListener.py');
+let windowListenerScriptPath = path.resolve(
+  __dirname,
+  '../scripts/ActiveWindowListener.py'
+);
+let trackListenerScriptPath = path.resolve(
+  __dirname,
+  '../scripts/ActiveTrackListener.py'
+);
+let windowProcess;
 let trackProcess;
 let refreshRetryLimit = 0;
 
@@ -94,6 +102,48 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+const initActiveWindowListenerProcess = () => {
+  try {
+    windowProcess?.close();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  windowProcess = execFile('python', [windowListenerScriptPath]);
+
+  windowProcess.stdout.on('data', function (data) {
+    let windowInfo = data.toString().trim();
+
+    console.log('windowInfo ', windowInfo);
+
+    // Second comparison doesn't work for some reason
+    if (
+      windowInfo &&
+      windowInfo !== 'Mingler' &&
+      windowInfo !== 'Task Switching' &&
+      windowInfo !== 'Snap Assist' &&
+      windowInfo !== 'Spotify Free'
+    ) {
+      mainWindow?.webContents.send('windowinfo:frommain', {
+        WindowTitle: windowInfo,
+        Date: new Date(),
+      });
+    }
+  });
+
+  windowProcess.stderr.on('data', function (data) {
+    console.warn('stderr activeTrackListener: ', data);
+  });
+
+  windowProcess.on('error', function (err) {
+    if (err) return console.error('trackprocess error: ', err);
+  });
+
+  windowProcess.on('exit', () =>
+    console.warn('windowProcess exited ', windowProcess)
+  );
+};
+
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   try {
     trackProcess?.close();
@@ -103,7 +153,10 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 
   if (!spotifyAccessToken) return;
 
-  trackProcess = execFile('python', [exePath, spotifyAccessToken]);
+  trackProcess = execFile('python', [
+    trackListenerScriptPath,
+    spotifyAccessToken,
+  ]);
 
   trackProcess.on('exit', () =>
     console.warn('trackprocess exited ', trackProcess)
@@ -224,6 +277,7 @@ const createWindow = async () => {
     // alwaysOnTop: true,
     icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
     webPreferences: {
+      contextIsolation: false,
       nodeIntegration: true,
       enableRemoteModule: true,
       devTools: true,
@@ -326,6 +380,11 @@ const createWindow = async () => {
     } catch (exception) {
       console.log('Creating host socket server exception: ', exception);
     }
+  });
+
+  ipcMain.handle('initActiveWindowListener:fromrenderer', (event) => {
+    initActiveWindowListenerProcess();
+    return true;
   });
 
   ipcMain.handle(

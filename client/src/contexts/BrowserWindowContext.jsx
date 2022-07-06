@@ -44,6 +44,7 @@ const settingsWindowConfig = {
   height: 510,
   icon: favicon,
   webPreferences: {
+    contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
     // devTools: false,
@@ -59,6 +60,7 @@ const findFriendsWindowConfig = {
   // height: 634,
   icon: favicon,
   webPreferences: {
+    contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
     devTools: false,

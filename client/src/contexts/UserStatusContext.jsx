@@ -33,40 +33,18 @@ export function UserStatusProvider({ children }) {
 
   const { sendActivity } = useClientSocket();
 
-  const activeWindowListener = () => {
-    let process;
-    let exePath = path.resolve(__dirname, '../scripts/ActiveWindowListener.py');
-    process = execFile('python', [exePath]);
+  const activeWindowListener = async () => {
+    ipcRenderer.removeAllListeners(
+      'windowinfo:frommain',
+      windowInfoFromMainHandler
+    );
+    const result = await ipcRenderer.invoke(
+      'initActiveWindowListener:fromrenderer'
+    );
 
-    process.stdout.on('data', function (data) {
-      if (!currentUser) return;
-
-      let activeWindow = data.toString().trim();
-
-      console.log('activeWindow ', activeWindow);
-
-      // Second comparison doesn't work for some reason
-      if (
-        activeWindow &&
-        activeWindow !== 'Mingler' &&
-        activeWindow !== 'Task Switching' &&
-        activeWindow !== 'Snap Assist' &&
-        activeWindow !== 'Spotify Free'
-      ) {
-        sendActivity(
-          { WindowTitle: activeWindow, Date: new Date() },
-          currentUser?._id
-        );
-      }
-    });
-
-    // process.stderr.on('data', function (data) {
-    // if (data) console.log('STDERR: ', data);
-    // });
-
-    process.on('error', function (err) {
-      if (err) return console.error(err);
-    });
+    if (result)
+      return ipcRenderer.on('windowinfo:frommain', windowInfoFromMainHandler);
+    return notify('Error', 'Failed to initialize window listener.');
   };
 
   const activeTrackListener = async (spotifyAccessToken) => {
@@ -81,8 +59,15 @@ export function UserStatusProvider({ children }) {
 
     if (result)
       return ipcRenderer.on('trackinfo:frommain', trackInfoFromMainHandler);
-    console.log('no result');
     return notify('Error', 'Failed to initialize Spotify.');
+  };
+
+  const windowInfoFromMainHandler = (evt, windowInfo) => {
+    sendActivity(windowInfo, currentUser?._id);
+  };
+
+  const trackInfoFromMainHandler = (evt, trackInfo) => {
+    sendActivity(trackInfo, currentUser?._id);
   };
 
   const refreshSpotify = () => {
@@ -101,10 +86,6 @@ export function UserStatusProvider({ children }) {
       .catch((e) => {
         console.log('Refreshing spotify error ', e);
       });
-  };
-
-  const trackInfoFromMainHandler = (evt, trackInfo) => {
-    sendActivity(trackInfo, currentUser?._id);
   };
 
   const chromiumHostDataHandler = (event, data) => {
@@ -158,6 +139,10 @@ export function UserStatusProvider({ children }) {
       ipcRenderer.removeAllListeners(
         'trackinfo:frommain',
         trackInfoFromMainHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'windowinfo:frommain',
+        windowInfoFromMainHandler
       );
     };
   }, []);
