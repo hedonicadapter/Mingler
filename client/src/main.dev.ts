@@ -31,6 +31,7 @@ import installExtension, {
 
 import dao from './config/dao';
 import configureStore from './mainState/newStore';
+import { getPath } from './helpers/getPath';
 
 const execFile = require('child_process').execFile;
 const JSON5 = require('json5');
@@ -65,13 +66,13 @@ httpServer.listen(PORT);
 let store;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
-let windowListenerScriptPath = path.resolve(
-  __dirname,
-  '../scripts/ActiveWindowListener.py'
+let windowListenerScript = path.resolve(
+  getPath('scripts', app),
+  'ActiveWindowListener.py'
 );
-let trackListenerScriptPath = path.resolve(
-  __dirname,
-  '../scripts/ActiveTrackListener.py'
+let trackListenerScript = path.resolve(
+  getPath('scripts', app),
+  'ActiveTrackListener.py'
 );
 let windowProcess;
 let trackProcess;
@@ -109,7 +110,7 @@ const initActiveWindowListenerProcess = () => {
     console.warn(e);
   }
 
-  windowProcess = execFile('python', [windowListenerScriptPath]);
+  windowProcess = execFile('python', [windowListenerScript]);
 
   windowProcess.stdout.on('data', function (data) {
     let windowInfo = data.toString().trim();
@@ -132,11 +133,11 @@ const initActiveWindowListenerProcess = () => {
   });
 
   windowProcess.stderr.on('data', function (data) {
-    console.warn('stderr activeTrackListener: ', data);
+    console.warn('stderr activeWindowListener: ', data);
   });
 
   windowProcess.on('error', function (err) {
-    if (err) return console.error('trackprocess error: ', err);
+    if (err) return console.error('windowProcess error: ', err);
   });
 
   windowProcess.on('exit', () =>
@@ -153,10 +154,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 
   if (!spotifyAccessToken) return;
 
-  trackProcess = execFile('python', [
-    trackListenerScriptPath,
-    spotifyAccessToken,
-  ]);
+  trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
   trackProcess.on('exit', () =>
     console.warn('trackprocess exited ', trackProcess)
@@ -357,6 +355,11 @@ const createWindow = async () => {
     }
   };
 
+  const exitApp = () => {
+    mainWindow?.webContents.send('exit:frommain');
+    app.quit();
+  };
+
   mainWindow.webContents.once('dom-ready', async () => {
     try {
       await storage
@@ -370,8 +373,7 @@ const createWindow = async () => {
         .catch(console.error);
 
       ipcMain.on('exit:frommenubutton', () => {
-        mainWindow?.webContents.send('exit:frommain');
-        app.quit();
+        exitApp();
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
@@ -382,10 +384,10 @@ const createWindow = async () => {
     }
   });
 
-  ipcMain.handle('initActiveWindowListener:fromrenderer', (event) => {
-    initActiveWindowListenerProcess();
-    return true;
-  });
+  initActiveWindowListenerProcess();
+  // ipcMain.handle('initActiveWindowListener:fromrenderer', () => {
+  //   return true;
+  // });
 
   ipcMain.handle(
     'initActiveTrackListener:fromrenderer',
@@ -424,6 +426,7 @@ const createWindow = async () => {
   });
 
   mainWindow.on('closed', () => {
+    exitApp();
     mainWindow = null;
   });
 

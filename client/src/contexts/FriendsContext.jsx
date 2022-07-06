@@ -74,7 +74,7 @@ export function FriendsProvider({ children }) {
       );
       socket?.removeAllListeners();
     };
-  }, [socket, friends]);
+  }, [socket, friends, currentUser?._id]);
 
   const getConversations = () => {
     DAO.getConversations(currentUser._id, currentUser.accessToken)

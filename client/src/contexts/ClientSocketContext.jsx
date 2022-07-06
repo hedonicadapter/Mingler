@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { useSelector } from 'react-redux';
 import { io } from 'socket.io-client';
+import { notify } from '../components/reusables/notifications';
 
 import DAO from '../config/DAO';
 import { getCurrentUser } from '../mainState/features/settingsSlice';

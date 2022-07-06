@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
-var path = require('path');
-const execFile = require('child_process').execFile;
 
 import DAO from '../config/DAO';
 import { useLocalStorage } from '../helpers/localStorageManager';
@@ -31,20 +29,14 @@ export function UserStatusProvider({ children }) {
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
-  const { sendActivity } = useClientSocket();
+  const { sendActivity, socket } = useClientSocket();
 
-  const activeWindowListener = async () => {
-    ipcRenderer.removeAllListeners(
-      'windowinfo:frommain',
-      windowInfoFromMainHandler
-    );
-    const result = await ipcRenderer.invoke(
-      'initActiveWindowListener:fromrenderer'
-    );
+  const activeWindowListener = () => {
+    ipcRenderer.on('windowinfo:frommain', windowInfoFromMainHandler);
+  };
 
-    if (result)
-      return ipcRenderer.on('windowinfo:frommain', windowInfoFromMainHandler);
-    return notify('Error', 'Failed to initialize window listener.');
+  const activeTabListener = () => {
+    ipcRenderer.on('chromiumHostData', chromiumHostDataHandler);
   };
 
   const activeTrackListener = async (spotifyAccessToken) => {
@@ -63,11 +55,15 @@ export function UserStatusProvider({ children }) {
   };
 
   const windowInfoFromMainHandler = (evt, windowInfo) => {
-    sendActivity(windowInfo, currentUser?._id);
+    const packet = { data: windowInfo, userID: currentUser?._id };
+
+    socket.emit('activity:send', packet);
   };
 
   const trackInfoFromMainHandler = (evt, trackInfo) => {
-    sendActivity(trackInfo, currentUser?._id);
+    const packet = { data: trackInfo, userID: currentUser?._id };
+
+    socket.emit('activity:send', packet);
   };
 
   const refreshSpotify = () => {
@@ -89,8 +85,8 @@ export function UserStatusProvider({ children }) {
   };
 
   const chromiumHostDataHandler = (event, data) => {
-    sendActivity(
-      {
+    socket.emit('activity:send', {
+      data: {
         //Either tabdata or youtube data is sent, never both
         TabTitle: data?.TabTitle,
         TabURL: data?.TabURL,
@@ -98,8 +94,8 @@ export function UserStatusProvider({ children }) {
         YouTubeURL: data?.YouTubeURL,
         Date: new Date(),
       },
-      currentUser?._id
-    );
+      userID: currentUser?._id,
+    });
   };
 
   useEffect(() => {
@@ -126,12 +122,15 @@ export function UserStatusProvider({ children }) {
   }, [currentUser?.spotifyExpiryDate]);
 
   useEffect(() => {
-    ipcRenderer.on('chromiumHostData', chromiumHostDataHandler);
-
     activeWindowListener();
+    activeTabListener();
     activeTrackListener(currentUser?.spotifyAccessToken);
 
     return () => {
+      ipcRenderer.removeAllListeners(
+        'windowinfo:frommain',
+        windowInfoFromMainHandler
+      );
       ipcRenderer.removeAllListeners(
         'chromiumHostData',
         chromiumHostDataHandler
@@ -140,12 +139,8 @@ export function UserStatusProvider({ children }) {
         'trackinfo:frommain',
         trackInfoFromMainHandler
       );
-      ipcRenderer.removeAllListeners(
-        'windowinfo:frommain',
-        windowInfoFromMainHandler
-      );
     };
-  }, []);
+  }, [currentUser?._id, socket]);
 
   const value = { activeTrackListener };
 

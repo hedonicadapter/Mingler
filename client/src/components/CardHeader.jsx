@@ -34,6 +34,7 @@ const AvatarContainer = ({
         isWidgetHeader && {
           backgroundColor: colors.offWhitePressed,
           cursor: 'pointer',
+          scale: 1.05,
         }
       }
       whileTap={isWidgetHeader && { opacity: 0.5 }}
