@@ -212,7 +212,9 @@ export function BrowserWindowProvider({ children }) {
       .then()
       .catch(console.warn);
 
-    settingsWindow.once('ready-to-show', () => {});
+    settingsWindow.once('ready-to-show', () => {
+      settingsWindow.setTitle('Settings');
+    });
   };
 
   const toggleSettings = (page = 'General', quickSetting = false) => {
@@ -235,7 +237,9 @@ export function BrowserWindowProvider({ children }) {
       .then()
       .catch(console.warn);
 
-    findFriendsWindow.once('ready-to-show', () => {});
+    findFriendsWindow.once('ready-to-show', () => {
+      findFriendsWindow.setTitle('Find friends');
+    });
   };
 
   const toggleFindFriends = () => {
@@ -279,6 +283,7 @@ export function BrowserWindowProvider({ children }) {
             .catch((e) => sendSpotifyError(e));
 
           await connectSpotifyWindow.once('ready-to-show', () => {
+            connectSpotifyWindow.setTitle('Connect with Spotify');
             connectSpotifyWindow.show();
 
             let currentUrl = connectSpotifyWindow.webContents.getURL();

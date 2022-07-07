@@ -27,7 +27,7 @@ const FrameButtons = () => {
   };
 
   return (
-    <div>
+    <div className={styles.frameButtonsContainer}>
       <motion.span
         className={[styles.frameButton, 'undraggable'].join(' ')}
         whileHover={hoverAnimation}
@@ -48,6 +48,10 @@ const FrameButtons = () => {
   );
 };
 
+const AppTitle = () => {
+  return <div className={styles.appTitleStyle}>mingler</div>;
+};
+
 const WindowTitle = () => {
   const windowTitle = remote.getCurrentWindow().getTitle().toLowerCase();
 
@@ -62,6 +66,7 @@ export const WindowFrame = ({ children }) => {
         style={{ backgroundColor: frameColor }}
       >
         <FrameButtons />
+        <AppTitle />
         <WindowTitle />
       </div>
       <div className={[styles.body, 'clickable'].join(' ')}>{children}</div>
