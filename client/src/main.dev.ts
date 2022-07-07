@@ -67,16 +67,24 @@ let store;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
 let windowListenerScript = path.resolve(
-  getPath('scripts', app),
-  'ActiveWindowListener.py'
+  // TODO: should probably not be scripts/dist, ruins the point of path.resolve
+  getPath('scripts/dist', app),
+  'ActiveWindowListener.exe'
 );
 let trackListenerScript = path.resolve(
-  getPath('scripts', app),
-  'ActiveTrackListener.py'
+  // TODO: should probably not be scripts/dist, ruins the point of path.resolve
+  getPath('scripts/dist', app),
+  'ActiveTrackListener.exe'
 );
 let windowProcess;
 let trackProcess;
 let refreshRetryLimit = 0;
+
+console.log(
+  'windowListenerScript trackListenerScript ',
+  windowListenerScript,
+  trackListenerScript
+);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -110,7 +118,9 @@ const initActiveWindowListenerProcess = () => {
     console.warn(e);
   }
 
-  windowProcess = execFile('python', [windowListenerScript]);
+  windowProcess = execFile(windowListenerScript, function (err, data) {
+    console.error('windowProcess error: ', err);
+  });
 
   windowProcess.stdout.on('data', function (data) {
     let windowInfo = data.toString().trim();
@@ -154,7 +164,13 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 
   if (!spotifyAccessToken) return;
 
-  trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
+  trackProcess = execFile(
+    trackListenerScript,
+    [spotifyAccessToken],
+    function (err, data) {
+      console.error('trackProcess error: ', err);
+    }
+  );
 
   trackProcess.on('exit', () =>
     console.warn('trackprocess exited ', trackProcess)
@@ -252,6 +268,11 @@ const createWindow = async () => {
     process.env.DEBUG_PROD === 'true'
   ) {
     await installExtensions();
+  } else {
+    // Auto-start app
+    app.setLoginItemSettings({
+      openAtLogin: true,
+    });
   }
 
   const RESOURCES_PATH = app.isPackaged

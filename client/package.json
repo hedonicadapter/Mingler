@@ -40,8 +40,8 @@
       "main.prod.js",
       "main.prod.js.map",
       "package.json",
-      "scripts/ActiveWindowListener.py",
-      "scripts/ActiveTrackListener.py"
+      "scripts/dist/ActiveWindowListener.exe",
+      "scripts/dist/ActiveTrackListener.exe"
     ],
     "afterSign": ".erb/scripts/Notarize.js",
     "mac": {
