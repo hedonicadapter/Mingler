@@ -184,7 +184,7 @@ export default function FindFriendsContent() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <WindowFrame />
+        <WindowFrame title={'Find friends'} />
         <div onKeyDown={handleEscapeKey}>
           <motion.input
             className={[

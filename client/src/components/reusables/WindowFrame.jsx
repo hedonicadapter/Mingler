@@ -52,13 +52,16 @@ const AppTitle = () => {
   return <div className={styles.appTitleStyle}>mingler</div>;
 };
 
-const WindowTitle = () => {
-  const windowTitle = remote.getCurrentWindow().getTitle().toLowerCase();
+const WindowTitle = ({ title }) => {
+  // Is 'Mingler' in production for some reason
+  const windowTitle = remote.getCurrentWindow().getTitle();
 
-  return <div className={styles.windowTitleStyle}>{windowTitle}</div>;
+  return (
+    <div className={styles.windowTitleStyle}>{title ? title : windowTitle}</div>
+  );
 };
 
-export const WindowFrame = ({ children }) => {
+export const WindowFrame = ({ children, title }) => {
   return (
     <div>
       <div
@@ -67,7 +70,7 @@ export const WindowFrame = ({ children }) => {
       >
         <FrameButtons />
         <AppTitle />
-        <WindowTitle />
+        <WindowTitle title={title} />
       </div>
       <div className={[styles.body, 'clickable'].join(' ')}>{children}</div>
     </div>

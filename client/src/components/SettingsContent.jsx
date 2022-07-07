@@ -358,7 +358,7 @@ export default function SettingsContent() {
 
   return (
     <div className={styles.container} onKeyDown={handleEscapeKey}>
-      <WindowFrame>
+      <WindowFrame title={'Settings'}>
         <div className={styles.menuAndContentContainer}>
           <div className={styles.menu}>
             {settings.map((setting, index) => {
