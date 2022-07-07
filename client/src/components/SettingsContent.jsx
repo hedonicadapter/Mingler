@@ -217,7 +217,7 @@ export default function SettingsContent() {
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(0);
   const [username, setUsername] = useState(
     settingsState?.currentUser?.username
   );
@@ -227,6 +227,10 @@ export default function SettingsContent() {
   const [usernameError, setUsernameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [spotifyError, setSpotifyError] = useState(null);
+
+  useEffect(() => {
+    dispatch(setSettingsContentMain(settings[expanded]?.title) || 'General');
+  }, [expanded]);
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => setProfilePictureError(null), 3000);
@@ -325,8 +329,13 @@ export default function SettingsContent() {
   };
 
   const quickSettingHandler = (e, quickSetting) => {
-    if (quickSetting === 'profilePictureClicked') fileInputRef?.current.click();
+    if (quickSetting === 'profilePictureClicked') {
+      fileInputRef?.current.click();
+
+      setExpanded(1);
+    }
   };
+
   const toggleConnectSpotifyErrorHandler = (e, error) => {
     setSpotifyError(error);
   };
@@ -354,11 +363,7 @@ export default function SettingsContent() {
           <div className={styles.menu}>
             {settings.map((setting, index) => {
               return (
-                <div
-                  onClick={() =>
-                    dispatch(setSettingsContentMain(setting.title))
-                  }
-                >
+                <div onClick={() => setExpanded(index)}>
                   <AccordionSetting
                     setting={setting}
                     key={index}

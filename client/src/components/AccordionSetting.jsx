@@ -15,7 +15,8 @@ export default function AccordionSetting({
   const isExpanded = index === expanded;
 
   const toggleExpansion = () => {
-    setExpanded(isExpanded ? false : index);
+    // Default to expanding the first accordion
+    setExpanded(isExpanded ? 0 : index);
   };
 
   return (
