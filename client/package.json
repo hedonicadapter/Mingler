@@ -77,7 +77,8 @@
     },
     "nsis": {
       "oneClick": "false",
-      "allowToChangeInstallationDirectory": "true"
+      "allowToChangeInstallationDirectory": "true",
+      "include": "scripts/installer.nsh"
     },
     "linux": {
       "target": [
@@ -94,7 +95,7 @@
     "extraResources": [
       "./assets/**",
       {
-        "from": "scripts/",
+        "from": "scripts/dist",
         "to": "scripts",
         "filter": [
           "**/*"
