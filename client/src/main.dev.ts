@@ -437,7 +437,9 @@ const createWindow = async () => {
     ]);
 
     const createTray = () => {
-      tray = new Tray(path.resolve('assets', 'icons', 'icon.ico'));
+      tray = new Tray(
+        path.resolve(getPath('assets', app), 'icons', 'icon.ico')
+      );
       tray.setToolTip('Mingler');
       tray.setContextMenu(notSignedInContextMenu);
     };
