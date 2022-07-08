@@ -297,6 +297,7 @@ const createWindow = async () => {
     maximizable: false,
     // alwaysOnTop: true,
     icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
+    skipTaskbar: true,
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true,
