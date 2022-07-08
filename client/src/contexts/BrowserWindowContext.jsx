@@ -144,12 +144,17 @@ export function BrowserWindowProvider({ children }) {
   useEffect(() => {
     ipcRenderer.once('exit:frommain', () => {
       console.log('closing ');
-      settingsWindow.setClosable(true);
-      findFriendsWindow.setClosable(true);
-
-      settingsWindow?.close();
-      findFriendsWindow?.close();
-      connectSpotifyWindow?.close();
+      if (!settingsWindow.isDestroyed()) {
+        settingsWindow.setClosable(true);
+        settingsWindow?.close();
+      }
+      if (!findFriendsWindow.isDestroyed()) {
+        findFriendsWindow.setClosable(true);
+        findFriendsWindow?.close();
+      }
+      if (!connectSpotifyWindow.isDestroyed()) {
+        connectSpotifyWindow?.close();
+      }
 
       setReadyToExit(true);
     });

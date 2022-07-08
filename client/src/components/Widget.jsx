@@ -9,6 +9,7 @@ import MenuButton from './MenuButton';
 import { ClientSocketProvider } from '../contexts/ClientSocketContext';
 import { FriendsProvider } from '../contexts/FriendsContext';
 import { UserStatusProvider } from '../contexts/UserStatusContext';
+import { Memoized } from './reusables/Memoized';
 
 import { BrowserWindowProvider } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
@@ -19,8 +20,6 @@ const Border = () => {
 };
 
 export default function Widget() {
-  const appState = useSelector(getApp);
-
   return (
     <AuthProvider>
       <ClientSocketProvider>
