@@ -18,6 +18,8 @@ import {
   globalShortcut,
   screen,
   ipcMain,
+  Tray,
+  Menu,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -29,7 +31,6 @@ import installExtension, {
   REDUX_DEVTOOLS,
 } from 'electron-devtools-installer';
 
-import dao from './config/dao';
 import configureStore from './mainState/newStore';
 import { getPath } from './helpers/getPath';
 
@@ -63,28 +64,33 @@ const authIo = io.of('/auth');
 const PORT = 8081;
 httpServer.listen(PORT);
 
-let store;
+let store = null;
 let mainWindow: BrowserWindow | null = null;
 let findFriendsWindow: BrowserWindow | null = null;
 let windowListenerScript = path.resolve(
+  app.getPath('appData'),
+  '..',
+  'local',
+  'MINGLER',
+  'scripts',
   // TODO: should probably not be scripts/dist, ruins the point of path.resolve
-  getPath('scripts/dist', app),
+  // getPath('scripts', app),
   'ActiveWindowListener.exe'
 );
 let trackListenerScript = path.resolve(
+  app.getPath('appData'),
+  '..',
+  'local',
+  'MINGLER',
+  'scripts',
   // TODO: should probably not be scripts/dist, ruins the point of path.resolve
-  getPath('scripts/dist', app),
+  // getPath('scripts', app),
   'ActiveTrackListener.exe'
 );
-let windowProcess;
-let trackProcess;
+let windowProcess = null;
+let trackProcess = null;
 let refreshRetryLimit = 0;
-
-console.log(
-  'windowListenerScript trackListenerScript ',
-  windowListenerScript,
-  trackListenerScript
-);
+let tray = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -113,14 +119,12 @@ const installExtensions = async () => {
 
 const initActiveWindowListenerProcess = () => {
   try {
-    windowProcess?.close();
+    windowProcess?.exit();
   } catch (e) {
     console.warn(e);
   }
 
-  windowProcess = execFile(windowListenerScript, function (err, data) {
-    console.error('windowProcess error: ', err);
-  });
+  windowProcess = execFile(windowListenerScript);
 
   windowProcess.stdout.on('data', function (data) {
     let windowInfo = data.toString().trim();
@@ -157,20 +161,14 @@ const initActiveWindowListenerProcess = () => {
 
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   try {
-    trackProcess?.close();
+    trackProcess?.exit();
   } catch (e) {
     console.warn(e);
   }
 
   if (!spotifyAccessToken) return;
 
-  trackProcess = execFile(
-    trackListenerScript,
-    [spotifyAccessToken],
-    function (err, data) {
-      console.error('trackProcess error: ', err);
-    }
-  );
+  trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
 
   trackProcess.on('exit', () =>
     console.warn('trackprocess exited ', trackProcess)
@@ -227,7 +225,10 @@ const initSocket = (userID) => {
 
 authIo.on('connection', (socket) => {
   ipcMain.once('currentUser:signedOut', () => {
-    socket.emit('fromAppToHost:signedOut');
+    console.log('still signed out authio');
+    // Prevents error when exiting app
+    if (!mainWindow?.isDestroyed()) socket.emit('fromAppToHost:signedOut');
+
     ipcMain.removeAllListeners('getYouTubeTime');
     socket.removeAllListeners('fromHostToApp:data');
     // socket.disconnect();
@@ -237,8 +238,7 @@ authIo.on('connection', (socket) => {
 
   console.log('authIo connected, rand: ', Math.random());
 
-  socket.on('fromHostToApp:data', (data, callback) => {
-    // callback('roger roger');
+  socket.on('fromHostToApp:data', (data) => {
     console.log('data ', data);
     // if data = time send time not chromiumhostdata
     // Picked up by Marky which then opens a browser tab for the video with the correct time
@@ -254,7 +254,8 @@ authIo.on('connection', (socket) => {
   });
 
   ipcMain.on('getYouTubeTime', (event, packet) => {
-    socket.emit('getYouTubeTime', packet);
+    // Prevents error when exiting app
+    if (!mainWindow?.isDestroyed()) socket.emit('getYouTubeTime', packet);
   });
 });
 
@@ -293,6 +294,7 @@ const createWindow = async () => {
     height: height,
     minWidth: 430,
     width: 430,
+    maximizable: false,
     // alwaysOnTop: true,
     icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
     webPreferences: {
@@ -318,6 +320,28 @@ const createWindow = async () => {
         });
       }, 150);
     }
+  });
+
+  mainWindow.on('close', function () {
+    windowProcess?.stdin.end();
+    trackProcess?.stdin.end();
+
+    windowProcess?.stdout.destroy();
+    trackProcess?.stdout.destroy();
+
+    windowProcess?.stderr.destroy();
+    trackProcess?.stderr.destroy();
+
+    trackProcess?.removeAllListeners();
+    windowProcess?.removeAllListeners();
+
+    io.close();
+
+    trackProcess?.kill();
+    windowProcess?.kill();
+
+    mainWindow = null;
+    app.exit(0);
   });
 
   // mainWindow?.on('show', () => {
@@ -376,12 +400,66 @@ const createWindow = async () => {
     }
   };
 
-  const exitApp = () => {
-    mainWindow?.webContents.send('exit:frommain');
-    app.quit();
-  };
-
   mainWindow.webContents.once('dom-ready', async () => {
+    const notSignedInContextMenu = Menu.buildFromTemplate([
+      {
+        label: 'show',
+        accelerator: 'CommandOrControl+q',
+        click: showWindow,
+      },
+      { type: 'separator' },
+      {
+        label: 'exit',
+        // No other windows are open, so we can just close from here
+        click: () => mainWindow?.close(),
+      },
+    ]);
+
+    const signedInContextMenu = Menu.buildFromTemplate([
+      {
+        label: 'show',
+        accelerator: 'CommandOrControl+q',
+        click: showWindow,
+      },
+      {
+        label: 'settings',
+        click: () => mainWindow.webContents.send('tray:settings'),
+      },
+      {
+        label: 'sign out',
+        click: () => mainWindow.webContents.send('tray:signout'),
+      },
+      { type: 'separator' },
+      {
+        label: 'exit',
+        click: () => mainWindow.webContents.send('exit:frommain'),
+      },
+    ]);
+
+    const createTray = () => {
+      tray = new Tray(path.resolve('assets', 'icons', 'icon.ico'));
+      tray.setToolTip('Mingler');
+      tray.setContextMenu(notSignedInContextMenu);
+    };
+
+    const setTrayContextMenu = (type: string) => {
+      if (type === 'signedIn') tray?.setContextMenu(signedInContextMenu);
+      if (type === 'signedOut') tray?.setContextMenu(notSignedInContextMenu);
+    };
+
+    createTray();
+
+    ipcMain.once('currentUser:signedOut', () => {
+      console.log('second listener');
+      setTrayContextMenu('signedOut');
+    });
+
+    ipcMain.once('exitready:fromrenderer', () => {
+      console.log('trying to exit');
+
+      mainWindow.close();
+    });
+
     try {
       await storage
         .getItem('store')
@@ -394,9 +472,11 @@ const createWindow = async () => {
         .catch(console.error);
 
       ipcMain.on('exit:frommenubutton', () => {
-        exitApp();
+        mainWindow.webContents.send('exit:frommain');
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
+        setTrayContextMenu('signedIn');
+
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
       });
@@ -444,11 +524,6 @@ const createWindow = async () => {
     //   //   });
     //   // });
     // });
-  });
-
-  mainWindow.on('closed', () => {
-    exitApp();
-    mainWindow = null;
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
@@ -538,6 +613,7 @@ app.whenReady().then(() => {
   })
     .then(async (name) => {
       console.log(`Added Extension:  ${name}`);
+
       try {
         store = configureStore(
           null,

@@ -40,6 +40,7 @@ const settingsWindowConfig = {
   show: false,
   frame: false,
   transparent: true,
+  closable: false,
   width: 475,
   height: 510,
   icon: favicon,
@@ -56,6 +57,7 @@ const findFriendsWindowConfig = {
   show: false,
   frame: false,
   transparent: true,
+  closable: false,
   width: 460,
   // height: 634,
   icon: favicon,
@@ -83,6 +85,8 @@ export function BrowserWindowProvider({ children }) {
   const settingsState = useSelector(getSettings);
   const currentUser = useSelector(getCurrentUser);
 
+  const [readyToExit, setReadyToExit] = useState(false);
+
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
   );
@@ -109,45 +113,65 @@ export function BrowserWindowProvider({ children }) {
 
   const settingsWindowCloseHandler = () => {
     dispatch(settingsOpenFalse());
+    setSettingsWindow(null);
   };
   const settingsWindowClosedHandler = () => {
-    setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-    dispatch(settingsOpenFalse());
+    // setSettingsWindow(new BrowserWindow(settingsWindowConfig));
+    // dispatch(settingsOpenFalse());
   };
 
   const findFriendsWindowCloseHandler = () => {
     dispatch(findFriendsOpenFalse());
+    setFindFriendsWindow(null);
   };
   const findFriendsWindowClosedHandler = () => {
-    setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-    dispatch(findFriendsOpenFalse());
+    // setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
+    // dispatch(findFriendsOpenFalse());
+  };
+
+  const connectSpotifyWindowCloseHandler = () => {
+    setConnectSpotifyWindow(null);
   };
 
   const toggleConnectSpotifyHandler = () => {
     toggleConnectSpotify();
   };
 
+  const traySettingsHandler = () => {
+    toggleSettings();
+  };
+
   useEffect(() => {
     ipcRenderer.once('exit:frommain', () => {
-      settingsWindow.removeListener('close', settingsWindowCloseHandler);
-      settingsWindow.removeListener('closed', settingsWindowClosedHandler);
-
-      findFriendsWindow.removeListener('close', findFriendsWindowCloseHandler);
-      findFriendsWindow.removeListener(
-        'closed',
-        findFriendsWindowClosedHandler
-      );
-
-      settingsWindow.on('closed', () => setSettingsWindow(null));
-      findFriendsWindow.on('closed', () => setFindFriendsWindow(null));
+      console.log('closing ');
+      settingsWindow.setClosable(true);
+      findFriendsWindow.setClosable(true);
 
       settingsWindow?.close();
       findFriendsWindow?.close();
       connectSpotifyWindow?.close();
 
-      setConnectSpotifyWindow(null);
+      setReadyToExit(true);
     });
   }, []);
+
+  useEffect(() => {
+    console.log(
+      !settingsWindow &&
+        !findFriendsWindow &&
+        !connectSpotifyWindow &&
+        readyToExit
+    );
+    if (
+      !settingsWindow &&
+      !findFriendsWindow &&
+      !connectSpotifyWindow &&
+      readyToExit
+    ) {
+      console.log('yooooooooooooooooooooooooooo');
+      ipcRenderer.send('exitready:fromrenderer');
+    }
+  }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
 
   useEffect(() => {
     if (!settingsWindow) return;
@@ -158,14 +182,14 @@ export function BrowserWindowProvider({ children }) {
     settingsWindow.on('blur', settingsWindowBlurHandler);
 
     settingsWindow.on('close', settingsWindowCloseHandler);
-    settingsWindow.on('closed', settingsWindowClosedHandler);
+    // settingsWindow.on('closed', settingsWindowClosedHandler);
 
     return () => {
       settingsWindow.removeListener('focus', settingsWindowFocusHandler);
       settingsWindow.removeListener('blur', settingsWindowBlurHandler);
       settingsWindow.removeListener('close', settingsWindowCloseHandler);
-      settingsWindow.removeListener('closed', settingsWindowClosedHandler);
-      !settingsWindow.isDestroyed() && settingsWindow.close();
+      // settingsWindow.removeListener('closed', settingsWindowClosedHandler);
+      !settingsWindow.isDestroyed() && settingsWindow.destroy();
     };
   }, [settingsWindow]);
 
@@ -175,17 +199,28 @@ export function BrowserWindowProvider({ children }) {
     loadFindFriendsContent();
 
     findFriendsWindow.on('close', findFriendsWindowCloseHandler);
-    findFriendsWindow.on('closed', findFriendsWindowClosedHandler);
+    // findFriendsWindow.on('closed', findFriendsWindowClosedHandler);
 
     return () => {
       findFriendsWindow.removeListener('close', findFriendsWindowCloseHandler);
-      findFriendsWindow.removeListener(
-        'closed',
-        findFriendsWindowClosedHandler
-      );
-      !findFriendsWindow.isDestroyed() && findFriendsWindow.close();
+      // findFriendsWindow.removeListener(
+      //   'closed',
+      //   findFriendsWindowClosedHandler
+      // );
+      !findFriendsWindow.isDestroyed() && findFriendsWindow.destroy();
     };
   }, [findFriendsWindow]);
+
+  useEffect(() => {
+    connectSpotifyWindow.on('close', connectSpotifyWindowCloseHandler);
+
+    return () => {
+      connectSpotifyWindow.removeListener(
+        'close',
+        connectSpotifyWindowCloseHandler
+      );
+    };
+  });
 
   useEffect(() => {
     if (findFriendsWindow?.isVisible())
@@ -193,6 +228,7 @@ export function BrowserWindowProvider({ children }) {
   }, [friends, findFriendsWindow]);
 
   useEffect(() => {
+    ipcRenderer.on('tray:settings', traySettingsHandler);
     ipcRenderer.on(
       'toggleconnectspotify:frommain',
       toggleConnectSpotifyHandler
@@ -203,6 +239,7 @@ export function BrowserWindowProvider({ children }) {
         'toggleconnectspotify:frommain',
         toggleConnectSpotifyHandler
       );
+      ipcRenderer.removeAllListeners('tray:settings', traySettingsHandler);
     };
   }, []);
 
@@ -325,7 +362,7 @@ export function BrowserWindowProvider({ children }) {
               .catch((e) => {
                 sendSpotifyError(e);
               })
-              .finally(() => connectSpotifyWindow.close());
+              .finally(() => connectSpotifyWindow.destroy());
           });
         }
       })

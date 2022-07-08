@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GoPrimitiveDot } from 'react-icons/go';
 
 import styles from './MenuButton.module.css';
@@ -13,8 +13,15 @@ export default function MenuButton() {
   const { signOut, signedIn } = useAuth();
 
   const currentUser = useSelector((state) => getCurrentUser(state));
-
   const [menuVisibility, setMenuVisibility] = useState(false);
+
+  useEffect(() => {
+    ipcRenderer.on('tray:signout', handleSignoutButton);
+
+    return () =>
+      ipcRenderer.removeAllListeners('tray:signout', handleSignoutButton);
+  }, []);
+
   const toggleMenu = () => {
     setMenuVisibility(!menuVisibility);
   };

@@ -15,6 +15,7 @@ import {
   setKeepMeSignedInMain,
 } from '../mainState/features/settingsSlice';
 import genericErrorHandler from '../helpers/genericErrorHandler';
+import { Memoized } from '../components/reusables/Memoized';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
@@ -187,7 +188,11 @@ export function authAndy({ children }) {
   return (
     <AuthContext.Provider value={value}>
       {currentUser && signedIn && <div>{children}</div>}
-      {!signedIn && <SplashScreen />}
+      {!signedIn && (
+        <Memoized>
+          <SplashScreen />
+        </Memoized>
+      )}
     </AuthContext.Provider>
   );
 }
