@@ -78,7 +78,7 @@
     "nsis": {
       "oneClick": "false",
       "allowToChangeInstallationDirectory": "true",
-      "include": "scripts/installer.nsh"
+      "include": "src/scripts/installer.nsh"
     },
     "linux": {
       "target": [

@@ -173,7 +173,6 @@ export function BrowserWindowProvider({ children }) {
       !connectSpotifyWindow &&
       readyToExit
     ) {
-      console.log('yooooooooooooooooooooooooooo');
       ipcRenderer.send('exitready:fromrenderer');
     }
   }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
