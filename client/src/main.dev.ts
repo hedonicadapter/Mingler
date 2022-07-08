@@ -20,6 +20,7 @@ import {
   ipcMain,
   Tray,
   Menu,
+  dialog,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -400,6 +401,55 @@ const createWindow = async () => {
       hideWindow();
     }
   };
+
+  const signOutDialog = {
+    title: "don't go.",
+    message: 'sign out?',
+    buttons: ['nvm', 'bye'],
+    defaultId: 1,
+    cancelId: 0,
+    noLink: true,
+  };
+
+  const signOutGuestDialog = {
+    title: "don't go.",
+    message: 'sign out?',
+    detail: 'your account will be lost',
+    buttons: ['nvm', 'bye'],
+    defaultId: 1,
+    noLink: true,
+  };
+
+  const confirmGuestSignOutDialog = {
+    title: "don't go.",
+    message: 'are you sure?',
+    detail: 'forever',
+    buttons: ['nvm', 'bye'],
+    defaultId: 1,
+    noLink: true,
+  };
+
+  ipcMain.handle('showdialog:fromrenderer', async (evt, guest: Boolean) => {
+    const { response } = await dialog.showMessageBox(
+      mainWindow,
+      guest ? signOutGuestDialog : signOutDialog
+    );
+
+    if (response === 0) return false;
+
+    if (response === 1) {
+      if (!guest) return true;
+
+      const { response } = await dialog.showMessageBox(
+        mainWindow,
+        confirmGuestSignOutDialog
+      );
+
+      if (response === 0) return false;
+      if (response === 1) return true;
+    }
+    return false;
+  });
 
   mainWindow.webContents.once('dom-ready', async () => {
     const notSignedInContextMenu = Menu.buildFromTemplate([
