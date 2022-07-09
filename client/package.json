@@ -41,7 +41,10 @@
       "main.prod.js.map",
       "package.json",
       "scripts/dist/ActiveWindowListener.exe",
-      "scripts/dist/ActiveTrackListener.exe"
+      "scripts/dist/ActiveTrackListener.exe",
+      "scripts/dist/chromiumHostSpawner.bat",
+      "scripts/dist/mingler.json",
+      "scripts/dist/minglerchromiumhost.exe"
     ],
     "afterSign": ".erb/scripts/Notarize.js",
     "mac": {
@@ -73,7 +76,8 @@
       "target": [
         "nsis"
       ],
-      "icon": "./assets/icons/minglerReversed.ico"
+      "icon": "./assets/icons/minglerReversed.ico",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "oneClick": "false",
@@ -299,6 +303,7 @@
     "react-router-dom": "^5.2.0",
     "react-sanfona": "^1.5.0",
     "react-textarea-autosize": "^8.3.3",
+    "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
     "redux-logger": "^3.0.6",
     "regenerator-runtime": "^0.13.5",

@@ -38,7 +38,7 @@ export default function AccordionSetting({
           cursor: 'pointer',
         }}
         whileTap={animations.whileTap}
-        transition={{ duration: 0.1 }}
+        transition={{ duration: 0.15 }}
         onClick={() => toggleExpansion()}
         style={
           index === 0

@@ -689,6 +689,7 @@ app.whenReady().then(() => {
           // persist store changes
           await storage.setItem('store', {
             settings: {
+              ...global.state?.settings,
               currentUser: {
                 _id: global.state?.settings?.currentUser?._id,
                 friends: global.state?.settings?.currentUser?.friends,
@@ -704,7 +705,6 @@ app.whenReady().then(() => {
                   global.state?.settings?.currentUser?.keepMeSignedIn,
                 guest: global.state?.settings?.currentUser?.guest,
               },
-              showWelcome: global.state?.settings?.showWelcome,
             },
             app: {
               ...global.state?.app,

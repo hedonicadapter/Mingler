@@ -17,7 +17,7 @@ const hoverAnimation = {
   transition: { duration: 0.1 },
 };
 
-const FrameButtons = () => {
+export const FrameButtons = () => {
   const handleMinimize = () => {
     remote.getCurrentWindow().minimize();
   };

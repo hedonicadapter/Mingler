@@ -11,12 +11,14 @@ interface SettingsState {
   currentUser: Array<any>;
   showWelcome: Boolean;
   settingsContent: string;
+  browser: string;
 }
 
 const initialState: SettingsState = {
   currentUser: [],
   showWelcome: true, //Used to show welcome splash screen or header on first launch
   settingsContent: 'General',
+  browser: 'Chrome',
 };
 
 export const settingsSlice = createSlice({
@@ -72,6 +74,9 @@ export const settingsSlice = createSlice({
     setSettingsContentMain: (state, action: PayloadAction<string>) => {
       state.settingsContent = action.payload;
     },
+    setBrowserMain: (state, action: PayloadAction<string>) => {
+      state.browser = action.payload;
+    },
   },
 });
 
@@ -90,6 +95,7 @@ export const { setKeepMeSignedInMain } = settingsSlice.actions;
 
 export const { turnOffShowWelcomeMain } = settingsSlice.actions;
 export const { setSettingsContentMain } = settingsSlice.actions;
+export const { setBrowserMain } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 

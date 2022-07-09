@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useAnimation } from 'framer-motion';
+import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
-import { BsSpotify } from 'react-icons/bs';
+import { BsThreeDots, BsSpotify } from 'react-icons/bs';
+import { IoLogoEdge, IoLogoChrome } from 'react-icons/io5';
+import ReactTooltip from 'react-tooltip';
+import developermodeedge from '../../assets/developermodeedge.png';
+import developermodechrome from '../../assets/developermodechrome.png';
 
 import styles from './SettingsContent.module.css';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import colors from '../config/colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { WindowFrame } from './reusables/WindowFrame';
+import { FrameButtons, WindowFrame } from './reusables/WindowFrame';
 import AccordionSetting from './AccordionSetting';
 import Avatar from 'react-avatar';
 import {
@@ -17,17 +21,53 @@ import {
   setUsernameMain,
   setEmailMain,
   setSettingsContentMain,
+  setBrowserMain,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 
-const { remote } = require('electron');
+const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
 
-const settings = [{ title: 'General' }, { title: 'Account' }];
+const AnimationWrapper = ({ children, key }) => {
+  return (
+    <AnimatePresence exitBeforeEnter>
+      {children && (
+        <motion.div
+          layout
+          key={key}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const settings = [
+  { title: 'General' },
+  { title: 'Account' },
+  { title: 'Set-up' },
+];
+
+const GeneralSettingsContent = () => {
+  return (
+    <div
+      style={{
+        fontSize: '0.9em',
+        color: colors.defaultPlaceholderTextColor,
+      }}
+    >
+      Nothing to see here yet.
+    </div>
+  );
+};
 
 const AccountSettingsContent = ({
   username,
@@ -211,6 +251,186 @@ const AccountSettingsContent = ({
   );
 };
 
+const SetupSettingsHeader = ({ browser, browserIconOnClickHandler }) => {
+  return (
+    <div className={styles.setupSettingsHeaderBrowserPicker}>
+      <motion.div
+        className={styles.browserIcons}
+        whileHover={animations.whileHover}
+        whileTap={animations.whileTap}
+        onClick={() => browserIconOnClickHandler('Chrome')}
+        style={{
+          color:
+            browser === 'Chrome'
+              ? colors.darkmodeLightBlack
+              : colors.defaultPlaceholderTextColor,
+        }}
+      >
+        <IoLogoChrome size={25} />
+      </motion.div>
+      <motion.div
+        className={styles.browserIcons}
+        whileHover={animations.whileHover}
+        whileTap={animations.whileTap}
+        onClick={() => browserIconOnClickHandler('Edge')}
+        style={{
+          color:
+            browser === 'Edge'
+              ? colors.darkmodeLightBlack
+              : colors.defaultPlaceholderTextColor,
+        }}
+      >
+        <IoLogoEdge size={25} />
+      </motion.div>
+    </div>
+  );
+};
+
+const MockBrowserWindow = ({ browser }) => {
+  const chrome = browser === 'Chrome';
+
+  return (
+    <div className={styles.mockBrowserContainer}>
+      <div className={styles.mockBrowserHeader}>
+        <div className={styles.mockBrowserTrafficLights}>
+          <FrameButtons />
+        </div>
+        <div className={styles.mockBrowserAddressBar}>
+          &nbsp; &nbsp;
+          {chrome ? 'chrome://extensions' : 'edge://extensions'}
+        </div>
+        <div className={styles.mockBrowserMenu}>
+          <BsThreeDots size={18} />
+        </div>
+      </div>
+      <img
+        className={styles.mockBrowserWebcontents}
+        src={chrome ? developermodeedge : developermodechrome}
+      />
+    </div>
+  );
+};
+
+const SetupSettingsContent = ({ browser }) => {
+  const [extensionID, setExtensionID] = useState();
+  const installationPath = remote.app.getAppPath();
+
+  const handleToolTipAfterShow = () => {
+    setTimeout(() => ReactTooltip.hide(), 1500);
+  };
+
+  const handleDetectedTextClick = () => {
+    clipboard
+      .writeText(installationPath)
+      .then(() => {})
+      .catch((e) => {
+        console.error(e);
+      });
+  };
+
+  const handleExtensionIDInput = (evt) => {
+    setExtensionID(evt.target.value);
+  };
+
+  const handleSaveExtensionIDInput = () => {};
+
+  return (
+    <div className={styles.setupSettingsContainer}>
+      <ol className={styles.setupInstructionsText}>
+        <li>1. Open the extensions settings in {browser}</li>
+        <ul>
+          <li>
+            {browser === 'Chrome' ? (
+              <a
+                className={styles.detectedTextContainer}
+                onClick={() => clipboard.writeText('chrome://extensions/')}
+                data-tip="copied."
+                data-event="click focus"
+              >
+                <IoLogoChrome className={styles.detectedIcon} size={16} />
+                <mark className={styles.detectedText}>
+                  chrome://extensions/
+                </mark>
+              </a>
+            ) : (
+              <a
+                className={styles.detectedTextContainer}
+                onClick={() =>
+                  navigator.clipboard.writeText('edge://extensions/')
+                }
+                data-tip="copied."
+                data-event="click focus"
+              >
+                <IoLogoEdge className={styles.detectedIcon} size={16} />
+                <mark className={styles.detectedText}>edge://extensions/</mark>
+              </a>
+            )}
+          </li>
+        </ul>
+        <ReactTooltip
+          globalEventOff="click"
+          place="top"
+          type="dark"
+          effect="solid"
+          afterShow={handleToolTipAfterShow}
+          className={styles.toolTip}
+        />
+
+        <li>2. Enable developer mode</li>
+        <ul>
+          <li>
+            <MockBrowserWindow browser={browser} />
+          </li>
+        </ul>
+        <li>
+          3. Click 'load unpacked' and select the mingler
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;extension folder</div>
+          {/* it is what it is */}
+        </li>
+        <ul>
+          <li>
+            detected:{' '}
+            <mark
+              className={styles.detectedText}
+              onClick={handleDetectedTextClick}
+              data-tip="copied."
+              data-event="click focus"
+            >
+              {installationPath}
+            </mark>
+          </li>
+        </ul>
+        <li>3. Find and copy extension ID </li>
+        <li>4. ...and save it here:</li>
+        <ul>
+          <div className={styles.extensionIDInputContainer}>
+            <input
+              type="text"
+              className={styles.genericInput}
+              placeholder="e.g. aemjofpcokklmfkjgkljmoojdldgichj"
+              onChange={handleExtensionIDInput}
+              style={{ paddingLeft: 10 }}
+            />
+            <motion.div
+              className={styles.extensionIDSaveButton}
+              onClick={handleSaveExtensionIDInput}
+              whileHover={{
+                ...animations.whileHover,
+                cursor: extensionID ? 'pointer' : 'default',
+              }}
+              whileTap={animations.whileTap}
+              style={{ opacity: extensionID ? 1 : 0 }}
+            >
+              save
+            </motion.div>
+          </div>
+        </ul>
+        <li>5. Reload extension</li>
+      </ol>
+    </div>
+  );
+};
+
 export default function SettingsContent() {
   makeClickthrough();
 
@@ -340,6 +560,10 @@ export default function SettingsContent() {
     setSpotifyError(error);
   };
 
+  const browserIconOnClickHandler = (browser = 'Chrome') => {
+    dispatch(setBrowserMain(browser));
+  };
+
   useEffect(() => {
     ipcRenderer.on('quickSetting', quickSettingHandler);
     ipcRenderer.on(
@@ -378,33 +602,77 @@ export default function SettingsContent() {
           <div className={styles.contentContainer}>
             <div className={styles.contentHeader}>
               {settingsState.settingsContent}
+              {settingsState.settingsContent === 'Set-up' && (
+                <SetupSettingsHeader
+                  browser={settingsState.browser}
+                  browserIconOnClickHandler={browserIconOnClickHandler}
+                />
+              )}
             </div>
-            {settingsState.settingsContent === 'Account' && (
-              <AccountSettingsContent
-                fileInputRef={fileInputRef}
-                handleProfilePictureChange={handleProfilePictureChange}
-                handleNameChange={handleNameChange}
-                handleEmailChange={handleEmailChange}
-                username={username}
-                email={email}
-                dispatch={dispatch}
-                settingsState={settingsState}
-                profilePictureError={profilePictureError}
-                usernameError={usernameError}
-                emailError={emailError}
-                spotifyError={spotifyError}
-              />
-            )}
-            {settingsState.settingsContent === 'General' && (
-              <div
-                style={{
-                  fontSize: '0.9em',
-                  color: colors.defaultPlaceholderTextColor,
-                }}
-              >
-                Nothing to see here yet.
-              </div>
-            )}
+
+            <AnimatePresence>
+              {settingsState.settingsContent && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  layout
+                >
+                  {settingsState.settingsContent === 'General' && (
+                    <GeneralSettingsContent />
+                  )}
+                  {settingsState.settingsContent === 'Account' && (
+                    <AccountSettingsContent
+                      fileInputRef={fileInputRef}
+                      handleProfilePictureChange={handleProfilePictureChange}
+                      handleNameChange={handleNameChange}
+                      handleEmailChange={handleEmailChange}
+                      username={username}
+                      email={email}
+                      dispatch={dispatch}
+                      settingsState={settingsState}
+                      profilePictureError={profilePictureError}
+                      usernameError={usernameError}
+                      emailError={emailError}
+                      spotifyError={spotifyError}
+                    />
+                  )}
+                  {settingsState.settingsContent === 'Set-up' && (
+                    <SetupSettingsContent browser={settingsState.browser} />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {/* <AnimationWrapper key={0}>
+              {settingsState.settingsContent === 'General' && (
+                <GeneralSettingsContent />
+              )}
+            </AnimationWrapper>
+
+            <AnimationWrapper key={1}>
+              {settingsState.settingsContent === 'Account' && (
+                <AccountSettingsContent
+                  fileInputRef={fileInputRef}
+                  handleProfilePictureChange={handleProfilePictureChange}
+                  handleNameChange={handleNameChange}
+                  handleEmailChange={handleEmailChange}
+                  username={username}
+                  email={email}
+                  dispatch={dispatch}
+                  settingsState={settingsState}
+                  profilePictureError={profilePictureError}
+                  usernameError={usernameError}
+                  emailError={emailError}
+                  spotifyError={spotifyError}
+                />
+              )}
+            </AnimationWrapper>
+
+            <AnimationWrapper key={2}>
+              {settingsState.settingsContent === 'Set-up' && (
+                <SetupSettingsContent />
+              )}
+            </AnimationWrapper> */}
           </div>
         </div>
       </WindowFrame>

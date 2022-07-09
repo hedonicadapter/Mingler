@@ -41,9 +41,10 @@ const settingsWindowConfig = {
   frame: false,
   transparent: true,
   closable: false,
-  width: 475,
+  width: 595,
   height: 510,
   icon: favicon,
+  resizable: false,
   webPreferences: {
     contextIsolation: false,
     nodeIntegration: true,
