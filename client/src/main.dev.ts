@@ -34,6 +34,7 @@ import installExtension, {
 
 import configureStore from './mainState/newStore';
 import { getPath } from './helpers/getPath';
+import { setExtensionID } from '../editJSON';
 
 const execFile = require('child_process').execFile;
 const JSON5 = require('json5');
@@ -87,6 +88,16 @@ let trackListenerScript = path.resolve(
   // TODO: should probably not be scripts/dist, ruins the point of path.resolve
   // getPath('scripts', app),
   'ActiveTrackListener.exe'
+);
+let chromiumHostConfig = path.resolve(
+  app.getPath('appData'),
+  '..',
+  'local',
+  'MINGLER',
+  'scripts',
+  // TODO: should probably not be scripts/dist, ruins the point of path.resolve
+  // getPath('scripts', app),
+  'mingler.json'
 );
 let windowProcess = null;
 let trackProcess = null;
@@ -182,7 +193,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
       trackProcess.stdout.destroy();
       trackProcess.stderr.destroy();
       try {
-        trackProcess?.close();
+        trackProcess?.kill();
       } catch (e) {
         console.log(e);
       }
@@ -673,6 +684,15 @@ app.whenReady().then(() => {
           await storage.getItem('store'),
           // global.state,
           'main'
+        );
+
+        ipcMain.handle(
+          'setextensionid:fromrenderer',
+          async (evt, extensionID) => {
+            console.log(chromiumHostConfig);
+            const body = await setExtensionID(chromiumHostConfig, extensionID);
+            return body;
+          }
         );
 
         ipcMain.handle('getTokens', async () => {

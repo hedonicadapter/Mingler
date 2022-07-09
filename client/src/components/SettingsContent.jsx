@@ -305,14 +305,17 @@ const MockBrowserWindow = ({ browser }) => {
       </div>
       <img
         className={styles.mockBrowserWebcontents}
-        src={chrome ? developermodeedge : developermodechrome}
+        src={chrome ? developermodechrome : developermodeedge}
       />
     </div>
   );
 };
 
 const SetupSettingsContent = ({ browser }) => {
-  const [extensionID, setExtensionID] = useState();
+  const [extensionID, setExtensionID] = useState(); // TODO: get from redux
+  const [extensionIDSaved, setExtensionIDSaved] = useState(false);
+  const [extensionIDError, setExtensionIDError] = useState(false);
+
   const installationPath = remote.app.getAppPath();
 
   const handleToolTipAfterShow = () => {
@@ -329,10 +332,21 @@ const SetupSettingsContent = ({ browser }) => {
   };
 
   const handleExtensionIDInput = (evt) => {
+    setExtensionIDError(false);
+    setExtensionIDSaved(false);
     setExtensionID(evt.target.value);
   };
 
-  const handleSaveExtensionIDInput = () => {};
+  const handleSaveExtensionIDInput = () => {
+    if (extensionIDSaved || extensionIDError) return;
+    ipcRenderer
+      .invoke('setextensionid:fromrenderer', extensionID)
+      .then((res) => {
+        if (res) return setExtensionIDSaved(true);
+        setExtensionIDError(true);
+        console.error(res);
+      });
+  };
 
   return (
     <div className={styles.setupSettingsContainer}>
@@ -400,7 +414,7 @@ const SetupSettingsContent = ({ browser }) => {
             </mark>
           </li>
         </ul>
-        <li>3. Find and copy extension ID </li>
+        <li>3. Find and copy extension ID...</li>
         <li>4. ...and save it here:</li>
         <ul>
           <div className={styles.extensionIDInputContainer}>
@@ -416,12 +430,26 @@ const SetupSettingsContent = ({ browser }) => {
               onClick={handleSaveExtensionIDInput}
               whileHover={{
                 ...animations.whileHover,
-                cursor: extensionID ? 'pointer' : 'default',
+                cursor:
+                  extensionIDSaved || extensionIDError
+                    ? 'default'
+                    : extensionID
+                    ? 'pointer'
+                    : 'default',
               }}
-              whileTap={animations.whileTap}
-              style={{ opacity: extensionID ? 1 : 0 }}
+              whileTap={
+                !extensionIDSaved && !extensionIDError && animations.whileTap
+              }
+              style={{
+                opacity: extensionID ? 1 : 0,
+                color: extensionIDError
+                  ? colors.coffeeRed
+                  : extensionIDSaved
+                  ? colors.coffeeGreen
+                  : colors.darkmodeLightBlack,
+              }}
             >
-              save
+              {extensionIDError ? 'error' : extensionIDSaved ? 'saved' : 'save'}
             </motion.div>
           </div>
         </ul>
