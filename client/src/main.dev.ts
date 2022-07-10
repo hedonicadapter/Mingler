@@ -689,7 +689,6 @@ app.whenReady().then(() => {
         ipcMain.handle(
           'setextensionid:fromrenderer',
           async (evt, extensionID) => {
-            console.log(chromiumHostConfig);
             const body = await setExtensionID(chromiumHostConfig, extensionID);
             return body;
           }

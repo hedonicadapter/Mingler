@@ -127,6 +127,7 @@ ol ul {
 ol ul li {
   padding-block: 2px;
   padding-bottom: 8px;
+  color: var(--default-placeholder-text-color) !important;
 }
 li {
   padding-block: 6px;
@@ -138,7 +139,7 @@ li:marker {
 .setupInstructionsText {
   line-height: 1.4em;
   width: 90%;
-  color: var(--default-placeholder-text-color);
+  color: var(--darkmode-disabled-black);
   font-size: 0.8em;
 }
 .detectedTextContainer {

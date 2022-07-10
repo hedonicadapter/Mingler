@@ -338,14 +338,27 @@ const SetupSettingsContent = ({ browser }) => {
   };
 
   const handleSaveExtensionIDInput = () => {
-    if (extensionIDSaved || extensionIDError) return;
+    if (!extensionID || extensionIDSaved || extensionIDError) return;
+
     ipcRenderer
-      .invoke('setextensionid:fromrenderer', extensionID)
+      .invoke('setextensionid:fromrenderer', validateExtensionID())
       .then((res) => {
         if (res) return setExtensionIDSaved(true);
         setExtensionIDError(true);
         console.error(res);
       });
+  };
+
+  const validateExtensionID = () => {
+    let extensionIDCleaned = extensionID.replace(/ /g, '');
+
+    if (extensionIDCleaned.startsWith('ID:')) {
+      extensionIDCleaned = extensionIDCleaned.substring(3);
+    } else if (extensionIDCleaned.startsWith('ID')) {
+      extensionIDCleaned = extensionIDCleaned.substring(2);
+    }
+
+    return extensionIDCleaned.toLowerCase();
   };
 
   return (
@@ -438,15 +451,19 @@ const SetupSettingsContent = ({ browser }) => {
                     : 'default',
               }}
               whileTap={
-                !extensionIDSaved && !extensionIDError && animations.whileTap
+                !extensionIDSaved &&
+                !extensionIDError &&
+                extensionID &&
+                animations.whileTap
               }
               style={{
-                opacity: extensionID ? 1 : 0,
                 color: extensionIDError
                   ? colors.coffeeRed
                   : extensionIDSaved
                   ? colors.coffeeGreen
-                  : colors.darkmodeLightBlack,
+                  : extensionID
+                  ? colors.darkmodeLightBlack
+                  : colors.darkmodeDisabledText,
               }}
             >
               {extensionIDError ? 'error' : extensionIDSaved ? 'saved' : 'save'}
