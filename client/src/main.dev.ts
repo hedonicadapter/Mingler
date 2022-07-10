@@ -90,11 +90,10 @@ let trackListenerScript = path.resolve(
   'ActiveTrackListener.exe'
 );
 let chromiumHostConfig = path.resolve(
-  app.getPath('appData'),
+  app.getAppPath(),
   '..',
-  'local',
-  'MINGLER',
-  'scripts',
+  'extension',
+  'nativeApps',
   // TODO: should probably not be scripts/dist, ruins the point of path.resolve
   // getPath('scripts', app),
   'mingler.json'
@@ -693,11 +692,14 @@ app.whenReady().then(() => {
 
             const body = await setExtensionID(chromiumHostConfig, extensionID);
 
-            body &&
+            if (body) {
               store?.dispatch({
                 type: 'setExtensionID',
                 payload: extensionID,
               });
+
+              authIo.emit('fromAppToHost:requestreset');
+            }
 
             return body;
           }

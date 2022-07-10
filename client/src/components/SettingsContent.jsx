@@ -27,6 +27,7 @@ import settingsDao from '../config/settingsDao';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
+import path from 'path';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -59,6 +60,7 @@ const settings = [
 const GeneralSettingsContent = () => {
   return (
     <div
+      className={styles.settingsContentContainer}
       style={{
         fontSize: '0.9em',
         color: colors.defaultPlaceholderTextColor,
@@ -132,7 +134,7 @@ const AccountSettingsContent = ({
   };
 
   return (
-    <>
+    <div className={styles.settingsContentContainer}>
       <div className={styles.profilePictureFormContainer}>
         <motion.div className={styles.avatarContainer}>
           <motion.label
@@ -247,13 +249,14 @@ const AccountSettingsContent = ({
           <SpotifyText />
         </motion.div>
       </motion.div>
-    </>
+    </div>
   );
 };
 
 const SetupSettingsHeader = ({ browser, browserIconOnClickHandler }) => {
   return (
     <div className={styles.setupSettingsHeaderBrowserPicker}>
+      <div className={styles.setupSettingsHeaderBrowserName}>{browser}</div>
       <motion.div
         className={styles.browserIcons}
         whileHover={animations.whileHover}
@@ -316,7 +319,11 @@ const SetupSettingsContent = ({ browser, storedID }) => {
   const [extensionIDSaved, setExtensionIDSaved] = useState(false);
   const [extensionIDError, setExtensionIDError] = useState(false);
 
-  const installationPath = remote.app.getAppPath();
+  const installationPath = path.resolve(
+    remote.app.getAppPath(),
+    '..',
+    'extension'
+  );
 
   const handleToolTipAfterShow = () => {
     setTimeout(() => ReactTooltip.hide(), 1500);
@@ -368,7 +375,12 @@ const SetupSettingsContent = ({ browser, storedID }) => {
   };
 
   return (
-    <div className={styles.setupSettingsContainer}>
+    <div
+      className={[
+        styles.setupSettingsContainer,
+        styles.settingsContentContainer,
+      ].join(' ')}
+    >
       <ol className={styles.setupInstructionsText}>
         <li>1. Open the extensions settings in {browser}</li>
         <ul>
@@ -433,7 +445,10 @@ const SetupSettingsContent = ({ browser, storedID }) => {
             </mark>
           </li>
         </ul>
-        <li>3. Find and copy extension ID...</li>
+        <li>
+          3. In the {browser} extensions list, find the mingler extension{' '}
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;and its ID...</div>
+        </li>
         <li>4. ...and save it here:</li>
         <ul>
           <div className={styles.extensionIDInputContainer}>
@@ -478,7 +493,8 @@ const SetupSettingsContent = ({ browser, storedID }) => {
             </motion.div>
           </div>
         </ul>
-        <li>5. Reload extension</li>
+        <br />
+        <li>and hopefully that works.</li>
       </ol>
     </div>
   );

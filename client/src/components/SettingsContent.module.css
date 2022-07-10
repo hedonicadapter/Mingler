@@ -29,6 +29,10 @@
   align-items: center;
 }
 
+/* Every settingscontent has this */
+/* .settingsContentContainer {
+} */
+
 .profilePictureFormContainer {
   background-color: var(--off-white-pressed);
   border-radius: 2px;
@@ -110,6 +114,14 @@
 .setupSettingsHeaderBrowserPicker {
   display: flex;
   flex-direction: row;
+  align-items: center;
+  height: 28px;
+}
+.setupSettingsHeaderBrowserName {
+  padding-bottom: 3px;
+  padding-right: 3px;
+  font-size: 0.7em;
+  color: var(--dark-mode-light-black);
 }
 .browserIcons {
   cursor: pointer;
@@ -213,6 +225,7 @@ mark:hover {
   padding-bottom: 7px;
 }
 .mockBrowserWebcontents {
+  border-top: 1px solid var(--off-white);
   width: 100%;
   height: 100%;
 }

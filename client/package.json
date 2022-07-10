@@ -104,6 +104,13 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "../Mingler-chromium-extension/",
+        "to": "extension",
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "publish": {

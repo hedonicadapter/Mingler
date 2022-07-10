@@ -8,12 +8,16 @@ const socket = io('ws://127.0.0.1:8081/auth', {
   // origins: 'localhost:* http://localhost:* http://www.localhost:*',
 });
 
+socket.on('fromAppToHost:requestreset', () => {
+  setTimeout(() => sendToChromium('request:reset'), 1);
+});
+
 socket.on('fromAppToHost:userID', (packet) => {
   setTimeout(() => sendToChromium(packet), 1);
 });
 
 socket.on('fromAppToHost:signedOut', (packet) => {
-  setTimeout(() => sendToChromium('request:awaitnewclient'), 1);
+  setTimeout(() => sendToChromium('request:reset'), 1);
 });
 
 socket.on('getYouTubeTime', (packet) => {
@@ -89,7 +93,7 @@ const processData = () => {
     //   // if no response within 5000ms, it might mean that the client has closed mingler
     //   // if client has closed mingler, reset chromium extension to await a new client and spawn a new host
     //   if (err) {
-    //     sendToChromium('request:awaitnewclient');
+    //     sendToChromium('request:reset');
     //   }
     // });
     socket.emit('fromHostToApp:data', json);
