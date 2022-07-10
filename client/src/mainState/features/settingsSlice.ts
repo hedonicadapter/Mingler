@@ -12,6 +12,7 @@ interface SettingsState {
   showWelcome: Boolean;
   settingsContent: string;
   browser: string;
+  extensionID: string;
 }
 
 const initialState: SettingsState = {
@@ -19,6 +20,7 @@ const initialState: SettingsState = {
   showWelcome: true, //Used to show welcome splash screen or header on first launch
   settingsContent: 'General',
   browser: 'Chrome',
+  extensionID: '',
 };
 
 export const settingsSlice = createSlice({
@@ -76,6 +78,11 @@ export const settingsSlice = createSlice({
     },
     setBrowserMain: (state, action: PayloadAction<string>) => {
       state.browser = action.payload;
+    },
+  },
+  extraReducers: {
+    setExtensionID: (state, action: PayloadAction<string>) => {
+      state.extensionID = action.payload;
     },
   },
 });

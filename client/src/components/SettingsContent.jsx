@@ -311,8 +311,8 @@ const MockBrowserWindow = ({ browser }) => {
   );
 };
 
-const SetupSettingsContent = ({ browser }) => {
-  const [extensionID, setExtensionID] = useState(); // TODO: get from redux
+const SetupSettingsContent = ({ browser, storedID }) => {
+  const [extensionID, setExtensionID] = useState(storedID); // TODO: get from redux
   const [extensionIDSaved, setExtensionIDSaved] = useState(false);
   const [extensionIDError, setExtensionIDError] = useState(false);
 
@@ -338,7 +338,13 @@ const SetupSettingsContent = ({ browser }) => {
   };
 
   const handleSaveExtensionIDInput = () => {
-    if (!extensionID || extensionIDSaved || extensionIDError) return;
+    if (
+      !extensionID ||
+      extensionIDSaved ||
+      extensionIDError ||
+      extensionID === storedID
+    )
+      return;
 
     ipcRenderer
       .invoke('setextensionid:fromrenderer', validateExtensionID())
@@ -435,6 +441,7 @@ const SetupSettingsContent = ({ browser }) => {
               type="text"
               className={styles.genericInput}
               placeholder="e.g. aemjofpcokklmfkjgkljmoojdldgichj"
+              value={extensionID}
               onChange={handleExtensionIDInput}
               style={{ paddingLeft: 10 }}
             />
@@ -446,7 +453,7 @@ const SetupSettingsContent = ({ browser }) => {
                 cursor:
                   extensionIDSaved || extensionIDError
                     ? 'default'
-                    : extensionID
+                    : extensionID && extensionID != storedID
                     ? 'pointer'
                     : 'default',
               }}
@@ -454,6 +461,7 @@ const SetupSettingsContent = ({ browser }) => {
                 !extensionIDSaved &&
                 !extensionIDError &&
                 extensionID &&
+                extensionID != storedID &&
                 animations.whileTap
               }
               style={{
@@ -461,7 +469,7 @@ const SetupSettingsContent = ({ browser }) => {
                   ? colors.coffeeRed
                   : extensionIDSaved
                   ? colors.coffeeGreen
-                  : extensionID
+                  : extensionID && extensionID != storedID
                   ? colors.darkmodeLightBlack
                   : colors.darkmodeDisabledText,
               }}
@@ -683,7 +691,10 @@ export default function SettingsContent() {
                     />
                   )}
                   {settingsState.settingsContent === 'Set-up' && (
-                    <SetupSettingsContent browser={settingsState.browser} />
+                    <SetupSettingsContent
+                      browser={settingsState.browser}
+                      storedID={settingsState.extensionID}
+                    />
                   )}
                 </motion.div>
               )}
