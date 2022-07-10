@@ -356,6 +356,13 @@ const createWindow = async () => {
     app.exit(0);
   });
 
+  var cleanExit = function () {
+    trackProcess?.kill(); // exit is cleaner but idk if required
+    windowProcess?.kill();
+  };
+  process.on('SIGINT', cleanExit); // catch ctrl-c
+  process.on('SIGTERM', cleanExit); // catch kill
+
   // mainWindow?.on('show', () => {
   //   setTimeout(() => {
   //     mainWindow?.setOpacity(1);
