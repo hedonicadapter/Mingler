@@ -357,6 +357,8 @@ const createWindow = async () => {
   });
 
   var cleanExit = function () {
+    io?.close();
+
     trackProcess?.kill(); // exit is cleaner but idk if required
     windowProcess?.kill();
   };
