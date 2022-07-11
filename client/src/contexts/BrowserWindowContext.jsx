@@ -144,7 +144,6 @@ export function BrowserWindowProvider({ children }) {
 
   useEffect(() => {
     ipcRenderer.once('exit:frommain', () => {
-      console.log('closing ');
       if (!settingsWindow.isDestroyed()) {
         settingsWindow.setClosable(true);
         settingsWindow?.close();

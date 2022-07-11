@@ -7,7 +7,7 @@ export const getPath = (extraResourceDirectory, app) => {
     process.env.NODE_ENV === 'development' ||
     process.env.DEBUG_PROD === 'true'
   ) {
-    app_path = path.join(__dirname, '../');
+    app_path = path.resolve(__dirname, '../', '../');
   } else {
     app_path = path.join(app.getAppPath(), '..');
   }

@@ -356,15 +356,6 @@ const createWindow = async () => {
     app.exit(0);
   });
 
-  var cleanExit = function () {
-    io?.close();
-
-    trackProcess?.kill(); // exit is cleaner but idk if required
-    windowProcess?.kill();
-  };
-  process.on('SIGINT', cleanExit); // catch ctrl-c
-  process.on('SIGTERM', cleanExit); // catch kill
-
   // mainWindow?.on('show', () => {
   //   setTimeout(() => {
   //     mainWindow?.setOpacity(1);
@@ -493,20 +484,24 @@ const createWindow = async () => {
       },
       {
         label: 'settings',
-        click: () => mainWindow.webContents.send('tray:settings'),
+        click: () => mainWindow?.webContents.send('tray:settings'),
       },
       {
         label: 'sign out',
-        click: () => mainWindow.webContents.send('tray:signout'),
+        click: () => mainWindow?.webContents.send('tray:signout'),
       },
       { type: 'separator' },
       {
         label: 'exit',
-        click: () => mainWindow.webContents.send('exit:frommain'),
+        click: () => mainWindow?.webContents.send('exit:frommain'),
       },
     ]);
 
     const createTray = () => {
+      console.log(
+        'PATH path ',
+        path.resolve(getPath('assets', app), 'icons', 'icon.ico')
+      );
       tray = new Tray(
         path.resolve(getPath('assets', app), 'icons', 'icon.ico')
       );
@@ -629,6 +624,7 @@ app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
   if (process.platform !== 'darwin') {
+    cleanExit();
     app.quit();
   }
   return;
@@ -771,3 +767,12 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
 });
+
+var cleanExit = function () {
+  io?.close();
+
+  trackProcess?.kill(); // exit is cleaner but idk if required
+  windowProcess?.kill();
+};
+process.on('SIGINT', cleanExit); // catch ctrl-c
+process.on('SIGTERM', cleanExit); // catch kill

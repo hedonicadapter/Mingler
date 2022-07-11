@@ -280,6 +280,8 @@
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^3.3.0",
     "@reduxjs/toolkit": "^1.7.1",
+    "@rpldy/upload-button": "^1.0.0",
+    "@rpldy/uploady": "^1.0.0",
     "@yung_samba/positive-name-generator": "^1.0.1",
     "axios": "^0.21.1",
     "connected-react-router": "^6.9.2",

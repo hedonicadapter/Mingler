@@ -6,6 +6,8 @@ import { IoLogoEdge, IoLogoChrome } from 'react-icons/io5';
 import ReactTooltip from 'react-tooltip';
 import developermodeedge from '../../assets/developermodeedge.png';
 import developermodechrome from '../../assets/developermodechrome.png';
+import Uploady from '@rpldy/uploady';
+import UploadButton from '@rpldy/upload-button';
 
 import styles from './SettingsContent.module.css';
 import { useLocalStorage } from '../helpers/localStorageManager';
@@ -28,10 +30,28 @@ import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 import path from 'path';
+import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
+
+const avatarLoadingContainer = {
+  transition: 'opacity 0.15s ease',
+  position: 'relative',
+  height: 58,
+  width: 58,
+};
+const avatarLoadingAnimationStyle = {
+  position: 'absolute',
+  left: '50%',
+  top: '50%',
+  transform: 'translate(-50%,-50%)',
+  zIndex: 50,
+  margin: 0,
+  width: 24,
+  height: 24,
+};
 
 const AnimationWrapper = ({ children, key }) => {
   return (
@@ -75,6 +95,7 @@ const AccountSettingsContent = ({
   username,
   email,
   handleProfilePictureChange,
+  formFilled,
   handleNameChange,
   handleEmailChange,
   dispatch,
@@ -136,13 +157,44 @@ const AccountSettingsContent = ({
   return (
     <div className={styles.settingsContentContainer}>
       <div className={styles.profilePictureFormContainer}>
-        <motion.div className={styles.avatarContainer}>
+        <motion.div
+          className={styles.avatarContainer}
+          whileHover={
+            formFilled !== 'loading' && {
+              cursor: 'pointer',
+              backgroundColor: colors.offWhitePressed2,
+              borderRadius: '50%',
+            }
+          }
+          transition={{ duration: 0.1 }}
+        >
+          <Uploady
+            destination={{
+              url: 'https://menglir.herokuapp.com/api/private/setProfilePicture',
+              headers: {
+                Authorization: `Bearer ${settingsState?.currentUser?.accessToken}`,
+              },
+            }}
+          >
+            <UploadButton />
+          </Uploady>
           <motion.label
-            whileHover={{ cursor: 'pointer' }}
+            whileHover={{
+              cursor: formFilled === 'loading' ? 'default' : 'pointer',
+            }}
             htmlFor="file-upload"
             className="custom-file-upload"
             ref={fileInputRef}
+            style={{
+              opacity: formFilled === 'loading' ? 0.8 : 1,
+              ...avatarLoadingContainer,
+            }}
           >
+            <LoadingAnimation
+              style={avatarLoadingAnimationStyle}
+              formFilled={formFilled}
+            />
+
             <Avatar
               round
               name={username}
@@ -153,6 +205,7 @@ const AccountSettingsContent = ({
           <input
             onChange={handleProfilePictureChange}
             onFocus={(evt) => evt.preventDefault()}
+            disabled={formFilled === 'loading' ? true : false}
             accept="image/*"
             id="file-upload"
             type="file"
@@ -326,16 +379,17 @@ const SetupSettingsContent = ({ browser, storedID }) => {
   );
 
   const handleToolTipAfterShow = () => {
+    // if (browser === 'Chrome') {
+    //
+    // } else if (browser === 'Edge') {
+    //
+    // }
+
     setTimeout(() => ReactTooltip.hide(), 1500);
   };
 
   const handleDetectedTextClick = () => {
-    clipboard
-      .writeText(installationPath)
-      .then(() => {})
-      .catch((e) => {
-        console.error(e);
-      });
+    navigator.clipboard.writeText(installationPath);
   };
 
   const handleExtensionIDInput = (evt) => {
@@ -388,26 +442,26 @@ const SetupSettingsContent = ({ browser, storedID }) => {
             {browser === 'Chrome' ? (
               <a
                 className={styles.detectedTextContainer}
-                onClick={() => clipboard.writeText('chrome://extensions/')}
                 data-tip="copied."
                 data-event="click focus"
+                onClick={() =>
+                  navigator.clipboard.writeText('chrome://extensions')
+                }
               >
                 <IoLogoChrome className={styles.detectedIcon} size={16} />
-                <mark className={styles.detectedText}>
-                  chrome://extensions/
-                </mark>
+                <mark className={styles.detectedText}>chrome://extensions</mark>
               </a>
             ) : (
               <a
                 className={styles.detectedTextContainer}
-                onClick={() =>
-                  navigator.clipboard.writeText('edge://extensions/')
-                }
                 data-tip="copied."
                 data-event="click focus"
+                onClick={() =>
+                  navigator.clipboard.writeText('edge://extensions')
+                }
               >
                 <IoLogoEdge className={styles.detectedIcon} size={16} />
-                <mark className={styles.detectedText}>edge://extensions/</mark>
+                <mark className={styles.detectedText}>edge://extensions</mark>
               </a>
             )}
           </li>
@@ -418,6 +472,7 @@ const SetupSettingsContent = ({ browser, storedID }) => {
           type="dark"
           effect="solid"
           afterShow={handleToolTipAfterShow}
+          isCapture={true}
           className={styles.toolTip}
         />
 
@@ -435,14 +490,16 @@ const SetupSettingsContent = ({ browser, storedID }) => {
         <ul>
           <li>
             detected:{' '}
-            <mark
-              className={styles.detectedText}
-              onClick={handleDetectedTextClick}
-              data-tip="copied."
-              data-event="click focus"
-            >
-              {installationPath}
-            </mark>
+            <a className={styles.detectedTextContainer}>
+              <mark
+                className={styles.detectedText}
+                onClick={handleDetectedTextClick}
+                data-tip="copied."
+                data-event="click focus"
+              >
+                {installationPath}
+              </mark>
+            </a>
           </li>
         </ul>
         <li>
@@ -516,6 +573,7 @@ export default function SettingsContent() {
   const [usernameError, setUsernameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [spotifyError, setSpotifyError] = useState(null);
+  const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
     dispatch(setSettingsContentMain(settings[expanded]?.title) || 'General');
@@ -556,24 +614,26 @@ export default function SettingsContent() {
 
   const handleProfilePictureChange = (evt) => {
     const file = Array.from(evt.target.files)[0];
+    if (!file) return;
 
-    if (file) {
-      let formData = new FormData();
-      formData.append('userID', settingsState.currentUser._id);
-      formData.append('profilePicture', file, file.name);
+    setFormFilled('loading');
 
-      settingsDao
-        .setProfilePicture(formData, settingsState.currentUser.accessToken)
-        .then((res) => {
-          if (res?.data?.success) {
-            dispatch(setProfilePictureMain(res.data.profilePicture));
-            setProfilePictureError(null);
-          }
-        })
-        .catch((e) => {
-          setProfilePictureError(e?.response?.data?.error);
-        });
-    }
+    let formData = new FormData();
+    formData.append('userID', settingsState.currentUser._id);
+    formData.append('profilePicture', file, file.name);
+
+    settingsDao
+      .setProfilePicture(formData, settingsState.currentUser.accessToken)
+      .then((res) => {
+        if (res?.data?.success) {
+          dispatch(setProfilePictureMain(res.data.profilePicture));
+          setProfilePictureError(null);
+        }
+      })
+      .catch((e) => {
+        setProfilePictureError(e?.response?.data?.error);
+      })
+      .finally(() => setFormFilled(false));
   };
 
   const handleNameChange = (evt) => {
@@ -694,6 +754,7 @@ export default function SettingsContent() {
                     <AccountSettingsContent
                       fileInputRef={fileInputRef}
                       handleProfilePictureChange={handleProfilePictureChange}
+                      formFilled={formFilled}
                       handleNameChange={handleNameChange}
                       handleEmailChange={handleEmailChange}
                       username={username}

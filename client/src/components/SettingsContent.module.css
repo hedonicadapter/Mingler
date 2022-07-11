@@ -57,17 +57,12 @@
 .avatarContainer {
   margin-right: auto;
   align-self: center;
-
+  height: 100%;
   padding: 6px;
   padding-left: 6px;
   border-radius: 50%;
 
   transition: background-color 0.15s ease;
-}
-.avatarContainer:hover {
-  cursor: pointer;
-  background-color: var(--off-white-pressed2);
-  border-radius: 50%;
 }
 
 .inputsContainer {
@@ -155,6 +150,7 @@ li:marker {
   font-size: 0.8em;
 }
 .detectedTextContainer {
+  z-index: 80;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -225,7 +221,7 @@ mark:hover {
   padding-bottom: 7px;
 }
 .mockBrowserWebcontents {
-  border-top: 1px solid var(--off-white);
+  border-top: 1px solid var(--dark-mode-light-black);
   width: 100%;
   height: 100%;
 }

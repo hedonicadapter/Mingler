@@ -26,11 +26,6 @@ class settingsDAO extends DAO {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      onUploadProgress: (progressEvent) => {
-        console.log(
-          Math.round((progressEvent.loaded / progressEvent.total) * 100 + '%')
-        );
-      },
     });
   };
 }
