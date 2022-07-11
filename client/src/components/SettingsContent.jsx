@@ -49,8 +49,6 @@ const avatarLoadingAnimationStyle = {
   transform: 'translate(-50%,-50%)',
   zIndex: 50,
   margin: 0,
-  width: 24,
-  height: 24,
 };
 
 const AnimationWrapper = ({ children, key }) => {
@@ -168,7 +166,7 @@ const AccountSettingsContent = ({
           }
           transition={{ duration: 0.1 }}
         >
-          <Uploady
+          {/* <Uploady
             destination={{
               url: 'https://menglir.herokuapp.com/api/private/setProfilePicture',
               headers: {
@@ -177,7 +175,7 @@ const AccountSettingsContent = ({
             }}
           >
             <UploadButton />
-          </Uploady>
+          </Uploady> */}
           <motion.label
             whileHover={{
               cursor: formFilled === 'loading' ? 'default' : 'pointer',

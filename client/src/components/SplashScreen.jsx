@@ -370,38 +370,12 @@ const GuestSlide = () => {
         />
       </div>
       <div className={styles.guestSlideButtonsContainer}>
-        <motion.div
-          animate={formFilled}
-          variants={formFilledVariants}
-          whileTap={
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            !error &&
-            animations.whileTap
-          }
-          className={styles.buttonStyle}
-          style={{
-            minWidth: '80px',
-            opacity: 0,
-            cursor: error ? 'default' : 'auto',
-            marginRight: 0,
-            textAlign: 'right',
-          }}
-          onClick={() =>
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            !error &&
-            handleContinueButton()
-          }
-        >
-          {error ? (
-            <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
-              {error}
-            </div>
-          ) : (
-            <LoadingAnimation formFilled={formFilled} buttonText={'continue'} />
-          )}
-        </motion.div>
+        <FormButton
+          formFilled={formFilled}
+          error={error}
+          buttonText={'continue'}
+          buttonHandler={handleContinueButton}
+        />
       </div>
     </AnimationWrapper>
   );
@@ -561,32 +535,53 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
         />
       </div>
       <div className={styles.emailSlideButtonsContainer}>
-        <motion.div
-          animate={formFilled}
-          variants={formFilledVariants}
-          whileTap={
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            animations.whileTap
-          }
-          className={styles.buttonStyle}
-          style={{ minWidth: '80px', opacity: 0, textAlign: 'right' }}
-          onClick={() =>
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            handleSignUpButton()
-          }
-        >
-          {error ? (
-            <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
-              {error}
-            </div>
-          ) : (
-            <LoadingAnimation formFilled={formFilled} buttonText={'sign up!'} />
-          )}
-        </motion.div>
+        <FormButton
+          formFilled={formFilled}
+          error={error}
+          buttonText={'sign up!'}
+          buttonHandler={handleSignUpButton}
+        />
       </div>
     </AnimationWrapper>
+  );
+};
+
+const FormButton = ({ formFilled, error, buttonText, buttonHandler }) => {
+  return (
+    <motion.div
+      animate={formFilled}
+      variants={formFilledVariants}
+      whileTap={
+        !error &&
+        formFilled != 'false' &&
+        formFilled != 'loading' &&
+        animations.whileTap
+      }
+      style={{
+        minWidth: '80px',
+        opacity: 0,
+        paddingRight: 12,
+        alignSelf: 'center',
+        fontSize: '0.8em',
+        opacity: formFilled === 'false' ? 0 : 1,
+        cursor: error ? 'default' : 'auto',
+        textAlign: 'right',
+      }}
+      onClick={() =>
+        formFilled != 'false' && formFilled != 'loading' && buttonHandler()
+      }
+    >
+      <LoadingAnimation
+        style={
+          buttonText === 'sign in' && {
+            paddingBottom: 3,
+          }
+        }
+        formFilled={formFilled}
+        buttonText={buttonText}
+        error={error}
+      />
+    </motion.div>
   );
 };
 
@@ -758,38 +753,12 @@ const SigninSlide = ({ justRegistered }) => {
             &nbsp;keep me signed in
           </label>
         </div>
-        <motion.div
-          animate={formFilled}
-          variants={formFilledVariants}
-          whileTap={
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            animations.whileTap
-          }
-          style={{
-            minWidth: '60px',
-            opacity: 0,
-            paddingRight: 12,
-            alignSelf: 'center',
-            fontSize: '0.8em',
-            opacity: formFilled === 'false' ? 0 : 1,
-            textAlign: 'right',
-          }}
-          // formFilled={formFilled}
-          onClick={() =>
-            formFilled != 'false' &&
-            formFilled != 'loading' &&
-            handleSignInButton()
-          }
-        >
-          {error ? (
-            <div style={{ fontSize: '0.9em', color: colors.coffeeRed }}>
-              {error}
-            </div>
-          ) : (
-            <LoadingAnimation formFilled={formFilled} buttonText={'sign in'} />
-          )}
-        </motion.div>
+        <FormButton
+          formFilled={formFilled}
+          error={error}
+          buttonText={'sign in'}
+          buttonHandler={handleSignInButton}
+        />
       </div>
       <Separator />
       {signInOptions.map((option) => {

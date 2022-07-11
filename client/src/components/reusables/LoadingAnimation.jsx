@@ -4,40 +4,71 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../../config/colors';
 
-export const LoadingAnimation = ({ formFilled, buttonText = '', style }) => {
+export const LoadingAnimation = ({
+  formFilled,
+  buttonText = '',
+  error,
+  style,
+}) => {
   return (
-    <>
-      <AnimatePresence>
-        {formFilled === 'loading' && (
+    <AnimatePresence>
+      <div
+        style={
+          style
+            ? {
+                ...style,
+              }
+            : {
+                marginLeft: 40,
+                width: 100,
+                height: 30,
+                ...style,
+              }
+        }
+      >
+        {formFilled === 'loading' ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            style={{ marginLeft: 40, ...style }}
+            key={formFilled}
           >
             <ReactLoading
-              style={{ outline: '1px solid transparent' }} // makes it work for some reason
+              style={{
+                outline: '1px solid transparent', // makes it work for some reason
+                width: '1.1em',
+                height: '1.1em',
+                float: 'right',
+                paddingRight: style ? 0 : 12,
+              }}
               type={'spin'}
               color={colors.darkmodeLightBlack}
-              height={'0.8em'}
-              width={'0.8em'}
             />
           </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {formFilled !== 'loading' && (
+        ) : error ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
+            key={formFilled}
+            style={{ fontSize: '0.9em', color: colors.coffeeRed }}
+          >
+            {error}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            key={formFilled}
           >
             {buttonText}
           </motion.div>
         )}
-      </AnimatePresence>
-    </>
+      </div>
+    </AnimatePresence>
   );
 };
