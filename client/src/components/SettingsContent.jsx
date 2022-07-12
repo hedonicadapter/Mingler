@@ -31,6 +31,7 @@ import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 import path from 'path';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import { compressFile } from '../helpers/fileManager';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -182,6 +183,9 @@ const AccountSettingsContent = ({
             }}
             htmlFor="file-upload"
             className="custom-file-upload"
+            onClick={(evt) => {
+              evt.target.value = ''; // So you can pick the same file twice
+            }}
             ref={fileInputRef}
             style={{
               opacity: formFilled === 'loading' ? 0.8 : 1,
@@ -201,6 +205,9 @@ const AccountSettingsContent = ({
             />
           </motion.label>
           <input
+            onClick={(evt) => {
+              evt.target.value = ''; // So you can pick the same file twice
+            }}
             onChange={handleProfilePictureChange}
             onFocus={(evt) => evt.preventDefault()}
             disabled={formFilled === 'loading' ? true : false}
@@ -610,12 +617,7 @@ export default function SettingsContent() {
     }
   };
 
-  const handleProfilePictureChange = (evt) => {
-    const file = Array.from(evt.target.files)[0];
-    if (!file) return;
-
-    setFormFilled('loading');
-
+  const uploadFile = (file) => {
     let formData = new FormData();
     formData.append('userID', settingsState.currentUser._id);
     formData.append('profilePicture', file, file.name);
@@ -631,7 +633,25 @@ export default function SettingsContent() {
       .catch((e) => {
         setProfilePictureError(e?.response?.data?.error);
       })
-      .finally(() => setFormFilled(false));
+      .finally(() => {
+        setFormFilled(false);
+        formData = null;
+      });
+  };
+
+  const handleProfilePictureChange = async (evt) => {
+    const file = Array.from(evt.target.files)[0];
+    if (!file) return;
+
+    setFormFilled('loading');
+
+    if (file.type === 'image/gif') {
+      uploadFile(file); // couldn't figure out how to compress gifs, compressFile() removes animation
+    } else {
+      compressFile(file, (result) => {
+        uploadFile(result);
+      });
+    }
   };
 
   const handleNameChange = (evt) => {
