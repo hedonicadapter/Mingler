@@ -94,17 +94,6 @@ export default function FindFriendsContent() {
 
           users.forEach((object, index) => {
             object.key = index;
-
-            // // format profile picture objects to JSX img elements
-            if (object.profilePicture) {
-              //   object.profilePicture = profilePictureToJSXImg(
-              //     object.profilePicture
-              //   );
-              console.log(
-                'object.profilepicture ',
-                object.profilePicture.image
-              );
-            }
           });
 
           setFoundFriends(users);
@@ -128,6 +117,9 @@ export default function FindFriendsContent() {
   };
 
   const handleSearchInput = (evt) => {
+    // don't search unless window is up
+    if (!remote.getCurrentWindow().isVisible()) return;
+
     dispatch(setFindFriendsSearchValue(evt.target.value));
   };
 
@@ -189,7 +181,7 @@ export default function FindFriendsContent() {
     <div className={styles.container}>
       <header className={styles.header}>
         <WindowFrame title={'Find friends'} />
-        <div onKeyDown={handleEscapeKey}>
+        <div className={styles.inputContainer} onKeyDown={handleEscapeKey}>
           <motion.input
             className={[
               styles.searchInputStyle,
@@ -217,20 +209,21 @@ export default function FindFriendsContent() {
       </header>
       <div className={styles.body}>
         {foundFriends?.map((user, index) => (
-          <UserItem
-            findFriendsContent={true}
-            key={index}
-            user={user}
-            requestSent={sentFriendRequests.includes(user._id)}
-            alreadyFriends={
-              !Array.isArray(friends) || !friends.length
-                ? false
-                : friends.some((friend) => friend._id === user._id)
-            }
-            index={index}
-            handleSendRequestButton={handleSendRequestButton}
-            handleCancelRequestButton={handleCancelRequestButton}
-          />
+          <div className={styles.userItemContainer} key={index}>
+            <UserItem
+              findFriendsContent={true}
+              user={user}
+              requestSent={sentFriendRequests.includes(user._id)}
+              alreadyFriends={
+                !Array.isArray(friends) || !friends.length
+                  ? false
+                  : friends.some((friend) => friend._id === user._id)
+              }
+              index={index}
+              handleSendRequestButton={handleSendRequestButton}
+              handleCancelRequestButton={handleCancelRequestButton}
+            />
+          </div>
         ))}
       </div>
     </div>

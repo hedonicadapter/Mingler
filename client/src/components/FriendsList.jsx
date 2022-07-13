@@ -106,7 +106,7 @@ export default function FriendsList() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.15, staggerChildren: 0.15 }}
             style={{
               zIndex: 80,
               position: 'absolute',
@@ -116,15 +116,19 @@ export default function FriendsList() {
               backgroundColor: colors.offWhite,
             }}
           >
-            <div
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               style={{
                 position: 'relative',
                 top: '50%',
                 transform: 'translateY(-50%)',
               }}
             >
-              Hello
-            </div>
+              Welcome.
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -152,7 +156,10 @@ export default function FriendsList() {
             />
           )}
         </div>
-        <div style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
+        <div
+          className={styles.friendsList}
+          style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}
+        >
           {appState?.findFriendsSearchValue
             ? filteredFriends?.map((friend, index) => (
                 <AccordionItem

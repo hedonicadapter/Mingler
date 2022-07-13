@@ -110,8 +110,9 @@ export default function FriendRequestsAccordion({
             }}
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
-            {friendRequests.map((user) => (
+            {friendRequests.map((user, index) => (
               <div
+                key={index}
                 style={{
                   padding: generalPadding,
                   backgroundColor: colors.offWhiteHovered,
