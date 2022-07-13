@@ -49,7 +49,7 @@ const settingsWindowConfig = {
     contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
-    // devTools: false,
+    devTools: false,
   },
 };
 
@@ -66,7 +66,7 @@ const findFriendsWindowConfig = {
     contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
-    devTools: false,
+    devTools: true,
   },
 };
 

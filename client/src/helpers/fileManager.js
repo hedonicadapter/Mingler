@@ -25,9 +25,17 @@ export function arrayBufferToBase64(buffer) {
 }
 
 export function profilePictureToJSXImg(profilePicture) {
+  if (!profilePicture?.image) return null;
   let buffer = Buffer.from(profilePicture.image).toString('base64');
 
-  return `data:${profilePicture?.mimetype};base64,${buffer}`;
+  return `data:${profilePicture?.mimetype || 'image/*'};base64,${buffer}`;
+}
+
+export function profilePictureToBlob(profilePicture) {
+  if (!profilePicture?.image) return null;
+  let buffer = Buffer.from(profilePicture.image).toString('base64');
+
+  return new Blob([buffer], { type: profilePicture?.mimetype });
 }
 
 const MAX_WIDTH = 142;

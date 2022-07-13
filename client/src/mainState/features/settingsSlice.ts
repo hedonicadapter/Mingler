@@ -36,6 +36,7 @@ export const settingsSlice = createSlice({
       }
 
       if (data.profilePicture && Object.keys(data.profilePicture).length != 0) {
+        console.log('data.profilePicture ', data.profilePicture);
         data.profilePicture = profilePictureToJSXImg(data.profilePicture);
       }
 

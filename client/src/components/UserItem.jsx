@@ -5,6 +5,10 @@ import Avatar from 'react-avatar';
 import styles from './UserItem.module.css';
 import colors from '../config/colors';
 import animations from '../config/animations';
+import {
+  profilePictureToBlob,
+  profilePictureToJSXImg,
+} from '../helpers/fileManager';
 
 const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
   return (
@@ -88,6 +92,7 @@ const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
 
 export default function UserItem({
   user,
+  findFriendsContent,
   profilePicture,
   index,
   alreadyFriends,
@@ -101,11 +106,24 @@ export default function UserItem({
   const [hovered, setHovered] = useState(false);
   const [error, setError] = useState(null);
 
+  const pic =
+    user?.profilePicture && findFriendsContent // It sucks I do this but I have absolutely no idea why the images don't load in findfriendscontent by just using the else clause here
+      ? `data:${user?.profilePicture?.mimetype || 'image/*'};base64,${
+          user?.profilePicture.image
+        }`
+      : profilePictureToJSXImg(user?.profilePicture);
+
   useEffect(() => {
     const errorTimeout = setTimeout(() => setError(null), 3000);
 
     return () => clearTimeout(errorTimeout);
   }, [error]);
+
+  useEffect(() => {
+    if (user.profilePicture) {
+      // process.stdout.write(JSON.stringify(user?.profilePicture) + '\n');
+    }
+  }, [user]);
 
   const errorCallback = ({ success, error }) => {
     if (success) {
@@ -157,7 +175,7 @@ export default function UserItem({
         className={styles.header}
       >
         <motion.div className={styles.container}>
-          <Avatar round name={user.username} size="34" src={profilePicture} />
+          <Avatar round name={user.username} size="34" src={pic} />
           <div className={styles.nameAndActivityContainer}>
             <div className={styles.text}>{user.username}</div>
 

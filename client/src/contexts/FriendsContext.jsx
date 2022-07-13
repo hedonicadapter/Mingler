@@ -145,12 +145,12 @@ export function FriendsProvider({ children }) {
           res.data?.friends.forEach((object, index) => {
             object.key = index;
 
-            // format profile picture objects to JSX img elements
-            if (object.profilePicture) {
-              object.profilePicture = profilePictureToJSXImg(
-                object.profilePicture
-              );
-            }
+            // // format profile picture objects to JSX img elements
+            // if (object.profilePicture) {
+            //   object.profilePicture = profilePictureToJSXImg(
+            //     object.profilePicture
+            //   );
+            // }
           });
 
           setFriends(res.data?.friends);
@@ -167,6 +167,12 @@ export function FriendsProvider({ children }) {
         console.log('friend requests ', res);
         res.data.friendRequests?.forEach((object, index) => {
           object.key = index;
+
+          // if (object.profilePicture) {
+          //   object.profilePicture = profilePictureToJSXImg(
+          //     object.profilePicture
+          //   );
+          // }
         });
 
         setFriendRequests(res.data.friendRequests);
@@ -279,12 +285,6 @@ export function FriendsProvider({ children }) {
   };
 
   const findFriends = (searchTerm) => {
-    console.log(
-      'searching ',
-      friends.filter((friend) =>
-        friend.username.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
     setFilteredFriends(
       searchTerm
         ? friends.filter((friend) =>

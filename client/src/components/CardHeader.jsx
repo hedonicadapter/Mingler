@@ -6,6 +6,7 @@ import colors from '../config/colors';
 import Marky from './Marky';
 import styles from './CardHeader.module.css';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
+import { profilePictureToJSXImg } from '../helpers/fileManager';
 
 const AvatarContainer = ({
   expanded,
@@ -57,7 +58,7 @@ const AvatarContainer = ({
       <Avatar
         name={name}
         size={isWidgetHeader ? '68' : '58'}
-        src={profilePicture}
+        src={profilePictureToJSXImg(profilePicture)}
         round
       />
     </motion.div>

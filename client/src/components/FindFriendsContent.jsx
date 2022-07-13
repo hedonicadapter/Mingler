@@ -95,10 +95,14 @@ export default function FindFriendsContent() {
           users.forEach((object, index) => {
             object.key = index;
 
-            // format profile picture objects to JSX img elements
+            // // format profile picture objects to JSX img elements
             if (object.profilePicture) {
-              object.profilePicture = profilePictureToJSXImg(
-                object.profilePicture
+              //   object.profilePicture = profilePictureToJSXImg(
+              //     object.profilePicture
+              //   );
+              console.log(
+                'object.profilepicture ',
+                object.profilePicture.image
               );
             }
           });
@@ -214,10 +218,10 @@ export default function FindFriendsContent() {
       <div className={styles.body}>
         {foundFriends?.map((user, index) => (
           <UserItem
+            findFriendsContent={true}
             key={index}
             user={user}
             requestSent={sentFriendRequests.includes(user._id)}
-            profilePicture={user.profilePicture}
             alreadyFriends={
               !Array.isArray(friends) || !friends.length
                 ? false
