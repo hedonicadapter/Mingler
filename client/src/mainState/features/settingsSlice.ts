@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  arrayBufferToBase64,
-  profilePictureToJSXImg,
-} from '../../helpers/fileManager';
+import { arrayBufferToBase64 } from '../../helpers/fileManager';
 import { upsertArray } from '../../helpers/arrayTools';
 import produce from 'immer';
 
@@ -37,7 +34,7 @@ export const settingsSlice = createSlice({
 
       if (data.profilePicture && Object.keys(data.profilePicture).length != 0) {
         console.log('data.profilePicture ', data.profilePicture);
-        data.profilePicture = profilePictureToJSXImg(data.profilePicture);
+        data.profilePicture = data.profilePicture;
       }
 
       state.currentUser = produce(state.currentUser, (draft) => {
@@ -66,7 +63,7 @@ export const settingsSlice = createSlice({
       state.currentUser.spotifyExpiryDate = action.payload;
     },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
-      state.currentUser.profilePicture = profilePictureToJSXImg(action.payload);
+      state.currentUser.profilePicture = action.payload;
     },
     setKeepMeSignedInMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.keepMeSignedIn = action.payload;

@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { notify } from '../components/reusables/notifications';
 
 import DAO from '../config/DAO';
-import { profilePictureToJSXImg } from '../helpers/fileManager';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 import { useClientSocket } from './ClientSocketContext';
@@ -55,6 +54,7 @@ export function FriendsProvider({ children }) {
     setYouTubeTimeRequestListeners();
     setChromiumHostDataTimeReplyListeners();
 
+    console.log('friends ', friends);
     // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
     // it isn't cleaned up there every time 'friends' changes
     return () => {
@@ -139,18 +139,13 @@ export function FriendsProvider({ children }) {
   };
 
   const getFriends = async () => {
+    console.log(currentUser._id);
+    console.log(currentUser.accessToken);
     return await DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
         if (res?.data?.success) {
           res.data?.friends.forEach((object, index) => {
             object.key = index;
-
-            // // format profile picture objects to JSX img elements
-            // if (object.profilePicture) {
-            //   object.profilePicture = profilePictureToJSXImg(
-            //     object.profilePicture
-            //   );
-            // }
           });
 
           setFriends(res.data?.friends);

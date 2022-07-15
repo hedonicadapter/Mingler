@@ -31,7 +31,7 @@ import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 import path from 'path';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
-import { compressFile } from '../helpers/fileManager';
+import { compressFile, profilePictureToJSXImg } from '../helpers/fileManager';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -201,7 +201,10 @@ const AccountSettingsContent = ({
               round
               name={username}
               size="58"
-              src={settingsState.currentUser.profilePicture}
+              src={profilePictureToJSXImg(
+                settingsState.currentUser.profilePicture,
+                settingsState.currentUser.demoUser
+              )}
             />
           </motion.label>
           <input
@@ -255,16 +258,30 @@ const AccountSettingsContent = ({
                   ? 'Not currently available for guest users. '
                   : null
               }
-              disabled={settingsState?.currentUser?.guest ? true : false}
+              disabled={
+                settingsState?.currentUser?.guest ||
+                settingsState?.currentUser?.demoUser
+                  ? true
+                  : false
+              }
               className={styles.genericInput}
               readOnly={emailError ? true : false}
               value={emailError ? emailError : email || ''}
               style={{
-                opacity: settingsState?.currentUser?.guest ? 0.4 : 1,
+                opacity:
+                  settingsState?.currentUser?.guest ||
+                  settingsState?.currentUser?.demoUser
+                    ? 0.4
+                    : 1,
                 color: emailError
                   ? colors.coffeeRed
                   : colors.darkmodeLightBlack,
-                cursor: emailError ? 'default' : 'auto',
+                cursor:
+                  settingsState?.currentUser?.guest ||
+                  settingsState?.currentUser?.demoUser ||
+                  emailError
+                    ? 'default'
+                    : 'auto',
                 '&:hover, &:focus': {
                   color: usernameError
                     ? colors.coffeeRed

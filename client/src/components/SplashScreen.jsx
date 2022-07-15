@@ -280,7 +280,7 @@ const GuestSlide = () => {
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
 
-  const { signInGuest, signUpGuest } = useAuth();
+  const { signInGuest, signUpGuest, signInDemoUser } = useAuth();
 
   useEffect(() => {
     console.log('signinguest ', error);
@@ -302,6 +302,8 @@ const GuestSlide = () => {
 
   const handleBackspaceAndEnter = (evt, fieldName) => {
     if (evt.key === 'Enter') {
+      if (name.toLowerCase() === 'demo') return signInDemoUser();
+
       if (formFilled === 'true') handleContinueButton();
     } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
       setName(evt.target.value);
@@ -391,7 +393,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
 
-  const { signUpWithEmail } = useAuth();
+  const { signUpWithEmail, signInDemoUser } = useAuth();
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => setError(null), 3000);
@@ -422,6 +424,12 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
 
   const handleBackspaceAndEnter = (evt, fieldName) => {
     if (evt.key === 'Enter') {
+      if (
+        (name.toLowerCase() === 'demo' || email.toLowerCase() === 'demo') &&
+        !password
+      )
+        return signInDemoUser();
+
       if (formFilled === 'true') handleSignUpButton();
     } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
       if (fieldName === 'email') {
@@ -451,7 +459,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
       }
       if (success) {
         setJustRegistered({ email, password });
-        error && setError(null);
+        error && setError(null); // Why did I do this?
         setSlide('signIn');
       }
     });
@@ -595,7 +603,7 @@ const SigninSlide = ({ justRegistered }) => {
   const [error, setError] = useState(null);
   const [keepMeSignedIn, setKeepMeSignedIn] = useState(true);
 
-  const { signIn } = useAuth();
+  const { signIn, signInDemoUser } = useAuth();
 
   const signInOptions = [
     { key: 0, title: 'Discord', available: false },
@@ -640,6 +648,10 @@ const SigninSlide = ({ justRegistered }) => {
 
   const handleBackspaceAndEnter = (evt, fieldName) => {
     if (evt.key === 'Enter') {
+      if (email.toLowerCase() === 'demo' && !password) {
+        return signInDemoUser();
+      }
+
       if (formFilled === 'true') handleSignInButton();
     } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
       if (fieldName === 'email') {

@@ -721,6 +721,7 @@ app.whenReady().then(() => {
 
         store.subscribe(async () => {
           global.state = store.getState();
+
           // persist store changes
           await storage.setItem('store', {
             settings: {

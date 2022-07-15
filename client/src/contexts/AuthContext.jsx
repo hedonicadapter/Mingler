@@ -41,9 +41,22 @@ export function authAndy({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
   const dispatch = useDispatch();
 
+  const [demoUser, setDemoUser] = useState(null);
   const [signedIn, setSignedIn] = useState(false);
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
+
+  useEffect(() => {
+    console.log('demoUser ', demoUser);
+  }, [demoUser]);
+
+  const setCurrentUser = (data) => {
+    dispatch(setCurrentUserMain(data));
+
+    ipcRenderer.send('currentUser:signedIn', data._id); //for the socket in main
+
+    setSignedIn(true);
+  };
 
   const signUpWithEmail = async (name, email, password) => {
     return await DAO.signUpWithEmail(name, email, password, clientFingerprint)
@@ -73,12 +86,7 @@ export function authAndy({ children }) {
     return await DAO.signInGuest(userID, clientFingerprint)
       .then((result) => {
         if (result.data.success) {
-          dispatch(setCurrentUserMain(result.data));
-
-          //for the socket in main
-          ipcRenderer.send('currentUser:signedIn', result.data._id);
-
-          setSignedIn(true);
+          setCurrentUser(result.data);
           return { success: true, email: result.data.email };
         }
       })
@@ -100,17 +108,13 @@ export function authAndy({ children }) {
             refreshToken: result.data.refreshToken,
           };
 
-          dispatch(setCurrentUserMain(result.data));
-
-          ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+          setCurrentUser(result.data);
 
           if (keepMeSignedIn) {
             dispatch(setKeepMeSignedInMain(tokens));
           } else {
             dispatch(setKeepMeSignedInMain(null));
           }
-
-          setSignedIn(true);
 
           return { success: true };
         }
@@ -122,17 +126,30 @@ export function authAndy({ children }) {
     return await DAO.signInRememberedUser(refreshToken)
       .then((result) => {
         if (result.data.success) {
-          dispatch(setCurrentUserMain(result.data));
-
-          ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
-
-          setSignedIn(true);
+          setCurrentUser(result.data);
         }
       })
       .catch((e) => {
         setSignedIn(false);
         notify("Couldn't sign in.", e?.response?.data?.error);
       });
+  };
+
+  const initDemoAccount = () => {
+    DAO.initDemoAccount(clientFingerprint)
+      .then((result) => {
+        if (result.data.success) {
+          setDemoUser(result.data);
+        }
+      })
+      .catch((e) => notify("Couldn't set demo user. ", e));
+  };
+
+  const signInDemoUser = () => {
+    dispatch(setCurrentUserMain(demoUser));
+    ipcRenderer.send('currentUser:signedIn', demoUser._id); //for the socket in main
+
+    setSignedIn(true);
   };
 
   const refreshTokenFromMainHandler = (e, { currentUser }) => {
@@ -167,6 +184,7 @@ export function authAndy({ children }) {
   }, [currentUser, signedIn]);
 
   useEffect(() => {
+    initDemoAccount();
     ipcRenderer.on('refreshtoken:frommain', refreshTokenFromMainHandler);
 
     return () =>
@@ -180,6 +198,7 @@ export function authAndy({ children }) {
     signOut,
     signUpWithEmail,
     signUpGuest,
+    signInDemoUser,
     signInGuest,
     signIn,
     signedIn,

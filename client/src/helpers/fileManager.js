@@ -1,3 +1,5 @@
+import demoProfilePicture from '../../assets/Demo.jpg';
+
 export function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -24,8 +26,12 @@ export function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-export function profilePictureToJSXImg(profilePicture) {
-  if (!profilePicture?.image) return null;
+export function profilePictureToJSXImg(profilePicture, demoUser) {
+  if (!profilePicture?.image) {
+    if (demoUser) return demoProfilePicture;
+
+    return null;
+  }
   let buffer = Buffer.from(profilePicture.image).toString('base64');
 
   return `data:${profilePicture?.mimetype || 'image/*'};base64,${buffer}`;
@@ -69,6 +75,7 @@ export const compressFile = (file, callback) => {
     const blob = await new Promise((resolve) =>
       canvas.toBlob((blob) => resolve(blob), file.type, QUALITY)
     );
+
     callback(new File([blob], file.name, { type: file.type }));
   };
 };

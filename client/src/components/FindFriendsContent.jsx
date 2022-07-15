@@ -21,7 +21,6 @@ import {
   setFindFriendsSearchValue,
 } from '../mainState/features/appSlice';
 import { makeClickthrough } from '../config/clickthrough';
-import { profilePictureToJSXImg } from '../helpers/fileManager';
 import useDebounce from '../helpers/useDebounce';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 

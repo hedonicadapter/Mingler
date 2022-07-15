@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Avatar from 'react-avatar';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -10,6 +10,7 @@ import { profilePictureToJSXImg } from '../helpers/fileManager';
 
 const AvatarContainer = ({
   expanded,
+  demoUser,
   name,
   isWidgetHeader,
   profilePicture,
@@ -58,7 +59,7 @@ const AvatarContainer = ({
       <Avatar
         name={name}
         size={isWidgetHeader ? '68' : '58'}
-        src={profilePictureToJSXImg(profilePicture)}
+        src={profilePictureToJSXImg(profilePicture, demoUser)}
         round
       />
     </motion.div>
@@ -113,6 +114,7 @@ export default function CardHeader({
   chatVisible,
   cardHovered,
   cardHeaderRef,
+  demoUser,
   isMe,
 }) {
   const el = useRef(undefined);
@@ -154,6 +156,7 @@ export default function CardHeader({
       >
         <div style={{ float: 'left', paddingRight: '12px' }}>
           <AvatarContainer
+            demoUser={demoUser}
             expanded={expanded}
             name={name}
             profilePicture={profilePicture}

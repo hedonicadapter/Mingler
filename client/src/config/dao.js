@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ipcRenderer } from 'electron';
 
 const auth = axios.create({
-  baseURL: 'https://menglir.herokuapp.com/api/auth/',
+  baseURL: 'http://localhost:8080/api/auth/',
   timeout: 6000,
   headers: {
     'Content-type': 'application/json',
@@ -11,7 +11,7 @@ const auth = axios.create({
 });
 
 export const privateRoute = axios.create({
-  baseURL: 'https://menglir.herokuapp.com/api/private/',
+  baseURL: 'http://localhost:8080/api/private/',
   timeout: 6000,
   withCredentials: true,
   headers: {
@@ -220,6 +220,12 @@ export class DAO {
         Authorization: `Bearer ${token}`,
       },
     });
+  };
+
+  initDemoAccount = (clientFingerprint) => {
+    const data = { clientFingerprint };
+
+    return auth.post('/initDemoAccount', data);
   };
 }
 const getNewToken = (refreshToken) => {
