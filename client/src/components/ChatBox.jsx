@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, AnimateSharedLayout, motion } from 'framer-motion';
 import TextareaAutosize from 'react-textarea-autosize';
 import { BsDot } from 'react-icons/bs';
 
@@ -12,6 +12,7 @@ import { ConversationBubble } from './ConversationBubble';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 import { getApp } from '../mainState/features/appSlice';
+import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 const ConnectButton = () => {
   const [chatClientPopUpOpen, setChatClientPopUpOpen] = useState(false);
@@ -175,6 +176,7 @@ export const ChatBox = ({ receiver, expanded }) => {
   // const [defaultChatClient, setDefaultChatClient] = useLocalStorage('defaultChatClient')
   const [scrollTop, setScrollTop] = useState(null);
   const [currentConvo, setCurrentConvo] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const inputBoxRef = useRef(null);
 
@@ -281,8 +283,10 @@ export const ChatBox = ({ receiver, expanded }) => {
     if (evt.target.scrollTop === 0) {
       setScrollTop(true);
 
+      setLoading(true);
       getMessages(receiver)
         .then(({ success, error }) => {
+          setLoading(false);
           if (success) {
             setError(null);
           }
@@ -302,16 +306,41 @@ export const ChatBox = ({ receiver, expanded }) => {
   return (
     <div className={styles.chatContainer}>
       <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
-        {currentConvo?.messages?.map((message, index) => {
-          return (
-            <ConversationBubble
-              key={index}
-              fromID={message.fromID}
-              message={message.message}
-              sent={message.sentDate}
-            />
-          );
-        })}
+        <AnimateSharedLayout>
+          <AnimatePresence>
+            {loading && (
+              <motion.div
+                layout
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <LoadingAnimation
+                  formFilled={'loading'}
+                  style={{ marginLeft: 10 }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.div transition={{ duration: 0.15 }} layout>
+            {currentConvo?.messages?.map((message, index) => {
+              return (
+                <ConversationBubble
+                  key={index}
+                  fromID={message.fromID}
+                  message={message.message}
+                  sent={message.sentDate}
+                />
+              );
+            })}
+          </motion.div>
+        </AnimateSharedLayout>
+
         <div ref={anchorRef} />
       </div>
       <div className={styles.inputContainer}>

@@ -43,7 +43,7 @@ export const LoadingAnimation = ({
                 paddingRight: style ? 0 : 12,
               }}
               type={'spin'}
-              color={colors.darkmodeLightBlack}
+              color={colors.defaultPlaceholderTextColor}
             />
           </motion.div>
         ) : error ? (
