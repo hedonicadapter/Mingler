@@ -33,6 +33,7 @@ body,
   pointer-events: none;
 }
 * {
+  scroll-behavior: smooth;
   pointer-events: all;
 }
 [data-reactroot] {
@@ -59,7 +60,9 @@ body {
   /* font-family: Helvetica Neue, Helvetica, Arial, sans-serif; */
   overflow-y: hidden;
   overflow-x: hidden;
+
   scrollbar-gutter: stable;
+
   margin: auto;
   pointer-events: none;
   cursor: default;

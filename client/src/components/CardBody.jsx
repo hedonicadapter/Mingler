@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence, AnimateSharedLayout } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactPlayer from 'react-player';
 import { RiArrowDropUpLine } from 'react-icons/ri';
 
@@ -23,7 +23,7 @@ export default function CardBody({
   setFriends,
 }) {
   return (
-    <div className={styles.container}>
+    <motion.div layout="position" className={styles.container}>
       <AnimatePresence>
         {playerVisible && playerURL && (
           <motion.div
@@ -67,18 +67,21 @@ export default function CardBody({
           </motion.div>
         )}
       </AnimatePresence>
-      <AnimatePresence>
-        {chatVisible && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <ChatBox receiver={userID} expanded={expanded} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <motion.div
+        animate={chatVisible ? 'show' : 'hide'}
+        initial={'hide'}
+        variants={{
+          show: { height: 'auto' },
+          hide: { height: 0 },
+        }}
+        transition={{ duration: 0.15, stiffness: 100 }}
+      >
+        <ChatBox
+          receiver={userID}
+          expanded={expanded}
+          chatVisible={chatVisible}
+        />
+      </motion.div>
+    </motion.div>
   );
 }

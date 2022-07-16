@@ -19,6 +19,7 @@
 
 .messageArea {
   overflow-y: scroll;
+  scroll-behavior: smooth;
   overflow-x: hidden;
   flex: 1;
   margin-bottom: 4px;

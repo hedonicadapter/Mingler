@@ -57,7 +57,7 @@ const AnimationWrapper = ({ children, key }) => {
     <AnimatePresence exitBeforeEnter>
       {children && (
         <motion.div
-          layout
+          layout="position"
           key={key}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -780,7 +780,7 @@ export default function SettingsContent() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  layout
+                  layout="position"
                 >
                   {settingsState.settingsContent === 'General' && (
                     <GeneralSettingsContent />

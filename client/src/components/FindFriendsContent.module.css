@@ -18,6 +18,7 @@
 .body {
   flex-grow: 1;
   overflow-y: auto;
+  scroll-behavior: smooth;
   overflow-x: hidden;
   margin-bottom: 4px;
 }
@@ -57,6 +58,7 @@
 .searchResultsStyle {
   height: 100vh;
   overflow-y: scroll;
+  scroll-behavior: smooth;
 }
 
 .userItemContainer {

@@ -60,6 +60,8 @@ export default function AccordionItem({
 
   useEffect(() => {
     setExpanded(false);
+    setPlayerVisible(false);
+    setChatVisible(false);
   }, [cardExpandedMasterToggle]);
 
   const handleOnContextMenu = (evt) => {
@@ -108,20 +110,15 @@ export default function AccordionItem({
   };
 
   return (
-    <div onContextMenu={handleOnContextMenu}>
-      <motion.header
+    <motion.div
+      transition={{ duration: 0.15, stiffness: 100 }}
+      onContextMenu={handleOnContextMenu}
+    >
+      <div
         style={{
-          // margin: 'auto',
           position: 'relative',
-          // display: 'flex',
-          // flexDirection: 'row',
-          // height: '120px',
-          // height: expanded ? '120px' : '90px',
-          // paddingTop: '55px',
-          // paddingBottom: '55px',
-          // height: expanded ? cardHeaderRef.current?.clientHeight + 10 : 84,
-          // minHeight: activityLength >= 2 ? 104 : 84,
           minHeight: 86,
+          transition: 'background-color 0.1s linear',
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
@@ -193,32 +190,20 @@ export default function AccordionItem({
             </div>
           )}
         </div>
-      </motion.header>
+      </div>
       <CardSeparator cardHovered={cardHovered} expanded={expanded} />
-      <AnimatePresence initial={'collapsed'}>
-        {expanded && (
-          <motion.section
-            initial="collapsed"
-            animate="open"
-            exit="collapsed"
-            variants={{
-              open: { height: 'auto', color: colors.offWhite },
-              collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
-            }}
-            transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
-          >
-            <CardBody
-              activity={friend?.activity}
-              userID={friend?._id}
-              expanded={expanded}
-              chatVisible={chatVisible}
-              playerURL={playerURL}
-              playerVisible={playerVisible}
-              closePlayer={closePlayer}
-            />
-          </motion.section>
-        )}
-      </AnimatePresence>
-    </div>
+
+      {expanded && (
+        <CardBody
+          activity={friend?.activity}
+          userID={friend?._id}
+          expanded={expanded}
+          chatVisible={chatVisible}
+          playerURL={playerURL}
+          playerVisible={playerVisible}
+          closePlayer={closePlayer}
+        />
+      )}
+    </motion.div>
   );
 }

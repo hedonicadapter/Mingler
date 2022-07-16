@@ -27,11 +27,6 @@ const AvatarContainer = ({
 
   return (
     <motion.div
-      // animate={{
-      //   scale: expanded ? 0.8 : 1,
-      //   originX: expanded ? -0.5 : 0,
-      //   originY: expanded ? -0.6 : 0,
-      // }}
       whileHover={
         isWidgetHeader && {
           backgroundColor: colors.offWhitePressed,
@@ -145,7 +140,14 @@ export default function CardHeader({
   };
 
   return (
-    <div ref={cardHeaderRef}>
+    <motion.div
+      ref={cardHeaderRef}
+      animate={expanded ? 'show' : 'hide'}
+      variants={{
+        show: { height: 'auto' },
+        hide: { height: 86 },
+      }}
+    >
       <div
         style={
           {
@@ -167,26 +169,18 @@ export default function CardHeader({
           />
         </div>
         <div className={styles.nameAndActivityContainer}>
-          <div className={styles.nameContainer}>
-            <motion.div
-            // animate={{
-            //   scale: expanded ? 0.8 : 1,
-            //   originX: expanded ? -0.1 : 0,
-            //   originY: expanded ? -0.4 : 0,
-            // }}
+          <motion.div className={styles.nameContainer}>
+            <div
+              className={styles.text}
+              style={{
+                color: expanded
+                  ? colors.darkmodeLightBlack
+                  : colors.darkmodeBlack,
+              }}
             >
-              <div
-                className={styles.text}
-                style={{
-                  color: expanded
-                    ? colors.darkmodeLightBlack
-                    : colors.darkmodeBlack,
-                }}
-              >
-                {name}
-              </div>
-            </motion.div>
-          </div>
+              {name}
+            </div>
+          </motion.div>
           <div
             className={styles.markyContainer}
             style={{ marginLeft: isWidgetHeader ? 25 : 20 }}
@@ -210,7 +204,7 @@ export default function CardHeader({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
+                      transition={{ duration: 0.2 }}
                       className={styles.markyContainerTwo}
                       style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
                     >
@@ -229,6 +223,6 @@ export default function CardHeader({
           <div style={{ height: 10 }} />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

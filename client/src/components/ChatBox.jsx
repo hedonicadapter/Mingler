@@ -94,19 +94,21 @@ const ChatInput = ({
   handleInputKeyDown,
 }) => {
   return (
-    <TextareaAutosize
-      ref={inputBoxRef}
-      rows={1}
-      maxRows={10}
-      autoFocus={settingsFocused ? false : true}
-      placeholder="Aa"
-      className={styles.inputBox}
-      style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
-      value={error ? error : inputText || ''}
-      readOnly={error ? true : false}
-      onChange={handleInput}
-      onKeyDown={handleInputKeyDown}
-    />
+    <motion.div layout="position">
+      <TextareaAutosize
+        ref={inputBoxRef}
+        rows={1}
+        maxRows={10}
+        autoFocus={settingsFocused ? false : true}
+        placeholder="Aa"
+        className={styles.inputBox}
+        style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
+        value={error ? error : inputText || ''}
+        readOnly={error ? true : false}
+        onChange={handleInput}
+        onKeyDown={handleInputKeyDown}
+      />
+    </motion.div>
   );
 };
 
@@ -241,20 +243,6 @@ export const ChatBox = ({ receiver, expanded }) => {
             };
           });
 
-          // setConversations((prevState) =>
-          //   prevState.map((convoObject) =>
-          //     convoObject._id === receiver
-          //       ? {
-          //           ...convoObject,
-          //           conversation: {
-          //             messages:
-          //               convoObject.conversation.messages?.concat(newMessage),
-          //           },
-          //         }
-          //       : { ...convoObject }
-          //   )
-          // );
-
           setInputText('');
           inputBoxRef.current?.focus();
           anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -300,18 +288,23 @@ export const ChatBox = ({ receiver, expanded }) => {
 
   useEffect(() => {
     if (scrollTop) return;
-    anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
+    anchorRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'start',
+    });
   }, [anchorRef]);
 
   return (
-    <div className={styles.chatContainer}>
+    <motion.div className={styles.chatContainer}>
       <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
         <AnimateSharedLayout>
           <AnimatePresence>
             {loading && (
               <motion.div
-                layout
+                layout="position"
                 style={{
+                  paddingBlock: 6,
                   display: 'flex',
                   flexDirection: 'row',
                   justifyContent: 'center',
@@ -327,7 +320,7 @@ export const ChatBox = ({ receiver, expanded }) => {
               </motion.div>
             )}
           </AnimatePresence>
-          <motion.div transition={{ duration: 0.15 }} layout>
+          <motion.div layout transition={{ duration: 0.15 }}>
             {currentConvo?.messages?.map((message, index) => {
               return (
                 <ConversationBubble
@@ -340,7 +333,6 @@ export const ChatBox = ({ receiver, expanded }) => {
             })}
           </motion.div>
         </AnimateSharedLayout>
-
         <div ref={anchorRef} />
       </div>
       <div className={styles.inputContainer}>
@@ -364,6 +356,6 @@ export const ChatBox = ({ receiver, expanded }) => {
         {/* <Dropdown /> */}
         <SendButton inputText={inputText} handleSendButton={handleSendButton} />
       </div>
-    </div>
+    </motion.div>
   );
 };

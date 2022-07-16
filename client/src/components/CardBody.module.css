@@ -1,5 +1,6 @@
 .container {
   background-color: var(--off-white-hovered);
+  color: var(--off-white);
 }
 
 .playerContainer {

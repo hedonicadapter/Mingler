@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import '../App.global.css';
 import styles from './FriendsList.module.css';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, AnimateSharedLayout, motion } from 'framer-motion';
 
 import AccordionItem from './AccordionItem';
 import colors from '../config/colors';
@@ -158,27 +158,35 @@ export default function FriendsList() {
         </div>
         <div
           className={styles.friendsList}
-          style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}
+          style={{ overflowY: 'overlay', scrollbarGutter: 'stable' }}
         >
-          {appState?.findFriendsSearchValue
-            ? filteredFriends?.map((friend, index) => (
-                <AccordionItem
-                  key={index}
-                  friend={friend}
-                  isMe={friend._id === currentUser?._id}
-                  cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
-                />
-              ))
-            : friends.length
-            ? friends.map((friend, index) => (
-                <AccordionItem
-                  key={index}
-                  friend={friend}
-                  isMe={friend._id === currentUser?._id}
-                  cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
-                />
-              ))
-            : null}
+          <AnimateSharedLayout>
+            <motion.div layout="position">
+              {appState?.findFriendsSearchValue
+                ? filteredFriends?.map((friend, index) => (
+                    <AccordionItem
+                      key={index}
+                      friend={friend}
+                      isMe={friend._id === currentUser?._id}
+                      cardExpandedMasterToggle={
+                        appState?.cardExpandedMasterToggle
+                      }
+                    />
+                  ))
+                : friends.length
+                ? friends.map((friend, index) => (
+                    <AccordionItem
+                      key={index}
+                      friend={friend}
+                      isMe={friend._id === currentUser?._id}
+                      cardExpandedMasterToggle={
+                        appState?.cardExpandedMasterToggle
+                      }
+                    />
+                  ))
+                : null}
+            </motion.div>
+          </AnimateSharedLayout>
         </div>
 
         <EmptySpaceFiller />
