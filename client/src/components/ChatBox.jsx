@@ -186,12 +186,14 @@ export const ChatBox = ({ receiver, expanded }) => {
   }, [error]);
 
   useEffect(() => {
-    console.log('receiver: ', receiver, 'currentUser: ', currentUser._id);
-    console.log(conversations);
+    console.log('conversations ', conversations);
     setCurrentConvo(
       conversations?.find((convo) => convo._id === receiver)?.conversation
     );
   }, [conversations]);
+  useEffect(() => {
+    console.log('currentConvo ', currentConvo);
+  }, [currentConvo]);
 
   const handleInput = (evt) => {
     setInputText(evt.target.value);
@@ -219,6 +221,8 @@ export const ChatBox = ({ receiver, expanded }) => {
             sentDate: new Date(),
           };
 
+          console.log(newMessage);
+
           socket.emit('message:send', {
             toID: receiver,
             fromID: currentUser?._id,
@@ -228,7 +232,10 @@ export const ChatBox = ({ receiver, expanded }) => {
           setCurrentConvo((prevState) => {
             return {
               ...prevState,
-              messages: prevState?.messages?.concat(newMessage),
+
+              messages: prevState?.messages
+                ? prevState?.messages?.concat(newMessage)
+                : [newMessage],
             };
           });
 

@@ -27,9 +27,9 @@ export default function CardBody({
       <AnimatePresence>
         {playerVisible && playerURL && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.15 }}
             style={{
               padding: 10,
@@ -38,10 +38,18 @@ export default function CardBody({
               flexDirection: 'column',
             }}
           >
-            <RiArrowDropUpLine
-              className={styles.closePlayerButton}
+            <motion.div
+              whileHover={{
+                opacity: 0.86,
+              }}
+              transition={{ duration: 0.1 }}
+              className={styles.closePlayerButtonContainer}
               onClick={() => closePlayer()}
-            />
+            >
+              <div className={styles.closePlayerButtonBar} />
+              <RiArrowDropUpLine className={styles.closePlayerButton} />
+            </motion.div>
+
             <div className={styles.playerContainer}>
               <ReactPlayer
                 url={playerURL}

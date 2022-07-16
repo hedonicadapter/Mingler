@@ -2,8 +2,11 @@ import React from 'react';
 import axios from 'axios';
 import { ipcRenderer } from 'electron';
 
+const baseURL = 'https://menglir.herokuapp.com/';
+// const baseURL = 'http://localhost:8080/'
+
 const auth = axios.create({
-  baseURL: 'http://localhost:8080/api/auth/',
+  baseURL: `${baseURL}api/auth/`,
   timeout: 6000,
   headers: {
     'Content-type': 'application/json',
@@ -11,7 +14,7 @@ const auth = axios.create({
 });
 
 export const privateRoute = axios.create({
-  baseURL: 'http://localhost:8080/api/private/',
+  baseURL: `${baseURL}api/private/`,
   timeout: 6000,
   withCredentials: true,
   headers: {
@@ -20,7 +23,7 @@ export const privateRoute = axios.create({
 });
 
 export const token = axios.create({
-  baseURL: 'https://menglir.herokuapp.com/api/token/',
+  baseURL: `${baseURL}api/token/`,
   timeout: 4000,
   withCredentials: true,
   headers: {
