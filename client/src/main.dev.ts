@@ -46,6 +46,7 @@ var Positioner = require('electron-positioner');
 
 // Disable windows default window animations
 app.commandLine.appendSwitch('wm-window-animations-disabled');
+app.commandLine.appendSwitch('enable-smooth-scrolling');
 
 export default class AppUpdater {
   constructor() {

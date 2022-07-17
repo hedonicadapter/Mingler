@@ -32,6 +32,7 @@ import animations from '../config/animations';
 import path from 'path';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
 import { compressFile, profilePictureToJSXImg } from '../helpers/fileManager';
+import { useIsInViewport } from '../helpers/useIsInViewport';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -154,7 +155,7 @@ const AccountSettingsContent = ({
   };
 
   return (
-    <div className={styles.settingsContentContainer}>
+    <motion.div className={styles.settingsContentContainer}>
       <div className={styles.profilePictureFormContainer}>
         <motion.div
           className={styles.avatarContainer}
@@ -324,13 +325,13 @@ const AccountSettingsContent = ({
           <SpotifyText />
         </motion.div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
 const SetupSettingsHeader = ({ browser, browserIconOnClickHandler }) => {
   return (
-    <div className={styles.setupSettingsHeaderBrowserPicker}>
+    <motion.div className={styles.setupSettingsHeaderBrowserPicker}>
       <div className={styles.setupSettingsHeaderBrowserName}>{browser}</div>
       <motion.div
         className={styles.browserIcons}
@@ -360,7 +361,7 @@ const SetupSettingsHeader = ({ browser, browserIconOnClickHandler }) => {
       >
         <IoLogoEdge size={25} />
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -579,13 +580,45 @@ const SetupSettingsContent = ({ browser, storedID }) => {
   );
 };
 
+const SettingsContentHeader = ({
+  title,
+  browser,
+  browserIconOnClickHandler,
+}) => {
+  return (
+    <div className={styles.contentHeader}>
+      {title}
+      {title === 'Set-up' && (
+        <SetupSettingsHeader
+          browser={browser}
+          browserIconOnClickHandler={browserIconOnClickHandler}
+        />
+      )}
+    </div>
+  );
+};
+
 export default function SettingsContent() {
   makeClickthrough();
 
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 
+  const generalSettingsContentRef = useRef(null);
+  const accountSettingsContentRef = useRef(null);
+  const setupSettingsContentRef = useRef(null);
+
+  const generalSettingsContentInView = useIsInViewport(
+    generalSettingsContentRef
+  );
+  const accountSettingsContentInView = useIsInViewport(
+    accountSettingsContentRef
+  );
+  const setupSettingsContentInView = useIsInViewport(setupSettingsContentRef);
+
   const [expanded, setExpanded] = useState(0);
+
+  const [formFilled, setFormFilled] = useState(false);
   const [username, setUsername] = useState(
     settingsState?.currentUser?.username
   );
@@ -595,7 +628,16 @@ export default function SettingsContent() {
   const [usernameError, setUsernameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [spotifyError, setSpotifyError] = useState(null);
-  const [formFilled, setFormFilled] = useState(false);
+
+  useEffect(() => {
+    if (generalSettingsContentInView) setExpanded(0);
+    if (accountSettingsContentInView) setExpanded(1);
+    if (setupSettingsContentInView) setExpanded(2);
+  }, [
+    generalSettingsContentInView,
+    accountSettingsContentInView,
+    setupSettingsContentInView,
+  ]);
 
   useEffect(() => {
     dispatch(setSettingsContentMain(settings[expanded]?.title) || 'General');
@@ -751,7 +793,20 @@ export default function SettingsContent() {
           <div className={styles.menu}>
             {settings.map((setting, index) => {
               return (
-                <div onClick={() => setExpanded(index)}>
+                <div
+                  onClick={() => {
+                    setExpanded(index);
+                    if (index === 0)
+                      generalSettingsContentRef.current.parentNode.scrollTop =
+                        generalSettingsContentRef.current?.offsetTop + 50;
+                    if (index === 1)
+                      accountSettingsContentRef.current.parentNode.scrollTop =
+                        accountSettingsContentRef.current?.offsetTop + 50;
+                    if (index === 2)
+                      setupSettingsContentRef.current.parentNode.scrollTop =
+                        setupSettingsContentRef.current?.offsetTop + 50;
+                  }}
+                >
                   <AccordionSetting
                     setting={setting}
                     key={index}
@@ -764,58 +819,61 @@ export default function SettingsContent() {
             })}
           </div>
           <div className={styles.contentContainer}>
-            <div className={styles.contentHeader}>
-              {settingsState.settingsContent}
-              {settingsState.settingsContent === 'Set-up' && (
-                <SetupSettingsHeader
-                  browser={settingsState.browser}
-                  browserIconOnClickHandler={browserIconOnClickHandler}
-                />
-              )}
+            <div
+              className={styles.contentWrapper}
+              ref={generalSettingsContentRef}
+            >
+              <SettingsContentHeader
+                title={'General'}
+                browser={settingsState.browser}
+                browserIconOnClickHandler={browserIconOnClickHandler}
+              />
+              <GeneralSettingsContent />
             </div>
-
-            <AnimatePresence>
-              {settingsState.settingsContent && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  layout="position"
-                >
-                  {settingsState.settingsContent === 'General' && (
-                    <GeneralSettingsContent />
-                  )}
-                  {settingsState.settingsContent === 'Account' && (
-                    <AccountSettingsContent
-                      fileInputRef={fileInputRef}
-                      handleProfilePictureChange={handleProfilePictureChange}
-                      formFilled={formFilled}
-                      handleNameChange={handleNameChange}
-                      handleEmailChange={handleEmailChange}
-                      username={username}
-                      email={email}
-                      dispatch={dispatch}
-                      settingsState={settingsState}
-                      profilePictureError={profilePictureError}
-                      usernameError={usernameError}
-                      emailError={emailError}
-                      spotifyError={spotifyError}
-                    />
-                  )}
-                  {settingsState.settingsContent === 'Set-up' && (
-                    <SetupSettingsContent
-                      browser={settingsState.browser}
-                      storedID={settingsState.extensionID}
-                    />
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div
+              className={styles.contentWrapper}
+              ref={accountSettingsContentRef}
+            >
+              <SettingsContentHeader
+                title={'Account'}
+                browser={settingsState.browser}
+                browserIconOnClickHandler={browserIconOnClickHandler}
+              />
+              <AccountSettingsContent
+                fileInputRef={fileInputRef}
+                handleProfilePictureChange={handleProfilePictureChange}
+                formFilled={formFilled}
+                handleNameChange={handleNameChange}
+                handleEmailChange={handleEmailChange}
+                username={username}
+                email={email}
+                dispatch={dispatch}
+                settingsState={settingsState}
+                profilePictureError={profilePictureError}
+                usernameError={usernameError}
+                emailError={emailError}
+                spotifyError={spotifyError}
+              />
+            </div>
+            <div
+              className={styles.contentWrapper}
+              ref={setupSettingsContentRef}
+            >
+              <SettingsContentHeader
+                title={'Set-up'}
+                browser={settingsState.browser}
+                browserIconOnClickHandler={browserIconOnClickHandler}
+              />
+              <SetupSettingsContent
+                browser={settingsState.browser}
+                storedID={settingsState.extensionID}
+              />
+            </div>
             {/* <AnimationWrapper key={0}>
-              {settingsState.settingsContent === 'General' && (
-                <GeneralSettingsContent />
+            {settingsState.settingsContent === 'General' && (
+              <GeneralSettingsContent />
               )}
-            </AnimationWrapper>
+              </AnimationWrapper>
 
             <AnimationWrapper key={1}>
               {settingsState.settingsContent === 'Account' && (

@@ -42,8 +42,12 @@ export default function AccordionSetting({
         onClick={() => toggleExpansion()}
         style={
           index === 0
-            ? { paddingTop: 30, paddingBottom: 8 }
-            : { paddingBlock: 8 }
+            ? {
+                paddingTop: 30,
+                paddingBottom: 8,
+                transition: 'background-color 0.15s linear',
+              }
+            : { paddingBlock: 8, transition: 'background-color 0.25s linear' }
         }
         className={styles.header}
       >

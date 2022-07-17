@@ -15,8 +15,25 @@
 }
 
 .contentContainer {
+  overflow-y: scroll !important;
+  scroll-behavior: smooth;
   padding: 24px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* scroll snap proximity isnt consistent enough,
+  and mandatory makes it annoying to read setupcontent */
+  /* scroll-snap-type: y mandatory; */
+  /* scroll-snap-stop: always; */
+  height: 400px;
+  margin-bottom: 20px;
+  margin-right: 1px;
+}
+.contentWrapper {
+  /* scroll-padding: 80; */
+  /* scroll-snap-align: start; */
+  min-height: 510px;
 }
 
 .contentHeader {
@@ -98,14 +115,17 @@
   background-color: var(--off-white-pressed);
   color: var(--dark-mode-black);
 }
-
+.heightAnimationContainer {
+  transition: all 0.3s ease-out;
+  overflow: hidden;
+  flex: 1;
+  height: auto;
+}
 /* Set-up content */
 .setupSettingsContainer {
-  height: 380px;
+  height: 590px;
   margin-bottom: 20px;
   margin-right: -20px;
-  overflow-y: scroll !important;
-  scroll-behavior: smooth;
 }
 .setupSettingsHeaderBrowserPicker {
   display: flex;
