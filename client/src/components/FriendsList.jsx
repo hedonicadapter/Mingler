@@ -196,6 +196,7 @@ export default function FriendsList() {
         <EmptySpaceFiller />
         <div style={{ flex: '0 1 40px' }}>
           <WidgetFooter
+            appVisible={appState?.appVisible}
             handleSearchInput={handleSearchInput}
             searchValue={appState?.findFriendsSearchValue}
             friends={friends}

@@ -38,7 +38,7 @@ export function useAuth() {
 }
 
 export function authAndy({ children }) {
-  const currentUser = useSelector((state) => getCurrentUser(state));
+  const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
   const [demoUser, setDemoUser] = useState(null);

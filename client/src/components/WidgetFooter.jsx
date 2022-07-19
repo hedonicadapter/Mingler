@@ -2,33 +2,39 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import styles from './WidgetFooter.module.css';
 import colors from '../config/colors';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  appVisibleFalse,
-  getApp,
-  settingsFocusedFalse,
-  settingsFocusedTrue,
-  settingsOpenFalse,
-  settingsOpenTrue,
-} from '../mainState/features/appSlice';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
+import ReactTooltip from 'react-tooltip';
+import { useSelector } from 'react-redux';
 
 export default function WidgetFooter({
+  appVisible,
   handleSearchInput,
   searchValue,
   friends,
 }) {
-  const dispatch = useDispatch();
-
-  const appState = useSelector(getApp);
+  const extensionID = useSelector((state) => state.extensionID);
   const { toggleFindFriends, toggleSettings } = useBrowserWindow();
 
-  const searchInputRef = useRef();
+  const searchInputRef = useRef(null);
+  const settingsButtonRef = useRef(null);
 
   useEffect(() => {
     if (friends <= 0) searchInputRef?.current?.focus();
   }, [searchInputRef]);
+
+  let globalTimeout;
+  useEffect(() => {
+    if (settingsButtonRef?.current) {
+      ReactTooltip.show(settingsButtonRef.current);
+      const timeout = setTimeout(
+        () => ReactTooltip.hide(settingsButtonRef.current),
+        1500
+      );
+      globalTimeout = timeout;
+    }
+    return () => clearTimeout(globalTimeout);
+  }, [settingsButtonRef, appVisible]);
 
   return (
     <footer className={styles.container}>
@@ -77,6 +83,9 @@ export default function WidgetFooter({
         <AnimatePresence>
           {!searchValue && (
             <motion.div
+              ref={settingsButtonRef}
+              data-tip="Complete your set-up."
+              data-for="completeYourSetup"
               style={{ position: 'absolute', bottom: 20, right: 18 }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.7 }}
@@ -87,6 +96,15 @@ export default function WidgetFooter({
             </motion.div>
           )}
         </AnimatePresence>
+        {!extensionID && (
+          <ReactTooltip
+            id="completeYourSetup"
+            place="left"
+            type="dark"
+            effect="solid"
+            className={styles.toolTip}
+          />
+        )}
       </motion.div>
     </footer>
   );

@@ -86,6 +86,7 @@ const SendButton = ({ inputText, handleSendButton }) => {
 };
 
 const ChatInput = ({
+  chatVisible,
   inputText,
   inputBoxRef,
   settingsFocused,
@@ -95,19 +96,21 @@ const ChatInput = ({
 }) => {
   return (
     <motion.div layout="position">
-      <TextareaAutosize
-        ref={inputBoxRef}
-        rows={1}
-        maxRows={10}
-        autoFocus={settingsFocused ? false : true}
-        placeholder="Aa"
-        className={styles.inputBox}
-        style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
-        value={error ? error : inputText || ''}
-        readOnly={error ? true : false}
-        onChange={handleInput}
-        onKeyDown={handleInputKeyDown}
-      />
+      {chatVisible && (
+        <TextareaAutosize
+          ref={inputBoxRef}
+          rows={1}
+          maxRows={10}
+          autoFocus={settingsFocused ? false : true}
+          placeholder="Aa"
+          className={styles.inputBox}
+          style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
+          value={error ? error : inputText || ''}
+          readOnly={error ? true : false}
+          onChange={handleInput}
+          onKeyDown={handleInputKeyDown}
+        />
+      )}
     </motion.div>
   );
 };
@@ -162,7 +165,7 @@ const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
   );
 };
 
-export const ChatBox = ({ receiver }) => {
+export const ChatBox = ({ receiver, chatVisible }) => {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
@@ -296,8 +299,15 @@ export const ChatBox = ({ receiver }) => {
   }, [anchorRef]);
 
   return (
-    <motion.div className={styles.chatContainer}>
-      <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
+    <motion.div
+      className={styles.chatContainer}
+      style={{ padding: chatVisible ? 10 : 0 }}
+    >
+      <div
+        className={styles.messageArea}
+        onScroll={handleMessageAreaScroll}
+        style={{ marginBottom: chatVisible && 4 }}
+      >
         <AnimateSharedLayout>
           <AnimatePresence>
             {loading && (
@@ -335,27 +345,43 @@ export const ChatBox = ({ receiver }) => {
         </AnimateSharedLayout>
         <div ref={anchorRef} />
       </div>
-      <div className={styles.inputContainer}>
-        {chatClientSelection === 'Mingler' ? (
-          useMemo(
-            () => (
-              <ChatInput
-                inputText={inputText}
-                inputBoxRef={inputBoxRef}
-                settingsFocused={appState?.settingsFocused}
-                error={error}
-                handleInput={handleInput}
-                handleInputKeyDown={handleInputKeyDown}
-              />
-            ),
-            [inputText, inputBoxRef, appState?.settingsFocused, error]
-          )
-        ) : (
-          <ConnectButton />
+      <motion.div
+        className={styles.inputContainer}
+        style={
+          chatVisible && {
+            borderTop: '1px solid' + colors.offWhitePressed2,
+            marginTop: 6,
+          }
+        }
+      >
+        {useMemo(
+          () => (
+            <ChatInput
+              chatVisible={chatVisible}
+              inputText={inputText}
+              inputBoxRef={inputBoxRef}
+              settingsFocused={appState?.settingsFocused}
+              error={error}
+              handleInput={handleInput}
+              handleInputKeyDown={handleInputKeyDown}
+            />
+          ),
+          [
+            chatVisible,
+            inputText,
+            inputBoxRef,
+            appState?.settingsFocused,
+            error,
+          ]
         )}
-        {/* <Dropdown /> */}
-        <SendButton inputText={inputText} handleSendButton={handleSendButton} />
-      </div>
+
+        {chatVisible && (
+          <SendButton
+            inputText={inputText}
+            handleSendButton={handleSendButton}
+          />
+        )}
+      </motion.div>
     </motion.div>
   );
 };

@@ -13,7 +13,7 @@
   display: flex;
   flex-direction: column;
   max-height: 200px;
-  padding: 10px;
+
   z-index: 200;
 }
 
@@ -22,7 +22,7 @@
   scroll-behavior: smooth;
   overflow-x: hidden;
   flex: 1;
-  margin-bottom: 4px;
+
   scroll-snap-type-y: proximity;
 }
 
@@ -31,12 +31,10 @@
 }
 
 .inputContainer {
-  border-top: 1px solid var(--off-white-pressed2);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-top: 6px;
 }
 
 .inputBox {
