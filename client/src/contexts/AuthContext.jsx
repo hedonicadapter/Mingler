@@ -42,6 +42,7 @@ export function authAndy({ children }) {
   const dispatch = useDispatch();
 
   const [demoUser, setDemoUser] = useState(null);
+
   const [signedIn, setSignedIn] = useState(false);
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
@@ -150,6 +151,16 @@ export function authAndy({ children }) {
     ipcRenderer.send('currentUser:signedIn', demoUser._id); //for the socket in main
 
     setSignedIn(true);
+
+    DAO.getDemoActivities()
+      .then((result) => {
+        if (result.data.success) {
+          setDemoUser((prevState) => {
+            return { ...prevState, fakeActivities: result.data.activities };
+          });
+        }
+      })
+      .catch((e) => notify('Failed to set demo up properly.'));
   };
 
   const refreshTokenFromMainHandler = (e, { currentUser }) => {
@@ -202,6 +213,7 @@ export function authAndy({ children }) {
     signInGuest,
     signIn,
     signedIn,
+    demoUser,
   };
 
   return (

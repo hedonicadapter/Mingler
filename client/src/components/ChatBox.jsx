@@ -162,7 +162,7 @@ const Dropdown = ({ chatClientSelection, setChatClientSelection }) => {
   );
 };
 
-export const ChatBox = ({ receiver, expanded }) => {
+export const ChatBox = ({ receiver }) => {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
   const dispatch = useDispatch();

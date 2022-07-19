@@ -9,6 +9,7 @@ import CardHeader from './CardHeader';
 import CardBody from './CardBody';
 import colors from '../config/colors';
 import { useFriends } from '../contexts/FriendsContext';
+import { getRandomPositiveNumber } from '../helpers/useFakeActivities';
 
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -26,12 +27,19 @@ const CardSeparator = ({ cardHovered, expanded }) => {
 };
 
 export default function AccordionItem({
+  clientDemoUser,
   username,
   friend,
   isMe,
   isWidgetHeader,
   cardExpandedMasterToggle,
 }) {
+  const isDefaultDemoFriend = clientDemoUser?.demoDefaultFriendIDs.includes(
+    friend?._id
+  );
+
+  const cardHeaderRef = useRef(null);
+
   const { deleteFriend } = useFriends();
 
   const [expanded, setExpanded] = useState(false);
@@ -40,8 +48,38 @@ export default function AccordionItem({
   const [playerVisible, setPlayerVisible] = useState(false);
   const [playerURL, setPlayerURL] = useState(null);
   const [activityLength, setActivityLength] = useState(null);
+  const [online, setOnline] = useState();
 
-  const cardHeaderRef = useRef(null);
+  useEffect(() => {
+    console.log('chatVisible ', chatVisible);
+  }, [chatVisible]);
+
+  // Set random online/offline statuses for demo account default friends
+  useEffect(() => {
+    let timeouts = [];
+
+    if (isDefaultDemoFriend) {
+      let fiveHours = 18000000;
+      let fiveMinutes = 300000;
+      let randomBoolean = Math.random() < 0.5;
+      setOnline(randomBoolean);
+
+      // random time between five hours and five minutes for user to be online or offline
+      // If they're online already, use a bigger range so there's more online than offline
+      let randomOnlineTime = online
+        ? getRandomPositiveNumber(fiveHours, fiveMinutes)
+        : getRandomPositiveNumber(fiveMinutes, 1);
+
+      const statusTimeout = setTimeout(
+        () => setOnline(!online),
+        randomOnlineTime
+      );
+
+      timeouts.push(statusTimeout);
+    } else setOnline(friend?.online);
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [online]);
 
   useEffect(() => {
     ipcRenderer.on('context-menu:delete', contextMenuDeleteFriendHandler);
@@ -122,7 +160,7 @@ export default function AccordionItem({
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           WebkitMask: isWidgetHeader
             ? 'none'
-            : !friend?.online &&
+            : !online &&
               !isMe &&
               'radial-gradient(circle 9px at 36px 50%,transparent 88%,#fff)',
           // backgroundColor: expanded
@@ -139,15 +177,18 @@ export default function AccordionItem({
       >
         <div
           style={{
-            opacity: friend?.online || isMe || isWidgetHeader ? 1 : 0.4,
+            transition: 'opacity 0.5s ease',
+            opacity: online || isMe || isWidgetHeader ? 1 : 0.4,
           }}
         >
           <CardHeader
+            clientDemoUser={clientDemoUser} // this client's own assigned demo user
+            demoUser={friend?.demoUser} // boolean is friend a demo user or not
             activityLength={activityLength}
             togglePlayer={togglePlayer}
             setPlayerURL={setPlayerURL}
             cardHeaderRef={cardHeaderRef}
-            online={friend?.online}
+            online={online}
             key={friend?.key}
             name={username ? username : friend?.username}
             profilePicture={friend?.profilePicture}
@@ -157,7 +198,6 @@ export default function AccordionItem({
             expanded={expanded}
             chatVisible={chatVisible}
             isWidgetHeader={isWidgetHeader}
-            demoUser={friend?.demoUser}
             isMe={isMe}
             cardHovered={cardHovered}
           />
@@ -202,6 +242,7 @@ export default function AccordionItem({
           playerURL={playerURL}
           playerVisible={playerVisible}
           closePlayer={closePlayer}
+          isWidgetHeader={isWidgetHeader}
         />
       )}
     </motion.div>

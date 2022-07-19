@@ -19,7 +19,7 @@ export function ClientSocketProvider({ children }) {
 
   const connectSocket = (user) => {
     // ws://127.0.0.1:8080/user
-    const newSocket = io('https://menglir.herokuapp.com/user', {
+    const newSocket = io('http://localhost:8080/user', {
       auth: {
         accessToken: user && user.accessToken,
       },

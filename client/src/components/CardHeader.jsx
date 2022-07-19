@@ -7,6 +7,7 @@ import Marky from './Marky';
 import styles from './CardHeader.module.css';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { profilePictureToJSXImg } from '../helpers/fileManager';
+import { useFakeActivities } from '../helpers/useFakeActivities';
 
 const AvatarContainer = ({
   expanded,
@@ -69,32 +70,41 @@ const OnlineStatusIndicator = ({
 }) => {
   if (!online && !isMe) return null;
   return (
-    <motion.span
-      style={{
-        pointerEvents: 'none',
-        position: 'relative',
-      }}
-    >
-      <span
-        style={{
-          zIndex: 80,
-          position: 'absolute',
-          height: '50px',
-          width: '50px',
-          marginLeft: 'auto',
-          backgroundColor: colors.coffeeGreen,
-          clipPath: 'circle(8.6px at 20px)',
-          // minHeight: activityLength >= 2 ? 104 : 84,
-          // paddingTop: isWidgetHeader ? 35 : 28,
-          left: -38,
-          top: -15,
-        }}
-      />
-    </motion.span>
+    <AnimatePresence>
+      {(online || isMe) && (
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            pointerEvents: 'none',
+            position: 'relative',
+          }}
+        >
+          <span
+            style={{
+              zIndex: 80,
+              position: 'absolute',
+              height: '50px',
+              width: '50px',
+              marginLeft: 'auto',
+              backgroundColor: colors.coffeeGreen,
+              clipPath: 'circle(8.6px at 20px)',
+              // minHeight: activityLength >= 2 ? 104 : 84,
+              // paddingTop: isWidgetHeader ? 35 : 28,
+              left: -38,
+              top: -13,
+            }}
+          />
+        </motion.span>
+      )}
+    </AnimatePresence>
   );
 };
 
 export default function CardHeader({
+  clientDemoUser,
   activityLength,
   isWidgetHeader,
   online,
@@ -116,6 +126,90 @@ export default function CardHeader({
   const [refresh, setRefresh] = useState(true);
   const [overflown, setOverflown] = useState();
   const [refVisible, setRefVisible] = useState(false);
+
+  // Demo user stuff
+  const [fakeActivities, setFakeActivities] = useState({});
+  const [randomWindow, randomTrack, randomTab, randomYouTube, setActivities] =
+    useFakeActivities(null);
+
+  useEffect(() => {
+    return () => setFakeActivities(null);
+  }, []);
+
+  useEffect(() => {
+    if (!randomWindow) return;
+
+    if (fakeActivities.length > 0) {
+      setFakeActivities((prevState) => {
+        let filtered = prevState.filter((item) => !item.WindowTitle);
+        filtered.unshift(randomWindow);
+
+        return filtered;
+      });
+    } else {
+      setFakeActivities([randomWindow]);
+    }
+  }, [randomWindow]);
+
+  useEffect(() => {
+    if (!randomTrack) return;
+
+    if (fakeActivities.length > 0) {
+      setFakeActivities((prevState) => {
+        let filtered = prevState.filter((item) => !item.TrackTitle);
+        filtered.unshift(randomTrack);
+
+        return filtered;
+      });
+    } else {
+      setFakeActivities([randomTrack]);
+    }
+  }, [randomTrack]);
+
+  useEffect(() => {
+    if (!randomTab) return;
+
+    if (fakeActivities.length > 0) {
+      setFakeActivities((prevState) => {
+        let filtered = prevState.filter((item) => !item.TabTitle);
+        filtered.unshift(randomTab);
+
+        return filtered;
+      });
+    } else {
+      setFakeActivities([randomTab]);
+    }
+  }, [randomTab]);
+
+  useEffect(() => {
+    if (!randomYouTube) return;
+
+    if (fakeActivities.length > 0) {
+      setFakeActivities((prevState) => {
+        let filtered = prevState.filter((item) => !item.YouTubeTitle);
+        filtered.unshift(randomYouTube);
+
+        return filtered;
+      });
+    } else {
+      setFakeActivities([randomYouTube]);
+    }
+  }, [randomYouTube]);
+
+  useEffect(() => {
+    // If this cardheader belongs to a default demo friend
+    if (
+      clientDemoUser?.demoDefaultFriendIDs.includes(userID) &&
+      online &&
+      !isMe &&
+      !isWidgetHeader
+    ) {
+      setActivities(clientDemoUser?.fakeActivities);
+    }
+    if (!online) {
+      setActivities(null);
+    }
+  }, [clientDemoUser, userID, online]);
 
   function checkOverflow(el) {
     if (el === undefined || el === null) return false;
@@ -181,46 +275,84 @@ export default function CardHeader({
               {name}
             </div>
           </motion.div>
-          <div
-            className={styles.markyContainer}
-            style={{ marginLeft: isWidgetHeader ? 25 : 20 }}
-          >
-            <Marky
-              {...mainActivity}
-              userID={userID}
-              marKey={1}
-              expanded={expanded}
-              togglePlayer={togglePlayer}
-              setPlayerURL={setPlayerURL}
-            />
-          </div>
           <AnimatePresence>
-            {expanded &&
-              activity?.map(
-                (activity, index) =>
-                  index != 0 && (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className={styles.markyContainerTwo}
-                      style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
-                    >
-                      <Marky
-                        {...activity}
-                        userID={userID}
-                        marKey={index}
-                        expanded={expanded}
-                        togglePlayer={togglePlayer}
-                        setPlayerURL={setPlayerURL}
-                      />
-                    </motion.div>
-                  )
-              )}
+            {(isMe || isWidgetHeader || online) && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div
+                  className={styles.markyContainer}
+                  style={{ marginLeft: isWidgetHeader ? 25 : 20 }}
+                >
+                  <Marky
+                    {...mainActivity}
+                    {...fakeActivities[0]}
+                    userID={userID}
+                    marKey={1}
+                    expanded={expanded}
+                    togglePlayer={togglePlayer}
+                    setPlayerURL={setPlayerURL}
+                  />
+                </div>
+                <AnimatePresence>
+                  {expanded &&
+                    activity?.map(
+                      (activity, index) =>
+                        index != 0 && (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className={styles.markyContainerTwo}
+                            style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
+                          >
+                            <Marky
+                              {...activity}
+                              userID={userID}
+                              marKey={index}
+                              expanded={expanded}
+                              togglePlayer={togglePlayer}
+                              setPlayerURL={setPlayerURL}
+                            />
+                          </motion.div>
+                        )
+                    )}
+                  {expanded &&
+                    fakeActivities &&
+                    fakeActivities.length > 0 &&
+                    fakeActivities?.map(
+                      (activity, index) =>
+                        index != 0 && (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className={styles.markyContainerTwo}
+                            style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
+                          >
+                            <Marky
+                              {...activity}
+                              userID={userID}
+                              marKey={index}
+                              expanded={expanded}
+                              togglePlayer={togglePlayer}
+                              setPlayerURL={setPlayerURL}
+                            />
+                          </motion.div>
+                        )
+                    )}
+                </AnimatePresence>
+                <div style={{ height: 10 }} />
+              </motion.div>
+            )}
           </AnimatePresence>
-          <div style={{ height: 10 }} />
         </div>
       </div>
     </motion.div>

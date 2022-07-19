@@ -93,6 +93,7 @@ export default function Marky({
   ]);
 
   useEffect(() => {
+    console.log('savasaca ', WindowTitle);
     (WindowTitle && setMarkyType('Window')) ||
       (TrackTitle && setMarkyType('Track')) ||
       (TabTitle && setMarkyType('Tab')) ||

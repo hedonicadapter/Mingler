@@ -2,8 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import { ipcRenderer } from 'electron';
 
-const baseURL = 'https://menglir.herokuapp.com/';
-// const baseURL = 'http://localhost:8080/'
+// const baseURL = 'https://menglir.herokuapp.com/';
+const baseURL = 'http://localhost:8080/';
 
 const auth = axios.create({
   baseURL: `${baseURL}api/auth/`,
@@ -230,7 +230,18 @@ export class DAO {
 
     return auth.post('/initDemoAccount', data);
   };
+
+  createTracktivity = (trackInfo) => {
+    const data = { trackInfo };
+
+    return privateRoute.post('/createTracktivity', data);
+  };
+
+  getDemoActivities = () => {
+    return privateRoute.get('/getDemoActivities');
+  };
 }
+
 const getNewToken = (refreshToken) => {
   const data = { refreshToken };
 

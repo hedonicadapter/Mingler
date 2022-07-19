@@ -22,6 +22,7 @@ import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import useDebounce from '../helpers/useDebounce';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
+import { useAuth } from '../contexts/AuthContext';
 
 export const EmptySpaceFiller = ({}) => {
   const dispatch = useDispatch();
@@ -81,6 +82,7 @@ export default function FriendsList() {
     getFriendRequests,
     friendRequests,
   } = useFriends();
+  const { demoUser } = useAuth();
 
   const handleSearchInput = (evt) => {
     let searchValue = evt.target.value;
@@ -165,6 +167,7 @@ export default function FriendsList() {
               {appState?.findFriendsSearchValue
                 ? filteredFriends?.map((friend, index) => (
                     <AccordionItem
+                      clientDemoUser={demoUser}
                       key={index}
                       friend={friend}
                       isMe={friend._id === currentUser?._id}
@@ -176,6 +179,7 @@ export default function FriendsList() {
                 : friends.length
                 ? friends.map((friend, index) => (
                     <AccordionItem
+                      clientDemoUser={demoUser}
                       key={index}
                       friend={friend}
                       isMe={friend._id === currentUser?._id}

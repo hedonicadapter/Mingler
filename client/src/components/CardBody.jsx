@@ -21,6 +21,7 @@ export default function CardBody({
   playerVisible,
   closePlayer,
   setFriends,
+  isWidgetHeader,
 }) {
   return (
     <motion.div layout="position" className={styles.container}>
@@ -67,21 +68,19 @@ export default function CardBody({
           </motion.div>
         )}
       </AnimatePresence>
-      <motion.div
-        animate={chatVisible ? 'show' : 'hide'}
-        initial={'hide'}
-        variants={{
-          show: { height: 'auto' },
-          hide: { height: 0 },
-        }}
-        transition={{ duration: 0.15, stiffness: 100 }}
-      >
-        <ChatBox
-          receiver={userID}
-          expanded={expanded}
-          chatVisible={chatVisible}
-        />
-      </motion.div>
+      {!isWidgetHeader && ( // have to do this bc it will render messages on top for seemingly no reason
+        <motion.div
+          animate={chatVisible ? 'show' : 'hide'}
+          initial={'hide'}
+          variants={{
+            show: { height: 'auto' },
+            hide: { height: 0 },
+          }}
+          transition={{ duration: 0.15, stiffness: 100 }}
+        >
+          <ChatBox receiver={userID} chatVisible={chatVisible} />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
