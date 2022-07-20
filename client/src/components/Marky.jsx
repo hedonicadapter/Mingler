@@ -4,7 +4,7 @@ import { BiPlanet } from 'react-icons/bi';
 import { RiWindow2Fill, RiArrowDropUpLine } from 'react-icons/ri';
 import { BsSpotify, BsYoutube } from 'react-icons/bs';
 import { CgYoutube } from 'react-icons/cg';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 import styles from './Marky.module.css';
 import colors from '../config/colors';
@@ -68,11 +68,13 @@ export default function Marky({
 
   const appState = useSelector(getApp);
 
-  const marqueeRef = useRef();
+  const marqueeRef = useRef(null);
   const { setAccessToken, setRefreshToken } = useStatus();
 
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState();
+  const [showFade, setShowFade] = useState(true);
+  const x = useMotionValue(0);
 
   useEffect(() => {
     if (marqueeRef.current) {
@@ -91,6 +93,21 @@ export default function Marky({
     YouTubeTitle,
     appState.windowWidth,
   ]);
+
+  useEffect(() => {
+    const unsub = x.onChange((latest) => {
+      let offset = -marqueeWidth + 20; // Offset by 20 so that it starts fading out before iteration end
+      if (latest <= offset) {
+        //Means the animation has come to its iteration's end (it repeats, so it's an iteration)
+
+        setShowFade(false);
+      } else {
+        setShowFade(true);
+      }
+    });
+
+    return () => unsub();
+  }, [marqueeWidth]);
 
   useEffect(() => {
     (WindowTitle && setMarkyType('Window')) ||
@@ -193,11 +210,27 @@ export default function Marky({
         }}
       >
         <motion.div
+          animate={showFade ? 'showFade' : 'hideFade'}
+          variants={{
+            showFade: {
+              opacity: 1,
+            },
+            hideFade: {
+              opacity: 0,
+            },
+          }}
+          transition={{
+            duration: 1.15,
+          }}
+          className={styles.fade}
+        />
+        <motion.div
           style={{
             width: '100%',
             zIndex: 50,
             letterSpacing: '1px',
             fontSize: '0.8em',
+            x,
           }}
           onMouseOver={() => console.log('hello')} //makes it work for some reason
           whileHover={{

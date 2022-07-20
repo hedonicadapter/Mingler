@@ -5,9 +5,16 @@
 
 .nameContainer {
   padding-bottom: 2px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding-right: 20px;
 }
 
 .text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-size: 1.3em;
   letter-spacing: 1px;
   font-family: 'Cormorant SC';

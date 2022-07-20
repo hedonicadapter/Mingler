@@ -4,6 +4,7 @@
   display: flex;
   color: var(--dark-mode-black);
   align-items: center;
+  position: relative;
 }
 
 .activityText {
@@ -16,6 +17,22 @@
 
   /* TODO: This makes some markytext cut off */
   width: 100%;
+}
+
+.fade {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  min-width: 16%;
+  z-index: 80;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0), var(--off-white));
+
+  pointer-events: none;
+}
+
+.fade:after {
+  content: '\200b';
 }
 
 .closeText {
