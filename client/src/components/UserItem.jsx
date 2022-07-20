@@ -9,6 +9,7 @@ import {
   profilePictureToBlob,
   profilePictureToJSXImg,
 } from '../helpers/fileManager';
+import { notify } from './reusables/notifications';
 
 const AcceptRejectButtons = ({ error, handleAccept, handleReject }) => {
   return (
@@ -125,9 +126,12 @@ export default function UserItem({
     }
   }, [user]);
 
-  const errorCallback = ({ success, error }) => {
+  const errorCallback = ({ success, demo, error }) => {
     if (success) {
       setError(null);
+      if (demo) {
+        notify('Demo', 'As a demo user, your reality is just a simulation.');
+      }
     }
     if (error) {
       setError(error);

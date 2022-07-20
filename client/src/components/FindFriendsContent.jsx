@@ -123,6 +123,12 @@ export default function FindFriendsContent() {
   };
 
   const handleSendRequestButton = async (toID) => {
+    if (currentUser?.demoUser) {
+      setSentFriendRequests((oldValue) => [...oldValue, toID]);
+
+      return { success: true, demo: true };
+    }
+
     return await DAO.sendFriendRequest(
       toID,
       currentUser._id,
@@ -132,6 +138,7 @@ export default function FindFriendsContent() {
         console.log('send request ', res);
         if (res?.data?.success) {
           setSentFriendRequests((oldValue) => [...oldValue, toID]);
+
           ipcRenderer.send('sendfriendrequest:fromrenderer', toID);
 
           return { success: true };
@@ -141,6 +148,16 @@ export default function FindFriendsContent() {
   };
 
   const handleCancelRequestButton = async (toID) => {
+    if (currentUser?.demoUser) {
+      const updatedRequests = sentFriendRequests.filter(
+        (item) => item !== toID
+      );
+
+      setSentFriendRequests(updatedRequests);
+
+      return { success: true, demo: true };
+    }
+
     return await DAO.cancelFriendRequest(
       toID,
       currentUser._id,
@@ -153,6 +170,7 @@ export default function FindFriendsContent() {
           );
 
           setSentFriendRequests(updatedRequests);
+
           ipcRenderer.send('cancelfriendrequest:fromrenderer', toID);
 
           return { success: true };

@@ -384,6 +384,7 @@ export function FriendsProvider({ children }) {
     filteredFriends,
     friendRequests,
     getFriendRequests,
+    setFriendRequests,
     getConversations,
     deleteFriend,
     conversations,

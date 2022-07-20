@@ -14,6 +14,7 @@ const generalPadding = 12;
 
 export default function FriendRequestsAccordion({
   friendRequests,
+  setFriendRequests,
   getFriends,
   getConversations,
   getFriendRequests,
@@ -39,6 +40,14 @@ export default function FriendRequestsAccordion({
   };
 
   const handleAcceptRequestButton = async (fromID) => {
+    if (currentUser?.demoUser) {
+      const updatedRequests = friendRequests.filter((item) => item !== fromID);
+
+      setFriendRequests(updatedRequests);
+
+      return { success: true, demo: true };
+    }
+
     return await DAO.acceptFriendRequest(
       fromID,
       currentUser._id,
@@ -50,7 +59,7 @@ export default function FriendRequestsAccordion({
           getFriends();
           getConversations();
           getFriendRequests();
-          acceptFriendRequest(fromID);
+          acceptFriendRequest(fromID); // socket.emit
           return { success: true };
         }
       })
@@ -58,6 +67,14 @@ export default function FriendRequestsAccordion({
   };
 
   const handleRejectRequestButton = async (toID) => {
+    if (currentUser?.demoUser) {
+      const updatedRequests = friendRequests.filter((item) => item !== toID);
+
+      setFriendRequests(updatedRequests);
+
+      return { success: true, demo: true };
+    }
+
     return await DAO.cancelFriendRequest(
       currentUser._id,
       toID,

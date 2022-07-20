@@ -80,6 +80,7 @@ export default function FriendsList() {
     findFriends,
     filteredFriends,
     getFriendRequests,
+    setFriendRequests,
     friendRequests,
   } = useFriends();
   const { demoUser } = useAuth();
@@ -153,6 +154,7 @@ export default function FriendsList() {
               friendRequests={friendRequests}
               getFriends={getFriends} // To refresh friends list after accepting a friend request
               getFriendRequests={getFriendRequests} // Same thing here
+              setFriendRequests={setFriendRequests}
               // cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
               acceptFriendRequest={acceptFriendRequest}
             />
