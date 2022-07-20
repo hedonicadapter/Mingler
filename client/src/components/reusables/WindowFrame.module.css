@@ -6,6 +6,7 @@
 
 .frameButtonsContainer,
 .appTitleStyle {
+  white-space: nowrap;
   flex: 1;
 }
 
@@ -23,6 +24,7 @@
 }
 
 .windowTitleStyle {
+  white-space: nowrap;
   letter-spacing: 1px;
   font-size: 0.6em;
   color: var(--dark-mode-light-black);

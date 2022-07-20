@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Avatar from 'react-avatar';
+import Avatar, { ConfigProvider } from 'react-avatar';
 
 import styles from './UserItem.module.css';
 import colors from '../config/colors';
@@ -70,7 +70,7 @@ const AddButton = ({ error, handleSendRequest, accept, hovered }) => {
       }}
       animate={hovered ? 'true' : 'false'}
       transition={{ duration: 0.15 }}
-      className={styles.buttonsContainer}
+      className={styles.addButtonContainer}
     >
       <motion.div
         whileHover={{
@@ -163,70 +163,90 @@ export default function UserItem({
   // const alternatingColor = [colors.offWhiteHovered, colors.offWhite];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="clickable"
-      // style={{ backgroundColor: colors.offWhite }}
+    <ConfigProvider
+      colors={[
+        colors.coffeeBeige,
+        colors.coffeeBlue,
+        colors.coffeeBrown,
+        colors.coffeeGreen,
+        colors.coffeeOrange,
+        colors.coffeePink,
+        colors.coffeeRed,
+      ]}
     >
-      <header
-        style={
-          {
-            // backgroundColor: alternatingColor[index % alternatingColor.length],
-          }
-        }
-        className={styles.header}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="clickable"
+        // style={{ backgroundColor: colors.offWhite }}
       >
-        <motion.div className={styles.container}>
-          <div className={styles.nameAndActivityContainer}>
-            <Avatar round name={user.username} size="30" src={pic} />
-            <div className={styles.text}>{user.username}</div>
-          </div>
-          {alreadyFriends ? (
-            <></>
-          ) : !requestSent ? (
-            accept ? (
-              <AcceptRejectButtons
-                error={error}
-                handleAccept={handleAccept}
-                handleReject={handleReject}
+        <header
+          style={
+            {
+              // backgroundColor: alternatingColor[index % alternatingColor.length],
+            }
+          }
+          className={styles.header}
+        >
+          <motion.div className={styles.container}>
+            <div className={styles.nameAndActivityContainer}>
+              <Avatar
+                className="avatar"
+                round
+                name={user.username}
+                size="30"
+                src={pic}
               />
-            ) : (
-              <AddButton
-                error={error}
-                hovered={hovered}
-                accept={accept}
-                handleSendRequest={handleSendRequest}
-              />
-            )
-          ) : (
-            <div onClick={() => handleCancelRequest()}>
-              {error ? (
-                <div className={styles.errorStyle}>{error}</div>
+              <div className={styles.text}>{user.username}</div>
+            </div>
+            <div className={styles.buttonsContainer}>
+              {alreadyFriends ? (
+                <></>
+              ) : !requestSent ? (
+                accept ? (
+                  <AcceptRejectButtons
+                    error={error}
+                    handleAccept={handleAccept}
+                    handleReject={handleReject}
+                  />
+                ) : (
+                  <AddButton
+                    error={error}
+                    hovered={hovered}
+                    accept={accept}
+                    handleSendRequest={handleSendRequest}
+                  />
+                )
               ) : (
-                <motion.div
-                  whileHover={{
-                    borderTopColor: colors.coffeeRed,
-                    color: colors.coffeeRed,
-                    transition: { duration: 0.1 },
-                  }}
-                  whileTap={animations.whileTap}
-                  style={{
-                    borderTop: '1px solid ' + colors.offWhitePressed2,
-                    margin: 'auto',
-                  }}
-                  className={styles.cancelRequestButtonStyle}
-                >
-                  cancel request
-                </motion.div>
+                <div onClick={() => handleCancelRequest()}>
+                  {error ? (
+                    <div className={styles.errorStyle}>{error}</div>
+                  ) : (
+                    <motion.div
+                      whileHover={{
+                        borderTopColor: colors.coffeeRed,
+                        color: colors.coffeeRed,
+                        transition: { duration: 0.1 },
+                      }}
+                      whileTap={animations.whileTap}
+                      style={{
+                        borderTop: '1px solid ' + colors.offWhitePressed2,
+                        margin: 'auto',
+                      }}
+                      className={styles.cancelRequestButtonStyle}
+                    >
+                      cancel request
+                    </motion.div>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </motion.div>
-      </header>
-    </motion.div>
+          </motion.div>
+        </header>
+      </motion.div>
+    </ConfigProvider>
   );
 }

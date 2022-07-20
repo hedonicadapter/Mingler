@@ -199,6 +199,7 @@ const AccountSettingsContent = ({
             />
 
             <Avatar
+              className="avatar"
               round
               name={username}
               size="58"

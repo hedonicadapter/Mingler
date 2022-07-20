@@ -15,6 +15,11 @@
 }
 
 .buttonsContainer {
+  padding-left: 16px;
+  white-space: nowrap;
+}
+
+.addButtonContainer {
   padding-right: 6px;
 }
 

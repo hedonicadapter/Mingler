@@ -12,12 +12,16 @@
   letter-spacing: 1px;
 
   transition: opacity 0.15s ease;
+  width: 100%;
 
   margin: 15px;
   margin-left: 20px;
-  margin-right: 20px;
+  margin-right: 16px;
   margin-bottom: 18px;
+  flex: 3;
+  box-sizing: border-box;
 }
+
 .searchInputStyle::placeholder {
   opacity: 0.7;
 }
@@ -27,11 +31,24 @@
 }
 
 .button {
+  flex: 1;
   font-size: 0.9em;
   letter-spacing: 1px;
   cursor: pointer;
   background-color: transparent;
   color: var(--dark-mode-black);
+}
+
+.findWhatever {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+.whatever {
+  min-width: 0;
+  max-width: 80px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .toolTip {

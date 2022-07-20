@@ -23,6 +23,7 @@ import useDebounce from '../helpers/useDebounce';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
 import { useAuth } from '../contexts/AuthContext';
+import { ConfigProvider } from 'react-avatar';
 
 export const EmptySpaceFiller = ({}) => {
   const dispatch = useDispatch();
@@ -135,76 +136,90 @@ export default function FriendsList() {
           </motion.div>
         )}
       </AnimatePresence>
-      <div
-        onContextMenu={() => ipcRenderer.send('context-menu')}
-        className={styles.container}
-        spellCheck="false"
+      <ConfigProvider
+        colors={[
+          colors.coffeeBeige,
+          colors.coffeeBlue,
+          colors.coffeeBrown,
+          colors.coffeeGreen,
+          colors.coffeeOrange,
+          colors.coffeePink,
+          colors.coffeeRed,
+        ]}
       >
-        <div style={{ flex: '0 1 auto' }}>
-          <AccordionItem
-            username={currentUser?.username}
-            friend={friends?.find((friend) => friend._id === currentUser?._id)}
-            isWidgetHeader={true}
-            cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
-          />
-
-          {friendRequests?.length > 0 && (
-            <FriendRequestsAccordion
-              getConversations={getConversations}
-              friendRequests={friendRequests}
-              getFriends={getFriends} // To refresh friends list after accepting a friend request
-              getFriendRequests={getFriendRequests} // Same thing here
-              setFriendRequests={setFriendRequests}
-              // cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
-              acceptFriendRequest={acceptFriendRequest}
-            />
-          )}
-        </div>
         <div
-          className={styles.friendsList}
-          style={{ overflowY: 'overlay', scrollbarGutter: 'stable' }}
+          onContextMenu={() => ipcRenderer.send('context-menu')}
+          className={styles.container}
+          spellCheck="false"
         >
-          <AnimateSharedLayout>
-            <motion.div layout="position">
-              {appState?.findFriendsSearchValue
-                ? filteredFriends?.map((friend, index) => (
-                    <AccordionItem
-                      clientDemoUser={demoUser}
-                      key={index}
-                      friend={friend}
-                      isMe={friend._id === currentUser?._id}
-                      cardExpandedMasterToggle={
-                        appState?.cardExpandedMasterToggle
-                      }
-                    />
-                  ))
-                : friends.length
-                ? friends.map((friend, index) => (
-                    <AccordionItem
-                      clientDemoUser={demoUser}
-                      key={index}
-                      friend={friend}
-                      isMe={friend._id === currentUser?._id}
-                      cardExpandedMasterToggle={
-                        appState?.cardExpandedMasterToggle
-                      }
-                    />
-                  ))
-                : null}
-            </motion.div>
-          </AnimateSharedLayout>
-        </div>
+          <div style={{ flex: '0 1 auto' }}>
+            <AccordionItem
+              username={currentUser?.username}
+              friend={friends?.find(
+                (friend) => friend._id === currentUser?._id
+              )}
+              isWidgetHeader={true}
+              cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
+            />
 
-        <EmptySpaceFiller />
-        <div style={{ flex: '0 1 40px' }}>
-          <WidgetFooter
-            appVisible={appState?.appVisible}
-            handleSearchInput={handleSearchInput}
-            searchValue={appState?.findFriendsSearchValue}
-            friends={friends}
-          />
+            {friendRequests?.length > 0 && (
+              <FriendRequestsAccordion
+                getConversations={getConversations}
+                friendRequests={friendRequests}
+                getFriends={getFriends} // To refresh friends list after accepting a friend request
+                getFriendRequests={getFriendRequests} // Same thing here
+                setFriendRequests={setFriendRequests}
+                // cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
+                acceptFriendRequest={acceptFriendRequest}
+              />
+            )}
+          </div>
+          <div
+            className={styles.friendsList}
+            style={{ overflowY: 'overlay', scrollbarGutter: 'stable' }}
+          >
+            <AnimateSharedLayout>
+              <motion.div layout="position">
+                {appState?.findFriendsSearchValue
+                  ? filteredFriends?.map((friend, index) => (
+                      <AccordionItem
+                        clientDemoUser={demoUser}
+                        key={index}
+                        friend={friend}
+                        isMe={friend._id === currentUser?._id}
+                        cardExpandedMasterToggle={
+                          appState?.cardExpandedMasterToggle
+                        }
+                      />
+                    ))
+                  : friends.length
+                  ? friends.map((friend, index) => (
+                      <AccordionItem
+                        clientDemoUser={demoUser}
+                        key={index}
+                        friend={friend}
+                        isMe={friend._id === currentUser?._id}
+                        cardExpandedMasterToggle={
+                          appState?.cardExpandedMasterToggle
+                        }
+                      />
+                    ))
+                  : null}
+              </motion.div>
+            </AnimateSharedLayout>
+          </div>
+
+          <EmptySpaceFiller />
+          <div style={{ flex: '0 1 40px' }}>
+            <WidgetFooter
+              appVisible={appState?.appVisible}
+              handleSearchInput={handleSearchInput}
+              searchValue={appState?.findFriendsSearchValue}
+              friends={friends}
+            />
+          </div>
         </div>
-      </div>
+      </ConfigProvider>
       <svg
         id="svg"
         xmlns="http://www.w3.org/2000/svg"

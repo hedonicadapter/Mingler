@@ -53,6 +53,7 @@ const AvatarContainer = ({
         />
       )}
       <Avatar
+        className="avatar"
         name={name}
         size={isWidgetHeader ? '68' : '58'}
         src={profilePictureToJSXImg(profilePicture, demoUser)}

@@ -70,13 +70,18 @@ export default function WidgetFooter({
         <AnimatePresence>
           {searchValue && (
             <motion.div
-              style={{ position: 'absolute', right: 20, bottom: 18 }}
+              style={{
+                position: 'absolute',
+                right: 20,
+                bottom: 18,
+              }}
+              className={styles.findWhatever}
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.7 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35 }}
             >
-              find '{searchValue}'
+              <div className={styles.whatever}>find '{searchValue}'</div>
             </motion.div>
           )}
         </AnimatePresence>

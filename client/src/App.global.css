@@ -68,6 +68,11 @@ body {
   cursor: default;
 }
 
+/* .avatar { TODO: name initials shouldnt overflow, but this changes shape of underlying avatar if name has too many initials
+  overflow: hidden;
+  color: black !important;
+} */
+
 input,
 select,
 textarea,
