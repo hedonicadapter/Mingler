@@ -103,12 +103,14 @@ export function BrowserWindowProvider({ children }) {
   const settingsWindowFocusHandler = () => {
     dispatch(settingsFocusedTrue());
     electron.remote.getCurrentWindow().moveTop();
+    ipcRenderer.send('settingsfocused:fromrenderer');
   };
 
   const settingsWindowBlurHandler = () => {
     dispatch(settingsFocusedFalse());
     if (!electron.remote.getCurrentWindow().isFocused()) {
       dispatch(appVisibleFalse());
+      // ipcRenderer.send('settingsblurred:fromrenderer');
     }
   };
 

@@ -386,7 +386,8 @@ const createWindow = async () => {
     }
 
     mainWindow.on('blur', () => {
-      mainWindow?.setAlwaysOnTop(true);
+      // mainWindow?.setAlwaysOnTop(true);
+      mainWindow?.showInactive();
       if (mainWindow.webContents.isDevToolsFocused()) {
         return; //ignore
       } else {
@@ -398,6 +399,7 @@ const createWindow = async () => {
         // const listenerTimeout = setTimeout(() => fallbackBlur(), 200);
 
         ipcMain.once('animationComplete', () => {
+          console.log('animation complete');
           hideWindow();
           // clearTimeout(listenerTimeout);
         });
@@ -594,6 +596,17 @@ const createWindow = async () => {
     // });
   });
 
+  ipcMain.on('settingsfocused:fromrenderer', () => {
+    if (!store?.getState()?.app?.appVisible) {
+      toggleWidget(true);
+    }
+  });
+  ipcMain.on('settingsblurred:fromrenderer', () => {
+    toggleWidget();
+    mainWindow?.setAlwaysOnTop(false);
+    hideWindow();
+  });
+
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
@@ -639,8 +652,13 @@ const hideWindow = () => {
   mainWindow?.blur();
 };
 
-const showWindow = () => {
-  mainWindow?.show();
+const showWindow = (noFocus = false) => {
+  if (noFocus) {
+    mainWindow?.showInactive();
+  } else {
+    mainWindow?.show();
+  }
+
   setTimeout(() => {
     mainWindow?.setOpacity(1);
   }, 150);
@@ -651,7 +669,7 @@ const showWindow = () => {
   });
 };
 
-const toggleWidget = () => {
+const toggleWidget = (noFocus = false) => {
   let appVisible = store?.getState()?.app?.appVisible;
   ipcMain.removeAllListeners('animationComplete');
   // const listenerTimeout = setTimeout(
@@ -670,7 +688,7 @@ const toggleWidget = () => {
       // clearTimeout(listenerTimeout);
     });
   } else if (!appVisible) {
-    showWindow();
+    showWindow(noFocus);
   }
 };
 

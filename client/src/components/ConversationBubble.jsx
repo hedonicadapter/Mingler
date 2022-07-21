@@ -22,7 +22,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
     >
       {sentByMe ? (
         <>
-          <div className={styles.sentTime}>
+          <div className={styles.sentTime} style={{ paddingLeft: 2 }}>
             {new Date(sent).toLocaleTimeString('en-US', {
               timeStyle: 'short',
             })}
@@ -30,9 +30,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
           <div
             className={styles.bubble}
             style={{
-              backgroundColor: sentByMe
-                ? colors.darkmodeLightBlack
-                : colors.coffeeBrown,
+              backgroundColor: colors.darkmodeLightBlack,
             }}
           >
             <p className={styles.conversationText}>{message}</p>
@@ -43,14 +41,15 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
           <div
             className={styles.bubble}
             style={{
-              backgroundColor: sentByMe
-                ? colors.darkmodeLightBlack
-                : colors.coffeeBrown,
+              backgroundColor: colors.coffeeBrown,
             }}
           >
             <p className={styles.conversationText}>{message}</p>
           </div>
-          <div className={styles.sentTime} style={{ padding: 0 }}>
+          <div
+            className={styles.sentTime}
+            style={{ padding: 0, paddingRight: 12 }}
+          >
             {new Date(sent).toLocaleTimeString('en-US', {
               timeStyle: 'short',
             })}

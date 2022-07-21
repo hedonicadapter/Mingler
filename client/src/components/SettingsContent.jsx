@@ -799,13 +799,13 @@ export default function SettingsContent() {
                     setExpanded(index);
                     if (index === 0)
                       generalSettingsContentRef.current.parentNode.scrollTop =
-                        generalSettingsContentRef.current?.offsetTop + 50;
+                        generalSettingsContentRef.current?.offsetTop - 80;
                     if (index === 1)
                       accountSettingsContentRef.current.parentNode.scrollTop =
-                        accountSettingsContentRef.current?.offsetTop + 50;
+                        accountSettingsContentRef.current?.offsetTop - 80;
                     if (index === 2)
                       setupSettingsContentRef.current.parentNode.scrollTop =
-                        setupSettingsContentRef.current?.offsetTop + 50;
+                        setupSettingsContentRef.current?.offsetTop - 80;
                   }}
                 >
                   <AccordionSetting

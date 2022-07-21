@@ -29,7 +29,7 @@ export const appSlice = createSlice({
       state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      // if (state.settingsOpen) return;
+      // if (state.settingsFocused) return;
       state.appVisible = false;
     },
     toggleCardExpandedMasterToggle: (state) => {
@@ -49,7 +49,7 @@ export const appSlice = createSlice({
     },
     settingsFocusedTrue: (state) => {
       state.settingsFocused = true;
-      if (!state.appVisible) state.appVisible = true;
+      // if (!state.appVisible) state.appVisible = true;
     },
     settingsFocusedFalse: (state) => {
       state.settingsFocused = false;
@@ -69,7 +69,7 @@ export const appSlice = createSlice({
       state.appVisible = true;
     },
     appVisibleFalse: (state) => {
-      // if (state.settingsOpen) return;
+      // if (state.settingsFocused) return;
       state.appVisible = false;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
