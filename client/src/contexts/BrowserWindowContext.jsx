@@ -114,9 +114,17 @@ export function BrowserWindowProvider({ children }) {
     }
   };
 
-  const settingsWindowCloseHandler = () => {
-    dispatch(settingsOpenFalse());
-    setSettingsWindow(null);
+  const hideWindow = (window) => {
+    // window?.setOpacity(0);
+    window?.setSkipTaskbar(true);
+    if (process.platform == 'win32') window?.minimize();
+    else if (process.platform == 'darwin') app?.hide();
+    else window?.hide();
+    // window?.blur();
+  };
+
+  const settingsWindowCloseHandler = (evt) => {
+    hideWindow(settingsWindow);
   };
   const settingsWindowClosedHandler = () => {
     // setSettingsWindow(new BrowserWindow(settingsWindowConfig));
@@ -124,8 +132,7 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const findFriendsWindowCloseHandler = () => {
-    dispatch(findFriendsOpenFalse());
-    setFindFriendsWindow(null);
+    hideWindow(findFriendsWindow);
   };
   const findFriendsWindowClosedHandler = () => {
     // setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
@@ -147,12 +154,23 @@ export function BrowserWindowProvider({ children }) {
   useEffect(() => {
     ipcRenderer.once('exit:frommain', () => {
       if (!settingsWindow.isDestroyed()) {
+        settingsWindow.removeListener('close', settingsWindowCloseHandler);
+        settingsWindow.destroy();
         settingsWindow.setClosable(true);
-        settingsWindow?.close();
+        settingsWindow.close();
+        dispatch(settingsOpenFalse());
+        setSettingsWindow(null);
       }
       if (!findFriendsWindow.isDestroyed()) {
+        findFriendsWindow.removeListener(
+          'close',
+          findFriendsWindowCloseHandler
+        );
+        findFriendsWindow.destroy();
         findFriendsWindow.setClosable(true);
-        findFriendsWindow?.close();
+        findFriendsWindow.close();
+        dispatch(findFriendsOpenFalse());
+        setFindFriendsWindow(null);
       }
       if (!connectSpotifyWindow.isDestroyed()) {
         connectSpotifyWindow?.close();
@@ -263,12 +281,16 @@ export function BrowserWindowProvider({ children }) {
   const toggleSettings = (page = 'General', quickSetting = false) => {
     dispatch(setSettingsContentMain(page));
 
+    settingsWindow?.setSkipTaskbar(false);
+
     if (!appState.settingsOpen) {
       settingsWindow.show();
       dispatch(settingsOpenTrue());
     } else if (appState.settingsOpen && !settingsWindow?.isVisible()) {
       settingsWindow.show();
-    } else settingsWindow.focus();
+    } else {
+      settingsWindow.focus();
+    }
 
     if (!quickSetting) return;
     settingsWindow.webContents.send('quickSetting', quickSetting);
@@ -286,6 +308,8 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const toggleFindFriends = () => {
+    findFriendsWindow?.setSkipTaskbar(false);
+
     if (!appState.findFriendsOpen) {
       findFriendsWindow.show();
       dispatch(findFriendsOpenTrue());

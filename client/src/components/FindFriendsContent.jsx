@@ -29,6 +29,9 @@ const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
 
 export default function FindFriendsContent() {
+  window.onbeforeunload = (e) => {
+    e.returnValue = false; // Cancels close, true unclosable
+  };
   makeClickthrough();
 
   const [friends, setFriends] = useState([]);
@@ -68,6 +71,12 @@ export default function FindFriendsContent() {
     ipcRenderer.on('friends', setFriendsFromOtherWindowHandler);
 
     ipcRenderer.once('initialValue', findFriendsInitialSearchValueHandler);
+
+    ipcRenderer.once('exit:frommain', () => {
+      window.onbeforeunload = (e) => {
+        e.returnValue = undefined;
+      };
+    });
 
     return () => {
       ipcRenderer.removeAllListeners(

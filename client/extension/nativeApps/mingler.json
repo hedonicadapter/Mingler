@@ -1,1 +1,7 @@
-{"name":"com.samba.minglerhost","description":"Mingler chrome extension host","path":"minglerchromiumhost.exe","type":"stdio","allowed_origins":["chrome-extension://test/"]}
+{
+  "name": "com.samba.minglerhost",
+  "description": "This is for production mode debugging, as this is where the mingler.json path points to in development. The real json file is somewhere else.",
+  "path": "minglerchromiumhost.exe",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://test/"]
+}

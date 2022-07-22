@@ -147,6 +147,8 @@ export function authAndy({ children }) {
   };
 
   const signInDemoUser = () => {
+    if (!demoUser?._id) return notify("Couldn't sign in demo user.");
+
     dispatch(setCurrentUserMain(demoUser));
     ipcRenderer.send('currentUser:signedIn', demoUser._id); //for the socket in main
 

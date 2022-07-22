@@ -556,6 +556,8 @@ const createWindow = async () => {
 
       ipcMain.on('exit:frommenubutton', () => {
         mainWindow.webContents.send('exit:frommain');
+
+        setTimeout(() => mainWindow?.destroy(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         setTrayContextMenu('signedIn');

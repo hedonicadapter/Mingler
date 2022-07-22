@@ -393,6 +393,18 @@ const MockBrowserWindow = ({ browser }) => {
 };
 
 const SetupSettingsContent = ({ browser, storedID }) => {
+  window.onbeforeunload = (e) => {
+    e.returnValue = false; // Cancels close, true unclosable
+  };
+
+  useEffect(() => {
+    ipcRenderer.once('exit:frommain', () => {
+      window.onbeforeunload = (e) => {
+        e.returnValue = undefined;
+      };
+    });
+  }, []);
+
   const [extensionID, setExtensionID] = useState(storedID); // TODO: get from redux
   const [extensionIDSaved, setExtensionIDSaved] = useState(false);
   const [extensionIDError, setExtensionIDError] = useState(false);
