@@ -4,7 +4,7 @@ import { BiPlanet } from 'react-icons/bi';
 import { RiWindow2Fill, RiArrowDropUpLine } from 'react-icons/ri';
 import { BsSpotify, BsYoutube } from 'react-icons/bs';
 import { CgYoutube } from 'react-icons/cg';
-import { motion, useMotionValue } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
 
 import styles from './Marky.module.css';
 import colors from '../config/colors';
@@ -209,21 +209,63 @@ export default function Marky({
           color: expanded ? colors.darkmodeBlack : colors.darkmodeLightBlack,
         }}
       >
-        <motion.div
-          animate={showFade ? 'showFade' : 'hideFade'}
-          variants={{
-            showFade: {
-              opacity: 1,
-            },
-            hideFade: {
-              opacity: 0,
-            },
-          }}
-          transition={{
-            duration: 1.15,
-          }}
-          className={styles.fade}
-        />
+        <AnimatePresence>
+          {expanded ? (
+            <motion.div
+              key={0}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <motion.div
+                animate={showFade ? 'showFade' : 'hideFade'}
+                variants={{
+                  showFade: {
+                    opacity: 1,
+                  },
+                  hideFade: {
+                    opacity: 0,
+                  },
+                }}
+                transition={{
+                  duration: 1.15,
+                }}
+                className={styles.fade}
+                style={{
+                  background: `linear-gradient(to right, rgba(0, 0, 0, 0), ${colors.offWhiteHovered})`,
+                }}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={1}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <motion.div
+                animate={showFade ? 'showFade' : 'hideFade'}
+                variants={{
+                  showFade: {
+                    opacity: 1,
+                  },
+                  hideFade: {
+                    opacity: 0,
+                  },
+                }}
+                transition={{
+                  duration: 1.15,
+                }}
+                className={styles.fade}
+                style={{
+                  background: `linear-gradient(to right, rgba(0, 0, 0, 0), ${colors.offWhite})`,
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <motion.div
           style={{
             width: '100%',
