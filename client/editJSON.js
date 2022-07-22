@@ -14,6 +14,7 @@ export const setExtensionID = async (file, newID) => {
       return body;
     })
     .catch((e) => {
+      console.error(e);
       return false;
     });
 };

@@ -13,8 +13,13 @@ export default function WidgetFooter({
   searchValue,
   friends,
 }) {
-  const extensionID = useSelector((state) => state.extensionID);
+  const extensionID = useSelector((state) => state?.settings?.extensionID);
   const { toggleFindFriends, toggleSettings } = useBrowserWindow();
+
+  useEffect(() => {
+    // if (extensionID) ReactTooltip.rebuild();
+    console.log('extensionID ', extensionID);
+  }, [extensionID]);
 
   const searchInputRef = useRef(null);
   const settingsButtonRef = useRef(null);
@@ -101,15 +106,15 @@ export default function WidgetFooter({
             </motion.div>
           )}
         </AnimatePresence>
-        {!extensionID && (
-          <ReactTooltip
-            id="completeYourSetup"
-            place="left"
-            type="dark"
-            effect="solid"
-            className={styles.toolTip}
-          />
-        )}
+        <ReactTooltip
+          id="completeYourSetup"
+          place="left"
+          type="dark"
+          effect="solid"
+          disable={extensionID ? true : false}
+          className={styles.toolTip}
+          style={{ display: 'none' }}
+        />
       </motion.div>
     </footer>
   );

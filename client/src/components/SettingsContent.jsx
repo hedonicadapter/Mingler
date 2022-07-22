@@ -24,6 +24,7 @@ import {
   setEmailMain,
   setSettingsContentMain,
   setBrowserMain,
+  setExtensionIDMain,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
@@ -396,6 +397,8 @@ const SetupSettingsContent = ({ browser, storedID }) => {
   const [extensionIDSaved, setExtensionIDSaved] = useState(false);
   const [extensionIDError, setExtensionIDError] = useState(false);
 
+  const dispatch = useDispatch();
+
   const installationPath = path.resolve(
     remote.app.getAppPath(),
     '..',
@@ -422,6 +425,10 @@ const SetupSettingsContent = ({ browser, storedID }) => {
     setExtensionID(evt.target.value);
   };
 
+  const handleSaveExtensionIDKeyUp = (evt) => {
+    if (evt.key === 'Enter') handleSaveExtensionIDInput();
+  };
+
   const handleSaveExtensionIDInput = () => {
     if (
       !extensionID ||
@@ -434,7 +441,9 @@ const SetupSettingsContent = ({ browser, storedID }) => {
     ipcRenderer
       .invoke('setextensionid:fromrenderer', validateExtensionID())
       .then((res) => {
-        if (res) return setExtensionIDSaved(true);
+        if (res) {
+          return setExtensionIDSaved(true);
+        }
         setExtensionIDError(true);
         console.error(res);
       });
@@ -544,6 +553,7 @@ const SetupSettingsContent = ({ browser, storedID }) => {
             <motion.div
               className={styles.extensionIDSaveButton}
               onClick={handleSaveExtensionIDInput}
+              onKeyUp={handleSaveExtensionIDKeyUp}
               whileHover={{
                 ...animations.whileHover,
                 cursor:

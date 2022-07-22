@@ -1,0 +1,1 @@
+{"name":"com.samba.minglerhost","description":"Mingler chrome extension host","path":"minglerchromiumhost.exe","type":"stdio","allowed_origins":["chrome-extension://test/"]}
