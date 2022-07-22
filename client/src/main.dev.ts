@@ -662,7 +662,7 @@ const hideWindow = () => {
   if (process.platform == 'win32') mainWindow?.minimize();
   else if (process.platform == 'darwin') app?.hide();
   else mainWindow?.hide();
-  mainWindow?.blur();
+  // mainWindow?.blur();
 };
 
 const showWindow = (noFocus = false) => {
