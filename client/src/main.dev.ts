@@ -129,6 +129,12 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+const answerProcess = (process) => {
+  if (!process.stdin) return;
+
+  process.stdin.write('yo\n');
+};
+
 const initActiveWindowListenerProcess = () => {
   try {
     windowProcess?.exit();
@@ -137,8 +143,11 @@ const initActiveWindowListenerProcess = () => {
   }
 
   windowProcess = execFile(windowListenerScript);
+  // windowProcess = execFile('python', [windowListenerScript]);
 
   windowProcess.stdout.on('data', function (data) {
+    answerProcess(windowProcess);
+
     let windowInfo = data.toString().trim();
 
     console.log('windowInfo ', windowInfo);
@@ -181,13 +190,17 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   if (!spotifyAccessToken) return;
 
   trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
+  // trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
   trackProcess.on('exit', () =>
     console.warn('trackprocess exited ', trackProcess)
   );
 
   trackProcess.stdout.on('data', function (data) {
+    answerProcess(trackProcess);
+
     let processedData = data.toString().trim();
+    console.log('processedData ', processedData);
     if (processedData === '401') {
       trackProcess.stdin.end();
       trackProcess.stdout.destroy();

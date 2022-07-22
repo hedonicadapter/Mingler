@@ -109,6 +109,11 @@
   padding-left: 5px;
   transition: background-color 0.15s ease;
   font-family: inherit;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+}
+.genericInput::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 .genericInput:hover,
 .genericInput:focus {

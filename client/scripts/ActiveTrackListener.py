@@ -1,3 +1,4 @@
+from operator import truediv
 import sys
 from threading import Timer
 import requests
@@ -38,10 +39,37 @@ def get_current_track(access_token):
         }
 
         return current_track_info
+
+def exit_script():
+    sys.exit()
+
+t = None
+def new_timer():
+    global t
+    t = Timer(5, exit_script)
+
+def get_from_app():
+    boolin = True
+
+    if t:
+        if t.is_alive():
+            t.cancel()
     
+    new_timer()
+    t.start()
+    
+    while boolin:
+        line = sys.stdin.readline()
+        if line: 
+            t.cancel()
+            boolin = False
+
 def send_to_app(data):
     print(data)
     sys.stdout.flush()
+    get_from_app()
+
+            
 
 def main():
     previous_track_id = None

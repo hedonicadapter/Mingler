@@ -3,6 +3,7 @@ import time
 import ctypes
 import ctypes.wintypes
 import threading
+from threading import Timer
 
 
 class ObservableWindowChange(object):
@@ -113,10 +114,35 @@ class WindowChangeEventListener(object):
         ole32.CoUninitialize()
 
 
+def exit_script():
+        raise KeyboardInterrupt
+
+exit_timer = None
+def new_timer():
+    global exit_timer
+    exit_timer = Timer(5, exit_script)
+
+def get_from_app():
+    boolin = True
+
+    if exit_timer:
+        if exit_timer.is_alive():
+            exit_timer.cancel()
+    
+    new_timer()
+    exit_timer.start()
+    
+    while boolin:
+        line = sys.stdin.readline()
+        if line: 
+            exit_timer.cancel()
+            boolin = False
+
 class WindowObserver(IWindowChangeObserver):
     def notify(self, win_title):
         print(win_title)
         sys.stdout.flush()
+        get_from_app()
 
 def run():
     # Create an observable and an observer observing it

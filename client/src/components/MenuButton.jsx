@@ -5,12 +5,14 @@ import styles from './MenuButton.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import colors from '../config/colors';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
+import { appVisibleTrue } from '../mainState/features/appSlice';
 const ipcRenderer = require('electron').ipcRenderer;
 
 export default function MenuButton() {
   const { signOut, signedIn } = useAuth();
+  const dispatch = useDispatch();
 
   const currentUser = useSelector((state) => getCurrentUser(state));
   const [menuVisibility, setMenuVisibility] = useState(false);
@@ -27,6 +29,7 @@ export default function MenuButton() {
   };
 
   const handleSignoutButton = async () => {
+    dispatch(appVisibleTrue());
     const dialogueResponse = await ipcRenderer.invoke(
       'showdialog:fromrenderer',
       currentUser.guest // true or false
