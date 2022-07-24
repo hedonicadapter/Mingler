@@ -50,6 +50,7 @@
 /* .settingsContentContainer {
 } */
 
+/* Account content */
 .profilePictureFormContainer {
   background-color: var(--off-white-pressed);
   border-radius: 2px;
@@ -126,6 +127,34 @@
   flex: 1;
   height: auto;
 }
+
+/* Widget content */
+.miniWidget::after {
+  content: '';
+}
+.keyboardSettingsForm {
+  background-color: var(--off-white-pressed);
+  color: var(--dark-mode-light-black);
+
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+.keyboardSettingsForm header {
+  padding: 2px;
+  padding-bottom: 16px;
+  font-size: 1em;
+}
+.keyboardSettingsForm footer {
+  font-size: 0.9em;
+}
+.keyboardContainer {
+  z-index: 50;
+}
+
 /* Set-up content */
 .setupSettingsContainer {
   height: 590px;

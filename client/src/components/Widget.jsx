@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import styles from './Widget.module.css';
 
@@ -20,6 +20,17 @@ const Border = () => {
 };
 
 export default function Widget() {
+  window.onbeforeunload = (e) => {
+    e.returnValue = false; // Cancels close, true unclosable
+  };
+
+  useEffect(() => {
+    ipcRenderer.once('exit:frommain', () => {
+      window.onbeforeunload = (e) => {
+        e.returnValue = undefined;
+      };
+    });
+  }, []);
   return (
     <AuthProvider>
       <ClientSocketProvider>

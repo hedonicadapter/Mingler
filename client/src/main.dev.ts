@@ -21,6 +21,7 @@ import {
   Tray,
   Menu,
   dialog,
+  Accelerator,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -288,6 +289,56 @@ authIo.on('disconnect', (reason) => {
   console.log('Host socket dc reason: ', reason);
 });
 
+const notSignedInContextMenu = (accelerator) =>
+  Menu.buildFromTemplate([
+    {
+      label: 'show',
+      accelerator: accelerator,
+      click: showWindow,
+    },
+    { type: 'separator' },
+    {
+      label: 'exit',
+      // No other windows are open, so we can just close from here
+      click: () => mainWindow?.close(),
+    },
+  ]);
+
+const signedInContextMenu = (accelerator) =>
+  Menu.buildFromTemplate([
+    {
+      label: 'show',
+      accelerator: accelerator,
+      click: showWindow,
+    },
+    {
+      label: 'settings',
+      click: () => mainWindow?.webContents.send('tray:settings'),
+    },
+    {
+      label: 'sign out',
+      click: () => mainWindow?.webContents.send('tray:signout'),
+    },
+    { type: 'separator' },
+    {
+      label: 'exit',
+      click: () => mainWindow?.webContents.send('exit:frommain'),
+    },
+  ]);
+
+const setTrayContextMenu = (type: string, accelerator) => {
+  if (type === 'signedIn')
+    tray?.setContextMenu(signedInContextMenu(accelerator));
+  if (type === 'signedOut')
+    tray?.setContextMenu(notSignedInContextMenu(accelerator));
+};
+
+const createTray = (accelerator) => {
+  tray = new Tray(path.resolve(getPath('assets', app), 'icons', 'icon.ico'));
+  tray.setToolTip('Mingler');
+  tray.setContextMenu(notSignedInContextMenu(accelerator));
+};
+
 const createWindow = async () => {
   if (
     process.env.NODE_ENV === 'development' ||
@@ -478,63 +529,18 @@ const createWindow = async () => {
   });
 
   mainWindow.webContents.once('dom-ready', async () => {
-    const notSignedInContextMenu = Menu.buildFromTemplate([
-      {
-        label: 'show',
-        accelerator: 'CommandOrControl+q',
-        click: showWindow,
-      },
-      { type: 'separator' },
-      {
-        label: 'exit',
-        // No other windows are open, so we can just close from here
-        click: () => mainWindow?.close(),
-      },
-    ]);
+    storage.getItem('store').then((res) => {
+      let persistedShortcut = res?.app?.globalShortcut || 'CommandOrControl+q';
 
-    const signedInContextMenu = Menu.buildFromTemplate([
-      {
-        label: 'show',
-        accelerator: 'CommandOrControl+q',
-        click: showWindow,
-      },
-      {
-        label: 'settings',
-        click: () => mainWindow?.webContents.send('tray:settings'),
-      },
-      {
-        label: 'sign out',
-        click: () => mainWindow?.webContents.send('tray:signout'),
-      },
-      { type: 'separator' },
-      {
-        label: 'exit',
-        click: () => mainWindow?.webContents.send('exit:frommain'),
-      },
-    ]);
+      const shortcut = globalShortcut.register(persistedShortcut, toggleWidget);
 
-    const createTray = () => {
-      console.log(
-        'PATH path ',
-        path.resolve(getPath('assets', app), 'icons', 'icon.ico')
-      );
-      tray = new Tray(
-        path.resolve(getPath('assets', app), 'icons', 'icon.ico')
-      );
-      tray.setToolTip('Mingler');
-      tray.setContextMenu(notSignedInContextMenu);
-    };
+      if (!shortcut) {
+        console.error('registration failed');
+      }
 
-    const setTrayContextMenu = (type: string) => {
-      if (type === 'signedIn') tray?.setContextMenu(signedInContextMenu);
-      if (type === 'signedOut') tray?.setContextMenu(notSignedInContextMenu);
-    };
+      createTray(persistedShortcut);
 
-    createTray();
-
-    ipcMain.once('currentUser:signedOut', () => {
-      console.log('second listener');
-      setTrayContextMenu('signedOut');
+      // console.log(globalShortcut.isRegistered('CommandOrControl+q'));
     });
 
     ipcMain.once('exitready:fromrenderer', () => {
@@ -560,10 +566,15 @@ const createWindow = async () => {
         setTimeout(() => mainWindow?.destroy(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
-        setTrayContextMenu('signedIn');
+        setTrayContextMenu('signedIn', global.state?.app?.globalShortcut);
 
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
+      });
+      ipcMain.once('currentUser:signedOut', () => {
+        storage.getItem('store').then((res) => {
+          setTrayContextMenu('signedOut', res?.app?.globalShortcut);
+        });
       });
     } catch (exception) {
       console.log('Creating host socket server exception: ', exception);
@@ -631,13 +642,30 @@ const createWindow = async () => {
     shell.openExternal(url);
   });
 
-  const shortcut = globalShortcut.register('CommandOrControl+q', () => {
-    toggleWidget();
+  ipcMain.handle('changeshortcut:fromrenderer', (evt, data) => {
+    globalShortcut.unregisterAll();
+
+    try {
+      const newShortcut = globalShortcut.register(data, () => {
+        toggleWidget();
+      });
+
+      if (newShortcut) {
+        store?.dispatch({
+          type: 'setGlobalShortcut',
+          payload: data,
+        });
+
+        setTrayContextMenu('signedIn', data);
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   });
-  if (!shortcut) {
-    console.error('registration failed');
-  }
-  // console.log(globalShortcut.isRegistered('CommandOrControl+q'));
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
@@ -647,6 +675,9 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
+});
 
 app.on('window-all-closed', () => {
   console.log('all windows closed');
@@ -796,6 +827,19 @@ app.whenReady().then(() => {
     })
     .catch((err) => console.log('An error occurred: ', err));
 });
+
+// app.on('browser-window-focus', function () {
+//   globalShortcut.register('CommandOrControl+R', () => {
+//     console.log('CommandOrControl+R is pressed: Shortcut Disabled');
+//   });
+//   globalShortcut.register('F5', () => {
+//     console.log('F5 is pressed: Shortcut Disabled');
+//   });
+// });
+// app.on('browser-window-blur', function () {
+//   globalShortcut.unregister('CommandOrControl+R');
+//   globalShortcut.unregister('F5');
+// });
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the

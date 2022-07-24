@@ -39,7 +39,7 @@ export default function MenuButton() {
 
   const handleExitButton = () => {
     ipcRenderer.send('exit:frommenubutton');
-    window.close();
+    // window.close();
   };
 
   return (

@@ -242,3 +242,219 @@ h2 {
   opacity: 0.84;
   cursor: not-allowed;
 }
+
+/* react-simple-keyboard */
+.hg-theme-default {
+  box-shadow: 0px 11px 20px -10px rgba(0, 0, 0, 0.58);
+  background-color: var(--dark-mode-light-black);
+  border-top: 2px solid var(--off-white-pressed2);
+  border-bottom: 6px solid var(--off-white-pressed2);
+  border-left: 3px solid var(--off-white-pressed2);
+  border-right: 3px solid var(--off-white-pressed2);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: Cormorant SC;
+  overflow: hidden;
+  padding-top: 0px;
+  padding-bottom: 3px;
+  padding-left: 2px;
+  padding-right: 1px;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 100%;
+}
+.hg-theme-default .hg-button.hg-highlight {
+  transform: scale(0.8);
+}
+.hg-theme-default .hg-button span {
+  padding-bottom: 8px;
+  pointer-events: none;
+  color: var(--dark-mode-light-black);
+}
+.hg-theme-default .hg-button[data-skbtn='{space}'] {
+  width: 56%;
+}
+.hg-theme-default .hg-button[data-skbtn='{f1}'],
+.hg-theme-default .hg-button[data-skbtn='{f2}'],
+.hg-theme-default .hg-button[data-skbtn='{f3}'],
+.hg-theme-default .hg-button[data-skbtn='{f4}'],
+.hg-theme-default .hg-button[data-skbtn='{f5}'],
+.hg-theme-default .hg-button[data-skbtn='{f6}'],
+.hg-theme-default .hg-button[data-skbtn='{f7}'],
+.hg-theme-default .hg-button[data-skbtn='{f8}'],
+.hg-theme-default .hg-button[data-skbtn='{f9}'],
+.hg-theme-default .hg-button[data-skbtn='{f10}'],
+.hg-theme-default .hg-button[data-skbtn='{f11}'],
+.hg-theme-default .hg-button[data-skbtn='{f12}'] {
+  font-size: 0.5em;
+}
+.hg-theme-default .hg-button[data-skbtn='{escape}'] {
+  font-size: 0.5em;
+}
+.hg-theme-default .hg-button[data-skbtn='{controlleft}'],
+.hg-theme-default .hg-button[data-skbtn='{controlright}'],
+.hg-theme-default .hg-button[data-skbtn='{altleft}'],
+.hg-theme-default .hg-button[data-skbtn='{altright}'] {
+  font-size: 0.5em;
+}
+.hg-theme-default .hg-button[data-skbtn='{shiftleft}'] span {
+  margin-left: -18px;
+}
+.hg-theme-default .hg-button[data-skbtn='{shiftright}'] span {
+  margin-right: -19px;
+}
+.hg-theme-default .hg-button[data-skbtn='{backspace}'] span {
+  margin-right: -16px;
+}
+.hg-theme-default .hg-button[data-skbtn='{tab}'] span {
+  margin-left: -14px;
+  font-size: 1.5em;
+  font-weight: thin;
+}
+.hg-theme-default .hg-button[data-skbtn='{capslock}'] span {
+  margin-left: -5px;
+}
+
+.hg-theme-default button.hg-button {
+  border-width: 0;
+  font-size: inherit;
+  outline: 0;
+}
+.hg-theme-default .hg-button {
+  display: inline-block;
+  flex-grow: 1;
+}
+.hg-theme-default .hg-row {
+  display: flex;
+  /* background-color: rgba(0, 0, 0, 0.733); */
+}
+.hg-theme-default .hg-row:not(:last-child) {
+  margin-bottom: -2px;
+}
+.hg-theme-default .hg-row .hg-button:not(:last-child) {
+  margin-right: 1px;
+}
+.hg-theme-default .hg-row .hg-button-container {
+  margin-right: 2px;
+}
+.hg-theme-default .hg-row > div:last-child {
+  margin-right: -1px;
+}
+.hg-theme-default .hg-row .hg-button-container {
+  display: flex;
+}
+.hg-theme-default .hg-button {
+  /* rgba(230, 204, 178, 0.5) */
+  box-shadow: inset -28px -34px 17px -25px rgba(230, 204, 178, 0.5) /* coffee-beige */,
+    inset 3px 0px 3px 0px rgba(0, 0, 0, 0.151),
+    inset 0px 2px 1px 0px rgb(255, 255, 255),
+    inset 0px -7px 1px 0px rgba(0, 0, 0, 0.137),
+    inset -3px 0px 3px 0px rgba(39, 39, 39, 0.144);
+  font-size: 0.7em;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  align-items: center;
+  background: rgba(253, 245, 241, 1);
+  border-bottom: 1px solid #00000086;
+  border-radius: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  padding: 5px;
+  width: 28px;
+}
+.hg-theme-default .hg-button.hg-standardBtn {
+  width: 10px;
+}
+.hg-theme-default .hg-button.hg-activeButton {
+  background: #efefef;
+}
+.hg-theme-default.hg-layout-numeric .hg-button {
+  align-items: center;
+  display: flex;
+  height: 60px;
+  justify-content: center;
+  width: 33.3%;
+}
+.hg-theme-default .hg-button.hg-button-numpadadd,
+.hg-theme-default .hg-button.hg-button-numpadenter {
+  height: 85px;
+}
+.hg-theme-default .hg-button.hg-button-numpad0 {
+  width: 105px;
+}
+.hg-theme-default .hg-button.hg-button-com {
+  max-width: 85px;
+}
+.hg-theme-default .hg-button.hg-standardBtn.hg-button-at {
+  max-width: 45px;
+}
+.hg-theme-default .hg-button.hg-selectedButton {
+  background: rgba(5, 25, 70, 0.53);
+  color: #fff;
+}
+.hg-candidate-box {
+  background: #ececec;
+  border-bottom: 2px solid #b5b5b5;
+  border-radius: 5px;
+  display: inline-flex;
+  margin-top: -10px;
+  max-width: 272px;
+  position: absolute;
+  transform: translateY(-100%);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+ul.hg-candidate-box-list {
+  display: flex;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li.hg-candidate-box-list-item {
+  align-items: center;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+li.hg-candidate-box-list-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+li.hg-candidate-box-list-item:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+.hg-candidate-box-prev:before {
+  content: '◄';
+}
+.hg-candidate-box-next:before {
+  content: '►';
+}
+.hg-candidate-box-next,
+.hg-candidate-box-prev {
+  align-items: center;
+  background: #d0d0d0;
+  color: #969696;
+  cursor: pointer;
+  display: flex;
+  padding: 0 10px;
+}
+.hg-candidate-box-next {
+  border-bottom-right-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.hg-candidate-box-prev {
+  border-bottom-left-radius: 5px;
+  border-top-left-radius: 5px;
+}
+.hg-candidate-box-btn-active {
+  color: #444;
+}

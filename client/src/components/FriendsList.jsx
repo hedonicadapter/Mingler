@@ -25,7 +25,7 @@ import { ipcRenderer } from 'electron';
 import { useAuth } from '../contexts/AuthContext';
 import { ConfigProvider } from 'react-avatar';
 
-export const EmptySpaceFiller = ({}) => {
+export const EmptySpaceFiller = () => {
   const dispatch = useDispatch();
 
   const contextMenuCollapseAllHandler = () => {

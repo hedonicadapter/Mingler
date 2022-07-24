@@ -9,6 +9,7 @@ interface AppState {
   findFriendsOpen: Boolean;
   findFriendsSearchValue: string;
   windowWidth: number;
+  globalShortcut: string;
 }
 
 const initialState: AppState = {
@@ -19,6 +20,7 @@ const initialState: AppState = {
   findFriendsOpen: false,
   findFriendsSearchValue: '',
   windowWidth: 430,
+  globalShortcut: 'CommandOrControl+q',
 };
 
 export const appSlice = createSlice({
@@ -74,6 +76,9 @@ export const appSlice = createSlice({
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
       state.windowWidth = action.payload;
+    },
+    setGlobalShortcut: (state, action: PayloadAction<string>) => {
+      state.globalShortcut = action.payload;
     },
   },
 });

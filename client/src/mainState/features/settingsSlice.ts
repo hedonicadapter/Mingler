@@ -15,7 +15,7 @@ interface SettingsState {
 const initialState: SettingsState = {
   currentUser: [],
   showWelcome: true, //Used to show welcome splash screen or header on first launch
-  settingsContent: 'General',
+  settingsContent: 'Widget',
   browser: 'Chrome',
   extensionID: '',
 };

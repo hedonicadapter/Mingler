@@ -34,6 +34,11 @@ import path from 'path';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
 import { compressFile, profilePictureToJSXImg } from '../helpers/fileManager';
 import { useIsInViewport } from '../helpers/useIsInViewport';
+import hotkeys from 'hotkeys-js';
+import Keyboard from 'react-simple-keyboard';
+import layout from 'simple-keyboard-layouts/build/layouts/swedish';
+
+var keycode = require('keycode');
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -73,12 +78,55 @@ const AnimationWrapper = ({ children, key }) => {
 };
 
 const settings = [
-  { title: 'General' },
+  { title: 'Widget' },
   { title: 'Account' },
   { title: 'Set-up' },
 ];
 
-const GeneralSettingsContent = () => {
+// From https://stackoverflow.com/a/1026087/11599993 by Steve Harrison and Samathingamajig
+const capitalizeFirstLetter = ([first, ...rest], locale = navigator.language) =>
+  first === undefined ? '' : first.toLocaleUpperCase(locale) + rest.join('');
+
+const captureAndSendShorcut = (event) => {
+  let keys = hotkeys.getPressedKeyCodes();
+  let shortcuts = [];
+
+  keys.forEach((val) => {
+    let key = keycode.names[val];
+
+    if (key === 'ctrl') {
+      shortcuts.push('CommandOrControl');
+    } else {
+      shortcuts.push(capitalizeFirstLetter(key));
+    }
+  });
+
+  if (shortcuts.length === 1) return;
+  console.log('shortcuts.length ', shortcuts.length);
+  ipcRenderer
+    .invoke('changeshortcut:fromrenderer', shortcuts.join('+'))
+    .then((res) => {
+      if (res) {
+        // dispatch(setShortcut(keys))
+      }
+      // setError('Something went wrong. Try again.')
+    });
+};
+
+const WidgetSettingsContent = ({ widgetSettingsContentInView }) => {
+  const [shortcutFormHovered, setShortcutFormHovered] = useState(false);
+
+  useEffect(() => {
+    console.log('widgetSettingsContentInView ', widgetSettingsContentInView);
+    if (!widgetSettingsContentInView) return;
+
+    hotkeys('*', function (event) {
+      captureAndSendShorcut(event);
+    });
+
+    return () => hotkeys.unbind('*');
+  }, [widgetSettingsContentInView]);
+
   return (
     <div
       className={styles.settingsContentContainer}
@@ -87,7 +135,133 @@ const GeneralSettingsContent = () => {
         color: colors.defaultPlaceholderTextColor,
       }}
     >
-      Nothing to see here yet.
+      <div
+        onMouseEnter={() => setShortcutFormHovered(true)}
+        onMouseLeave={() => setShortcutFormHovered(false)}
+        className={styles.keyboardSettingsForm}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingBottom: 14,
+          }}
+        >
+          <header>Toggle shortcut</header>
+          <div
+            style={{
+              width: 55,
+              border: '4px solid ' + colors.offWhitePressed2,
+              borderRadius: 2,
+            }}
+          >
+            <div
+              style={{
+                borderBottom: '2px solid ' + colors.defaultPlaceholderTextColor,
+                float: 'right',
+                width: '100%',
+              }}
+            >
+              <motion.div
+                initial={'hide'}
+                animate={'show'}
+                exit={'hide'}
+                transition={{
+                  duration: 0.15,
+                  repeat: Infinity,
+                  repeatType: 'reverse',
+                  repeatDelay: 1.8,
+                }}
+                variants={{
+                  show: {
+                    transform: 'translateX(0%)',
+                    opacity: 1,
+                  },
+                  hide: {
+                    transform: 'translateX(100%)',
+                    opacity: 0,
+                  },
+                }}
+                style={{
+                  float: 'right',
+                  backgroundColor: colors.offWhite,
+                  height: 25,
+                  width: 12,
+                }}
+                className={styles.miniWidget}
+              />
+            </div>
+          </div>
+        </div>
+        <div className={styles.keyboardContainer}>
+          <Keyboard
+            physicalKeyboardHighlightBgColor={colors.coffeeOrange}
+            layout={{
+              default: [
+                '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
+                '\u00A7 1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
+                '{tab} q w e r t y u i o p \u00E5 ¨',
+                "{capslock} a s d f g h j k l \u00F6 \u00E4 ' {enter}",
+                '{shiftleft} < z x c v b n m , . - {shiftright}',
+                '{controlleft} {altleft} {space} {altright} {controlright}',
+              ],
+              shift: [
+                '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
+                '\u00B0 ! " # $ % & / ( ) = ? ` {backspace}',
+                '{tab} Q W E R T Y U I O P \u00C5 ^',
+                '{capslock} A S D F G H J K L \u00D6 \u00C4 * {enter}',
+                '{shiftleft} > Z X C V B N M ; : _ {shiftright}',
+                '[{controlleft} {altleft} {space} {altright} {controlright}]',
+              ],
+            }}
+            display={{
+              '{controlleft}': 'Ctrl',
+              '{altleft}': 'Alt',
+              '{altright}': 'AltGr',
+              '{controlright}': 'Ctrl',
+              '{enter}': '↩',
+              '{backspace}': '⌫',
+              '{escape}': 'esc',
+              '{f1}': 'F1',
+              '{f2}': 'F2',
+              '{f3}': 'F3',
+              '{f4}': 'F4',
+              '{f5}': 'F5',
+              '{f6}': 'F6',
+              '{f7}': 'F7',
+              '{f8}': 'F8',
+              '{f9}': 'F9',
+              '{f10}': 'F10',
+              '{f11}': 'F11',
+              '{f12}': 'F12',
+              '{tab}': '↹',
+              '{capslock}': 'caps',
+              '{shiftleft}': '⇧',
+              '{shiftright}': '⇧',
+              '{space}': ' ',
+            }}
+            physicalKeyboardHighlight={true}
+            physicalKeyboardHighlightPress={true}
+          />
+        </div>
+
+        <motion.div
+          initial={'hide'}
+          animate={shortcutFormHovered ? 'show' : 'hide'}
+          variants={{
+            show: { height: 'auto', y: 0, opacity: 1 },
+            hide: { height: 0, y: -40, opacity: 0 },
+          }}
+          transition={{ duration: 0.15 }}
+        >
+          <footer>
+            <p>
+              Press two or more keys on your keyboard to set a new shortcut.
+            </p>
+          </footer>
+        </motion.div>
+      </div>
     </div>
   );
 };
@@ -617,6 +791,9 @@ const SettingsContentHeader = ({
           browserIconOnClickHandler={browserIconOnClickHandler}
         />
       )}
+      {/* {title === 'Widget' && (
+        
+      )} */}
     </div>
   );
 };
@@ -627,13 +804,11 @@ export default function SettingsContent() {
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 
-  const generalSettingsContentRef = useRef(null);
+  const widgetSettingsContentRef = useRef(null);
   const accountSettingsContentRef = useRef(null);
   const setupSettingsContentRef = useRef(null);
 
-  const generalSettingsContentInView = useIsInViewport(
-    generalSettingsContentRef
-  );
+  const widgetSettingsContentInView = useIsInViewport(widgetSettingsContentRef);
   const accountSettingsContentInView = useIsInViewport(
     accountSettingsContentRef
   );
@@ -653,17 +828,17 @@ export default function SettingsContent() {
   const [spotifyError, setSpotifyError] = useState(null);
 
   useEffect(() => {
-    if (generalSettingsContentInView) setExpanded(0);
+    if (widgetSettingsContentInView) setExpanded(0);
     if (accountSettingsContentInView) setExpanded(1);
     if (setupSettingsContentInView) setExpanded(2);
   }, [
-    generalSettingsContentInView,
+    widgetSettingsContentInView,
     accountSettingsContentInView,
     setupSettingsContentInView,
   ]);
 
   useEffect(() => {
-    dispatch(setSettingsContentMain(settings[expanded]?.title) || 'General');
+    dispatch(setSettingsContentMain(settings[expanded]?.title) || 'Widget');
   }, [expanded]);
 
   useEffect(() => {
@@ -785,6 +960,12 @@ export default function SettingsContent() {
     }
   };
 
+  const preventSpacebarScroll = (e) => {
+    if (e.keyCode === 32 && e.target === document.body) {
+      e.preventDefault();
+    }
+  };
+
   const toggleConnectSpotifyErrorHandler = (e, error) => {
     setSpotifyError(error);
   };
@@ -794,6 +975,7 @@ export default function SettingsContent() {
   };
 
   useEffect(() => {
+    window.addEventListener('keydown', preventSpacebarScroll);
     ipcRenderer.on('quickSetting', quickSettingHandler);
     ipcRenderer.on(
       'toggleconnectspotifyerror:fromrenderer',
@@ -801,6 +983,7 @@ export default function SettingsContent() {
     );
 
     return () => {
+      window.removeEventListener('keydown', preventSpacebarScroll);
       ipcRenderer.removeAllListeners('quickSetting', quickSettingHandler);
       ipcRenderer.removeAllListeners(
         'toggleconnectspotifyerror:fromrenderer',
@@ -820,8 +1003,8 @@ export default function SettingsContent() {
                   onClick={() => {
                     setExpanded(index);
                     if (index === 0)
-                      generalSettingsContentRef.current.parentNode.scrollTop =
-                        generalSettingsContentRef.current?.offsetTop - 80;
+                      widgetSettingsContentRef.current.parentNode.scrollTop =
+                        widgetSettingsContentRef.current?.offsetTop - 80;
                     if (index === 1)
                       accountSettingsContentRef.current.parentNode.scrollTop =
                         accountSettingsContentRef.current?.offsetTop - 80;
@@ -844,14 +1027,16 @@ export default function SettingsContent() {
           <div className={styles.contentContainer}>
             <div
               className={styles.contentWrapper}
-              ref={generalSettingsContentRef}
+              ref={widgetSettingsContentRef}
             >
               <SettingsContentHeader
-                title={'General'}
+                title={'Widget'}
                 browser={settingsState.browser}
                 browserIconOnClickHandler={browserIconOnClickHandler}
               />
-              <GeneralSettingsContent />
+              <WidgetSettingsContent
+                widgetSettingsContentInView={widgetSettingsContentInView}
+              />
             </div>
             <div
               className={styles.contentWrapper}
@@ -893,8 +1078,8 @@ export default function SettingsContent() {
               />
             </div>
             {/* <AnimationWrapper key={0}>
-            {settingsState.settingsContent === 'General' && (
-              <GeneralSettingsContent />
+            {settingsState.settingsContent === 'Widget' && (
+              <WidgetSettingsContent />
               )}
               </AnimationWrapper>
 

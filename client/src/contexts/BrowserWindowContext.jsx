@@ -152,12 +152,11 @@ export function BrowserWindowProvider({ children }) {
   };
 
   useEffect(() => {
+    // Clusterfuck of close handling to keep unclosability working
     ipcRenderer.once('exit:frommain', () => {
       if (!settingsWindow.isDestroyed()) {
         settingsWindow.removeListener('close', settingsWindowCloseHandler);
         settingsWindow.destroy();
-        settingsWindow.setClosable(true);
-        settingsWindow.close();
         dispatch(settingsOpenFalse());
         setSettingsWindow(null);
       }
@@ -167,8 +166,6 @@ export function BrowserWindowProvider({ children }) {
           findFriendsWindowCloseHandler
         );
         findFriendsWindow.destroy();
-        findFriendsWindow.setClosable(true);
-        findFriendsWindow.close();
         dispatch(findFriendsOpenFalse());
         setFindFriendsWindow(null);
       }
@@ -278,7 +275,7 @@ export function BrowserWindowProvider({ children }) {
     });
   };
 
-  const toggleSettings = (page = 'General', quickSetting = false) => {
+  const toggleSettings = (page = 'Widget', quickSetting = false) => {
     dispatch(setSettingsContentMain(page));
 
     settingsWindow?.setSkipTaskbar(false);
