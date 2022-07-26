@@ -650,17 +650,16 @@ const createWindow = async () => {
         toggleWidget();
       });
 
-      if (newShortcut) {
-        store?.dispatch({
-          type: 'setGlobalShortcut',
-          payload: data,
-        });
+      if (!newShortcut) return false;
 
-        setTrayContextMenu('signedIn', data);
+      store?.dispatch({
+        type: 'setGlobalShortcut',
+        payload: data,
+      });
 
-        return true;
-      }
-      return false;
+      setTrayContextMenu('signedIn', data);
+
+      return true;
     } catch (e) {
       console.log(e);
       return false;
@@ -827,19 +826,6 @@ app.whenReady().then(() => {
     })
     .catch((err) => console.log('An error occurred: ', err));
 });
-
-// app.on('browser-window-focus', function () {
-//   globalShortcut.register('CommandOrControl+R', () => {
-//     console.log('CommandOrControl+R is pressed: Shortcut Disabled');
-//   });
-//   globalShortcut.register('F5', () => {
-//     console.log('F5 is pressed: Shortcut Disabled');
-//   });
-// });
-// app.on('browser-window-blur', function () {
-//   globalShortcut.unregister('CommandOrControl+R');
-//   globalShortcut.unregister('F5');
-// });
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the

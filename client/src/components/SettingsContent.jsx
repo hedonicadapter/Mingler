@@ -46,10 +46,19 @@ const ipcRenderer = require('electron').ipcRenderer;
 
 const defaultLayout = [
   '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-  ' 1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
+  '1 2 3 4 5 6 7 8 9 0 + {backspace}',
   '{tab} q w e r t y u i o p \u00E5 ¨',
   "{capslock} a s d f g h j k l \u00F6 \u00E4 ' {enter}",
-  '{shiftleft}  z x c v b n m , . - {shiftright}',
+  '{shiftleft} z x c v b n m , . - {shiftright}',
+  '{controlleft} {altleft} {space} {altright} {controlright}',
+];
+
+const shiftLayout = [
+  '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
+  '! " # $ % & / ( ) = ? {backspace}',
+  '{tab} Q W E R T Y U I O P \u00C5 ^',
+  '{capslock} A S D F G H J K L \u00D6 \u00C4 * {enter}',
+  '{shiftleft} Z X C V B N M ; : _ {shiftright}',
   '{controlleft} {altleft} {space} {altright} {controlright}',
 ];
 
@@ -92,123 +101,10 @@ const settings = [
   { title: 'Set-up' },
 ];
 
-function getKeyCodeList(key) {
-  let codes = {
-    backspace: 8,
-    tab: 9,
-    enter: 13,
-    shiftleft: 16,
-    shiftright: 16,
-    ctrlleft: 17,
-    ctrlrigght: 17,
-    altleft: 18,
-    altright: 18,
-    pause: 19,
-    capslock: 20,
-    escape: 27,
-    pageup: 33,
-    pagedown: 34,
-    end: 35,
-    home: 36,
-    arrowleft: 37,
-    arrowup: 38,
-    arrowright: 39,
-    arrowdown: 40,
-    insert: 45,
-    delete: 46,
-    0: 48,
-    1: 49,
-    2: 50,
-    3: 51,
-    4: 52,
-    5: 53,
-    6: 54,
-    7: 55,
-    8: 56,
-    9: 57,
-    a: 65,
-    b: 66,
-    c: 67,
-    d: 68,
-    e: 69,
-    f: 70,
-    g: 71,
-    h: 72,
-    i: 73,
-    j: 74,
-    k: 75,
-    l: 76,
-    m: 77,
-    n: 78,
-    o: 79,
-    p: 80,
-    q: 81,
-    r: 82,
-    s: 83,
-    t: 84,
-    u: 85,
-    v: 86,
-    w: 87,
-    x: 88,
-    y: 89,
-    z: 90,
-    metaleft: 91,
-    metaright: 92,
-    select: 93,
-    numpad0: 96,
-    numpad1: 97,
-    numpad2: 98,
-    numpad3: 99,
-    numpad4: 100,
-    numpad5: 101,
-    numpad6: 102,
-    numpad7: 103,
-    numpad8: 104,
-    numpad9: 105,
-    numpadmultiply: 106,
-    numpadadd: 107,
-    numpadsubtract: 109,
-    numpaddecimal: 110,
-    numpaddivide: 111,
-    f1: 112,
-    f2: 113,
-    f3: 114,
-    f4: 115,
-    f5: 116,
-    f6: 117,
-    f7: 118,
-    f8: 119,
-    f9: 120,
-    f10: 121,
-    f11: 122,
-    f12: 123,
-    numlock: 144,
-    scrolllock: 145,
-    semicolon: 186,
-    equalsign: 187,
-    comma: 188,
-    minus: 189,
-    period: 190,
-    slash: 191,
-    backquote: 192,
-    bracketleft: 219,
-    backslash: 220,
-    braketright: 221,
-    quote: 222,
-  };
-
-  return codes[key];
-}
-
-const getKeyCode = (layoutKey) => {
-  let layoutKeyProcessed = layoutKey.replace('{', '').replace('}', '');
-  let code = getKeyCodeList(layoutKeyProcessed);
-
-  return code;
-};
-
 const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
   const [shortcutFormHovered, setShortcutFormHovered] = useState(false);
+  const [shortcutError, setShortcutError] = useState(null);
+  const [showShortcutError, setShowShortcutError] = useState(false);
   const [layoutName, setLayoutName] = useState('default');
   const dispatch = useDispatch();
 
@@ -231,11 +127,9 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
     ipcRenderer
       .invoke('changeshortcut:fromrenderer', shortcuts.join('+'))
       .then((res) => {
-        if (res) {
-          // highlightPersistedShortcut(shortcut);
-          // dispatch(setShortcut(keys))
-        }
-        // setError('Something went wrong. Try again.')
+        if (!res) {
+          setShortcutError('Something went wrong. Try again.');
+        } else setShortcutError(null);
       });
   };
 
@@ -299,9 +193,6 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
       button === '{capslock}'
     )
       handleShift();
-
-    if (!widgetSettingsContentInView) return;
-    getKeyCode(button);
   };
 
   useEffect(() => {
@@ -321,6 +212,16 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
     highlightPersistedShortcut();
   }, [keyboardRef, layoutName, shortcut]);
 
+  useEffect(() => {
+    if (!shortcutError) return;
+    const errorTimeout = setTimeout(() => {
+      setShortcutError(null);
+      setShowShortcutError(false);
+    }, 3000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [shortcutError]);
+
   return (
     <div
       className={styles.settingsContentContainer}
@@ -328,12 +229,10 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
         fontSize: '0.9em',
         color: colors.defaultPlaceholderTextColor,
       }}
+      onMouseEnter={() => setShortcutFormHovered(true)}
+      onMouseLeave={() => setShortcutFormHovered(false)}
     >
-      <div
-        onMouseEnter={() => setShortcutFormHovered(true)}
-        onMouseLeave={() => setShortcutFormHovered(false)}
-        className={styles.keyboardSettingsForm}
-      >
+      <div className={styles.keyboardSettingsForm}>
         <div
           style={{
             display: 'flex',
@@ -395,22 +294,8 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
             physicalKeyboardHighlightBgColor={colors.coffeeOrange}
             layoutName={layoutName}
             layout={{
-              default: [
-                '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-                '1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
-                '{tab} q w e r t y u i o p \u00E5 ¨',
-                "{capslock} a s d f g h j k l \u00F6 \u00E4 ' {enter}",
-                '{shiftleft} z x c v b n m , . - {shiftright}',
-                '{controlleft} {altleft} {space} {altright} {controlright}',
-              ],
-              shift: [
-                '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-                '! " # $ % & / ( ) = ? ` {backspace}',
-                '{tab} Q W E R T Y U I O P \u00C5 ^',
-                '{capslock} A S D F G H J K L \u00D6 \u00C4 * {enter}',
-                '{shiftleft} Z X C V B N M ; : _ {shiftright}',
-                '{controlleft} {altleft} {space} {altright} {controlright}',
-              ],
+              default: defaultLayout,
+              shift: shiftLayout,
             }}
             display={{
               '{controlleft}': 'Ctrl',
@@ -445,7 +330,7 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
 
         <motion.div
           initial={'hide'}
-          animate={shortcutFormHovered ? 'show' : 'hide'}
+          animate={showShortcutError || shortcutFormHovered ? 'show' : 'hide'}
           variants={{
             show: { height: 'auto', y: 0, opacity: 1 },
             hide: { height: 0, y: -40, opacity: 0 },
@@ -453,9 +338,38 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
           transition={{ duration: 0.15 }}
         >
           <footer>
-            <p>
-              Press two or more keys on your keyboard to set a new shortcut.
-            </p>
+            <AnimatePresence>
+              {!shortcutError && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <p>
+                    Press two or more keys on your keyboard to set a new
+                    <br />
+                    shortcut.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <AnimatePresence>
+              {shortcutError && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35 }}
+                  className={styles.shortcutError}
+                  onAnimationComplete={() =>
+                    !showShortcutError && setShowShortcutError(true)
+                  }
+                >
+                  <p>{shortcutError}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </footer>
         </motion.div>
       </div>
@@ -899,30 +813,37 @@ const SetupSettingsContent = ({ browser, storedID }) => {
           </li>
         </ul>
         <li>
-          3. Click 'load unpacked' and select the mingler
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;extension folder</div>
+          3. Click 'load unpacked' and select the mingler extension folder
           {/* it is what it is */}
         </li>
         <ul>
           <li>
-            detected:{' '}
-            <a className={styles.detectedTextContainer}>
-              <mark
-                className={styles.detectedText}
-                onClick={handleDetectedTextClick}
-                data-tip="copied."
-                data-event="click focus"
-              >
-                {installationPath}
-              </mark>
-            </a>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ paddingRight: 4 }}>detected: </div>
+              <a className={styles.detectedTextContainer}>
+                <mark
+                  className={styles.detectedText}
+                  onClick={handleDetectedTextClick}
+                  data-tip="copied."
+                  data-event="click focus"
+                >
+                  {installationPath}
+                </mark>
+              </a>
+            </div>
           </li>
         </ul>
         <li>
-          3. In the {browser} extensions list, find the mingler extension{' '}
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;and its ID...</div>
+          4. In the {browser} extensions list, find the mingler extension and
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;its ID...</div>
         </li>
-        <li>4. ...and save it here:</li>
+        <li>5. ...and save it here:</li>
         <ul>
           <div className={styles.extensionIDInputContainer}>
             <input
@@ -1163,6 +1084,12 @@ export default function SettingsContent() {
     }
   };
 
+  const preventTabNavigation = (e) => {
+    if (e.keyCode === 9 && e.target === document.body) {
+      e.preventDefault();
+    }
+  };
+
   const toggleConnectSpotifyErrorHandler = (e, error) => {
     setSpotifyError(error);
   };
@@ -1173,6 +1100,7 @@ export default function SettingsContent() {
 
   useEffect(() => {
     window.addEventListener('keydown', preventSpacebarScroll);
+    window.addEventListener('keydown', preventTabNavigation);
     ipcRenderer.on('quickSetting', quickSettingHandler);
     ipcRenderer.on(
       'toggleconnectspotifyerror:fromrenderer',
@@ -1181,6 +1109,7 @@ export default function SettingsContent() {
 
     return () => {
       window.removeEventListener('keydown', preventSpacebarScroll);
+      window.removeEventListener('keydown', preventTabNavigation);
       ipcRenderer.removeAllListeners('quickSetting', quickSettingHandler);
       ipcRenderer.removeAllListeners(
         'toggleconnectspotifyerror:fromrenderer',

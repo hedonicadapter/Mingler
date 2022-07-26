@@ -10,11 +10,12 @@
 
 .menu {
   flex-direction: column;
-  width: 120px;
+  width: 100px;
   background-color: var(--off-white-pressed);
 }
 
 .contentContainer {
+  overflow-x: hidden;
   overflow-y: scroll !important;
   scroll-behavior: smooth;
   padding: 24px;
@@ -149,8 +150,18 @@
   font-size: 1em;
 }
 .keyboardSettingsForm footer {
+  height: 50px;
+  width: 100%;
   font-size: 0.9em;
 }
+.keyboardSettingsForm footer div {
+  position: absolute;
+  padding-inline: 2px;
+}
+.shortcutError {
+  color: var(--coffee-red);
+}
+
 .keyboardContainer {
   z-index: 50;
 }
@@ -200,7 +211,7 @@ li:marker {
 
 .setupInstructionsText {
   line-height: 1.4em;
-  width: 90%;
+  width: 100%;
   color: var(--darkmode-disabled-black);
   font-size: 0.8em;
 }
@@ -241,7 +252,7 @@ mark:hover {
   background-color: var(--off-white-pressed);
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 72%;
 }
 .mockBrowserHeader {
   background-color: var(--off-white-pressed);
@@ -284,7 +295,7 @@ mark:hover {
   display: flex;
   flex-direction: row;
   background-color: var(--off-white-pressed);
-  width: 100%;
+  width: 340px;
   align-items: center;
 }
 .extensionIDSaveButton {
