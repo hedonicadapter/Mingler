@@ -347,6 +347,7 @@ h2 {
   display: flex;
 }
 .hg-theme-default .hg-button {
+  transition: all 0.15s ease;
   /* rgba(230, 204, 178, 0.5) */
   box-shadow: inset -28px -34px 17px -25px rgba(230, 204, 178, 0.5) /* coffee-beige */,
     inset 3px 0px 3px 0px rgba(0, 0, 0, 0.151),
@@ -457,4 +458,12 @@ li.hg-candidate-box-list-item:active {
 }
 .hg-candidate-box-btn-active {
   color: #444;
+}
+.active {
+  background-color: var(--coffee-orange) !important;
+  box-shadow: inset -28px -34px 17px -25px rgba(230, 204, 178, 0.5) /* coffee-beige */,
+    inset 3px 0px 3px 0px rgba(0, 0, 0, 0.151),
+    inset 0px 2px 1px 0px rgb(255, 190, 143),
+    inset 0px -7px 1px 0px rgba(0, 0, 0, 0.137),
+    inset -3px 0px 3px 0px rgba(39, 39, 39, 0.144) !important;
 }

@@ -110,7 +110,7 @@ export function BrowserWindowProvider({ children }) {
     dispatch(settingsFocusedFalse());
     if (!electron.remote.getCurrentWindow().isFocused()) {
       dispatch(appVisibleFalse());
-      // ipcRenderer.send('settingsblurred:fromrenderer');
+      ipcRenderer.send('settingsblurred:fromrenderer');
     }
   };
 

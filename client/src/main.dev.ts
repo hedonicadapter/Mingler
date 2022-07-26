@@ -21,7 +21,6 @@ import {
   Tray,
   Menu,
   dialog,
-  Accelerator,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -530,7 +529,8 @@ const createWindow = async () => {
 
   mainWindow.webContents.once('dom-ready', async () => {
     storage.getItem('store').then((res) => {
-      let persistedShortcut = res?.app?.globalShortcut || 'CommandOrControl+q';
+      let persistedShortcut =
+        res?.settings?.globalShortcut || 'CommandOrControl+q';
 
       const shortcut = globalShortcut.register(persistedShortcut, toggleWidget);
 
@@ -566,14 +566,14 @@ const createWindow = async () => {
         setTimeout(() => mainWindow?.destroy(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
-        setTrayContextMenu('signedIn', global.state?.app?.globalShortcut);
+        setTrayContextMenu('signedIn', global.state?.settings?.globalShortcut);
 
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
       });
       ipcMain.once('currentUser:signedOut', () => {
         storage.getItem('store').then((res) => {
-          setTrayContextMenu('signedOut', res?.app?.globalShortcut);
+          setTrayContextMenu('signedOut', res?.settings?.globalShortcut);
         });
       });
     } catch (exception) {
@@ -628,9 +628,9 @@ const createWindow = async () => {
     }
   });
   ipcMain.on('settingsblurred:fromrenderer', () => {
-    toggleWidget();
+    // toggleWidget();
     mainWindow?.setAlwaysOnTop(false);
-    hideWindow();
+    // hideWindow();
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);

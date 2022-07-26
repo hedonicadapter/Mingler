@@ -12,6 +12,7 @@ import UploadButton from '@rpldy/upload-button';
 import styles from './SettingsContent.module.css';
 import { useLocalStorage } from '../helpers/localStorageManager';
 import colors from '../config/colors';
+import keys from '../config/keys';
 import { useDispatch, useSelector } from 'react-redux';
 import { FrameButtons, WindowFrame } from './reusables/WindowFrame';
 import AccordionSetting from './AccordionSetting';
@@ -25,6 +26,7 @@ import {
   setSettingsContentMain,
   setBrowserMain,
   setExtensionIDMain,
+  setKeys,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
 import { useBrowserWindow } from '../contexts/BrowserWindowContext';
@@ -36,13 +38,20 @@ import { compressFile, profilePictureToJSXImg } from '../helpers/fileManager';
 import { useIsInViewport } from '../helpers/useIsInViewport';
 import hotkeys from 'hotkeys-js';
 import Keyboard from 'react-simple-keyboard';
-import layout from 'simple-keyboard-layouts/build/layouts/swedish';
-
-var keycode = require('keycode');
+// import layout from 'simple-keyboard-layouts/build/layouts/swedish';
 
 const { remote, clipboard } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
+
+const defaultLayout = [
+  '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
+  ' 1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
+  '{tab} q w e r t y u i o p \u00E5 ¨',
+  "{capslock} a s d f g h j k l \u00F6 \u00E4 ' {enter}",
+  '{shiftleft}  z x c v b n m , . - {shiftright}',
+  '{controlleft} {altleft} {space} {altright} {controlright}',
+];
 
 const avatarLoadingContainer = {
   transition: 'opacity 0.15s ease',
@@ -83,38 +92,217 @@ const settings = [
   { title: 'Set-up' },
 ];
 
-// From https://stackoverflow.com/a/1026087/11599993 by Steve Harrison and Samathingamajig
-const capitalizeFirstLetter = ([first, ...rest], locale = navigator.language) =>
-  first === undefined ? '' : first.toLocaleUpperCase(locale) + rest.join('');
+function getKeyCodeList(key) {
+  let codes = {
+    backspace: 8,
+    tab: 9,
+    enter: 13,
+    shiftleft: 16,
+    shiftright: 16,
+    ctrlleft: 17,
+    ctrlrigght: 17,
+    altleft: 18,
+    altright: 18,
+    pause: 19,
+    capslock: 20,
+    escape: 27,
+    pageup: 33,
+    pagedown: 34,
+    end: 35,
+    home: 36,
+    arrowleft: 37,
+    arrowup: 38,
+    arrowright: 39,
+    arrowdown: 40,
+    insert: 45,
+    delete: 46,
+    0: 48,
+    1: 49,
+    2: 50,
+    3: 51,
+    4: 52,
+    5: 53,
+    6: 54,
+    7: 55,
+    8: 56,
+    9: 57,
+    a: 65,
+    b: 66,
+    c: 67,
+    d: 68,
+    e: 69,
+    f: 70,
+    g: 71,
+    h: 72,
+    i: 73,
+    j: 74,
+    k: 75,
+    l: 76,
+    m: 77,
+    n: 78,
+    o: 79,
+    p: 80,
+    q: 81,
+    r: 82,
+    s: 83,
+    t: 84,
+    u: 85,
+    v: 86,
+    w: 87,
+    x: 88,
+    y: 89,
+    z: 90,
+    metaleft: 91,
+    metaright: 92,
+    select: 93,
+    numpad0: 96,
+    numpad1: 97,
+    numpad2: 98,
+    numpad3: 99,
+    numpad4: 100,
+    numpad5: 101,
+    numpad6: 102,
+    numpad7: 103,
+    numpad8: 104,
+    numpad9: 105,
+    numpadmultiply: 106,
+    numpadadd: 107,
+    numpadsubtract: 109,
+    numpaddecimal: 110,
+    numpaddivide: 111,
+    f1: 112,
+    f2: 113,
+    f3: 114,
+    f4: 115,
+    f5: 116,
+    f6: 117,
+    f7: 118,
+    f8: 119,
+    f9: 120,
+    f10: 121,
+    f11: 122,
+    f12: 123,
+    numlock: 144,
+    scrolllock: 145,
+    semicolon: 186,
+    equalsign: 187,
+    comma: 188,
+    minus: 189,
+    period: 190,
+    slash: 191,
+    backquote: 192,
+    bracketleft: 219,
+    backslash: 220,
+    braketright: 221,
+    quote: 222,
+  };
 
-const captureAndSendShorcut = (event) => {
-  let keys = hotkeys.getPressedKeyCodes();
-  let shortcuts = [];
+  return codes[key];
+}
 
-  keys.forEach((val) => {
-    let key = keycode.names[val];
+const getKeyCode = (layoutKey) => {
+  let layoutKeyProcessed = layoutKey.replace('{', '').replace('}', '');
+  let code = getKeyCodeList(layoutKeyProcessed);
 
-    if (key === 'ctrl') {
-      shortcuts.push('CommandOrControl');
-    } else {
-      shortcuts.push(capitalizeFirstLetter(key));
-    }
-  });
-
-  if (shortcuts.length === 1) return;
-  console.log('shortcuts.length ', shortcuts.length);
-  ipcRenderer
-    .invoke('changeshortcut:fromrenderer', shortcuts.join('+'))
-    .then((res) => {
-      if (res) {
-        // dispatch(setShortcut(keys))
-      }
-      // setError('Something went wrong. Try again.')
-    });
+  return code;
 };
 
-const WidgetSettingsContent = ({ widgetSettingsContentInView }) => {
+const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
   const [shortcutFormHovered, setShortcutFormHovered] = useState(false);
+  const [layoutName, setLayoutName] = useState('default');
+  const dispatch = useDispatch();
+
+  const keyboardRef = useRef(null);
+
+  const captureAndSendShorcut = (event) => {
+    // return dispatch(setKeys({ key: event.key, code: keys[0] }));
+    let pressedKeyCodes = hotkeys.getPressedKeyCodes();
+    let shortcuts = [];
+
+    pressedKeyCodes.forEach((val) => {
+      let key = keys[val];
+      console.log('pressed key: ', key);
+
+      shortcuts.push(key);
+    });
+
+    if (shortcuts.length === 1) return;
+
+    ipcRenderer
+      .invoke('changeshortcut:fromrenderer', shortcuts.join('+'))
+      .then((res) => {
+        if (res) {
+          // highlightPersistedShortcut(shortcut);
+          // dispatch(setShortcut(keys))
+        }
+        // setError('Something went wrong. Try again.')
+      });
+  };
+
+  const clearHighlights = () => {
+    keyboardRef.current.recurseButtons((buttonElement) => {
+      buttonElement.classList.remove('active');
+    });
+  };
+
+  const highlightPersistedShortcut = () => {
+    let split = shortcut.split('+');
+    let keycode = [];
+
+    clearHighlights();
+
+    defaultLayout.forEach((row) => {
+      split.forEach((key) => {
+        if (key === 'CommandOrControl') key = 'controlleft';
+        else if (key === 'Shift') key = 'shiftleft';
+
+        if (key.length <= 1) {
+          console.log('less than or equal to 1');
+          keycode = key;
+        } else {
+          keycode = row.match(
+            // Match any part of the string and return the whole word with {} if any
+            new RegExp(`({?\\b)(\\w*${key}\\w*)(\\b}?)`, 'ig')
+          );
+        }
+
+        // Handle outliers
+        // Handle symbols ✅
+        // Handle shifted ✅
+
+        if (!keycode) return;
+        console.log('keycode ', keycode[0]);
+
+        keyboardRef.current
+          .getButtonElement(keycode[0].toLowerCase())
+          ?.classList.add('active');
+        keyboardRef.current
+          .getButtonElement(keycode[0].toUpperCase())
+          ?.classList.add('active');
+      });
+    });
+    // shortcut.forEach(val=>{
+
+    //   keyboardRef.current.getButtonElement(val).classList.toggle('active');
+    // })
+  };
+
+  const handleShift = () => {
+    const newLayoutName = layoutName === 'default' ? 'shift' : 'default';
+    setLayoutName(newLayoutName);
+  };
+
+  const onKeyPress = (button) => {
+    if (
+      button === '{shiftleft}' ||
+      button === '{shiftright}' ||
+      button === '{capslock}'
+    )
+      handleShift();
+
+    if (!widgetSettingsContentInView) return;
+    getKeyCode(button);
+  };
 
   useEffect(() => {
     console.log('widgetSettingsContentInView ', widgetSettingsContentInView);
@@ -126,6 +314,12 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView }) => {
 
     return () => hotkeys.unbind('*');
   }, [widgetSettingsContentInView]);
+
+  useEffect(() => {
+    if (!keyboardRef.current) return;
+
+    highlightPersistedShortcut();
+  }, [keyboardRef, layoutName, shortcut]);
 
   return (
     <div
@@ -196,23 +390,26 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView }) => {
         </div>
         <div className={styles.keyboardContainer}>
           <Keyboard
+            onKeyPress={onKeyPress}
+            keyboardRef={(r) => (keyboardRef.current = r)}
             physicalKeyboardHighlightBgColor={colors.coffeeOrange}
+            layoutName={layoutName}
             layout={{
               default: [
                 '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-                '\u00A7 1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
+                '1 2 3 4 5 6 7 8 9 0 + \u00B4 {backspace}',
                 '{tab} q w e r t y u i o p \u00E5 ¨',
                 "{capslock} a s d f g h j k l \u00F6 \u00E4 ' {enter}",
-                '{shiftleft} < z x c v b n m , . - {shiftright}',
+                '{shiftleft} z x c v b n m , . - {shiftright}',
                 '{controlleft} {altleft} {space} {altright} {controlright}',
               ],
               shift: [
                 '{escape} {f1} {f2} {f3} {f4} {f5} {f6} {f7} {f8} {f9} {f10} {f11} {f12}',
-                '\u00B0 ! " # $ % & / ( ) = ? ` {backspace}',
+                '! " # $ % & / ( ) = ? ` {backspace}',
                 '{tab} Q W E R T Y U I O P \u00C5 ^',
                 '{capslock} A S D F G H J K L \u00D6 \u00C4 * {enter}',
-                '{shiftleft} > Z X C V B N M ; : _ {shiftright}',
-                '[{controlleft} {altleft} {space} {altright} {controlright}]',
+                '{shiftleft} Z X C V B N M ; : _ {shiftright}',
+                '{controlleft} {altleft} {space} {altright} {controlright}',
               ],
             }}
             display={{
@@ -1035,6 +1232,7 @@ export default function SettingsContent() {
                 browserIconOnClickHandler={browserIconOnClickHandler}
               />
               <WidgetSettingsContent
+                shortcut={settingsState?.globalShortcut}
                 widgetSettingsContentInView={widgetSettingsContentInView}
               />
             </div>

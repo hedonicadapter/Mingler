@@ -10,6 +10,8 @@ interface SettingsState {
   settingsContent: string;
   browser: string;
   extensionID: string;
+  globalShortcut: string;
+  keys: Array<any>;
 }
 
 const initialState: SettingsState = {
@@ -18,6 +20,8 @@ const initialState: SettingsState = {
   settingsContent: 'Widget',
   browser: 'Chrome',
   extensionID: '',
+  globalShortcut: 'CommandOrControl+q',
+  keys: [''],
 };
 
 export const settingsSlice = createSlice({
@@ -77,10 +81,16 @@ export const settingsSlice = createSlice({
     setBrowserMain: (state, action: PayloadAction<string>) => {
       state.browser = action.payload;
     },
+    setKeys: (state, action: PayloadAction<any>) => {
+      state.keys.push(action.payload);
+    },
   },
   extraReducers: {
     setExtensionID: (state, action: PayloadAction<string>) => {
       state.extensionID = action.payload;
+    },
+    setGlobalShortcut: (state, action: PayloadAction<string>) => {
+      state.globalShortcut = action.payload;
     },
   },
 });
@@ -101,6 +111,8 @@ export const { setKeepMeSignedInMain } = settingsSlice.actions;
 export const { turnOffShowWelcomeMain } = settingsSlice.actions;
 export const { setSettingsContentMain } = settingsSlice.actions;
 export const { setBrowserMain } = settingsSlice.actions;
+
+export const { setKeys } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 
