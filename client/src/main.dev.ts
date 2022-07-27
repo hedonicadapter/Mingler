@@ -38,6 +38,7 @@ import { setExtensionID } from '../editJSON';
 
 const execFile = require('child_process').execFile;
 const JSON5 = require('json5');
+const utf8 = require('utf8');
 
 const storage = require('node-persist');
 storage.init({ dir: './mainState/persist' });
@@ -135,6 +136,33 @@ const answerProcess = (process) => {
   process.stdin.write('yo\n');
 };
 
+function decodeUTF8(utf8String) {
+  if (typeof utf8String != 'string')
+    throw new TypeError('parameter ‘utf8String’ is not a string');
+  // note: decode 3-byte chars first as decoded 2-byte strings could appear to be 3-byte char!
+  const unicodeString = utf8String
+    .replace(
+      /[\u00e0-\u00ef][\u0080-\u00bf][\u0080-\u00bf]/g, // 3-byte chars
+      function (c) {
+        // (note parentheses for precedence)
+        var cc =
+          ((c.charCodeAt(0) & 0x0f) << 12) |
+          ((c.charCodeAt(1) & 0x3f) << 6) |
+          (c.charCodeAt(2) & 0x3f);
+        return String.fromCharCode(cc);
+      }
+    )
+    .replace(
+      /[\u00c0-\u00df][\u0080-\u00bf]/g, // 2-byte chars
+      function (c) {
+        // (note parentheses for precedence)
+        var cc = ((c.charCodeAt(0) & 0x1f) << 6) | (c.charCodeAt(1) & 0x3f);
+        return String.fromCharCode(cc);
+      }
+    );
+  return unicodeString;
+}
+
 const initActiveWindowListenerProcess = () => {
   try {
     windowProcess?.exit();
@@ -148,7 +176,7 @@ const initActiveWindowListenerProcess = () => {
   windowProcess.stdout.on('data', function (data) {
     answerProcess(windowProcess);
 
-    let windowInfo = data.toString().trim();
+    let windowInfo = decodeUTF8(data.toString().trim().replace(/\\"/g, '"')); // Yea it's a one-liner, what about it
 
     console.log('windowInfo ', windowInfo);
 
@@ -216,6 +244,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     try {
       console.log('processedData1', processedData);
       if (processedData === 401) return;
+
       let trackInfo = JSON5.parse(processedData);
 
       console.log('trackinfo3 ', trackInfo);

@@ -140,7 +140,7 @@ def get_from_app():
 
 class WindowObserver(IWindowChangeObserver):
     def notify(self, win_title):
-        print(win_title)
+        print(str(win_title.encode("utf-8"))[2:-1])
         sys.stdout.flush()
         get_from_app()
 

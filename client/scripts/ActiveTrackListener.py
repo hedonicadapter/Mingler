@@ -69,6 +69,21 @@ def send_to_app(data):
     sys.stdout.flush()
     get_from_app()
 
+# By Henri Chabert at https://stackoverflow.com/a/55734992/11599993
+def utfy_dict(dic):
+    if isinstance(dic,str):
+        return(str(dic.encode("utf-8"))[2:-1])
+    elif isinstance(dic,dict):
+        for key in dic:
+            dic[key] = utfy_dict(dic[key])
+        return(dic)
+    elif isinstance(dic,list):
+        new_l = []
+        for e in dic:
+            new_l.append(utfy_dict(e))
+        return(new_l)
+    else:
+        return(dic)
             
 
 def main():
@@ -83,7 +98,7 @@ def main():
                 if current_track_info["id"] is None:
                     pass;
                 elif previous_track_id != current_track_info["id"]:
-                    send_to_app(current_track_info)
+                    send_to_app(utfy_dict(current_track_info))
 
                     previous_track_id = current_track_info["id"]
                 

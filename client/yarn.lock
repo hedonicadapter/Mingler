@@ -1587,16 +1587,6 @@
     "@rpldy/shared" "^1.0.0"
     "@rpldy/simple-state" "^1.0.0"
 
-"@rpldy/uploady@^1.0.0":
-  "integrity" "sha512-EQdrdB1gvlXeUsUdLkhWS1Q7Cit7FBpK3WwBCrtODTIgmab1l+/6opHREv7/l8zfxnAf7DI/97fcFUCHt0D/8w=="
-  "resolved" "https://registry.npmjs.org/@rpldy/uploady/-/uploady-1.0.0.tgz"
-  "version" "1.0.0"
-  dependencies:
-    "@rpldy/life-events" "^1.0.0"
-    "@rpldy/shared" "^1.0.0"
-    "@rpldy/shared-ui" "^1.0.0"
-    "@rpldy/uploader" "^1.0.0"
-
 "@sindresorhus/is@^0.14.0":
   "integrity" "sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ=="
   "resolved" "https://registry.npmjs.org/@sindresorhus/is/-/is-0.14.0.tgz"
@@ -12982,6 +12972,11 @@
   "integrity" "sha1-9F8VDExm7uloGGUFq5P8u4rWv2E="
   "resolved" "https://registry.npmjs.org/utf8-byte-length/-/utf8-byte-length-1.0.4.tgz"
   "version" "1.0.4"
+
+"utf8@^3.0.0":
+  "integrity" "sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ=="
+  "resolved" "https://registry.npmjs.org/utf8/-/utf8-3.0.0.tgz"
+  "version" "3.0.0"
 
 "util-deprecate@^1.0.1", "util-deprecate@^1.0.2", "util-deprecate@~1.0.1":
   "integrity" "sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8="

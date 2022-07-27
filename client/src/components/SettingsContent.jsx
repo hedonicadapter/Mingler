@@ -6,8 +6,6 @@ import { IoLogoEdge, IoLogoChrome } from 'react-icons/io5';
 import ReactTooltip from 'react-tooltip';
 import developermodeedge from '../../assets/developermodeedge.png';
 import developermodechrome from '../../assets/developermodechrome.png';
-import Uploady from '@rpldy/uploady';
-import UploadButton from '@rpldy/upload-button';
 
 import styles from './SettingsContent.module.css';
 import { useLocalStorage } from '../helpers/localStorageManager';
@@ -151,7 +149,6 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
         else if (key === 'Shift') key = 'shiftleft';
 
         if (key.length <= 1) {
-          console.log('less than or equal to 1');
           keycode = key;
         } else {
           keycode = row.match(
@@ -160,12 +157,7 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
           );
         }
 
-        // Handle outliers
-        // Handle symbols ✅
-        // Handle shifted ✅
-
         if (!keycode) return;
-        console.log('keycode ', keycode[0]);
 
         keyboardRef.current
           .getButtonElement(keycode[0].toLowerCase())
@@ -175,10 +167,6 @@ const WidgetSettingsContent = ({ widgetSettingsContentInView, shortcut }) => {
           ?.classList.add('active');
       });
     });
-    // shortcut.forEach(val=>{
-
-    //   keyboardRef.current.getButtonElement(val).classList.toggle('active');
-    // })
   };
 
   const handleShift = () => {
@@ -454,16 +442,6 @@ const AccountSettingsContent = ({
           }
           transition={{ duration: 0.1 }}
         >
-          {/* <Uploady
-            destination={{
-              url: 'https://menglir.herokuapp.com/api/private/setProfilePicture',
-              headers: {
-                Authorization: `Bearer ${settingsState?.currentUser?.accessToken}`,
-              },
-            }}
-          >
-            <UploadButton />
-          </Uploady> */}
           <motion.label
             whileHover={{
               cursor: formFilled === 'loading' ? 'default' : 'pointer',
