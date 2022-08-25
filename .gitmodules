@@ -6,3 +6,6 @@
 	path = Mingler-chromium-extension
 	url = git@github.com:YungMilky/Mingler-chromium-extension.git
 	branch = main
+[submodule "website"]
+	path = website
+	url = https://github.com/YungMilky/website.git

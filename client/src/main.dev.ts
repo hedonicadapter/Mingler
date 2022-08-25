@@ -136,31 +136,12 @@ const answerProcess = (process) => {
   process.stdin.write('yo\n');
 };
 
-function decodeUTF8(utf8String) {
-  if (typeof utf8String != 'string')
-    throw new TypeError('parameter ‘utf8String’ is not a string');
-  // note: decode 3-byte chars first as decoded 2-byte strings could appear to be 3-byte char!
-  const unicodeString = utf8String
-    .replace(
-      /[\u00e0-\u00ef][\u0080-\u00bf][\u0080-\u00bf]/g, // 3-byte chars
-      function (c) {
-        // (note parentheses for precedence)
-        var cc =
-          ((c.charCodeAt(0) & 0x0f) << 12) |
-          ((c.charCodeAt(1) & 0x3f) << 6) |
-          (c.charCodeAt(2) & 0x3f);
-        return String.fromCharCode(cc);
-      }
-    )
-    .replace(
-      /[\u00c0-\u00df][\u0080-\u00bf]/g, // 2-byte chars
-      function (c) {
-        // (note parentheses for precedence)
-        var cc = ((c.charCodeAt(0) & 0x1f) << 6) | (c.charCodeAt(1) & 0x3f);
-        return String.fromCharCode(cc);
-      }
-    );
-  return unicodeString;
+function decodeUTF8(utf8String: string) {
+  if (!utf8String) return '';
+
+  let formattedString = utf8String.replace(/\\x/g, '%');
+
+  return decodeURIComponent(formattedString);
 }
 
 const initActiveWindowListenerProcess = () => {
@@ -178,8 +159,6 @@ const initActiveWindowListenerProcess = () => {
 
     let windowInfo = decodeUTF8(data.toString().trim().replace(/\\"/g, '"')); // Yea it's a one-liner, what about it
 
-    console.log('windowInfo ', windowInfo);
-
     // Second comparison doesn't work for some reason
     if (
       windowInfo &&
@@ -189,7 +168,7 @@ const initActiveWindowListenerProcess = () => {
       windowInfo !== 'Spotify Free'
     ) {
       mainWindow?.webContents.send('windowinfo:frommain', {
-        WindowTitle: windowInfo,
+        WindowTitle: decodeUTF8(windowInfo),
         Date: new Date(),
       });
     }
@@ -228,7 +207,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     answerProcess(trackProcess);
 
     let processedData = data.toString().trim();
-    console.log('processedData ', processedData);
+    // console.log('processedData ', processedData);
     if (processedData === '401') {
       trackProcess.stdin.end();
       trackProcess.stdout.destroy();
@@ -242,17 +221,15 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     }
 
     try {
-      console.log('processedData1', processedData);
+      // console.log('processedData1', processedData);
       if (processedData === 401) return;
 
       let trackInfo = JSON5.parse(processedData);
 
-      console.log('trackinfo3 ', trackInfo);
-
       if (trackInfo) {
         mainWindow?.webContents.send('trackinfo:frommain', {
-          Artists: trackInfo.artists,
-          TrackTitle: trackInfo.name,
+          Artists: decodeUTF8(trackInfo.artists),
+          TrackTitle: decodeUTF8(trackInfo.name),
           TrackURL: trackInfo.link,
           Date: new Date(),
         });
@@ -478,7 +455,7 @@ const createWindow = async () => {
     }
 
     mainWindow.on('blur', () => {
-      // mainWindow?.setAlwaysOnTop(true);
+      mainWindow?.setAlwaysOnTop(true);
       mainWindow?.showInactive();
       if (mainWindow.webContents.isDevToolsFocused()) {
         return; //ignore
