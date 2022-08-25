@@ -156,7 +156,7 @@ const ServiceSelector = ({ slides, setSlide }) => {
     <AnimationWrapper>
       <motion.div
         whileHover={{
-          borderTopColor: colors.darkmodeBlack,
+          borderBottomColor: colors.darkmodeBlack,
           transition: { duration: 0.1 },
         }}
         whileTap={animations.whileTap}
@@ -167,7 +167,7 @@ const ServiceSelector = ({ slides, setSlide }) => {
         ].join(' ')}
         // style={{ backgroundColor: colors.coffeePink }}
         style={{
-          borderTop: '1px solid ' + colors.offWhitePressed2,
+          borderBottom: '1px solid ' + colors.offWhitePressed2,
           margin: 'auto',
         }}
         onClick={() => handleServiceButtonClick('email')}
@@ -187,7 +187,7 @@ const ServiceSelector = ({ slides, setSlide }) => {
                 service.available && {
                   color: colors.darkmodeHighWhite,
                   transition: { duration: 0.1 },
-                  borderTopColor: colors.darkmodeBlack,
+                  borderBottomColor: colors.darkmodeBlack,
                 }
               }
               whileFocus={{
@@ -209,7 +209,7 @@ const ServiceSelector = ({ slides, setSlide }) => {
               //     service.title === 'guest' && colors.coffeeBrown,
               // }}
               style={{
-                borderTop: service.available
+                borderBottom: service.available
                   ? '1px solid ' + colors.darkmodeBlack
                   : '1px solid ' + colors.offWhitePressed2,
               }}
@@ -228,10 +228,10 @@ const ServiceSelector = ({ slides, setSlide }) => {
         whileHover={{
           color: colors.darkmodeBlack,
           transition: { duration: 0.1 },
-          borderTopColor: colors.darkmodeBlack,
+          borderBottomColor: colors.darkmodeBlack,
         }}
         whileFocus={{ color: colors.darkmodeBlack }}
-        style={{ borderTop: '1px solid ' + colors.offWhitePressed2 }}
+        style={{ borderBottom: '1px solid ' + colors.offWhitePressed2 }}
         whileTap={animations.whileTap}
         onClick={() => handleServiceButtonClick('guest')}
       >
@@ -342,7 +342,7 @@ const GuestSlide = () => {
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
-          borderTop: '1px solid ' + colors.offWhitePressed2,
+          borderBottom: '1px solid ' + colors.offWhitePressed2,
         }}
       >
         <input
@@ -354,7 +354,7 @@ const GuestSlide = () => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt)}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: name
+            borderBottom: name
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
@@ -477,7 +477,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'name')}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: name
+            borderBottom: name
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
@@ -502,7 +502,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: email
+            borderBottom: email
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
@@ -526,7 +526,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: password
+            borderBottom: password
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
@@ -566,25 +566,25 @@ const FormButton = ({ formFilled, error, buttonText, buttonHandler }) => {
         animations.whileTap
       }
       style={{
-        minWidth: '80px',
+        minWidth: 80,
+        width: '99%',
         opacity: 0,
-        paddingRight: 12,
+        marginRight: 12,
         alignSelf: 'center',
         fontSize: '0.8em',
         opacity: formFilled === 'false' ? 0 : 1,
         cursor: error ? 'default' : 'auto',
         textAlign: 'right',
+        position: 'relative',
       }}
       onClick={() =>
         formFilled != 'false' && formFilled != 'loading' && buttonHandler()
       }
     >
       <LoadingAnimation
-        style={
-          buttonText === 'sign in' && {
-            paddingBottom: 3,
-          }
-        }
+        style={{
+          paddingBottom: buttonText === 'sign in' && 3,
+        }}
         formFilled={formFilled}
         buttonText={buttonText}
         error={error}
@@ -701,7 +701,7 @@ const SigninSlide = ({ justRegistered }) => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'email')}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: email
+            borderBottom: email
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
@@ -725,7 +725,7 @@ const SigninSlide = ({ justRegistered }) => {
           onKeyUp={(evt) => handleBackspaceAndEnter(evt, 'password')}
           className={[styles.inputStyle, 'undraggable', 'clickable'].join(' ')}
           style={{
-            borderTop: password
+            borderBottom: password
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:

@@ -4,6 +4,21 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../../config/colors';
 
+const AnimationWrapper = ({ children, key, style }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      style={style}
+      key={key}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 export const LoadingAnimation = ({
   formFilled,
   buttonText = '',
@@ -11,62 +26,47 @@ export const LoadingAnimation = ({
   style,
 }) => {
   return (
-    <AnimatePresence>
+    <AnimatePresence exitBeforeEnter>
       <div
         style={
           style
             ? {
                 ...style,
+                position: 'absolute',
+                right: 0,
               }
             : {
-                marginLeft: 40,
-                width: 100,
-                height: 30,
+                width: '100%',
+                position: 'absolute',
+                right: 0,
                 ...style,
               }
         }
       >
         {formFilled === 'loading' ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            key={formFilled}
-          >
+          <AnimationWrapper>
             <ReactLoading
               style={{
                 outline: '1px solid transparent', // makes it work for some reason
                 width: '1.1em',
                 height: '1.1em',
-                float: 'right',
+                // float: 'right',
+
                 paddingRight: style ? 0 : 12,
               }}
               type={'spin'}
               color={colors.defaultPlaceholderTextColor}
             />
-          </motion.div>
+          </AnimationWrapper>
         ) : error ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+          <AnimationWrapper
             key={formFilled}
             style={{ fontSize: '0.9em', color: colors.coffeeRed }}
           >
             {error}
-          </motion.div>
+          </AnimationWrapper>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            key={formFilled}
-          >
-            {buttonText}
-          </motion.div>
+          <AnimationWrapper key={formFilled}>{buttonText}</AnimationWrapper>
         )}
       </div>
     </AnimatePresence>
