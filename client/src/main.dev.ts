@@ -199,10 +199,6 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
   // trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
-  trackProcess.on('exit', () =>
-    console.warn('trackprocess exited ', trackProcess)
-  );
-
   trackProcess.stdout.on('data', function (data) {
     answerProcess(trackProcess);
 
@@ -239,12 +235,41 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     }
   });
 
+  trackProcess.on('spawn', function () {
+    let payload;
+
+    if (trackProcess.connected) {
+      payload = true;
+    } else {
+      payload = false;
+    }
+    console.log('set spotify connected ', payload);
+    store?.dispatch({
+      type: 'setSpotifyConnected',
+      payload,
+    });
+  });
+
+  trackProcess.on('exit', () =>
+    store?.dispatch({
+      type: 'setSpotifyConnected',
+      payload: false,
+    })
+  );
+
   trackProcess.stderr.on('data', function (data) {
     console.warn('stderr activeTrackListener: ', data);
   });
 
   trackProcess.on('error', function (err) {
     if (err) return console.error('trackprocess error: ', err);
+  });
+
+  trackProcess.on('disconnect', function () {
+    store?.dispatch({
+      type: 'setSpotifyConnected',
+      payload: false,
+    });
   });
 };
 
@@ -596,6 +621,18 @@ const createWindow = async () => {
     'initActiveTrackListener:fromrenderer',
     (event, spotifyAccessToken) => {
       initActiveTrackListenerProcess(spotifyAccessToken);
+
+      // let payload;
+
+      // if (trackProcess?.connected) {
+      //   payload = true;
+      // } else {
+      //   payload = false;
+      // }
+      store?.dispatch({
+        type: 'setSpotifyConnected',
+        payload: true,
+      });
       return true;
     }
   );

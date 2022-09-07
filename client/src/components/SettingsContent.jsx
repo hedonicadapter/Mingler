@@ -386,22 +386,23 @@ const AccountSettingsContent = ({
   const spotifyTextAnimationControls = useAnimation();
 
   useEffect(() => {
-    let now = new Date();
-    let spotifyExpiryDate = new Date(
-      settingsState.currentUser?.spotifyExpiryDate
-    );
+    console.log({
+      connectedToSpotify,
+      accesstoken: settingsState.currentUser?.spotifyAccessToken,
+      expired:
+        new Date() < new Date(settingsState.currentUser?.spotifyExpiryDate),
+    });
+  }, [connectedToSpotify]);
 
-    if (
-      // If access token exists and hasnt expired
-      settingsState.currentUser?.spotifyAccessToken &&
-      now < spotifyExpiryDate
-    ) {
-      setConnectedToSpotify(true);
-    } else setConnectedToSpotify(false);
-  }, [
-    settingsState.currentUser?.spotifyAccessToken,
-    settingsState.currentUser?.spotifyExpiryDate,
-  ]);
+  useEffect(() => {
+    console.log(
+      'spotifyConncetet: ',
+      settingsState.currentUser?.spotifyConnected
+    );
+    settingsState.currentUser?.spotifyConnected
+      ? setConnectedToSpotify(true)
+      : setConnectedToSpotify(false);
+  }, [settingsState.currentUser?.spotifyConnected]);
 
   const animationSequence = async () => {
     await spotifyTextAnimationControls.start({

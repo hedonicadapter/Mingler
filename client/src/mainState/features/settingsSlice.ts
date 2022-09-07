@@ -37,7 +37,6 @@ export const settingsSlice = createSlice({
       }
 
       if (data.profilePicture && Object.keys(data.profilePicture).length != 0) {
-        console.log('data.profilePicture ', data.profilePicture);
         data.profilePicture = data.profilePicture;
       }
 
@@ -91,6 +90,20 @@ export const settingsSlice = createSlice({
     },
     setGlobalShortcut: (state, action: PayloadAction<string>) => {
       state.globalShortcut = action.payload;
+    },
+    setSpotifyConnected: (state, action: PayloadAction<boolean>) => {
+      if (!state.currentUser) return;
+
+      let now = new Date();
+      let spotifyExpiryDate = new Date(state.currentUser?.spotifyExpiryDate);
+
+      if (
+        // If access token exists and hasnt expired
+        state.currentUser.spotifyAccessToken &&
+        now < spotifyExpiryDate
+      ) {
+        state.currentUser.spotifyConnected = action.payload;
+      } else state.currentUser.spotifyConnected = false;
     },
   },
 });

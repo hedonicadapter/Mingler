@@ -54,7 +54,6 @@ export function FriendsProvider({ children }) {
     setYouTubeTimeRequestListeners();
     setChromiumHostDataTimeReplyListeners();
 
-    console.log('friends ', friends);
     // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
     // it isn't cleaned up there every time 'friends' changes
     return () => {
@@ -139,8 +138,6 @@ export function FriendsProvider({ children }) {
   };
 
   const getFriends = async () => {
-    console.log(currentUser._id);
-    console.log(currentUser.accessToken);
     return await DAO.getFriends(currentUser._id, currentUser.accessToken)
       .then((res) => {
         if (res?.data?.success) {
@@ -159,7 +156,6 @@ export function FriendsProvider({ children }) {
   const getFriendRequests = () => {
     DAO.getFriendRequests(currentUser?._id, currentUser?.accessToken)
       .then((res) => {
-        console.log('friend requests ', res);
         res.data.friendRequests?.forEach((object, index) => {
           object.key = index;
 

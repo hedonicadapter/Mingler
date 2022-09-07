@@ -71,6 +71,8 @@ const findFriendsWindowConfig = {
 };
 
 const connectSpotifyWindowConfig = {
+  height: 768,
+  width: 550,
   title: 'Connect to Spotify',
   show: false,
   icon: favicon,
@@ -334,68 +336,91 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const loadConnectSpotifyContent = () => {
-    DAO.createSpotifyURL(currentUser.accessToken)
-      .then(async (res) => {
-        if (res?.data?.success) {
-          console.warn(
-            'spotify authorize url from heroku ',
-            res.data.authorizeURL
-          );
-          connectSpotifyWindow
-            .loadURL(res.data.authorizeURL)
-            .then()
-            .catch((e) => sendSpotifyError(e));
+    try {
+      DAO.createSpotifyURL(currentUser.accessToken)
+        .then(async (res) => {
+          if (res?.data?.success) {
+            console.warn(
+              'spotify authorize url from server ',
+              res.data.authorizeURL
+            );
 
-          await connectSpotifyWindow.once('ready-to-show', () => {
-            connectSpotifyWindow.setTitle('Connect with Spotify');
-            connectSpotifyWindow.show();
+            // if (connectSpotifyWindow.isDestroyed()) {
+            //   setConnectSpotifyWindow(
+            //     new BrowserWindow(connectSpotifyWindowConfig)
+            //   );
+            // } else {
+            connectSpotifyWindow
+              .loadURL(res.data.authorizeURL)
+              .then()
+              .catch((e) => sendSpotifyError(e));
+            // }
 
-            let currentUrl = connectSpotifyWindow.webContents.getURL();
-            let code;
+            await connectSpotifyWindow.once('ready-to-show', () => {
+              connectSpotifyWindow.setTitle('Connect with Spotify');
+              connectSpotifyWindow.show();
 
-            if (currentUrl.includes('localhost:')) {
-              code = currentUrl.substring(currentUrl.indexOf('=') + 1);
-            } else {
-              connectSpotifyWindow.webContents.once(
-                'will-redirect',
-                (event, url) => {
-                  connectSpotifyWindow.webContents.once('dom-ready', () => {
-                    // get only the string content after "="
-                    code = url.substring(url.indexOf('=') + 1);
-                    //localhost:1212/?code=AQC9QkkbHZT2A6sYJLo8Rd0taIkkbgRTReRx6Lw9QyiUwHykeCXdw55bEk6CBJjYS5sXDyzQPAjkt-QVzNcUzZDSzUeMqdfs2RKjyM9EnDKhI4dbnzk9cZMGSjeldKq_8B6eRRU2hD_imYqVIE-mGxYioZ9n_w_lzIzRJt4dXNpNyDiee9FZF9hxuq-kDSOX8QPVGqsmles7I9SSbQXtRg9R0LHSjS-wO62GA-mUZtAiefCsrINxDOjRaMyBJRZ31PeerArXZACX8tTSqQ
-                  });
-                }
-              );
-            }
+              let currentUrl = connectSpotifyWindow.webContents.getURL();
+              let code;
 
-            DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
-              .then((result) => {
-                console.warn('spotiffff ', result);
-                if (result.data.success) {
-                  dispatch(
-                    setSpotifyAccessTokenMain(result.data.body['access_token'])
-                  );
-                  dispatch(
-                    setSpotifyRefreshTokenMain(
-                      result.data.body['refresh_token']
-                    )
-                  );
-                  dispatch(
-                    setSpotifyExpiryDate(result.data.body['spotifyExpiryDate'])
-                  );
-                  activeTrackListener(result.data.body['access_token']);
-                }
-              })
-              .catch((e) => {
-                sendSpotifyError(e);
-              })
-              .finally(() => connectSpotifyWindow.destroy());
-          });
-        }
-      })
-      .catch((e) => {
-        sendSpotifyError(e);
-      });
+              if (currentUrl.includes('localhost:')) {
+                code = currentUrl.substring(currentUrl.indexOf('=') + 1);
+              } else {
+                connectSpotifyWindow.webContents.once(
+                  'will-redirect',
+                  (event, url) => {
+                    connectSpotifyWindow.webContents.once('dom-ready', () => {
+                      // get only the string content after "="
+                      code = url.substring(url.indexOf('=') + 1);
+                      //localhost:1212/?code=AQC9QkkbHZT2A6sYJLo8Rd0taIkkbgRTReRx6Lw9QyiUwHykeCXdw55bEk6CBJjYS5sXDyzQPAjkt-QVzNcUzZDSzUeMqdfs2RKjyM9EnDKhI4dbnzk9cZMGSjeldKq_8B6eRRU2hD_imYqVIE-mGxYioZ9n_w_lzIzRJt4dXNpNyDiee9FZF9hxuq-kDSOX8QPVGqsmles7I9SSbQXtRg9R0LHSjS-wO62GA-mUZtAiefCsrINxDOjRaMyBJRZ31PeerArXZACX8tTSqQ
+                    });
+                  }
+                );
+              }
+
+              DAO.authorizeSpotify(
+                code,
+                currentUser._id,
+                currentUser.accessToken
+              )
+                .then((result) => {
+                  hideWindow(connectSpotifyWindow);
+                  console.warn('spotiffff ', result);
+                  if (result.data.success) {
+                    dispatch(
+                      setSpotifyAccessTokenMain(
+                        result.data.body['access_token']
+                      )
+                    );
+                    dispatch(
+                      setSpotifyRefreshTokenMain(
+                        result.data.body['refresh_token']
+                      )
+                    );
+                    dispatch(
+                      setSpotifyExpiryDate(
+                        result.data.body['spotifyExpiryDate']
+                      )
+                    );
+                    activeTrackListener(result.data.body['access_token']);
+                  }
+                })
+                .catch((e) => {
+                  sendSpotifyError(e);
+                });
+            });
+          }
+        })
+
+        .catch((e) => {
+          sendSpotifyError(e);
+        });
+    } catch (e) {
+      sendSpotifyError(e);
+    } finally {
+      console.log('hiding window');
+      hideWindow(connectSpotifyWindow);
+    }
   };
 
   const toggleConnectSpotify = () => {

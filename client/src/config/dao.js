@@ -182,11 +182,16 @@ export class DAO {
   };
 
   createSpotifyURL = (token) => {
-    return privateRoute.post('/createSpotifyURL', null, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    console.warn({ token });
+    return privateRoute.post(
+      '/createSpotifyURL',
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
   };
 
   authorizeSpotify = (code, userID, token) => {
