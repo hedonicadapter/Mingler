@@ -161,6 +161,7 @@ const initActiveWindowListenerProcess = () => {
 
     // Second comparison doesn't work for some reason
     if (
+      !mainWindow?.isDestroyed() &&
       windowInfo &&
       windowInfo !== 'Mingler' &&
       windowInfo !== 'Task Switching' &&
@@ -222,7 +223,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 
       let trackInfo = JSON5.parse(processedData);
 
-      if (trackInfo) {
+      if (!mainWindow?.isDestroyed() && trackInfo) {
         mainWindow?.webContents.send('trackinfo:frommain', {
           Artists: decodeUTF8(trackInfo.artists),
           TrackTitle: decodeUTF8(trackInfo.name),
