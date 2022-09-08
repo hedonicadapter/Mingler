@@ -50,10 +50,6 @@ export default function AccordionItem({
   const [activityLength, setActivityLength] = useState(null);
   const [online, setOnline] = useState();
 
-  useEffect(() => {
-    console.log('chatVisible ', chatVisible);
-  }, [chatVisible]);
-
   // Set random online/offline statuses for demo account default friends
   useEffect(() => {
     let timeouts = [];

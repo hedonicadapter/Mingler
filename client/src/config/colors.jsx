@@ -34,6 +34,7 @@ export default {
 
   darkmodeBlack: 'rgba(18,18,18,0.86)',
   darkmodeLightBlack: 'rgba(14,14,14,0.86)',
+  darkmodeLighterBlack: 'rgba(14,14,14,0.74)',
 
   darkmodeHighWhite: 'rgba(255,255,255,0.87)',
   darkmodeMediumWhite: 'rgba(255,255,255,0.60)',

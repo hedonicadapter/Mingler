@@ -256,18 +256,48 @@ const Slider = ({
     { key: 5, title: 'email' },
   ];
 
+  const ServiceAnimationWrapper = ({ index, children }) => {
+    return (
+      <motion.div
+        key={index}
+        layout="position"
+        inital={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ delay: 0.15, duration: 0.15 }}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
   return (
     <div className={styles.sliderContainer}>
-      {currentSlide === 'init' && (
-        <ServiceSelector slides={slides} setSlide={setSlide} />
-      )}
-      {currentSlide === 'guest' && <GuestSlide />}
-      {currentSlide === 'email' && (
-        <EmailSlide setSlide={setSlide} setJustRegistered={setJustRegistered} />
-      )}
-      {currentSlide === 'signIn' && (
-        <SigninSlide justRegistered={justRegistered} />
-      )}
+      <AnimatePresence exitBeforeEnter>
+        {currentSlide === 'init' && (
+          <ServiceAnimationWrapper index={0}>
+            <ServiceSelector slides={slides} setSlide={setSlide} />
+          </ServiceAnimationWrapper>
+        )}
+        {currentSlide === 'guest' && (
+          <ServiceAnimationWrapper index={1}>
+            <GuestSlide />
+          </ServiceAnimationWrapper>
+        )}
+        {currentSlide === 'email' && (
+          <ServiceAnimationWrapper index={2}>
+            <EmailSlide
+              setSlide={setSlide}
+              setJustRegistered={setJustRegistered}
+            />
+          </ServiceAnimationWrapper>
+        )}
+        {currentSlide === 'signIn' && (
+          <ServiceAnimationWrapper index={3}>
+            <SigninSlide justRegistered={justRegistered} />
+          </ServiceAnimationWrapper>
+        )}
+      </AnimatePresence>
       <Footer currentSlide={currentSlide} setSlide={setSlide} />
     </div>
   );
@@ -800,7 +830,7 @@ const SigninSlide = ({ justRegistered }) => {
 
 const Header = ({ showWelcome, slide, setSlide }) => {
   return (
-    <div className={styles.header}>
+    <motion.div layout="position" className={styles.header}>
       <BackButton slide={slide} setSlide={setSlide} />
       {showWelcome ? (
         <>
@@ -814,7 +844,7 @@ const Header = ({ showWelcome, slide, setSlide }) => {
       <div style={{ opacity: 0, pointerEvents: 'none' }}>
         <BackButton slide={slide} setSlide={setSlide} />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

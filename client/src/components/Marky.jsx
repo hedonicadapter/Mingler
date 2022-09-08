@@ -27,15 +27,12 @@ const markyVariants = {
   Window: { cursor: 'default' },
   Track: {
     color: colors.pastelGreen,
-    cursor: 'pointer',
   },
   Tab: {
     color: colors.pastelBlue,
-    cursor: 'pointer',
   },
   YouTubeVideo: {
     color: colors.pastelRed,
-    cursor: 'pointer',
   },
 };
 
@@ -149,21 +146,19 @@ export default function Marky({
 
   const ActivityIcon = () => {
     if (WindowTitle) {
-      return <RiWindow2Fill className={styles.windowIconStyle} />;
+      return <RiWindow2Fill className={styles.iconStyle} size={20} />;
     }
 
     if (TrackTitle) {
-      return <BsSpotify className={styles.trackIconStyle} />;
+      return <BsSpotify className={styles.iconStyle} size={19} />;
     }
 
     if (TabTitle || TabURL) {
-      return (
-        <BiPlanet className={styles.tabIconStyle} style={{ paddingTop: 1 }} />
-      );
+      return <BiPlanet className={styles.iconStyle} size={20} />;
     }
 
     if (YouTubeTitle || YouTubeURL) {
-      return <BsYoutube className={styles.yotubeIconStyle} />;
+      return <BsYoutube className={styles.iconStyle} size={19} />;
       // return markyToReplaceWithYouTubeVideo ? (
       //   <motion.div variants={buttonVariants} whileHover="hover">
       //     <RiArrowDropUpLine className={styles.closeIconStyle} />
@@ -196,19 +191,14 @@ export default function Marky({
   return (
     <motion.div
       className={styles.marky}
+      style={{ opacity: expanded ? 0.9 : 0.86 }}
       whileHover={markyType}
       variants={markyVariants}
       transition={{ duration: 0.1 }}
       onClick={(evt) => handleClick(evt)}
     >
       <ActivityIcon />
-      <motion.div
-        ref={marqueeRef}
-        className={styles.activityText}
-        style={{
-          color: expanded ? colors.darkmodeBlack : colors.darkmodeLightBlack,
-        }}
-      >
+      <motion.div ref={marqueeRef} className={styles.activityText}>
         <AnimatePresence>
           {expanded ? (
             <motion.div

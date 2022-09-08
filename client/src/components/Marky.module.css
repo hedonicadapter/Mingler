@@ -2,13 +2,13 @@
   z-index: 80;
   flex-direction: row;
   display: flex;
-  color: var(--dark-mode-black);
   align-items: center;
   position: relative;
+  cursor: pointer;
 }
 
 .activityText {
-  font-size: 0.9em;
+  font-size: 1.3em;
 
   white-space: nowrap;
   overflow: hidden;
@@ -40,31 +40,8 @@
   color: var(--dark-mode-disabled-text);
 }
 
-.windowIconStyle {
-  width: 19px !important;
-  height: 19px !important;
-  padding-right: 5px;
-  padding-left: 1px;
-}
-
-.trackIconStyle {
-  width: 17px !important;
-  height: 17px !important;
+.iconStyle {
   padding-right: 6px;
-  padding-left: 1px;
-}
-
-.tabIconStyle {
-  width: 21px !important;
-  height: 21px !important;
-  padding-right: 4px;
-}
-
-.yotubeIconStyle {
-  width: 17px !important;
-  height: 17px !important;
-  padding-right: 7px;
-  padding-left: 1px;
 }
 
 .closeIconStyle {
