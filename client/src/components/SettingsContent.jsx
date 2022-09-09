@@ -383,6 +383,8 @@ const AccountSettingsContent = ({
 }) => {
   const [connectedToSpotify, setConnectedToSpotify] = useState();
   const [spotifyHovered, setSpotifyHovered] = useState(false);
+  const [disconnectSpotifyHovered, setDisconnectSpotifyHovered] =
+    useState(false);
 
   useEffect(() => {
     console.log({
@@ -394,10 +396,6 @@ const AccountSettingsContent = ({
   }, [connectedToSpotify]);
 
   useEffect(() => {
-    console.log(
-      'spotifyConncetet: ',
-      settingsState.currentUser?.spotifyConnected
-    );
     settingsState.currentUser?.spotifyConnected
       ? setConnectedToSpotify(true)
       : setConnectedToSpotify(false);
@@ -406,9 +404,16 @@ const AccountSettingsContent = ({
   const SpotifyTextAnimationWrapper = ({ index, children }) => (
     <motion.div
       key={index}
-      initial={{ opacity: 0 }}
+      initial={
+        !connectedToSpotify && !spotifyError ? { opacity: 1 } : { opacity: 0 }
+      }
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={
+        !connectedToSpotify && !spotifyError && !spotifyHovered
+          ? { opacity: 1 }
+          : { opacity: 0 }
+      }
+      transition={{ duration: 0.1 }}
     >
       {children}
     </motion.div>
@@ -417,25 +422,34 @@ const AccountSettingsContent = ({
   const SpotifyText = () => {
     return (
       <AnimatePresence exitBeforeEnter>
-        {(spotifyError || connectedToSpotify) && spotifyHovered && (
+        {connectedToSpotify && disconnectSpotifyHovered && (
           <SpotifyTextAnimationWrapper index={0}>
-            <div>reconnect</div>
+            <div>disconnect</div>
           </SpotifyTextAnimationWrapper>
         )}
-        {spotifyError && !spotifyHovered && (
-          <SpotifyTextAnimationWrapper index={1}>
+
+        {!disconnectSpotifyHovered &&
+          (spotifyError || connectedToSpotify) &&
+          spotifyHovered && (
+            <SpotifyTextAnimationWrapper index={1}>
+              <div>reconnect</div>
+            </SpotifyTextAnimationWrapper>
+          )}
+
+        {!disconnectSpotifyHovered && spotifyError && !spotifyHovered && (
+          <SpotifyTextAnimationWrapper index={2}>
             <div>{spotifyError}</div>
           </SpotifyTextAnimationWrapper>
         )}
 
-        {connectedToSpotify && !spotifyHovered && (
-          <SpotifyTextAnimationWrapper index={2}>
+        {!disconnectSpotifyHovered && connectedToSpotify && !spotifyHovered && (
+          <SpotifyTextAnimationWrapper index={3}>
             <div>connected</div>
           </SpotifyTextAnimationWrapper>
         )}
 
         {!connectedToSpotify && !spotifyError && (
-          <SpotifyTextAnimationWrapper index={3}>
+          <SpotifyTextAnimationWrapper index={4}>
             <div>connect</div>
           </SpotifyTextAnimationWrapper>
         )}
@@ -579,15 +593,16 @@ const AccountSettingsContent = ({
           className={styles.connectSpotifyContainer}
           style={{
             transition: 'color 0.15s linear',
-            color: spotifyError
-              ? colors.coffeeRed
-              : connectedToSpotify
-              ? spotifyHovered
+            color:
+              spotifyError || disconnectSpotifyHovered
+                ? colors.coffeeRed
+                : connectedToSpotify
+                ? spotifyHovered
+                  ? colors.darkmodeLighterBlack
+                  : colors.coffeeGreen
+                : spotifyHovered
                 ? colors.darkmodeLighterBlack
-                : colors.coffeeGreen
-              : spotifyHovered
-              ? colors.darkmodeLighterBlack
-              : colors.defaultPlaceholderTextColor,
+                : colors.defaultPlaceholderTextColor,
           }}
           whileHover={
             spotifyError
@@ -599,7 +614,10 @@ const AccountSettingsContent = ({
                 }
           }
           whileTap={animations.whileTap}
-          onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
+          onClick={() => {
+            ipcRenderer.send('toggleconnectspotify:fromrenderer');
+            setSpotifyHovered(false);
+          }}
           onMouseEnter={() => setSpotifyHovered(true)}
           onMouseLeave={() => setSpotifyHovered(false)}
         >
@@ -630,7 +648,10 @@ const AccountSettingsContent = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: 0.15 }}
+                whileHover={{ color: colors.coffeeRed }}
+                onMouseEnter={() => setDisconnectSpotifyHovered(true)}
+                onMouseLeave={() => setDisconnectSpotifyHovered(false)}
               >
                 <IoCloseOutline
                   size={22}

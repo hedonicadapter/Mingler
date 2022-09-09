@@ -49,7 +49,7 @@ const settingsWindowConfig = {
     contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
-    devTools: true,
+    devTools: false,
   },
 };
 
