@@ -621,6 +621,14 @@ const createWindow = async () => {
   ipcMain.handle(
     'initActiveTrackListener:fromrenderer',
     (event, spotifyAccessToken) => {
+      if (!spotifyAccessToken || spotifyAccessToken === 'disconnect') {
+        if (trackProcess?.connected) trackProcess.exit();
+        store?.dispatch({
+          type: 'setSpotifyConnected',
+          payload: false,
+        });
+        return false;
+      }
       initActiveTrackListenerProcess(spotifyAccessToken);
 
       // let payload;
@@ -651,6 +659,9 @@ const createWindow = async () => {
 
   ipcMain.on('toggleconnectspotify:fromrenderer', () => {
     mainWindow?.webContents.send('toggleconnectspotify:frommain');
+  });
+  ipcMain.on('disconnectspotify:fromrenderer', () => {
+    mainWindow?.webContents.send('disconnectspotify:frommain');
   });
 
   //go offline on close

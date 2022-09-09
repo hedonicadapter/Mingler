@@ -40,6 +40,7 @@ export function UserStatusProvider({ children }) {
   };
 
   const activeTrackListener = async (spotifyAccessToken) => {
+    console.warn('ACTIVETRACKLISTENER');
     ipcRenderer.removeAllListeners(
       'trackinfo:frommain',
       trackInfoFromMainHandler
@@ -49,8 +50,11 @@ export function UserStatusProvider({ children }) {
       spotifyAccessToken
     );
 
+    if (spotifyAccessToken === 'disconnect') return;
+
     if (result)
       return ipcRenderer.on('trackinfo:frommain', trackInfoFromMainHandler);
+
     return notify('Error', 'Failed to initialize Spotify.');
   };
 

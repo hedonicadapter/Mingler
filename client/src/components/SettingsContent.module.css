@@ -90,18 +90,27 @@
   margin: 5px;
 }
 
+.connectAndDisconnectSpotifyContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 6px;
+  cursor: pointer;
+}
 .connectSpotifyContainer {
-  border-radius: 2px;
-  padding: 6px;
+  height: 42px;
   padding-right: 6px;
   display: flex;
   flex-direction: row;
   font-size: 0.9em;
 }
-.connectSpotifyContainer:hover {
-  border-color: var(--coffee-green);
-  color: var(--coffee-green);
-  cursor: pointer;
+.disconnectSpotifyButtonContainer {
+  height: 42px;
+  width: 40px;
+}
+.disconnectSpotifyButton {
+  float: right;
 }
 
 .genericInput {

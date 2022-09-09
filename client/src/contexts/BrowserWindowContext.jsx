@@ -148,6 +148,12 @@ export function BrowserWindowProvider({ children }) {
   const toggleConnectSpotifyHandler = () => {
     toggleConnectSpotify();
   };
+  const disconnectSpotifyHandler = () => {
+    dispatch(setSpotifyAccessTokenMain('disconnect'));
+    dispatch(setSpotifyRefreshTokenMain(null));
+    dispatch(setSpotifyExpiryDate(null));
+    activeTrackListener('disconnect');
+  };
 
   const traySettingsHandler = () => {
     toggleSettings();
@@ -236,11 +242,19 @@ export function BrowserWindowProvider({ children }) {
 
   useEffect(() => {
     connectSpotifyWindow.on('close', connectSpotifyWindowCloseHandler);
+    connectSpotifyWindow.webContents.on(
+      'will-redirect',
+      connectSpotifyWindowRedirectHandler
+    );
 
     return () => {
       connectSpotifyWindow.removeListener(
         'close',
         connectSpotifyWindowCloseHandler
+      );
+      connectSpotifyWindow.webContents.removeListener(
+        'will-redirect',
+        connectSpotifyWindowRedirectHandler
       );
     };
   });
@@ -256,11 +270,16 @@ export function BrowserWindowProvider({ children }) {
       'toggleconnectspotify:frommain',
       toggleConnectSpotifyHandler
     );
+    ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
 
     return () => {
       ipcRenderer.removeAllListeners(
         'toggleconnectspotify:frommain',
         toggleConnectSpotifyHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'disconnectspotify:frommain',
+        disconnectSpotifyHandler
       );
       ipcRenderer.removeAllListeners('tray:settings', traySettingsHandler);
     };
@@ -335,7 +354,38 @@ export function BrowserWindowProvider({ children }) {
     }
   };
 
+  const authorizeSpotify = (code) => {
+    DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
+      .then((result) => {
+        hideWindow(connectSpotifyWindow);
+        console.warn('spotiffff ', result);
+        if (result.data.success) {
+          dispatch(setSpotifyAccessTokenMain(result.data.body['access_token']));
+          dispatch(
+            setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
+          );
+          dispatch(setSpotifyExpiryDate(result.data.body['spotifyExpiryDate']));
+          activeTrackListener(result.data.body['access_token']);
+        }
+      })
+      .catch((e) => {
+        sendSpotifyError(e);
+      });
+  };
+
+  const connectSpotifyWindowRedirectHandler = (event, url) => {
+    if (!url) return;
+
+    let code;
+
+    if (url.includes('localhost:')) {
+      code = url.substring(url.indexOf('=') + 1);
+      authorizeSpotify(code);
+    }
+  };
+
   const loadConnectSpotifyContent = () => {
+    console.warn('loading spotify');
     try {
       DAO.createSpotifyURL(currentUser.accessToken)
         .then(async (res) => {
@@ -345,73 +395,17 @@ export function BrowserWindowProvider({ children }) {
               res.data.authorizeURL
             );
 
-            // if (connectSpotifyWindow.isDestroyed()) {
-            //   setConnectSpotifyWindow(
-            //     new BrowserWindow(connectSpotifyWindowConfig)
-            //   );
-            // } else {
+            connectSpotifyWindow.once('ready-to-show', () => {
+              connectSpotifyWindow.setTitle('Connect with Spotify');
+              connectSpotifyWindow.show();
+            });
+
             connectSpotifyWindow
               .loadURL(res.data.authorizeURL)
               .then()
               .catch((e) => sendSpotifyError(e));
-            // }
-
-            await connectSpotifyWindow.once('ready-to-show', () => {
-              connectSpotifyWindow.setTitle('Connect with Spotify');
-              connectSpotifyWindow.show();
-
-              let currentUrl = connectSpotifyWindow.webContents.getURL();
-              let code;
-
-              if (currentUrl.includes('localhost:')) {
-                code = currentUrl.substring(currentUrl.indexOf('=') + 1);
-              } else {
-                connectSpotifyWindow.webContents.once(
-                  'will-redirect',
-                  (event, url) => {
-                    connectSpotifyWindow.webContents.once('dom-ready', () => {
-                      // get only the string content after "="
-                      code = url.substring(url.indexOf('=') + 1);
-                      //localhost:1212/?code=AQC9QkkbHZT2A6sYJLo8Rd0taIkkbgRTReRx6Lw9QyiUwHykeCXdw55bEk6CBJjYS5sXDyzQPAjkt-QVzNcUzZDSzUeMqdfs2RKjyM9EnDKhI4dbnzk9cZMGSjeldKq_8B6eRRU2hD_imYqVIE-mGxYioZ9n_w_lzIzRJt4dXNpNyDiee9FZF9hxuq-kDSOX8QPVGqsmles7I9SSbQXtRg9R0LHSjS-wO62GA-mUZtAiefCsrINxDOjRaMyBJRZ31PeerArXZACX8tTSqQ
-                    });
-                  }
-                );
-              }
-
-              DAO.authorizeSpotify(
-                code,
-                currentUser._id,
-                currentUser.accessToken
-              )
-                .then((result) => {
-                  hideWindow(connectSpotifyWindow);
-                  console.warn('spotiffff ', result);
-                  if (result.data.success) {
-                    dispatch(
-                      setSpotifyAccessTokenMain(
-                        result.data.body['access_token']
-                      )
-                    );
-                    dispatch(
-                      setSpotifyRefreshTokenMain(
-                        result.data.body['refresh_token']
-                      )
-                    );
-                    dispatch(
-                      setSpotifyExpiryDate(
-                        result.data.body['spotifyExpiryDate']
-                      )
-                    );
-                    activeTrackListener(result.data.body['access_token']);
-                  }
-                })
-                .catch((e) => {
-                  sendSpotifyError(e);
-                });
-            });
           }
         })
-
         .catch((e) => {
           sendSpotifyError(e);
         });

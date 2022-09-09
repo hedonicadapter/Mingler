@@ -13,6 +13,7 @@ import { useStatus } from '../contexts/UserStatusContext';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useSelector } from 'react-redux';
 import { getApp } from '../mainState/features/appSlice';
+import animations from '../config/animations';
 
 const shell = electron.shell;
 const ipcRenderer = electron.ipcRenderer;
@@ -193,6 +194,7 @@ export default function Marky({
       className={styles.marky}
       style={{ opacity: expanded ? 0.9 : 0.86 }}
       whileHover={markyType}
+      whileTap={markyType !== 'Window' && animations.whileTap}
       variants={markyVariants}
       transition={{ duration: 0.1 }}
       onClick={(evt) => handleClick(evt)}

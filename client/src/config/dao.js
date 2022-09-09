@@ -183,7 +183,7 @@ export class DAO {
 
   createSpotifyURL = (token) => {
     console.warn({ token });
-    return privateRoute.post(
+    return privateRoute.get(
       '/createSpotifyURL',
       {},
       {
@@ -257,40 +257,38 @@ privateRoute.interceptors.response.use(
   function (response) {
     return response;
   },
-  function (error) {
+  async function (error) {
     const ogRequest = error.config;
+    console.warn({ status: error.response.status });
     if (401 === error.response.status && !ogRequest.retry) {
-      const oldAccessToken = ogRequest.headers.Authorization.replace(
-        /^Bearer\s+/,
-        ''
+      // const oldAccessToken = ogRequest.headers.Authorization.replace(
+      //   /^Bearer\s+/,
+      //   ''
+      // );
+
+      const { accessToken, refreshToken } = await ipcRenderer.invoke(
+        'getTokens'
+      );
+      if (!refreshToken) return Promise.reject('Failed to get refresh token.');
+
+      const newTokens = await getNewToken(refreshToken);
+      console.log({ newTokens });
+
+      if (!newTokens) return Promise.reject('Failed to get new tokens.');
+
+      const access = newTokens.data.accessToken;
+
+      ogRequest.headers.Authorization = 'Bearer ' + access;
+      ogRequest.retry = true;
+
+      const { port1 } = new MessageChannel();
+      ipcRenderer.postMessage(
+        'refreshtoken:fromrenderer',
+        { currentUser: newTokens.data },
+        [port1]
       );
 
-      ipcRenderer
-        .invoke('getTokens')
-        .then(async ({ accessToken, refreshToken }) => {
-          if (!refreshToken)
-            return Promise.reject('409: No refresh token found.');
-
-          getNewToken(refreshToken)
-            .then((tokens) => {
-              const access = tokens.data.accessToken;
-
-              ogRequest.headers.Authorization = 'Bearer ' + access;
-              ogRequest.retry = true;
-
-              const { port1 } = new MessageChannel();
-              ipcRenderer.postMessage(
-                'refreshtoken:fromrenderer',
-                { currentUser: tokens.data },
-                [port1]
-              );
-
-              return axios(ogRequest)
-                .then()
-                .catch((e) => Promise.reject(e));
-            })
-            .catch((e) => console.log(e));
-        });
+      return axios(ogRequest);
     } else {
       return Promise.reject(error);
     }
