@@ -96,10 +96,29 @@ export default function FriendsList() {
     appState?.findFriendsSearchValue,
   ]);
 
-  useEffect(() => {
-    const greetUser = setTimeout(() => setGreeting(false), 1000);
+  let timeout;
 
-    return () => clearTimeout(greetUser);
+  const loadListener = () => {
+    console.log('loadlistener: ', document.readyState);
+    if (document.readyState === 'complete')
+      timeout = setTimeout(() => setGreeting(false), 500);
+  };
+
+  useEffect(() => {
+    // Check if the page has already loaded
+    if (document.readyState === 'complete') {
+      timeout = setTimeout(() => setGreeting(false), 500);
+    } else {
+      window.addEventListener('load', loadListener);
+      return () => {
+        clearTimeout(timeout);
+        window.removeEventListener('load', loadListener);
+      };
+    }
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
   return (

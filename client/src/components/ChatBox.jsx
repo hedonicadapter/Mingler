@@ -95,23 +95,19 @@ const ChatInput = ({
   handleInputKeyDown,
 }) => {
   return (
-    <motion.div layout="position">
-      {chatVisible && (
-        <TextareaAutosize
-          ref={inputBoxRef}
-          rows={1}
-          maxRows={10}
-          autoFocus={settingsFocused ? false : true}
-          placeholder="Aa"
-          className={styles.inputBox}
-          style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
-          value={error ? error : inputText || ''}
-          readOnly={error ? true : false}
-          onChange={handleInput}
-          onKeyDown={handleInputKeyDown}
-        />
-      )}
-    </motion.div>
+    <TextareaAutosize
+      ref={inputBoxRef}
+      rows={1}
+      maxRows={10}
+      autoFocus={settingsFocused ? false : true}
+      placeholder="Aa"
+      className={styles.inputBox}
+      style={{ color: error ? colors.coffeeRed : colors.darkmodeBlack }}
+      value={error ? error : inputText || ''}
+      readOnly={error ? true : false}
+      onChange={handleInput}
+      onKeyDown={handleInputKeyDown}
+    />
   );
 };
 
@@ -193,14 +189,10 @@ export const ChatBox = ({ receiver, chatVisible }) => {
   }, [error]);
 
   useEffect(() => {
-    console.log('conversations ', conversations);
     setCurrentConvo(
       conversations?.find((convo) => convo._id === receiver)?.conversation
     );
   }, [conversations]);
-  useEffect(() => {
-    console.log('currentConvo ', currentConvo);
-  }, [currentConvo]);
 
   const handleInput = (evt) => {
     setInputText(evt.target.value);
@@ -248,7 +240,11 @@ export const ChatBox = ({ receiver, chatVisible }) => {
 
           setInputText('');
           inputBoxRef.current?.focus();
-          anchorRef.current?.scrollIntoView({ behavior: 'smooth' });
+          anchorRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
+          });
           setError(null);
         }
       })
@@ -300,87 +296,79 @@ export const ChatBox = ({ receiver, chatVisible }) => {
 
   return (
     <motion.div
-      className={styles.chatContainer}
-      style={{ padding: chatVisible ? 10 : 0 }}
+      style={{ overflow: 'hidden' }}
+      animate={chatVisible ? 'show' : 'hide'}
+      initial={'hide'}
+      variants={{
+        show: { height: 'auto' },
+        hide: { height: 0 },
+      }}
+      transition={{ duration: 0.15, stiffness: 100 }}
     >
-      <div
-        className={styles.messageArea}
-        onScroll={handleMessageAreaScroll}
-        style={{ marginBottom: chatVisible && 4 }}
-      >
-        <AnimateSharedLayout>
-          <AnimatePresence>
-            {loading && (
-              <motion.div
-                layout="position"
-                style={{
-                  paddingBlock: 6,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <LoadingAnimation
-                  formFilled={'loading'}
-                  style={{ marginLeft: 10 }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <motion.div layout transition={{ duration: 0.15 }}>
-            {currentConvo?.messages?.map((message, index) => {
-              return (
+      <motion.div layout="position" className={styles.chatContainer}>
+        <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
+          <AnimateSharedLayout>
+            <AnimatePresence>
+              {loading && (
+                <motion.div
+                  layout="position"
+                  key={'loadinganimation'}
+                  style={{
+                    height: 27,
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <LoadingAnimation
+                    formFilled={'loading'}
+                    style={{
+                      position: 'relative',
+                      zIndex: 50,
+                      left: '50%',
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {currentConvo?.messages?.map((message, index) => (
+              <motion.div layout="position" key={index}>
                 <ConversationBubble
                   key={index}
                   fromID={message.fromID}
                   message={message.message}
                   sent={message.sentDate}
                 />
-              );
-            })}
+              </motion.div>
+            ))}
+          </AnimateSharedLayout>
+          <div ref={anchorRef} />
+        </div>
+        <div className={styles.inputAndSendButtonContainer}>
+          <motion.div
+            className={styles.inputContainer}
+            style={{ borderTop: '1px solid' + colors.offWhitePressed2 }}
+          >
+            {useMemo(
+              () => (
+                <ChatInput
+                  inputText={inputText}
+                  inputBoxRef={inputBoxRef}
+                  settingsFocused={appState?.settingsFocused}
+                  error={error}
+                  handleInput={handleInput}
+                  handleInputKeyDown={handleInputKeyDown}
+                />
+              ),
+              [inputText, inputBoxRef, appState?.settingsFocused, error]
+            )}
           </motion.div>
-        </AnimateSharedLayout>
-        <div ref={anchorRef} />
-      </div>
-      <motion.div
-        className={styles.inputContainer}
-        style={
-          chatVisible && {
-            borderTop: '1px solid' + colors.offWhitePressed2,
-            marginTop: 6,
-          }
-        }
-      >
-        {useMemo(
-          () => (
-            <ChatInput
-              chatVisible={chatVisible}
-              inputText={inputText}
-              inputBoxRef={inputBoxRef}
-              settingsFocused={appState?.settingsFocused}
-              error={error}
-              handleInput={handleInput}
-              handleInputKeyDown={handleInputKeyDown}
-            />
-          ),
-          [
-            chatVisible,
-            inputText,
-            inputBoxRef,
-            appState?.settingsFocused,
-            error,
-          ]
-        )}
-
-        {chatVisible && (
           <SendButton
             inputText={inputText}
             handleSendButton={handleSendButton}
           />
-        )}
+        </div>
       </motion.div>
     </motion.div>
   );

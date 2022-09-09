@@ -94,6 +94,7 @@ export default function FriendRequestsAccordion({
     <>
       <motion.header
         style={{
+          transition: 'background-color 0.1s linear',
           backgroundColor: expanded ? colors.offWhiteHovered : colors.offWhite,
           color: expanded
             ? colors.darkmodeBlack

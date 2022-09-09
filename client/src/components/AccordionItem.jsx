@@ -50,6 +50,12 @@ export default function AccordionItem({
   const [activityLength, setActivityLength] = useState(null);
   const [online, setOnline] = useState();
 
+  useEffect(() => {
+    if (expanded) return;
+    setChatVisible(false);
+    setPlayerVisible(false);
+  }, [expanded]);
+
   // Set random online/offline statuses for demo account default friends
   useEffect(() => {
     let timeouts = [];
@@ -229,18 +235,16 @@ export default function AccordionItem({
       </div>
       <CardSeparator cardHovered={cardHovered} expanded={expanded} />
 
-      {expanded && (
-        <CardBody
-          activity={friend?.activity}
-          userID={friend?._id}
-          expanded={expanded}
-          chatVisible={chatVisible}
-          playerURL={playerURL}
-          playerVisible={playerVisible}
-          closePlayer={closePlayer}
-          isWidgetHeader={isWidgetHeader}
-        />
-      )}
+      <CardBody
+        activity={friend?.activity}
+        userID={friend?._id}
+        expanded={expanded}
+        chatVisible={chatVisible}
+        playerURL={playerURL}
+        playerVisible={playerVisible}
+        closePlayer={closePlayer}
+        isWidgetHeader={isWidgetHeader}
+      />
     </motion.div>
   );
 }

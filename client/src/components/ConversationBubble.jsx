@@ -16,7 +16,7 @@ export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      duration={{ transition: 0.15 }}
+      duration={{ transition: 0.1 }}
       className={styles.bubbleContainer}
       style={{ justifyContent: sentByMe ? 'flex-end' : 'flex-start' }}
     >
