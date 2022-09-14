@@ -21,6 +21,8 @@ const initialState: AppState = {
   windowWidth: 430,
 };
 
+// let windowTimeout;
+
 export const appSlice = createSlice({
   name: 'app',
   initialState,
@@ -37,6 +39,9 @@ export const appSlice = createSlice({
     },
     settingsOpenTrue: (state) => {
       state.settingsOpen = true;
+      // if (state.appVisible) return;
+
+      // state.appVisible = true;
     },
     settingsOpenFalse: (state) => {
       state.settingsOpen = false;
@@ -49,7 +54,9 @@ export const appSlice = createSlice({
     },
     settingsFocusedTrue: (state) => {
       state.settingsFocused = true;
-      // if (!state.appVisible) state.appVisible = true;
+      // if (state.appVisible) return;
+
+      // state.appVisible = true;
     },
     settingsFocusedFalse: (state) => {
       state.settingsFocused = false;
@@ -71,6 +78,9 @@ export const appSlice = createSlice({
     appVisibleFalse: (state) => {
       // if (state.settingsFocused) return;
       state.appVisible = false;
+    },
+    settingsFocusedTrue: (state) => {
+      state.settingsFocused = true;
     },
     setWindowWidth: (state, action: PayloadAction<number>) => {
       state.windowWidth = action.payload;

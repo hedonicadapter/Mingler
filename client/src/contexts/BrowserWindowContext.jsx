@@ -49,6 +49,7 @@ const settingsWindowConfig = {
     contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
+    spellcheck: false,
     devTools: false,
   },
 };
@@ -66,6 +67,7 @@ const findFriendsWindowConfig = {
     contextIsolation: false,
     nodeIntegration: true,
     enableRemoteModule: true,
+    spellcheck: false,
     devTools: false,
   },
 };
@@ -103,6 +105,7 @@ export function BrowserWindowProvider({ children }) {
   );
 
   const settingsWindowFocusHandler = () => {
+    console.log('sending from renterer');
     dispatch(settingsFocusedTrue());
     electron.remote.getCurrentWindow().moveTop();
     ipcRenderer.send('settingsfocused:fromrenderer');

@@ -10,6 +10,7 @@ const Pane = ({ children }) => {
 
   return (
     <motion.div
+      key="pane"
       // onContextMenu={(e) => e.preventDefault()}
       initial={'hide'}
       exit={'hide'}

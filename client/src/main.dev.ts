@@ -38,7 +38,6 @@ import { setExtensionID } from '../editJSON';
 
 const execFile = require('child_process').execFile;
 const JSON5 = require('json5');
-const utf8 = require('utf8');
 
 const storage = require('node-persist');
 storage.init({ dir: './mainState/persist' });
@@ -69,8 +68,7 @@ const PORT = 8081;
 httpServer.listen(PORT);
 
 let store = null;
-let mainWindow: BrowserWindow | null = null;
-let findFriendsWindow: BrowserWindow | null = null;
+
 let windowListenerScript = path.resolve(
   app.getPath('appData'),
   '..',
@@ -102,8 +100,10 @@ let chromiumHostConfig = path.resolve(
 );
 let windowProcess = null;
 let trackProcess = null;
-let refreshRetryLimit = 0;
+
 let tray = null;
+
+let mainWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -395,17 +395,23 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     title: 'Mingler',
+    icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
+
     frame: false,
     transparent: true,
+    hasShadow: false,
+    opacity: 0,
+
     show: false,
+    maximizable: false,
+    skipTaskbar: true,
+
     height: height,
     minWidth: 430,
     width: 430,
-    maximizable: false,
-    // alwaysOnTop: true,
-    icon: getAssetPath(__dirname + '../assets/icons/icon.ico'),
-    skipTaskbar: true,
+
     webPreferences: {
+      spellcheck: false,
       contextIsolation: false,
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -452,12 +458,6 @@ const createWindow = async () => {
     app.exit(0);
   });
 
-  // mainWindow?.on('show', () => {
-  //   setTimeout(() => {
-  //     mainWindow?.setOpacity(1);
-  //   }, 200);
-  // });
-
   mainWindow?.on('hide', () => {
     mainWindow?.setOpacity(0);
   });
@@ -474,6 +474,8 @@ const createWindow = async () => {
       throw new Error('"mainWindow" is not defined');
     }
 
+    mainWindow.setOpacity(1);
+
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {
@@ -483,7 +485,7 @@ const createWindow = async () => {
     mainWindow.on('blur', () => {
       mainWindow?.setAlwaysOnTop(true);
       mainWindow?.showInactive();
-      if (mainWindow.webContents.isDevToolsFocused()) {
+      if (mainWindow?.webContents.isDevToolsFocused()) {
         return; //ignore
       } else {
         store?.dispatch({
@@ -491,39 +493,28 @@ const createWindow = async () => {
           payload: {},
         });
 
-        // const listenerTimeout = setTimeout(() => fallbackBlur(), 200);
-
         ipcMain.once('animationComplete', () => {
           console.log('animation complete');
           hideWindow();
-          // clearTimeout(listenerTimeout);
         });
-        // mainWindow?.setFocusable(false);
       }
     });
   });
 
-  const fallbackBlur = () => {
-    ipcMain.removeAllListeners('animationComplete');
-    if (mainWindow?.isVisible()) {
-      hideWindow();
-    }
-  };
-
   const signOutDialog = {
-    title: "don't go.",
-    message: 'sign out?',
-    buttons: ['nvm', 'bye'],
+    title: 'Signing out.',
+    message: 'Sign out?',
+    buttons: ['nvm', 'Goodbye'],
     defaultId: 1,
     cancelId: 0,
     noLink: true,
   };
 
   const signOutGuestDialog = {
-    title: "don't go.",
-    message: 'sign out?',
-    detail: 'your account will be lost',
-    buttons: ['nvm', 'bye'],
+    title: 'Signing out.',
+    message: 'Sign out?',
+    detail: 'Your account will be lost.',
+    buttons: ['nvm', 'Goodbye'],
     defaultId: 1,
     noLink: true,
   };
@@ -678,13 +669,26 @@ const createWindow = async () => {
   });
 
   ipcMain.on('settingsfocused:fromrenderer', () => {
+    // mainWindow?.showInactive();
+    // clearTimeout(showWindowTimeout);
+    // showWindowTimeout = setTimeout(() => mainWindow?.setOpacity(1), 150);
+    // store?.dispatch({
+    //   type: 'appVisibleTrue',
+    //   payload: {},
+    // });
     if (!store?.getState()?.app?.appVisible) {
       toggleWidget(true);
     }
   });
   ipcMain.on('settingsblurred:fromrenderer', () => {
-    // toggleWidget();
     mainWindow?.setAlwaysOnTop(false);
+    //     if (store?.getState()?.app?.appVisible){
+    // mainWindow?.blur()
+    //     }
+    // toggleWidget();
+    // mainWindow?.setAlwaysOnTop(true);
+    // mainWindow?.setAlwaysOnTop(false);
+    // mainWindow?.setFocusable(false);
     // hideWindow();
   });
 
@@ -745,6 +749,7 @@ app.on('window-all-closed', () => {
 });
 
 const hideWindow = () => {
+  mainWindow?.setAlwaysOnTop(false);
   mainWindow?.setOpacity(0);
   if (process.platform == 'win32') mainWindow?.minimize();
   else if (process.platform == 'darwin') app?.hide();
@@ -752,21 +757,22 @@ const hideWindow = () => {
   // mainWindow?.blur();
 };
 
-const showWindow = (noFocus = false) => {
+let showWindowTimeout;
+const showWindow = async (noFocus = false) => {
+  if (showWindowTimeout) clearTimeout(showWindowTimeout);
+
   if (noFocus) {
     mainWindow?.showInactive();
   } else {
     mainWindow?.show();
   }
 
-  setTimeout(() => {
-    mainWindow?.setOpacity(1);
-  }, 150);
-
   store?.dispatch({
     type: 'appVisibleTrue',
     payload: {},
   });
+
+  showWindowTimeout = setTimeout(() => mainWindow?.setOpacity(1), 150);
 };
 
 const toggleWidget = (noFocus = false) => {
@@ -838,6 +844,27 @@ app.whenReady().then(() => {
           };
         });
 
+        store.subscribe(() => {
+          if (store.getState()?.app?.appVisible) {
+            mainWindow?.setIgnoreMouseEvents(false);
+          } else {
+            mainWindow?.setIgnoreMouseEvents(true);
+          }
+        });
+        // store.subscribe(() => {
+        //   if (store.getState()?.app.settingsFocused) {
+        //     if (showWindowTimeout) clearTimeout(showWindowTimeout);
+
+        //     mainWindow?.showInactive();
+        //     mainWindow?.moveTop();
+
+        //     showWindowTimeout = setTimeout(
+        //       () => mainWindow?.setOpacity(1),
+        //       150
+        //     );
+        //   }
+        // });
+
         store.subscribe(async () => {
           global.state = store.getState();
 
@@ -876,7 +903,6 @@ app.whenReady().then(() => {
         console.error('MAIN STORE ERROR: ', e);
       } finally {
         createWindow();
-        // createFindFriendsWindow();
       }
     })
     .catch((err) => console.log('An error occurred: ', err));

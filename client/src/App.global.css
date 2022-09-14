@@ -24,6 +24,11 @@
   --dark-mode-disabled-text: #8b8b8b;
 }
 
+::selection {
+  background-color: var(--dark-mode-black);
+  color: var(--off-white);
+}
+
 html,
 body,
 #root,
