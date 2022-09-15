@@ -1051,7 +1051,7 @@ export default function SettingsContent() {
       .setProfilePicture(formData, settingsState.currentUser.accessToken)
       .then((res) => {
         if (res?.data?.success) {
-          dispatch(setProfilePictureMain(res.data.profilePicture));
+          dispatch(setProfilePictureMain(res.data));
           setProfilePictureError(null);
         }
       })

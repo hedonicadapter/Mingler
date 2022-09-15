@@ -5,7 +5,7 @@ import produce from 'immer';
 
 // add interface for currentUser
 interface SettingsState {
-  currentUser: Array<any>;
+  currentUser: Array<any>; // TODO: make interface
   showWelcome: Boolean;
   settingsContent: string;
   browser: string;
@@ -66,7 +66,8 @@ export const settingsSlice = createSlice({
       state.currentUser.spotifyExpiryDate = action.payload;
     },
     setProfilePictureMain: (state, action: PayloadAction<Array<any>>) => {
-      state.currentUser.profilePicture = action.payload;
+      state.currentUser.profilePicture = action.payload.profilePicture;
+      state.currentUser.thumbnail = action.payload?.thumbnail;
     },
     setKeepMeSignedInMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.keepMeSignedIn = action.payload;

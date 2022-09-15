@@ -55,7 +55,10 @@ export function UserStatusProvider({ children }) {
     if (result)
       return ipcRenderer.on('trackinfo:frommain', trackInfoFromMainHandler);
 
-    return notify('Error', 'Failed to initialize Spotify.');
+    return (
+      spotifyAccessToken !== 'disconnect' &&
+      notify('Error', 'Failed to initialize Spotify.')
+    );
   };
 
   const windowInfoFromMainHandler = (evt, windowInfo) => {
@@ -128,7 +131,8 @@ export function UserStatusProvider({ children }) {
   useEffect(() => {
     activeWindowListener();
     activeTabListener();
-    activeTrackListener(currentUser?.spotifyAccessToken);
+    currentUser?.spotifyAccessToken &&
+      activeTrackListener(currentUser.spotifyAccessToken);
 
     return () => {
       ipcRenderer.removeAllListeners(

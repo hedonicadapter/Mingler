@@ -305,7 +305,8 @@ export function FriendsProvider({ children }) {
     getConversations();
 
     friends?.find((friend) => {
-      friend._id === userID && notify(friend.username, 'Now online.');
+      friend._id === userID &&
+        notify(friend.username, 'Now online.', true, friend?.thumbnail);
     });
   };
   const userOfflineHandler = (userID) => {
@@ -323,10 +324,8 @@ export function FriendsProvider({ children }) {
   };
 
   const messageReceiveHandler = ({ fromID, messageObject }) => {
-    notify(
-      friends?.find((friend) => friend._id === messageObject.fromID)?.username,
-      messageObject.message
-    );
+    let friend = friends?.find((friend) => friend._id === messageObject.fromID);
+    notify(friend.username, messageObject.message, false, friend?.thumbnail);
 
     setConversations((prevState) =>
       prevState.map((convoObject) =>

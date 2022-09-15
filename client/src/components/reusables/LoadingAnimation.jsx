@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import colors from '../../config/colors';
 
-const AnimationWrapper = ({ children, key, style }) => {
+const AnimationWrapper = ({ children, index, style }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -12,7 +12,7 @@ const AnimationWrapper = ({ children, key, style }) => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
       style={style}
-      key={key}
+      key={index}
     >
       {children}
     </motion.div>
@@ -44,7 +44,7 @@ export const LoadingAnimation = ({
         }
       >
         {formFilled === 'loading' ? (
-          <AnimationWrapper>
+          <AnimationWrapper index={formFilled}>
             <ReactLoading
               style={{
                 outline: '1px solid transparent', // makes it work for some reason
@@ -60,13 +60,13 @@ export const LoadingAnimation = ({
           </AnimationWrapper>
         ) : error ? (
           <AnimationWrapper
-            key={formFilled}
+            index={formFilled}
             style={{ fontSize: '0.9em', color: colors.coffeeRed }}
           >
             {error}
           </AnimationWrapper>
         ) : (
-          <AnimationWrapper key={formFilled}>{buttonText}</AnimationWrapper>
+          <AnimationWrapper index={formFilled}>{buttonText}</AnimationWrapper>
         )}
       </div>
     </AnimatePresence>
