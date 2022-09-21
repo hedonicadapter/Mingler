@@ -249,7 +249,7 @@ export const ChatBox = ({ receiver, chatVisible }) => {
         }
       })
       .catch((e) => {
-        setError(e.response.data.error);
+        setError(e?.response?.data?.error);
         inputBoxRef.current?.focus();
       });
   };
@@ -303,7 +303,7 @@ export const ChatBox = ({ receiver, chatVisible }) => {
         show: { height: 'auto' },
         hide: { height: 0 },
       }}
-      transition={{ duration: 0.15, stiffness: 100 }}
+      transition={{ duration: 0.15 }}
     >
       <motion.div layout="position" className={styles.chatContainer}>
         <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>

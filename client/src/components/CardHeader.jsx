@@ -242,6 +242,7 @@ export default function CardHeader({
         show: { height: 'auto' },
         hide: { height: 86 },
       }}
+      transition={{ duration: 0.15 }}
     >
       <div
         style={
@@ -292,7 +293,6 @@ export default function CardHeader({
                     {...mainActivity}
                     {...fakeActivities[0]}
                     userID={userID}
-                    marKey={1}
                     expanded={expanded}
                     togglePlayer={togglePlayer}
                     setPlayerURL={setPlayerURL}
@@ -315,7 +315,6 @@ export default function CardHeader({
                             <Marky
                               {...activity}
                               userID={userID}
-                              marKey={index}
                               expanded={expanded}
                               togglePlayer={togglePlayer}
                               setPlayerURL={setPlayerURL}
@@ -341,7 +340,6 @@ export default function CardHeader({
                             <Marky
                               {...activity}
                               userID={userID}
-                              marKey={index}
                               expanded={expanded}
                               togglePlayer={togglePlayer}
                               setPlayerURL={setPlayerURL}

@@ -35,6 +35,26 @@ export function useBrowserWindow() {
 
 const favicon = __dirname + '../../assets/icons/minglerReversed.ico';
 
+const welcomeModalConfig = {
+  title: 'Welcome to Mingler',
+  show: false,
+  frame: false,
+  transparent: true,
+  width: 330,
+  height: 140,
+  icon: favicon,
+  resizable: false,
+  closable: false,
+  alwaysOnTop: true,
+  webPreferences: {
+    contextIsolation: false,
+    nodeIntegration: true,
+    enableRemoteModule: true,
+    spellcheck: false,
+    devTools: false,
+  },
+};
+
 const settingsWindowConfig = {
   title: 'Settings',
   show: false,
@@ -92,17 +112,34 @@ export function BrowserWindowProvider({ children }) {
 
   const [readyToExit, setReadyToExit] = useState(false);
 
-  const [settingsWindow, setSettingsWindow] = useState(
-    new BrowserWindow(settingsWindowConfig)
-  );
+  const [welcomeModal, setWelcomeModal] = useState(null);
+  const [settingsWindow, setSettingsWindow] = useState(null);
+  const [findFriendsWindow, setFindFriendsWindow] = useState(null);
+  const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(null);
 
-  const [findFriendsWindow, setFindFriendsWindow] = useState(
-    new BrowserWindow(findFriendsWindowConfig)
-  );
+  useEffect(() => {
+    let welcomeModalStateless = new BrowserWindow(welcomeModalConfig);
+    let settingsWindowStateless = new BrowserWindow(settingsWindowConfig);
+    let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
+    let connectSpotifyWindowStateless = new BrowserWindow(
+      connectSpotifyWindowConfig
+    );
+    setWelcomeModal(welcomeModalStateless);
+    setSettingsWindow(settingsWindowStateless);
+    setFindFriendsWindow(findFriendsWindowStateless);
+    setConnectSpotifyWindow(connectSpotifyWindowStateless);
 
-  const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(
-    new BrowserWindow(connectSpotifyWindowConfig)
-  );
+    return () => {
+      welcomeModalStateless = null;
+      settingsWindowStateless = null;
+      findFriendsWindowStateless = null;
+      connectSpotifyWindowStateless = null;
+      setWelcomeModal(null);
+      setSettingsWindow(null);
+      setFindFriendsWindow(null);
+      setConnectSpotifyWindow(null);
+    };
+  }, []);
 
   const settingsWindowFocusHandler = () => {
     console.log('sending from renterer');
@@ -120,32 +157,27 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const hideWindow = (window) => {
-    // window?.setOpacity(0);
     window?.setSkipTaskbar(true);
     if (process.platform == 'win32') window?.minimize();
     else if (process.platform == 'darwin') app?.hide();
     else window?.hide();
-    // window?.blur();
+  };
+
+  const welcomeModalCloseHandler = () => {
+    hideWindow(welcomeModal);
   };
 
   const settingsWindowCloseHandler = (evt) => {
     hideWindow(settingsWindow);
   };
-  const settingsWindowClosedHandler = () => {
-    // setSettingsWindow(new BrowserWindow(settingsWindowConfig));
-    // dispatch(settingsOpenFalse());
-  };
 
   const findFriendsWindowCloseHandler = () => {
     hideWindow(findFriendsWindow);
   };
-  const findFriendsWindowClosedHandler = () => {
-    // setFindFriendsWindow(new BrowserWindow(findFriendsWindowConfig));
-    // dispatch(findFriendsOpenFalse());
-  };
 
   const connectSpotifyWindowCloseHandler = () => {
-    setConnectSpotifyWindow(null);
+    hideWindow(connectSpotifyWindow);
+    // setConnectSpotifyWindow(null);
   };
 
   const toggleConnectSpotifyHandler = () => {
@@ -163,39 +195,72 @@ export function BrowserWindowProvider({ children }) {
   };
 
   useEffect(() => {
+    if (!welcomeModal || welcomeModal.isDestroyed()) return;
+    if (!settingsState?.showWelcome) return;
+    if (welcomeModal?.isVisible()) return;
+
+    loadWelcomeModal();
+
+    welcomeModal.on('close', welcomeModalCloseHandler);
+
+    return () => {
+      welcomeModal.removeListener('close', welcomeModalCloseHandler);
+      welcomeModal?.destroy();
+    };
+  }, [settingsState?.showWelcome, welcomeModal]);
+
+  useEffect(() => {
     // Clusterfuck of close handling to keep unclosability working
     ipcRenderer.once('exit:frommain', () => {
-      if (!settingsWindow.isDestroyed()) {
-        settingsWindow.removeListener('close', settingsWindowCloseHandler);
-        settingsWindow.destroy();
-        dispatch(settingsOpenFalse());
-        setSettingsWindow(null);
-      }
-      if (!findFriendsWindow.isDestroyed()) {
-        findFriendsWindow.removeListener(
-          'close',
-          findFriendsWindowCloseHandler
-        );
-        findFriendsWindow.destroy();
-        dispatch(findFriendsOpenFalse());
-        setFindFriendsWindow(null);
-      }
-      if (!connectSpotifyWindow.isDestroyed()) {
-        connectSpotifyWindow?.close();
-      }
+      // if (welcomeModal && !welcomeModal?.isDestroyed()) {
+      //   // welcomeModal.removeListener('close', welcomeModalCloseHandler);
+      // }
+      // welcomeModal?.destroy();
+      // welcomeModalStateless = null;
+      setWelcomeModal(null);
+      // if (settingsWindow && !settingsWindow?.isDestroyed()) {
+      // settingsWindow.removeListener('close', settingsWindowCloseHandler);
+      // settingsWindow?.destroy();
+      // dispatch(settingsOpenFalse());
+      // settingsWindowStateless = null;
+      setSettingsWindow(null);
+      // }
+      // if (findFriendsWindow && !findFriendsWindow?.isDestroyed()) {
+      // findFriendsWindow.removeListener(
+      //   'close',
+      //   findFriendsWindowCloseHandler
+      // );
+      // findFriendsWindow?.destroy();
+      // dispatch(findFriendsOpenFalse());
+      // findFriendsWindowStateless = null;
+      setFindFriendsWindow(null);
+      // }
+      // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
+      //   // connectSpotifyWindow?.close();
+      // connectSpotifyWindow?.destroy();
+      // connectSpotifyWindowStateless = null;
+      setConnectSpotifyWindow(null);
+      // }
 
       setReadyToExit(true);
     });
+    // return () => {
+    //   hideWindow(welcomeModal);
+    //   hideWindow(settingsWindow);
+    //   hideWindow(findFriendsWindow);
+    //   hideWindow(connectSpotifyWindow);
+    // };
   }, []);
 
   useEffect(() => {
-    console.log(
-      !settingsWindow &&
-        !findFriendsWindow &&
-        !connectSpotifyWindow &&
-        readyToExit
-    );
+    console.log('separator');
+    console.log(!settingsWindow);
+    console.log(!findFriendsWindow);
+    console.log(!connectSpotifyWindow);
+    console.log(!welcomeModal);
+    console.log(readyToExit);
     if (
+      !welcomeModal &&
       !settingsWindow &&
       !findFriendsWindow &&
       !connectSpotifyWindow &&
@@ -203,7 +268,13 @@ export function BrowserWindowProvider({ children }) {
     ) {
       ipcRenderer.send('exitready:fromrenderer');
     }
-  }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
+  }, [
+    settingsWindow,
+    findFriendsWindow,
+    connectSpotifyWindow,
+    welcomeModal,
+    readyToExit,
+  ]);
 
   useEffect(() => {
     if (!settingsWindow) return;
@@ -221,7 +292,9 @@ export function BrowserWindowProvider({ children }) {
       settingsWindow.removeListener('blur', settingsWindowBlurHandler);
       settingsWindow.removeListener('close', settingsWindowCloseHandler);
       // settingsWindow.removeListener('closed', settingsWindowClosedHandler);
-      !settingsWindow.isDestroyed() && settingsWindow.destroy();
+      settingsWindow &&
+        !settingsWindow?.isDestroyed() &&
+        settingsWindow.destroy();
     };
   }, [settingsWindow]);
 
@@ -239,11 +312,14 @@ export function BrowserWindowProvider({ children }) {
       //   'closed',
       //   findFriendsWindowClosedHandler
       // );
-      !findFriendsWindow.isDestroyed() && findFriendsWindow.destroy();
+      findFriendsWindow &&
+        !findFriendsWindow?.isDestroyed() &&
+        findFriendsWindow.destroy();
     };
   }, [findFriendsWindow]);
 
   useEffect(() => {
+    if (!connectSpotifyWindow) return;
     connectSpotifyWindow.on('close', connectSpotifyWindowCloseHandler);
     connectSpotifyWindow.webContents.on(
       'will-redirect',
@@ -263,6 +339,8 @@ export function BrowserWindowProvider({ children }) {
   });
 
   useEffect(() => {
+    if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
+
     if (findFriendsWindow?.isVisible())
       findFriendsWindow.webContents.send('friends', friends);
   }, [friends, findFriendsWindow]);
@@ -288,7 +366,23 @@ export function BrowserWindowProvider({ children }) {
     };
   }, []);
 
+  const loadWelcomeModal = () => {
+    if (welcomeModal?.isDestroyed()) return;
+    welcomeModal
+      .loadURL(`file://${app.getAppPath()}/index.html#/welcome`)
+      .then()
+      .catch(console.warn);
+
+    welcomeModal.once('ready-to-show', () => {
+      welcomeModal.setTitle('Welcome to Mingler');
+    });
+    welcomeModal.webContents.once('did-finish-load', () => {
+      welcomeModal.show();
+    });
+  };
+
   const loadSettingsContent = () => {
+    if (settingsWindow?.isDestroyed()) return;
     settingsWindow
       .loadURL(`file://${app.getAppPath()}/index.html#/settings`)
       .then()
@@ -318,6 +412,7 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const loadFindFriendsContent = () => {
+    if (findFriendsWindow?.isDestroyed()) return;
     findFriendsWindow
       .loadURL(`file://${app.getAppPath()}/index.html#/findfriends`)
       .then()
@@ -403,6 +498,7 @@ export function BrowserWindowProvider({ children }) {
               connectSpotifyWindow.show();
             });
 
+            if (connectSpotifyWindow?.isDestroyed()) return;
             connectSpotifyWindow
               .loadURL(res.data.authorizeURL)
               .then()

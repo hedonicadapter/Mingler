@@ -136,36 +136,36 @@ export function authAndy({ children }) {
       });
   };
 
-  const initDemoAccount = () => {
+  const signInDemoUser = () => {
     DAO.initDemoAccount(clientFingerprint)
       .then((result) => {
-        if (result.data.success) {
+        if (result?.data?.success) {
           setDemoUser(result.data);
+
+          dispatch(setCurrentUserMain(result.data));
+          ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
+          setSignedIn(true);
+
+          DAO.getDemoActivities()
+            .then((result) => {
+              if (result.data.success) {
+                setDemoUser((prevState) => {
+                  return {
+                    ...prevState,
+                    fakeActivities: result.data.activities,
+                  };
+                });
+              }
+            })
+            .catch((e) => notify('Failed to set demo up properly.'));
         }
       })
       .catch((e) => notify("Couldn't set demo user. ", e));
   };
 
-  const signInDemoUser = () => {
-    if (!demoUser?._id) return notify("Couldn't sign in demo user.");
-
-    dispatch(setCurrentUserMain(demoUser));
-    ipcRenderer.send('currentUser:signedIn', demoUser._id); //for the socket in main
-
-    setSignedIn(true);
-
-    DAO.getDemoActivities()
-      .then((result) => {
-        if (result.data.success) {
-          setDemoUser((prevState) => {
-            return { ...prevState, fakeActivities: result.data.activities };
-          });
-        }
-      })
-      .catch((e) => notify('Failed to set demo up properly.'));
-  };
-
   const refreshTokenFromMainHandler = (e, { currentUser }) => {
+    console.log({ newerData: currentUser });
     dispatch(setCurrentUserMain(currentUser));
   };
 
@@ -197,7 +197,7 @@ export function authAndy({ children }) {
   }, [currentUser, signedIn]);
 
   useEffect(() => {
-    initDemoAccount();
+    // initDemoAccount();
     ipcRenderer.on('refreshtoken:frommain', refreshTokenFromMainHandler);
 
     return () =>

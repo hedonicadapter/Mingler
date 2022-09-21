@@ -8,6 +8,9 @@ import DAO from '../config/DAO';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
+// const baseURL = 'ws://127.0.0.1:8080/user';
+const baseURL = 'https://menglir.herokuapp.com/user';
+
 const ClientSocketContext = createContext();
 export function useClientSocket() {
   return useContext(ClientSocketContext);
@@ -18,8 +21,7 @@ export function ClientSocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
 
   const connectSocket = (user) => {
-    // ws://127.0.0.1:8080/user
-    const newSocket = io('https://menglir.herokuapp.com/user', {
+    const newSocket = io(baseURL, {
       auth: {
         accessToken: user && user.accessToken,
       },
@@ -54,7 +56,7 @@ export function ClientSocketProvider({ children }) {
 
   useEffect(() => {
     connectSocket(currentUser);
-  }, [currentUser._id]);
+  }, [currentUser?._id]);
 
   useEffect(() => {
     if (socket) {
@@ -87,36 +89,6 @@ export function ClientSocketProvider({ children }) {
       socket?.close();
     };
   }, [socket]);
-
-  // Deprecated I think lol
-  const sendActivityToLocalStorage = (packet) => {
-    // Each packet contains the ID it was sent from, and an activity wrapped in a data object
-    const userID = packet?.userID;
-
-    // activities are organized by userID so we can easily get them for each friend
-    const latestActivity = localStorage.getItem(userID);
-    if (latestActivity) {
-      let latestActivityParsed = JSON.parse(latestActivity);
-      // Put this activity on the top
-      latestActivityParsed.unshift(packet.data);
-
-      localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
-
-      // Clear storage if a user has more than 5 saved activitiees
-      if (latestActivityParsed.length > 5) {
-        cleanUpLocalStorageActivities(userID, latestActivityParsed);
-      }
-    } else {
-      const data = [packet.data];
-      localStorage.setItem(packet.userID, JSON.stringify(data));
-    }
-  };
-
-  // Removes the oldest activity from a given user's activities array
-  const cleanUpLocalStorageActivities = (userID, latestActivityParsed) => {
-    latestActivityParsed.pop();
-    localStorage.setItem(userID, JSON.stringify(latestActivityParsed));
-  };
 
   const sendFriendRequestFromMainHandler = (evt, toID) => {
     const packet = { toID, fromID: currentUser._id };
@@ -169,7 +141,6 @@ export function ClientSocketProvider({ children }) {
   const value = {
     sendActivity,
     acceptFriendRequest,
-    sendActivityToLocalStorage,
     sendYouTubeTimeRequest,
     answerYouTubeTimeRequest,
     socket,

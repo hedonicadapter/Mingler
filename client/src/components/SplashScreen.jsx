@@ -349,6 +349,7 @@ const GuestSlide = () => {
 
   const handleContinueButton = () => {
     setFormFilled('loading');
+    if (name.toLowerCase() === 'demo') return signInDemoUser();
 
     signUpGuest(name).then(({ success, _id, error }) => {
       if (error) {

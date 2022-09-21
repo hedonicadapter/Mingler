@@ -122,6 +122,7 @@ export default function FriendRequestsAccordion({
             initial="collapsed"
             animate="open"
             exit="collapsed"
+            style={{ backgroundColor: colors.offWhiteHovered }}
             variants={{
               open: { height: 'auto', color: colors.darkmodeBlack },
               collapsed: { height: 0, color: 'rgba(0,0,0,0)' },
@@ -129,11 +130,14 @@ export default function FriendRequestsAccordion({
             transition={{ duration: 0.15, ease: [0.04, 0.62, 0.23, 0.98] }}
           >
             {friendRequests.map((user, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 0.1 * index } }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
                 style={{
                   padding: generalPadding,
-                  backgroundColor: colors.offWhiteHovered,
                 }}
               >
                 <UserItem
@@ -143,7 +147,7 @@ export default function FriendRequestsAccordion({
                   handleRejectRequestButton={handleRejectRequestButton}
                   index={0}
                 />
-              </div>
+              </motion.div>
             ))}
           </motion.section>
         )}

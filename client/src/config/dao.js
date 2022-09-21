@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { ipcRenderer } from 'electron';
+const ipcRenderer = require('electron').ipcRenderer;
 
 const baseURL = 'https://menglir.herokuapp.com/';
 // const baseURL = 'http://localhost:8080/';
@@ -247,11 +247,34 @@ export class DAO {
   };
 }
 
-const getNewToken = (refreshToken) => {
-  const data = { refreshToken };
+const getNewToken = (refreshToken, demoUser = false) => {
+  const data = { refreshToken, demoUser };
 
   return token.post('/refreshToken', data);
 };
+
+const demoRequestInterceptor = async function (config) {
+  try {
+    const { accessToken, refreshToken, clientFingerprint, demoUser } =
+      await ipcRenderer.invoke('getTokens');
+
+    if (demoUser) {
+      config.data.demoUser = demoUser;
+      config.data.clientFingerprint = clientFingerprint;
+    }
+  } catch (e) {
+    console.warn('Request error: ', e);
+  }
+
+  return config;
+};
+
+privateRoute.interceptors.request.use(demoRequestInterceptor, function (error) {
+  return Promise.reject(error);
+});
+token.interceptors.request.use(demoRequestInterceptor, function (error) {
+  return Promise.reject(error);
+});
 
 privateRoute.interceptors.response.use(
   function (response) {
@@ -259,36 +282,42 @@ privateRoute.interceptors.response.use(
   },
   async function (error) {
     const ogRequest = error.config;
-    console.warn({ status: error.response.status });
-    if (401 === error.response.status && !ogRequest.retry) {
-      // const oldAccessToken = ogRequest.headers.Authorization.replace(
-      //   /^Bearer\s+/,
-      //   ''
-      // );
+    if (ogRequest.retry) Promise.reject('Failed after retry.');
 
-      const { accessToken, refreshToken } = await ipcRenderer.invoke(
-        'getTokens'
-      );
-      if (!refreshToken) return Promise.reject('Failed to get refresh token.');
+    const { accessToken, refreshToken, clientFingerprint, demoUser } =
+      await ipcRenderer.invoke('getTokens');
+    if (!refreshToken) return Promise.reject('Failed to get refresh token.');
 
+    ogRequest.retry = true;
+
+    if (401 === error.response.status) {
       const newTokens = await getNewToken(refreshToken);
-      console.log({ newTokens });
 
-      if (!newTokens) return Promise.reject('Failed to get new tokens.');
+      if (!newTokens?.data?.accessToken)
+        return Promise.reject('Failed to get new tokens.');
+      ogRequest.headers.Authorization = 'Bearer ' + newTokens.data.accessToken;
 
-      const access = newTokens.data.accessToken;
+      const result = await ipcRenderer.invoke('refreshtoken:fromrenderer', {
+        currentUser: newTokens?.data,
+      });
+      return result
+        ? axios(ogRequest)
+        : Promise.reject('Failed to set refreshed user.');
 
-      ogRequest.headers.Authorization = 'Bearer ' + access;
-      ogRequest.retry = true;
+      // If demo user might be expired
+    } else if (clientFingerprint && demoUser && 404 === error.response.status) {
+      const newTokens = await getNewToken(refreshToken, demoUser);
 
-      const { port1 } = new MessageChannel();
-      ipcRenderer.postMessage(
-        'refreshtoken:fromrenderer',
-        { currentUser: newTokens.data },
-        [port1]
-      );
+      if (!newTokens?.data?.accessToken)
+        return Promise.reject('Failed to get new tokens.');
+      ogRequest.headers.Authorization = 'Bearer ' + newTokens.data.accessToken;
 
-      return axios(ogRequest);
+      const result = await ipcRenderer.invoke('refreshtoken:fromrenderer', {
+        currentUser: newTokens?.data,
+      });
+      return result
+        ? axios(ogRequest)
+        : Promise.reject('Failed to set refreshed user.');
     } else {
       return Promise.reject(error);
     }

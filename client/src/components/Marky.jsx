@@ -59,8 +59,6 @@ export default function Marky({
   userID,
 
   expanded,
-
-  marKey,
 }) {
   const { socket, sendYouTubeTimeRequest } = useClientSocket();
 

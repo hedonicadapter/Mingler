@@ -28,6 +28,7 @@ const Pane = ({ children }) => {
           opacity: 0,
         },
       }}
+      style={{ willChange: 'transform' }}
       onAnimationComplete={() => ipcRenderer.send('animationComplete')}
     >
       {children}

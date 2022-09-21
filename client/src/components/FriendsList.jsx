@@ -150,7 +150,7 @@ export default function FriendsList() {
                 transform: 'translateY(-50%)',
               }}
             >
-              Welcome.
+              Good to see you.
             </motion.div>
           </motion.div>
         )}

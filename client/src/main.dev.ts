@@ -196,15 +196,16 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   }
 
   if (!spotifyAccessToken) return;
-
+  console.log('trackprocess execing');
   trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
   // trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
   trackProcess.stdout.on('data', function (data) {
+    console.log('yeeeeeeeee ', data);
     answerProcess(trackProcess);
 
     let processedData = data.toString().trim();
-    // console.log('processedData ', processedData);
+    console.log({ processedData });
     if (processedData === '401') {
       trackProcess.stdin.end();
       trackProcess.stdout.destroy();
@@ -353,7 +354,11 @@ const signedInContextMenu = (accelerator) =>
     { type: 'separator' },
     {
       label: 'exit',
-      click: () => mainWindow?.webContents.send('exit:frommain'),
+      click: () => {
+        mainWindow?.webContents.send('exit:frommain');
+
+        // setTimeout(() => mainWindow?.close(), 250);
+      },
     },
   ]);
 
@@ -437,6 +442,10 @@ const createWindow = async () => {
   });
 
   mainWindow.on('close', function () {
+    if (mainWindow?.webContents.isDevToolsOpened()) {
+      mainWindow.webContents.closeDevTools();
+    }
+    console.log('closing');
     windowProcess?.stdin.end();
     trackProcess?.stdin.end();
 
@@ -449,11 +458,12 @@ const createWindow = async () => {
     trackProcess?.removeAllListeners();
     windowProcess?.removeAllListeners();
 
-    io.close();
+    io?.close();
 
     trackProcess?.kill();
     windowProcess?.kill();
 
+    mainWindow?.destroy();
     mainWindow = null;
     app.exit(0);
   });
@@ -569,7 +579,7 @@ const createWindow = async () => {
     ipcMain.once('exitready:fromrenderer', () => {
       console.log('trying to exit');
 
-      mainWindow.close();
+      mainWindow?.close();
     });
 
     try {
@@ -586,7 +596,7 @@ const createWindow = async () => {
       ipcMain.on('exit:frommenubutton', () => {
         mainWindow.webContents.send('exit:frommain');
 
-        setTimeout(() => mainWindow?.destroy(), 250);
+        // setTimeout(() => mainWindow?.close(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         setTrayContextMenu('signedIn', global.state?.settings?.globalShortcut);
@@ -642,10 +652,6 @@ const createWindow = async () => {
   });
   ipcMain.on('cancelfriendrequest:fromrenderer', async (event, data) => {
     mainWindow?.webContents.send('cancelfriendrequest:frommain', data);
-  });
-
-  ipcMain.on('refreshtoken:fromrenderer', (e, currentUser) => {
-    mainWindow?.webContents.send('refreshtoken:frommain', currentUser);
   });
 
   ipcMain.on('toggleconnectspotify:fromrenderer', () => {
@@ -841,8 +847,29 @@ app.whenReady().then(() => {
           return {
             accessToken: currentUser?.accessToken,
             refreshToken: currentUser?.refreshToken,
+            clientFingerprint: currentUser?.clientFingerprint,
+            demoUser: currentUser?.demoUser && currentUser?._id,
           };
         });
+
+        ipcMain.handle(
+          'refreshtoken:fromrenderer',
+          async (evt, currentUser) => {
+            // const port = e.ports[0];
+            // console.log(currentUser);
+            // // MessagePortMain uses the Node.js-style events API, rather than the
+            // // web-style events API. So .on('message', ...) instead of .onmessage = ...
+            // port.on('message', (evt) => {
+            //   // data is { answer: 42 }
+            //   console.log('evt', evt);
+            // });
+            console.log('main works');
+            // // MessagePortMain queues messages until the .start() method has been called.
+            // port.start();
+            mainWindow?.webContents.send('refreshtoken:frommain', currentUser);
+            return true;
+          }
+        );
 
         store.subscribe(() => {
           if (store.getState()?.app?.appVisible) {

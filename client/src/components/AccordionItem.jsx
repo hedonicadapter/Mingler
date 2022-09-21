@@ -39,6 +39,7 @@ export default function AccordionItem({
   );
 
   const cardHeaderRef = useRef(null);
+  const cardBodyRef = useRef(null);
 
   const { deleteFriend } = useFriends();
 
@@ -49,6 +50,15 @@ export default function AccordionItem({
   const [playerURL, setPlayerURL] = useState(null);
   const [activityLength, setActivityLength] = useState(null);
   const [online, setOnline] = useState();
+
+  useEffect(() => {
+    if (!chatVisible && !playerVisible) return;
+
+    cardBodyRef?.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [expanded]);
 
   useEffect(() => {
     if (expanded) return;
@@ -235,16 +245,18 @@ export default function AccordionItem({
       </div>
       <CardSeparator cardHovered={cardHovered} expanded={expanded} />
 
-      <CardBody
-        activity={friend?.activity}
-        userID={friend?._id}
-        expanded={expanded}
-        chatVisible={chatVisible}
-        playerURL={playerURL}
-        playerVisible={playerVisible}
-        closePlayer={closePlayer}
-        isWidgetHeader={isWidgetHeader}
-      />
+      <div ref={cardBodyRef}>
+        <CardBody
+          activity={friend?.activity}
+          userID={friend?._id}
+          expanded={expanded}
+          chatVisible={chatVisible}
+          playerURL={playerURL}
+          playerVisible={playerVisible}
+          closePlayer={closePlayer}
+          isWidgetHeader={isWidgetHeader}
+        />
+      </div>
     </motion.div>
   );
 }

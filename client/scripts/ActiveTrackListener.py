@@ -22,22 +22,25 @@ def get_current_track(access_token):
     if response.status_code != 204:
         json_response = response.json();
 
+        item = json_response.get("item")
 
-        track_id = json_response["item"]["id"]
-        track_name = json_response["item"]["name"]
-        link = json_response["item"]["external_urls"]["spotify"]
-        
-        artists = json_response["item"]["artists"]
-        artists_names = ', '.join([artist["name"] for artist in artists])
-        
+        track_id = item.get("id") if item else None
+        track_name = item.get("name") if item else None
+        artists = item.get("artists") if item else None
+        artists_names = ', '.join([artist.get("name") for artist in artists]) if artists else None
+
+        urls = item.get("external_urls") if item else None
+        link = urls.get("spotify") if urls else None
+
 
         current_track_info = {
-            "id": track_id,
-            "name": track_name,
-            "link": link,
-            "artists": artists_names,
+            "id": track_id if track_id else "",
+            "name": track_name if track_name else "",
+            "artists": artists_names if artists_names else "",
+            "link": link if link else "",
+            "health":"check"
         }
-
+        
         return current_track_info
 
 def exit_script():
