@@ -53,6 +53,71 @@ export const EmptySpaceFiller = () => {
   );
 };
 
+export const BackgroundNoise = () => (
+  <svg
+    id="svg"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{
+      height: '100%',
+      width: '100%',
+      position: 'fixed',
+      top: '0px',
+      left: '0px',
+      right: '0px',
+      bottom: '0px',
+      pointerEvents: 'none',
+      zIndex: 90,
+    }}
+  >
+    <defs>
+      <filter id="noise" y="0" x="0">
+        <feTurbulence
+          className="basefrequency"
+          stitchTiles="stitch"
+          baseFrequency=".75"
+          type="fractalNoise"
+        />
+      </filter>
+      <pattern
+        id="pattern"
+        className="tile1"
+        patternUnits="userSpaceOnUse"
+        height="100"
+        width="100"
+        y="0"
+        x="0"
+      >
+        <rect
+          className="bg"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill="transparent"
+        />
+        <rect
+          className="opacity"
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          filter="url(#noise)"
+          opacity=".32"
+        />
+      </pattern>
+    </defs>
+    <rect
+      style={{ pointerEvents: 'none' }}
+      id="rect"
+      x="0"
+      y="0"
+      width="100%"
+      height="100%"
+      fill="url(#pattern)"
+    />
+  </svg>
+);
+
 export default function FriendsList() {
   // const setIgnoreMouseEvents =
   //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
@@ -239,68 +304,7 @@ export default function FriendsList() {
           </div>
         </div>
       </ConfigProvider>
-      <svg
-        id="svg"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          height: '100%',
-          width: '100%',
-          position: 'fixed',
-          top: '0px',
-          left: '0px',
-          right: '0px',
-          bottom: '0px',
-          pointerEvents: 'none',
-          zIndex: 90,
-        }}
-      >
-        <defs>
-          <filter id="noise" y="0" x="0">
-            <feTurbulence
-              className="basefrequency"
-              stitchTiles="stitch"
-              baseFrequency=".75"
-              type="fractalNoise"
-            />
-          </filter>
-          <pattern
-            id="pattern"
-            className="tile1"
-            patternUnits="userSpaceOnUse"
-            height="100"
-            width="100"
-            y="0"
-            x="0"
-          >
-            <rect
-              className="bg"
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="transparent"
-            />
-            <rect
-              className="opacity"
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              filter="url(#noise)"
-              opacity=".32"
-            />
-          </pattern>
-        </defs>
-        <rect
-          style={{ pointerEvents: 'none' }}
-          id="rect"
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          fill="url(#pattern)"
-        />
-      </svg>
+      <BackgroundNoise />
     </>
   );
 }

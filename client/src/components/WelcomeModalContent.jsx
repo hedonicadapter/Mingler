@@ -4,6 +4,7 @@ import { getSettings } from '../mainState/features/settingsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import colors from '../config/colors';
 import animations from '../config/animations';
+import { BackgroundNoise } from './FriendsList';
 
 const { remote, ipcRenderer } = require('electron');
 
@@ -87,6 +88,8 @@ const KeyboardKey = ({ text }) => (
     style={{
       marginInline: 10,
       padding: 2,
+      backgroundColor: colors.offWhitePressed2,
+      zIndex: 100,
       boxShadow: '0px 11px 20px -10px rgba(0, 0, 0, 0.58)',
       borderTop: '1px solid var(--off-white-pressed2)',
       borderBottom: '3px solid var(--off-white-pressed2)',
@@ -172,9 +175,11 @@ export default function WelcomeModalContent() {
               gap: 8,
             }}
           >
-            <KeyboardKey text="ctrl" /> or <KeyboardKey text="cmd" />
+            <KeyboardKey text="ctrl" /> <div style={{ opacity: 0.6 }}>or</div>
+            <KeyboardKey text="cmd" />
           </div>
-          +<KeyboardKey text="q" />
+          <div style={{ opacity: 0.6 }}>+</div>
+          <KeyboardKey text="q" />
         </div>
         <MiniWidget />
       </div>
@@ -186,17 +191,17 @@ export default function WelcomeModalContent() {
           borderBottomColor: colors.darkmodeBlack,
         }}
         style={{
-          letterSpacing: 1,
           cursor: 'pointer',
           zIndex: 10,
           marginLeft: 'auto',
           marginBottom: 8,
-          marginRight: 14,
+          paddingRight: 16,
+          marginRight: 12,
           marginTop: -20,
-          paddingLeft: 1,
-          paddingBottom: 2,
-          width: 42,
-          fontSize: '1em',
+          paddingLeft: 6,
+          paddingBottom: 6,
+          width: 62,
+          fontSize: '0.8em',
 
           color: colors.darkmodeLightBlack,
           borderBottom: '1px solid ' + colors.offWhitePressed2,
@@ -208,6 +213,7 @@ export default function WelcomeModalContent() {
       >
         got it
       </motion.div>
+      <BackgroundNoise />
     </motion.div>
   );
 }

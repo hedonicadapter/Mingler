@@ -35,26 +35,6 @@ export function useBrowserWindow() {
 
 const favicon = __dirname + '../../assets/icons/minglerReversed.ico';
 
-const welcomeModalConfig = {
-  title: 'Welcome to Mingler',
-  show: false,
-  frame: false,
-  transparent: true,
-  width: 330,
-  height: 140,
-  icon: favicon,
-  resizable: false,
-  closable: false,
-  alwaysOnTop: true,
-  webPreferences: {
-    contextIsolation: false,
-    nodeIntegration: true,
-    enableRemoteModule: true,
-    spellcheck: false,
-    devTools: false,
-  },
-};
-
 const settingsWindowConfig = {
   title: 'Settings',
   show: false,
@@ -112,34 +92,43 @@ export function BrowserWindowProvider({ children }) {
 
   const [readyToExit, setReadyToExit] = useState(false);
 
-  const [welcomeModal, setWelcomeModal] = useState(null);
-  const [settingsWindow, setSettingsWindow] = useState(null);
-  const [findFriendsWindow, setFindFriendsWindow] = useState(null);
-  const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(null);
+  const [settingsWindow, setSettingsWindow] = useState(
+    new BrowserWindow(settingsWindowConfig)
+  );
 
-  useEffect(() => {
-    let welcomeModalStateless = new BrowserWindow(welcomeModalConfig);
-    let settingsWindowStateless = new BrowserWindow(settingsWindowConfig);
-    let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
-    let connectSpotifyWindowStateless = new BrowserWindow(
-      connectSpotifyWindowConfig
-    );
-    setWelcomeModal(welcomeModalStateless);
-    setSettingsWindow(settingsWindowStateless);
-    setFindFriendsWindow(findFriendsWindowStateless);
-    setConnectSpotifyWindow(connectSpotifyWindowStateless);
+  const [findFriendsWindow, setFindFriendsWindow] = useState(
+    new BrowserWindow(findFriendsWindowConfig)
+  );
 
-    return () => {
-      welcomeModalStateless = null;
-      settingsWindowStateless = null;
-      findFriendsWindowStateless = null;
-      connectSpotifyWindowStateless = null;
-      setWelcomeModal(null);
-      setSettingsWindow(null);
-      setFindFriendsWindow(null);
-      setConnectSpotifyWindow(null);
-    };
-  }, []);
+  const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(
+    new BrowserWindow(connectSpotifyWindowConfig)
+  );
+
+  // const [settingsWindow, setSettingsWindow] = useState(null);
+  // const [findFriendsWindow, setFindFriendsWindow] = useState(null);
+  // const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(null);
+
+  // useEffect(() => {
+  //   let settingsWindowStateless = new BrowserWindow(settingsWindowConfig);
+  //   let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
+  //   let connectSpotifyWindowStateless = new BrowserWindow(
+  //     connectSpotifyWindowConfig
+  //   );
+
+  //   setSettingsWindow(settingsWindowStateless);
+  //   setFindFriendsWindow(findFriendsWindowStateless);
+  //   setConnectSpotifyWindow(connectSpotifyWindowStateless);
+
+  //   return () => {
+  //     settingsWindowStateless = null;
+  //     findFriendsWindowStateless = null;
+  //     connectSpotifyWindowStateless = null;
+
+  //     setSettingsWindow(null);
+  //     setFindFriendsWindow(null);
+  //     setConnectSpotifyWindow(null);
+  //   };
+  // }, []);
 
   const settingsWindowFocusHandler = () => {
     console.log('sending from renterer');
@@ -157,14 +146,12 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const hideWindow = (window) => {
-    window?.setSkipTaskbar(true);
-    if (process.platform == 'win32') window?.minimize();
-    else if (process.platform == 'darwin') app?.hide();
-    else window?.hide();
-  };
+    if (!window || window.isDestroyed()) return;
 
-  const welcomeModalCloseHandler = () => {
-    hideWindow(welcomeModal);
+    window.setSkipTaskbar(true);
+    if (process.platform == 'win32') window.minimize();
+    else if (process.platform == 'darwin') app?.hide();
+    else window.hide();
   };
 
   const settingsWindowCloseHandler = (evt) => {
@@ -195,29 +182,8 @@ export function BrowserWindowProvider({ children }) {
   };
 
   useEffect(() => {
-    if (!welcomeModal || welcomeModal.isDestroyed()) return;
-    if (!settingsState?.showWelcome) return;
-    if (welcomeModal?.isVisible()) return;
-
-    loadWelcomeModal();
-
-    welcomeModal.on('close', welcomeModalCloseHandler);
-
-    return () => {
-      welcomeModal.removeListener('close', welcomeModalCloseHandler);
-      welcomeModal?.destroy();
-    };
-  }, [settingsState?.showWelcome, welcomeModal]);
-
-  useEffect(() => {
     // Clusterfuck of close handling to keep unclosability working
     ipcRenderer.once('exit:frommain', () => {
-      // if (welcomeModal && !welcomeModal?.isDestroyed()) {
-      //   // welcomeModal.removeListener('close', welcomeModalCloseHandler);
-      // }
-      // welcomeModal?.destroy();
-      // welcomeModalStateless = null;
-      setWelcomeModal(null);
       // if (settingsWindow && !settingsWindow?.isDestroyed()) {
       // settingsWindow.removeListener('close', settingsWindowCloseHandler);
       // settingsWindow?.destroy();
@@ -245,7 +211,6 @@ export function BrowserWindowProvider({ children }) {
       setReadyToExit(true);
     });
     // return () => {
-    //   hideWindow(welcomeModal);
     //   hideWindow(settingsWindow);
     //   hideWindow(findFriendsWindow);
     //   hideWindow(connectSpotifyWindow);
@@ -257,10 +222,8 @@ export function BrowserWindowProvider({ children }) {
     console.log(!settingsWindow);
     console.log(!findFriendsWindow);
     console.log(!connectSpotifyWindow);
-    console.log(!welcomeModal);
     console.log(readyToExit);
     if (
-      !welcomeModal &&
       !settingsWindow &&
       !findFriendsWindow &&
       !connectSpotifyWindow &&
@@ -268,13 +231,7 @@ export function BrowserWindowProvider({ children }) {
     ) {
       ipcRenderer.send('exitready:fromrenderer');
     }
-  }, [
-    settingsWindow,
-    findFriendsWindow,
-    connectSpotifyWindow,
-    welcomeModal,
-    readyToExit,
-  ]);
+  }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
 
   useEffect(() => {
     if (!settingsWindow) return;
@@ -299,7 +256,7 @@ export function BrowserWindowProvider({ children }) {
   }, [settingsWindow]);
 
   useEffect(() => {
-    if (!findFriendsWindow) return;
+    if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
 
     loadFindFriendsContent();
 
@@ -366,21 +323,6 @@ export function BrowserWindowProvider({ children }) {
     };
   }, []);
 
-  const loadWelcomeModal = () => {
-    if (welcomeModal?.isDestroyed()) return;
-    welcomeModal
-      .loadURL(`file://${app.getAppPath()}/index.html#/welcome`)
-      .then()
-      .catch(console.warn);
-
-    welcomeModal.once('ready-to-show', () => {
-      welcomeModal.setTitle('Welcome to Mingler');
-    });
-    welcomeModal.webContents.once('did-finish-load', () => {
-      welcomeModal.show();
-    });
-  };
-
   const loadSettingsContent = () => {
     if (settingsWindow?.isDestroyed()) return;
     settingsWindow
@@ -394,14 +336,16 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const toggleSettings = (page = 'Widget', quickSetting = false) => {
+    if (!settingsWindow || settingsWindow.isDestroyed()) return;
+
     dispatch(setSettingsContentMain(page));
 
-    settingsWindow?.setSkipTaskbar(false);
+    settingsWindow.setSkipTaskbar(false);
 
     if (!appState.settingsOpen) {
       settingsWindow.show();
       dispatch(settingsOpenTrue());
-    } else if (appState.settingsOpen && !settingsWindow?.isVisible()) {
+    } else if (appState.settingsOpen && !settingsWindow.isVisible()) {
       settingsWindow.show();
     } else {
       settingsWindow.focus();
@@ -412,7 +356,6 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const loadFindFriendsContent = () => {
-    if (findFriendsWindow?.isDestroyed()) return;
     findFriendsWindow
       .loadURL(`file://${app.getAppPath()}/index.html#/findfriends`)
       .then()

@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { connect } from 'react-redux';
 import { assert } from 'console';
@@ -11,6 +11,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   getCurrentUser,
+  getSettings,
   setCurrentUserMain,
   setKeepMeSignedInMain,
 } from '../mainState/features/settingsSlice';
@@ -18,6 +19,31 @@ import genericErrorHandler from '../helpers/genericErrorHandler';
 import { Memoized } from '../components/reusables/Memoized';
 
 const { useLocalStorage } = require('../helpers/localStorageManager');
+
+const app = remote.app;
+const BrowserWindow = remote.BrowserWindow;
+
+const favicon = __dirname + '../../assets/icons/minglerReversed.ico';
+
+const welcomeModalConfig = {
+  title: 'Welcome to Mingler',
+  show: false,
+  frame: false,
+  transparent: true,
+  width: 330,
+  height: 140,
+  icon: favicon,
+  resizable: false,
+  closable: false,
+  alwaysOnTop: true,
+  webPreferences: {
+    contextIsolation: false,
+    nodeIntegration: true,
+    enableRemoteModule: true,
+    spellcheck: false,
+    devTools: false,
+  },
+};
 
 const AuthContext = createContext();
 
@@ -39,6 +65,7 @@ export function useAuth() {
 
 export function authAndy({ children }) {
   const currentUser = useSelector(getCurrentUser);
+  const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();
 
   const [demoUser, setDemoUser] = useState(null);
@@ -47,9 +74,28 @@ export function authAndy({ children }) {
   const [clientFingerprint, setClientFingerprint] =
     useLocalStorage('clientFingerprint');
 
-  useEffect(() => {
-    console.log('demoUser ', demoUser);
-  }, [demoUser]);
+  const [welcomeModal, setWelcomeModal] = useState(null);
+
+  const loadWelcomeModal = () => {
+    welcomeModal
+      .loadURL(`file://${app.getAppPath()}/index.html#/welcome`)
+      .then()
+      .catch(console.warn);
+
+    welcomeModal.once('ready-to-show', () => {
+      welcomeModal.setTitle('Welcome to Mingler');
+    });
+    welcomeModal.webContents.once('did-finish-load', () => {
+      welcomeModal.show();
+    });
+  };
+
+  const welcomeModalCloseHandler = () => {
+    welcomeModal?.setSkipTaskbar(true);
+    if (process.platform == 'win32') welcomeModal?.minimize();
+    else if (process.platform == 'darwin') app?.hide();
+    else welcomeModal?.hide();
+  };
 
   const setCurrentUser = (data) => {
     dispatch(setCurrentUserMain(data));
@@ -205,6 +251,42 @@ export function authAndy({ children }) {
         'refreshtoken:frommain',
         refreshTokenFromMainHandler
       );
+  }, []);
+
+  useEffect(() => {
+    let welcomeModalStateless = new BrowserWindow(welcomeModalConfig);
+    setWelcomeModal(welcomeModalStateless);
+
+    return () => {
+      welcomeModalStateless = null;
+      setWelcomeModal(null);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!welcomeModal || welcomeModal.isDestroyed()) return;
+    if (!settingsState?.showWelcome) return;
+    if (welcomeModal?.isVisible()) return;
+
+    loadWelcomeModal();
+
+    welcomeModal.on('close', welcomeModalCloseHandler);
+
+    return () => {
+      welcomeModal.removeListener('close', welcomeModalCloseHandler);
+      welcomeModal?.destroy();
+    };
+  }, [welcomeModal]);
+
+  useEffect(() => {
+    ipcRenderer.once('exit:frommain', () => {
+      // if (welcomeModal && !welcomeModal?.isDestroyed()) {
+      //   // welcomeModal.removeListener('close', welcomeModalCloseHandler);
+      // }
+      // welcomeModal?.destroy();
+      // welcomeModalStateless = null;
+      setWelcomeModal(null);
+    });
   }, []);
 
   const value = {
