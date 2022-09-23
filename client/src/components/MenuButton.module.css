@@ -4,7 +4,7 @@
   right: 0;
   margin: 10px;
   width: 110px;
-  background-color: var(--dark-mode-black);
+  background-color: var(--dark-mode-light-black);
   color: var(--off-white);
   z-index: 55;
 }

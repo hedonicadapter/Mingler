@@ -212,31 +212,41 @@ export default function AccordionItem({
           />
 
           {!isWidgetHeader && (
-            <div
-              style={{
-                position: 'absolute',
-                right: 16,
-                top: '25%',
-                bottom: '75%',
-                float: 'right',
-                verticalAlign: 'middle',
-                lineHeight: '100%',
-              }}
-              onClick={(e) => toggleChat(e)}
-            >
-              <BiConversation
-                // className={messageIcon()}
-                style={{
-                  color: expanded
-                    ? chatVisible
-                      ? colors.darkmodeLightBlack
-                      : colors.darkmodeBlack
-                    : colors.darkmodeBlack,
-
-                  opacity: cardHovered ? 0.6 : 0,
-                }}
-              />
-            </div>
+            <AnimatePresence>
+              {cardHovered && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.6 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <div
+                    style={{
+                      cursor: 'pointer',
+                      position: 'absolute',
+                      right: 16,
+                      top: '25%',
+                      bottom: '75%',
+                      float: 'right',
+                      verticalAlign: 'middle',
+                      lineHeight: '100%',
+                    }}
+                    onClick={(e) => toggleChat(e)}
+                  >
+                    <BiConversation
+                      // className={messageIcon()}
+                      style={{
+                        color: expanded
+                          ? chatVisible
+                            ? colors.darkmodeLightBlack
+                            : colors.darkmodeBlack
+                          : colors.darkmodeBlack,
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           )}
         </div>
       </div>

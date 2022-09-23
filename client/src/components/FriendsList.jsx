@@ -49,7 +49,20 @@ export const EmptySpaceFiller = () => {
       onClick={() => {
         contextMenuCollapseAllHandler();
       }}
-    />
+    >
+      <div
+        style={{
+          marginTop: -15,
+          width: '100%',
+          opacity: 0.5,
+          background: `linear-gradient(to top, ${colors.offWhite} 5%, transparent)`,
+          position: 'absolute',
+          '&:after': { content: '' },
+          height: 15,
+          pointerEvents: 'none',
+        }}
+      />
+    </div>
   );
 };
 
@@ -299,6 +312,7 @@ export default function FriendsList() {
           </div>
 
           <EmptySpaceFiller />
+
           <div style={{ flex: '0 1 40px' }}>
             <WidgetFooter
               appVisible={appState?.appVisible}
