@@ -220,8 +220,6 @@ export const ChatBox = ({ receiver, chatVisible }) => {
             sentDate: new Date(),
           };
 
-          console.log(newMessage);
-
           socket.emit('message:send', {
             toID: receiver,
             fromID: currentUser?._id,
@@ -305,43 +303,48 @@ export const ChatBox = ({ receiver, chatVisible }) => {
       }}
       transition={{ duration: 0.15 }}
     >
-      <motion.div layout="position" className={styles.chatContainer}>
+      <motion.div
+        // layout="position"
+        className={styles.chatContainer}
+      >
         <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
           <AnimateSharedLayout>
-            <AnimatePresence>
-              {loading && (
-                <motion.div
-                  layout="position"
-                  key={'loadinganimation'}
-                  style={{
-                    height: 27,
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <LoadingAnimation
-                    formFilled={'loading'}
+            <motion.div layout="position">
+              <AnimatePresence>
+                {loading && (
+                  <motion.div
+                    key={'loadinganimation'}
                     style={{
-                      position: 'relative',
-                      zIndex: 50,
-                      left: '50%',
+                      height: 27,
                     }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <LoadingAnimation
+                      formFilled={'loading'}
+                      style={{
+                        position: 'relative',
+                        zIndex: 50,
+                        left: '50%',
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+            <motion.div layout="position">
+              {currentConvo?.messages?.map((message, index) => (
+                <motion.div key={message.sentDate}>
+                  <ConversationBubble
+                    fromID={message.fromID}
+                    message={message.message}
+                    sent={message.sentDate}
                   />
                 </motion.div>
-              )}
-            </AnimatePresence>
-            {currentConvo?.messages?.map((message, index) => (
-              <motion.div layout="position" key={index}>
-                <ConversationBubble
-                  key={index}
-                  fromID={message.fromID}
-                  message={message.message}
-                  sent={message.sentDate}
-                />
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </AnimateSharedLayout>
           <div ref={anchorRef} />
         </div>

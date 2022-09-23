@@ -38,6 +38,7 @@ import { useIsInViewport } from '../helpers/useIsInViewport';
 import hotkeys from 'hotkeys-js';
 import Keyboard from 'react-simple-keyboard';
 import WidgetSettingsContent from './settingsContents/WidgetSettingsContent';
+import { BackgroundNoise } from './FriendsList';
 // import layout from 'simple-keyboard-layouts/build/layouts/swedish';
 
 const { remote, clipboard, ipcRenderer } = require('electron');
@@ -1002,6 +1003,7 @@ export default function SettingsContent() {
             </AnimationWrapper> */}
           </div>
         </div>
+        <BackgroundNoise />
       </WindowFrame>
     </div>
   );

@@ -9,7 +9,6 @@ import {
   setAccessTokenMain,
   setSpotifyAccessTokenMain,
   setSpotifyExpiryDate,
-  setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
 import { notify } from '../components/reusables/notifications';
 

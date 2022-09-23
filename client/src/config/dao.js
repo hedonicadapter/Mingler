@@ -218,6 +218,18 @@ export class DAO {
     });
   };
 
+  disconnectSpotify = (userID, token) => {
+    const data = {
+      userID,
+    };
+
+    return privateRoute.post('/refreshSpotify', data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   saveMessengerCredentials = (token, appState) => {
     const data = {
       appState,

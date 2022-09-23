@@ -171,10 +171,18 @@ export function BrowserWindowProvider({ children }) {
     toggleConnectSpotify();
   };
   const disconnectSpotifyHandler = () => {
-    dispatch(setSpotifyAccessTokenMain('disconnect'));
-    dispatch(setSpotifyRefreshTokenMain(null));
-    dispatch(setSpotifyExpiryDate(null));
-    activeTrackListener('disconnect');
+    DAO.disconnectSpotify(currentUser?._id, currentUser?.accessToken)
+      .then((result) => {
+        if (result?.data?.success) {
+          dispatch(setSpotifyAccessTokenMain('disconnect'));
+          dispatch(setSpotifyRefreshTokenMain(null));
+          dispatch(setSpotifyExpiryDate(null));
+          activeTrackListener('disconnect');
+        }
+      })
+      .catch((e) => {
+        sendSpotifyError(e);
+      });
   };
 
   const traySettingsHandler = () => {

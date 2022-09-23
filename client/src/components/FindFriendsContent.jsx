@@ -23,6 +23,7 @@ import {
 import { makeClickthrough } from '../config/clickthrough';
 import useDebounce from '../helpers/useDebounce';
 import genericErrorHandler from '../helpers/genericErrorHandler';
+import { BackgroundNoise } from './FriendsList';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;

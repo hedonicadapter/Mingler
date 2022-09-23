@@ -106,9 +106,9 @@
 
 .footerLink {
   text-decoration: underline;
-  text-decoration-color: transparent;
+  text-decoration-color: var(--off-white-pressed2);
   cursor: pointer;
-  color: var(--coffee-green);
+  color: #ce4257;
 }
 
 .footer {

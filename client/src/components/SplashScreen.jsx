@@ -577,7 +577,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
         <FormButton
           formFilled={formFilled}
           error={error}
-          buttonText={'sign up!'}
+          buttonText={'sign up.'}
           buttonHandler={handleSignUpButton}
         />
       </div>
@@ -867,7 +867,7 @@ const Footer = ({ currentSlide, setSlide }) => {
       <motion.div
         className={styles.footerLink}
         whileHover={{
-          textDecorationColor: colors.coffeeOrange,
+          textDecorationColor: colors.darkmodeLightBlack,
           transition: { duration: 0.15 },
         }}
         onClick={handleAlreadyAMemberButton || handleNotAMemberButton}
@@ -882,7 +882,7 @@ const Footer = ({ currentSlide, setSlide }) => {
       <>
         already a member?&nbsp;
         <Prompt handleAlreadyAMemberButton={handleAlreadyAMemberButton}>
-          sign in
+          sign in.
         </Prompt>
       </>
     );
@@ -893,7 +893,7 @@ const Footer = ({ currentSlide, setSlide }) => {
       <>
         not a member yet?&nbsp;
         <Prompt handleNotAMemberButton={handleNotAMemberButton}>
-          sign up!
+          sign up.
         </Prompt>
       </>
     );
