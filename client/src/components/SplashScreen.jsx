@@ -17,6 +17,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import animations from '../config/animations';
 import { useIsMounted } from '../helpers/useIsMounted';
 
+const slides = [
+  { key: 0, title: 'init' },
+  { key: 1, title: 'guest', available: true },
+  { key: 2, title: 'discord', available: false },
+  { key: 3, title: 'google', available: false },
+  { key: 4, title: 'facebook', available: false },
+  { key: 5, title: 'email' },
+];
+
 const formFilledVariants = {
   true: {
     // backgroundColor: colors.coffeeBlue,
@@ -118,7 +127,7 @@ const AnimationWrapper = ({ children }) => {
           duration: 0.35,
         }}
         style={{
-          marginInline: '10%',
+          marginInline: '12%',
         }}
         spellCheck="false"
       >
@@ -154,89 +163,97 @@ const ServiceSelector = ({ slides, setSlide }) => {
 
   return (
     <AnimationWrapper>
-      <motion.div
-        whileHover={{
-          borderBottomColor: colors.darkmodeBlack,
-          transition: { duration: 0.1 },
-        }}
-        whileTap={animations.whileTap}
-        className={[
-          styles.buttonStyle,
-          // inputStyle(),
-          styles.availableButtonStyle,
-        ].join(' ')}
-        // style={{ backgroundColor: colors.coffeePink }}
+      <div
         style={{
-          borderBottom: '1px solid ' + colors.offWhitePressed2,
-          margin: 'auto',
+          marginInline: '4%',
         }}
-        onClick={() => handleServiceButtonClick('email')}
       >
-        {'sign up with email'}
-      </motion.div>
-      {slides.map((service) => {
-        if (
-          service.title !== 'init' &&
-          service.title !== 'email' &&
-          service.title !== 'guest'
-        ) {
-          return (
-            <motion.div
-              key={service.key}
-              whileHover={
-                service.available && {
-                  color: colors.darkmodeHighWhite,
-                  transition: { duration: 0.1 },
-                  borderBottomColor: colors.darkmodeBlack,
+        <motion.div
+          whileHover={{
+            borderBottomColor: colors.darkmodeBlack,
+            transition: { duration: 0.1 },
+          }}
+          whileTap={animations.whileTap}
+          className={[
+            styles.buttonStyle,
+            // inputStyle(),
+            styles.availableButtonStyle,
+          ].join(' ')}
+          // style={{ backgroundColor: colors.coffeePink }}
+          style={{
+            borderBottom: '1px solid ' + colors.offWhitePressed2,
+            margin: 'auto',
+          }}
+          onClick={() => handleServiceButtonClick('email')}
+        >
+          {'sign up with email'}
+        </motion.div>
+        {slides.map((service) => {
+          if (
+            service.title !== 'init' &&
+            service.title !== 'email' &&
+            service.title !== 'guest'
+          ) {
+            return (
+              <motion.div
+                key={service.key}
+                whileHover={
+                  service.available && {
+                    color: colors.darkmodeHighWhite,
+                    transition: { duration: 0.1 },
+                    borderBottomColor: colors.darkmodeBlack,
+                  }
                 }
-              }
-              whileFocus={{
-                color: service.available
-                  ? colors.darkmodeBlack
-                  : colors.darkmodeLightBlack,
-              }}
-              whileTap={service.available && animations.whileTap}
-              className={[
-                styles.buttonStyle,
-                // inputStyle(),
-                service.available
-                  ? styles.availableButtonStyle
-                  : styles.unavailableButtonStyle,
-              ].join(' ')}
-              disabled={service.available ? true : false}
-              // style={{
-              //   backgroundColor:
-              //     service.title === 'guest' && colors.coffeeBrown,
-              // }}
-              style={{
-                borderBottom: service.available
-                  ? '1px solid ' + colors.darkmodeBlack
-                  : '1px solid ' + colors.offWhitePressed2,
-              }}
-              onClick={() =>
-                service.available && handleServiceButtonClick(service.title)
-              }
-            >
-              {'Sign up with ' + service.title}
-            </motion.div>
-          );
-        }
-      })}
-      <Separator />
-      <motion.div
-        className={[styles.buttonStyle, styles.availableButtonStyle].join(' ')}
-        whileHover={{
-          color: colors.darkmodeBlack,
-          transition: { duration: 0.1 },
-          borderBottomColor: colors.darkmodeBlack,
-        }}
-        whileFocus={{ color: colors.darkmodeBlack }}
-        style={{ borderBottom: '1px solid ' + colors.offWhitePressed2 }}
-        whileTap={animations.whileTap}
-        onClick={() => handleServiceButtonClick('guest')}
-      >
-        {'continue as guest '}
-      </motion.div>
+                whileFocus={{
+                  color: service.available
+                    ? colors.darkmodeBlack
+                    : colors.darkmodeLightBlack,
+                }}
+                whileTap={service.available && animations.whileTap}
+                className={[
+                  styles.buttonStyle,
+                  // inputStyle(),
+                  service.available
+                    ? styles.availableButtonStyle
+                    : styles.unavailableButtonStyle,
+                ].join(' ')}
+                disabled={service.available ? true : false}
+                // style={{
+                //   backgroundColor:
+                //     service.title === 'guest' && colors.coffeeBrown,
+                // }}
+                style={{
+                  borderBottom: service.available
+                    ? '1px solid ' + colors.darkmodeBlack
+                    : '1px solid ' + colors.offWhitePressed2,
+                }}
+                onClick={() =>
+                  service.available && handleServiceButtonClick(service.title)
+                }
+              >
+                {'Sign up with ' + service.title}
+              </motion.div>
+            );
+          }
+        })}
+        <Separator />
+        <motion.div
+          className={[styles.buttonStyle, styles.availableButtonStyle].join(
+            ' '
+          )}
+          whileHover={{
+            color: colors.darkmodeBlack,
+            transition: { duration: 0.1 },
+            borderBottomColor: colors.darkmodeBlack,
+          }}
+          whileFocus={{ color: colors.darkmodeBlack }}
+          style={{ borderBottom: '1px solid ' + colors.offWhitePressed2 }}
+          whileTap={animations.whileTap}
+          onClick={() => handleServiceButtonClick('guest')}
+        >
+          {'continue as guest '}
+        </motion.div>
+      </div>
     </AnimationWrapper>
   );
 };
@@ -247,15 +264,6 @@ const Slider = ({
   justRegistered,
   setJustRegistered,
 }) => {
-  const slides = [
-    { key: 0, title: 'init' },
-    { key: 1, title: 'guest', available: true },
-    { key: 2, title: 'discord', available: false },
-    { key: 3, title: 'google', available: false },
-    { key: 4, title: 'facebook', available: false },
-    { key: 5, title: 'email' },
-  ];
-
   const ServiceAnimationWrapper = ({ index, children }) => {
     return (
       <motion.div
@@ -927,7 +935,7 @@ export default function SplashScreen() {
   // so an experienced user is not met with
   // the same welcome screen
   useEffect(() => {
-    if (currentUser) setSlide('SignIn');
+    if (currentUser || !appSettings?.showWelcome) setSlide('signIn');
 
     return () => {
       // turn off welcome splash/header when user gets past splash screen for the first time
@@ -941,7 +949,7 @@ export default function SplashScreen() {
       <div style={{ zIndex: 1 }}>
         <MenuButton />
         <Header
-          showWelcome={appSettings.showWelcome}
+          showWelcome={appSettings?.showWelcome}
           slide={slide}
           setSlide={setSlide}
         />

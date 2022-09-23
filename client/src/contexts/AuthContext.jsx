@@ -302,16 +302,18 @@ export function authAndy({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      <AnimatePresence exitBeforeEnter>
-        {currentUser && signedIn && (
-          <motion.div key="children">{children}</motion.div>
-        )}
-        {!signedIn && (
-          <Memoized>
-            <SplashScreen />
-          </Memoized>
-        )}
-      </AnimatePresence>
+      <div style={{ willChange: 'transform' }}>
+        <AnimatePresence exitBeforeEnter>
+          {currentUser && signedIn && (
+            <motion.div key="children">{children}</motion.div>
+          )}
+          {!signedIn && (
+            <Memoized>
+              <SplashScreen />
+            </Memoized>
+          )}
+        </AnimatePresence>
+      </div>
     </AuthContext.Provider>
   );
 }

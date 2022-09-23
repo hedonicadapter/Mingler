@@ -6,17 +6,17 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .sliderContainer {
   text-align: center;
-  padding-inline: 20px;
   width: 100vw;
 }
 
 .header {
   font-family: Times New Roman;
-  font-size: 1.2em;
+  font-size: max(1em, 3.7vw);
   text-align: center;
   text-transform: uppercase;
   padding-bottom: 22px;
@@ -45,7 +45,7 @@
   padding: 10px;
   text-align: left;
   font-size: 0.8em;
-  max-width: 72%;
+  /* max-width: 72%; */
   margin: auto;
 }
 
@@ -112,21 +112,22 @@
 }
 
 .footer {
+  font-family: Times New Roman;
   position: absolute;
   bottom: 0;
-  padding: 8px;
-  font-size: 0.9em;
+  margin-bottom: 8px;
+  font-size: 0.8em;
   display: flex;
   flex-direction: row;
   justify-content: center;
   letter-spacing: 1px;
-  width: 100vw;
+  width: 100%;
 }
 
 .separator {
   display: flex;
   flex-direction: row;
-  padding-inline: 16%;
+  padding-inline: 6%;
   color: var(--dark-mode-light-black);
   opacity: 0.2;
 }

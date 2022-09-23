@@ -263,30 +263,35 @@ export default function FriendsList() {
             style={{ overflowY: 'overlay', scrollbarGutter: 'stable' }}
           >
             <AnimateSharedLayout>
-              <motion.div layout="position">
+              <motion.div
+                layout="position"
+                transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+              >
                 {appState?.findFriendsSearchValue
                   ? filteredFriends?.map((friend, index) => (
-                      <AccordionItem
-                        clientDemoUser={demoUser}
-                        key={index}
-                        friend={friend}
-                        isMe={friend._id === currentUser?._id}
-                        cardExpandedMasterToggle={
-                          appState?.cardExpandedMasterToggle
-                        }
-                      />
+                      <motion.div key={friend?._id}>
+                        <AccordionItem
+                          clientDemoUser={demoUser}
+                          friend={friend}
+                          isMe={friend._id === currentUser?._id}
+                          cardExpandedMasterToggle={
+                            appState?.cardExpandedMasterToggle
+                          }
+                        />
+                      </motion.div>
                     ))
                   : friends.length
                   ? friends.map((friend, index) => (
-                      <AccordionItem
-                        clientDemoUser={demoUser}
-                        key={index}
-                        friend={friend}
-                        isMe={friend._id === currentUser?._id}
-                        cardExpandedMasterToggle={
-                          appState?.cardExpandedMasterToggle
-                        }
-                      />
+                      <motion.div key={friend?._id}>
+                        <AccordionItem
+                          clientDemoUser={demoUser}
+                          friend={friend}
+                          isMe={friend._id === currentUser?._id}
+                          cardExpandedMasterToggle={
+                            appState?.cardExpandedMasterToggle
+                          }
+                        />{' '}
+                      </motion.div>
                     ))
                   : null}
               </motion.div>

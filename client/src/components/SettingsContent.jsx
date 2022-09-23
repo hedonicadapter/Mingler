@@ -723,7 +723,9 @@ export default function SettingsContent() {
   ]);
 
   useEffect(() => {
-    dispatch(setSettingsContentMain(settings[expanded]?.title) || 'Widget');
+    const setting = settings[expanded]?.title || 'Widget';
+
+    dispatch(setSettingsContentMain(setting));
   }, [expanded]);
 
   useEffect(() => {

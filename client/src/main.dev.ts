@@ -145,13 +145,7 @@ function decodeUTF8(utf8String: string) {
 }
 
 const initActiveWindowListenerProcess = () => {
-  try {
-    windowProcess?.exit();
-  } catch (e) {
-    console.warn(e);
-  }
-
-  windowProcess = execFile(windowListenerScript);
+  if (!windowProcess) windowProcess = execFile(windowListenerScript);
   // windowProcess = execFile('python', [windowListenerScript]);
 
   windowProcess.stdout.on('data', function (data) {
@@ -190,9 +184,9 @@ const initActiveWindowListenerProcess = () => {
 
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   try {
-    trackProcess?.exit();
+    trackProcess?.kill();
   } catch (e) {
-    console.warn(e);
+    console.warn('Failed to kill track process ', e);
   }
 
   if (!spotifyAccessToken) return;
@@ -282,11 +276,11 @@ const initSocket = (userID) => {
 };
 
 authIo.on('connection', (socket) => {
-  ipcMain.once('currentUser:signedOut', () => {
+  ipcMain.on('currentUser:signedOut', () => {
     console.log('still signed out authio');
-    // Prevents error when exiting app
     if (!mainWindow?.isDestroyed()) socket.emit('fromAppToHost:signedOut');
 
+    // Prevents error when exiting app
     ipcMain.removeAllListeners('getYouTubeTime');
     socket.removeAllListeners('fromHostToApp:data');
     // socket.disconnect();
@@ -604,7 +598,15 @@ const createWindow = async () => {
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
       });
-      ipcMain.once('currentUser:signedOut', () => {
+      ipcMain.on('currentUser:signedOut', () => {
+        console.log('signed outttttttt');
+        try {
+          let juice = trackProcess?.kill();
+          console.log({ juice });
+        } catch (e) {
+          console.warn('Failed to kill track process, ', e);
+        }
+
         storage.getItem('store').then((res) => {
           setTrayContextMenu('signedOut', res?.settings?.globalShortcut);
         });
@@ -623,7 +625,11 @@ const createWindow = async () => {
     'initActiveTrackListener:fromrenderer',
     (event, spotifyAccessToken) => {
       if (!spotifyAccessToken || spotifyAccessToken === 'disconnect') {
-        if (trackProcess?.connected) trackProcess.exit();
+        try {
+          trackProcess?.kill();
+        } catch (e) {
+          console.warn('Failed to kill track process, ', e);
+        }
         store?.dispatch({
           type: 'setSpotifyConnected',
           payload: false,

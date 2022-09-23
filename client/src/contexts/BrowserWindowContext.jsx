@@ -415,6 +415,7 @@ export function BrowserWindowProvider({ children }) {
           );
           dispatch(setSpotifyExpiryDate(result.data.body['spotifyExpiryDate']));
           activeTrackListener(result.data.body['access_token']);
+          hideWindow(connectSpotifyWindow);
         }
       })
       .catch((e) => {

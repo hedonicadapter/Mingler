@@ -17,6 +17,7 @@
 .contentContainer {
   overflow-x: hidden;
   overflow-y: scroll !important;
+
   scroll-behavior: smooth;
   padding: 24px;
   flex: 1;

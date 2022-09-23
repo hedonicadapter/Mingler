@@ -1,23 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
-import { getSettings } from '../mainState/features/settingsSlice';
-import { useDispatch, useSelector } from 'react-redux';
 import colors from '../config/colors';
 import animations from '../config/animations';
 import { BackgroundNoise } from './FriendsList';
 
-const { remote, ipcRenderer } = require('electron');
+const { remote } = require('electron');
 
-const MiniWidget = () => (
+const MiniWidget = ({ widgetVisible }) => (
   <motion.div
-    initial={{ opacity: 0, x: 100 }}
-    // initial={{ opacity: 1, x: 0 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{
-      duration: 0.5,
-      repeat: 'Infinity',
-      repeatType: 'reverse',
-      repeatDelay: 1.5,
+    initial={'hide'}
+    animate={widgetVisible ? 'show' : 'hide'}
+    variants={{
+      show: {
+        opacity: 1,
+        x: 0,
+        transition: {
+          delay: 0.15,
+          duration: 0.5,
+          type: 'spring',
+          bounce: 0,
+        },
+      },
+      hide: {
+        opacity: 0,
+        x: 100,
+        transition: {
+          delay: 0.25,
+          duration: 0.5,
+          type: 'spring',
+          bounce: 0,
+        },
+      },
     }}
     style={{
       position: 'absolute',
@@ -74,23 +87,17 @@ const MiniWidget = () => (
   </motion.div>
 );
 
-const KeyboardKey = ({ text }) => (
+const KeyboardKey = ({ animationController, text }) => (
   <motion.div
     initial={{ opacity: 0.9, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
+    animate={animationController}
     exit={{ opacity: 0.9, scale: 0.9 }}
-    transition={{
-      duration: 0.15,
-      repeat: 'Infinity',
-      repeatType: 'reverse',
-      repeatDelay: 0.75,
-    }}
     style={{
       marginInline: 10,
       padding: 2,
       backgroundColor: colors.offWhitePressed2,
       zIndex: 100,
-      boxShadow: '0px 11px 20px -10px rgba(0, 0, 0, 0.58)',
+      boxShadow: '0px 11px 20px -10px rgba(0, 0, 0, 0.46)',
       borderTop: '1px solid var(--off-white-pressed2)',
       borderBottom: '3px solid var(--off-white-pressed2)',
       borderLeft: '2px solid var(--off-white-pressed2)',
@@ -108,6 +115,7 @@ const KeyboardKey = ({ text }) => (
         boxShadow:
           'inset -28px -34px 17px -25px rgba(230, 204, 178, 0.5) inset 3px 0px 3px 0px rgba(0, 0, 0, 0.151), inset 0px 2px 1px 0px rgb(255, 255, 255), inset 0px -7px 1px 0px rgba(0, 0, 0, 0.137), inset -3px 0px 3px 0px rgba(39, 39, 39, 0.144)',
         fontSize: '0.9em',
+        color: colors.darkmodeLighterBlack,
 
         alignItems: 'center',
         background: 'rgba(253, 245, 241, 1)',
@@ -115,10 +123,10 @@ const KeyboardKey = ({ text }) => (
         borderRadius: 4,
         boxSizing: 'border-box',
         display: 'flex',
-        height: 28,
+        height: 34,
         justifyContent: 'center',
         padding: 5,
-        width: 38,
+        width: 48,
         fontWeight: '700',
       }}
     >
@@ -128,10 +136,32 @@ const KeyboardKey = ({ text }) => (
 );
 
 export default function WelcomeModalContent() {
-  const settingsState = useSelector(getSettings);
-  const dispatch = useDispatch();
+  const [widgetVisible, setWidgetVisible] = useState(false);
 
-  useEffect(() => {}, []);
+  const keyAnimationController = useAnimation();
+
+  const animateKeys = async () => {
+    // Keydown
+    await keyAnimationController.start({
+      opacity: 0.86,
+      scale: 0.94,
+      transition: { duration: 0.1 },
+    });
+    // Keyup
+    keyAnimationController.start({
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.15, delay: 0.15 },
+    });
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setWidgetVisible(!widgetVisible), 1450);
+
+    animateKeys();
+
+    return () => clearTimeout(timeout);
+  }, [widgetVisible]);
 
   return (
     <motion.div
@@ -175,13 +205,21 @@ export default function WelcomeModalContent() {
               gap: 8,
             }}
           >
-            <KeyboardKey text="ctrl" /> <div style={{ opacity: 0.6 }}>or</div>
-            <KeyboardKey text="cmd" />
+            <KeyboardKey
+              animationController={keyAnimationController}
+              text="ctrl"
+            />
+            {/* <div style={{ opacity: 0.6 }}>
+              or</div>
+            <KeyboardKey
+              animationController={keyAnimationController}
+              text="cmd"
+            /> */}
           </div>
           <div style={{ opacity: 0.6 }}>+</div>
-          <KeyboardKey text="q" />
+          <KeyboardKey animationController={keyAnimationController} text="q" />
         </div>
-        <MiniWidget />
+        <MiniWidget widgetVisible={widgetVisible} />
       </div>
       <motion.div
         className="undraggable"

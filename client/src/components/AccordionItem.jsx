@@ -160,10 +160,7 @@ export default function AccordionItem({
   };
 
   return (
-    <motion.div
-      transition={{ duration: 0.15, stiffness: 100 }}
-      onContextMenu={handleOnContextMenu}
-    >
+    <div onContextMenu={handleOnContextMenu}>
       <div
         style={{
           position: 'relative',
@@ -257,6 +254,6 @@ export default function AccordionItem({
           isWidgetHeader={isWidgetHeader}
         />
       </div>
-    </motion.div>
+    </div>
   );
 }
