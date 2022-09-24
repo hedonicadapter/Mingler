@@ -34,3 +34,8 @@
   padding-left: 5px;
   height: 25px;
 }
+
+.avatarWrapper {
+  border: 1px solid var(--dark-mode-light-black);
+  border-radius: 50%;
+}

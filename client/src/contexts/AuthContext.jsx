@@ -182,32 +182,66 @@ export function authAndy({ children }) {
       });
   };
 
-  const signInDemoUser = () => {
-    DAO.initDemoAccount(clientFingerprint)
-      .then((result) => {
-        if (result?.data?.success) {
-          setDemoUser(result.data);
+  const signInDemoUser = async () => {
+    const result = await DAO.initDemoAccount(clientFingerprint).catch((e) =>
+      notify("Couldn't set demo user. ", e)
+    );
 
-          dispatch(setCurrentUserMain(result.data));
-          ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+    if (result?.data?.success) {
+      console.log('wtf????', result.data.success);
+      setDemoUser(result.data);
 
-          setSignedIn(true);
+      dispatch(setCurrentUserMain(result.data));
+      ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
 
-          DAO.getDemoActivities()
-            .then((result) => {
-              if (result.data.success) {
-                setDemoUser((prevState) => {
-                  return {
-                    ...prevState,
-                    fakeActivities: result.data.activities,
-                  };
-                });
-              }
-            })
-            .catch((e) => notify('Failed to set demo up properly.'));
-        }
-      })
-      .catch((e) => notify("Couldn't set demo user. ", e));
+      setSignedIn(true);
+
+      DAO.getDemoActivities()
+        .then((result) => {
+          if (result.data.success) {
+            setDemoUser((prevState) => {
+              return {
+                ...prevState,
+                fakeActivities: result.data.activities,
+              };
+            });
+          }
+        })
+        .catch((e) => notify('Failed to set demo up properly.'));
+
+      return true;
+    } else {
+      notify("Couldn't set demo user. ");
+      console.warn({ serverResponse: result });
+    }
+
+    return false;
+
+    // DAO.initDemoAccount(clientFingerprint)
+    //   .then((result) => {
+    //     if (result?.data?.success) {
+    //       setDemoUser(result.data);
+
+    //       dispatch(setCurrentUserMain(result.data));
+    //       ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
+
+    //       setSignedIn(true);
+
+    //       DAO.getDemoActivities()
+    //         .then((result) => {
+    //           if (result.data.success) {
+    //             setDemoUser((prevState) => {
+    //               return {
+    //                 ...prevState,
+    //                 fakeActivities: result.data.activities,
+    //               };
+    //             });
+    //           }
+    //         })
+    //         .catch((e) => notify('Failed to set demo up properly.'));
+    //     }
+    //   })
+    //   .catch((e) => notify("Couldn't set demo user. ", e));
   };
 
   const refreshTokenFromMainHandler = (e, { currentUser }) => {

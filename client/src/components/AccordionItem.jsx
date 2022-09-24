@@ -234,7 +234,6 @@ export default function AccordionItem({
                     onClick={(e) => toggleChat(e)}
                   >
                     <BiConversation
-                      // className={messageIcon()}
                       style={{
                         color: expanded
                           ? chatVisible

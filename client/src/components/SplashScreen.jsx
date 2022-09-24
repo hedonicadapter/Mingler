@@ -26,6 +26,12 @@ const slides = [
   { key: 5, title: 'email' },
 ];
 
+const signInOptions = [
+  { key: 0, title: 'Discord', available: false },
+  { key: 1, title: 'Google', available: false },
+  { key: 2, title: 'Facebook', available: false },
+];
+
 const formFilledVariants = {
   true: {
     // backgroundColor: colors.coffeeBlue,
@@ -318,6 +324,8 @@ const GuestSlide = () => {
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
 
+  const guestNameInputRef = useRef(null);
+
   const { signInGuest, signUpGuest, signInDemoUser } = useAuth();
 
   useEffect(() => {
@@ -326,6 +334,10 @@ const GuestSlide = () => {
 
     return () => clearTimeout(errorTimeout);
   }, [error]);
+
+  useEffect(() => {
+    guestNameInputRef?.current?.focus();
+  }, [guestNameInputRef, formFilled]);
 
   useEffect(() => {
     if (!name) {
@@ -338,9 +350,14 @@ const GuestSlide = () => {
     validator();
   };
 
-  const handleBackspaceAndEnter = (evt, fieldName) => {
+  const handleBackspaceAndEnter = async (evt, fieldName) => {
     if (evt.key === 'Enter') {
-      if (name.toLowerCase() === 'demo') return signInDemoUser();
+      if (name.toLowerCase() === 'demo') {
+        setFormFilled('loading');
+        await signInDemoUser();
+        setFormFilled('true');
+        return;
+      }
 
       if (formFilled === 'true') handleContinueButton();
     } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
@@ -355,9 +372,13 @@ const GuestSlide = () => {
     // } else setFormFilled('false');
   };
 
-  const handleContinueButton = () => {
+  const handleContinueButton = async () => {
     setFormFilled('loading');
-    if (name.toLowerCase() === 'demo') return signInDemoUser();
+    if (name.toLowerCase() === 'demo') {
+      await signInDemoUser();
+      setFormFilled('true');
+      return;
+    }
 
     signUpGuest(name).then(({ success, _id, error }) => {
       if (error) {
@@ -385,6 +406,7 @@ const GuestSlide = () => {
         }}
       >
         <input
+          ref={guestNameInputRef}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="name"
           type="name"
@@ -426,19 +448,39 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState(null);
-  const [nameFieldFocused, setNameFieldFocused] = useState();
-  const [emailFieldFocused, setEmailFieldFocused] = useState();
-  const [passwordFieldFocused, setPasswordFieldFocused] = useState();
+  const [fieldFocused, setFieldFocused] = useState(0);
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
 
   const { signUpWithEmail, signInDemoUser } = useAuth();
+
+  const nameInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => setError(null), 3000);
 
     return () => clearTimeout(errorTimeout);
   }, [error]);
+
+  useEffect(() => {
+    let focusedInput = document.activeElement;
+
+    if (fieldFocused === 0) {
+      if (focusedInput === nameInputRef?.current) return;
+      nameInputRef?.current?.focus();
+    } else if (fieldFocused === 1) {
+      if (focusedInput === emailInputRef?.current) return;
+      emailInputRef?.current?.focus();
+    } else if (fieldFocused === 2) {
+      if (focusedInput === passwordInputRef?.current) return;
+      passwordInputRef?.current?.focus();
+    } else {
+      if (focusedInput === nameInputRef?.current) return;
+      nameInputRef?.current?.focus();
+    }
+  }, [fieldFocused, formFilled, nameInputRef, emailInputRef, passwordInputRef]);
 
   useEffect(() => {
     if (!name || !email || !password) {
@@ -461,13 +503,17 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
     validator();
   };
 
-  const handleBackspaceAndEnter = (evt, fieldName) => {
+  const handleBackspaceAndEnter = async (evt, fieldName) => {
     if (evt.key === 'Enter') {
       if (
         (name.toLowerCase() === 'demo' || email.toLowerCase() === 'demo') &&
         !password
-      )
-        return signInDemoUser();
+      ) {
+        setFormFilled('loading');
+        await signInDemoUser();
+        setFormFilled('false');
+        return;
+      }
 
       if (formFilled === 'true') handleSignUpButton();
     } else if (evt.key === 'Delete' || evt.key === 'Backspace') {
@@ -508,6 +554,7 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
     <AnimationWrapper>
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <input
+          ref={nameInputRef}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="name"
           type="name"
@@ -520,19 +567,17 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
-              nameFieldFocused && name
+              fieldFocused === 0 && name
                 ? colors.darkmodeBlack
                 : colors.darkmodeLightBlack,
           }}
           autoFocus={true}
           onFocus={() => {
-            setNameFieldFocused(true);
-          }}
-          onBlur={() => {
-            setNameFieldFocused(false);
+            setFieldFocused(0);
           }}
         />
         <input
+          ref={emailInputRef}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="email adress"
           type="email"
@@ -545,18 +590,16 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
-              emailFieldFocused && email
+              fieldFocused === 1 && email
                 ? colors.darkmodeBlack
                 : colors.darkmodeLightBlack,
           }}
           onFocus={() => {
-            setEmailFieldFocused(true);
-          }}
-          onBlur={() => {
-            setEmailFieldFocused(false);
+            setFieldFocused(1);
           }}
         />
         <input
+          ref={passwordInputRef}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="password"
           type="password"
@@ -569,15 +612,12 @@ const EmailSlide = ({ setSlide, setJustRegistered }) => {
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
-              passwordFieldFocused && password
+              fieldFocused === 2 && password
                 ? colors.darkmodeBlack
                 : colors.darkmodeLightBlack,
           }}
           onFocus={() => {
-            setPasswordFieldFocused(true);
-          }}
-          onBlur={() => {
-            setPasswordFieldFocused(false);
+            setFieldFocused(2);
           }}
         />
       </div>
@@ -633,22 +673,32 @@ const FormButton = ({ formFilled, error, buttonText, buttonHandler }) => {
 };
 
 const SigninSlide = ({ justRegistered }) => {
-  const emailInput = useRef(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState('');
-  const [emailFieldFocused, setEmailFieldFocused] = useState(true);
-  const [passwordFieldFocused, setPasswordFieldFocused] = useState(false);
+  const [fieldFocused, setFieldFocused] = useState(0);
   const [formFilled, setFormFilled] = useState('false');
   const [error, setError] = useState(null);
   const [keepMeSignedIn, setKeepMeSignedIn] = useState(true);
 
   const { signIn, signInDemoUser } = useAuth();
 
-  const signInOptions = [
-    { key: 0, title: 'Discord', available: false },
-    { key: 1, title: 'Google', available: false },
-    { key: 2, title: 'Facebook', available: false },
-  ];
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
+  useEffect(() => {
+    let focusedInput = document.activeElement;
+
+    if (fieldFocused === 0) {
+      if (focusedInput === emailInputRef?.current) return;
+      emailInputRef?.current?.focus();
+    } else if (fieldFocused === 1) {
+      if (focusedInput === passwordInputRef?.current) return;
+      passwordInputRef?.current?.focus();
+    } else {
+      if (focusedInput === nameInputRef?.current) return;
+      nameInputRef?.current?.focus();
+    }
+  }, [fieldFocused, formFilled, emailInputRef, passwordInputRef]);
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => setError(null), 3000);
@@ -662,10 +712,6 @@ const SigninSlide = ({ justRegistered }) => {
       setPassword(justRegistered.password);
     }
   }, []);
-
-  useEffect(() => {
-    emailInput?.current?.focus(); //TODO: this and autoFocus not working
-  }, [emailInput]);
 
   useEffect(() => {
     if (!email || !password) {
@@ -685,10 +731,13 @@ const SigninSlide = ({ justRegistered }) => {
     return;
   };
 
-  const handleBackspaceAndEnter = (evt, fieldName) => {
+  const handleBackspaceAndEnter = async (evt, fieldName) => {
     if (evt.key === 'Enter') {
       if (email.toLowerCase() === 'demo' && !password) {
-        return signInDemoUser();
+        setFormFilled('loading');
+        await signInDemoUser();
+        setFormFilled('false');
+        return;
       }
 
       if (formFilled === 'true') handleSignInButton();
@@ -730,7 +779,7 @@ const SigninSlide = ({ justRegistered }) => {
     <AnimationWrapper>
       <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
         <input
-          ref={emailInput}
+          ref={emailInputRef}
           autoFocus={true}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="email address"
@@ -744,18 +793,16 @@ const SigninSlide = ({ justRegistered }) => {
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
-              emailFieldFocused && email
+              fieldFocused === 0 && email
                 ? colors.darkmodeBlack
                 : colors.darkmodeLightBlack,
           }}
           onFocus={() => {
-            setEmailFieldFocused(true);
-          }}
-          onBlur={() => {
-            setEmailFieldFocused(false);
+            setFieldFocused(0);
           }}
         />
         <input
+          ref={passwordInputRef}
           disabled={formFilled === 'loading' ? true : false}
           placeholder="password"
           type="password"
@@ -768,15 +815,12 @@ const SigninSlide = ({ justRegistered }) => {
               ? '1px solid ' + colors.darkmodeBlack
               : '1px solid ' + colors.offWhitePressed2,
             color:
-              passwordFieldFocused && password
+              fieldFocused === 1 && password
                 ? colors.darkmodeBlack
                 : colors.darkmodeLightBlack,
           }}
           onFocus={() => {
-            setPasswordFieldFocused(true);
-          }}
-          onBlur={() => {
-            setPasswordFieldFocused(false);
+            setFieldFocused(1);
           }}
         />
       </div>

@@ -201,10 +201,10 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     let processedData = data.toString().trim();
     console.log({ processedData });
     if (processedData === '401') {
-      trackProcess.stdin.end();
-      trackProcess.stdout.destroy();
-      trackProcess.stderr.destroy();
       try {
+        // trackProcess?.stdin.end();
+        // trackProcess?.stdout.destroy();
+        // trackProcess?.stderr.destroy();
         trackProcess?.kill();
       } catch (e) {
         console.log(e);

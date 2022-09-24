@@ -28,6 +28,7 @@ const AvatarContainer = ({
 
   return (
     <motion.div
+      className={styles.avatarWrapper}
       whileHover={
         isWidgetHeader && {
           backgroundColor: colors.offWhitePressed,
@@ -81,21 +82,23 @@ const OnlineStatusIndicator = ({
           style={{
             pointerEvents: 'none',
             position: 'relative',
+            marginLeft: -38,
+            marginTop: -13,
+            height: '50px',
+            width: '50px',
           }}
         >
           <span
             style={{
               zIndex: 80,
               position: 'absolute',
-              height: '50px',
-              width: '50px',
               marginLeft: 'auto',
               backgroundColor: colors.coffeeGreen,
               clipPath: 'circle(8.6px at 20px)',
               // minHeight: activityLength >= 2 ? 104 : 84,
               // paddingTop: isWidgetHeader ? 35 : 28,
-              left: -38,
-              top: -13,
+              // left: -38,
+              // top: -13,
             }}
           />
         </motion.span>
