@@ -1,13 +1,21 @@
 .frame {
-  flex-shrink: 0;
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
   padding: 18px;
 }
+.frame div {
+  flex: 1;
+}
 
+.frameButtonsContainer {
+  text-align: left;
+}
 .frameButtonsContainer,
 .appTitleStyle {
   white-space: nowrap;
-  flex: 1;
 }
 
 .frameButton {
@@ -16,14 +24,15 @@
 }
 
 .appTitleStyle {
+  text-align: center;
   font-size: 0.7em;
   text-transform: uppercase;
   font-family: 'Cormorant SC';
-  align-self: center;
   color: var(--default-placeholder-text-color);
 }
 
 .windowTitleStyle {
+  text-align: right;
   white-space: nowrap;
   letter-spacing: 1px;
   font-size: 0.6em;

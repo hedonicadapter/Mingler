@@ -36,6 +36,6 @@
 }
 
 .avatarWrapper {
-  border: 1px solid var(--dark-mode-light-black);
+  border: 1px solid var(--off-white-hovered);
   border-radius: 50%;
 }

@@ -37,7 +37,22 @@ import { getPath } from './helpers/getPath';
 import { setExtensionID } from '../editJSON';
 
 const execFile = require('child_process').execFile;
+const exec = require('child_process').exec;
 const JSON5 = require('json5');
+
+// By Almenon
+// https://medium.com/@almenon214/killing-processes-with-node-772ffdd19aad
+const killProcess = (pid: number) => {
+  if (process.platform == 'win32') {
+    exec(`taskkill /PID ${pid} /T /F`, (error, stdout, stderr) => {
+      console.log('taskkill stdout: ' + stdout);
+      console.log('taskkill stderr: ' + stderr);
+      if (error) {
+        console.log('error: ' + error.message);
+      }
+    });
+  }
+};
 
 const storage = require('node-persist');
 storage.init({ dir: './mainState/persist' });
@@ -131,7 +146,7 @@ const installExtensions = async () => {
 };
 
 const answerProcess = (process) => {
-  if (!process.stdin) return;
+  if (!process || !process.stdin) return;
 
   process.stdin.write('yo\n');
 };
@@ -184,7 +199,7 @@ const initActiveWindowListenerProcess = () => {
 
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   try {
-    trackProcess?.kill();
+    if (trackProcess) killProcess(trackProcess.pid);
   } catch (e) {
     console.warn('Failed to kill track process ', e);
   }
@@ -205,7 +220,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
         // trackProcess?.stdin.end();
         // trackProcess?.stdout.destroy();
         // trackProcess?.stderr.destroy();
-        trackProcess?.kill();
+        if (trackProcess) killProcess(trackProcess.pid);
       } catch (e) {
         console.log(e);
       }
@@ -454,8 +469,12 @@ const createWindow = async () => {
 
     io?.close();
 
-    trackProcess?.kill();
-    windowProcess?.kill();
+    try {
+      if (trackProcess) killProcess(trackProcess.pid);
+      if (windowProcess) killProcess(windowProcess.pid);
+    } catch (e) {
+      console.log(e);
+    }
 
     mainWindow?.destroy();
     mainWindow = null;
@@ -601,8 +620,7 @@ const createWindow = async () => {
       ipcMain.on('currentUser:signedOut', () => {
         console.log('signed outttttttt');
         try {
-          let juice = trackProcess?.kill();
-          console.log({ juice });
+          if (trackProcess) killProcess(trackProcess.pid);
         } catch (e) {
           console.warn('Failed to kill track process, ', e);
         }
@@ -626,7 +644,7 @@ const createWindow = async () => {
     (event, spotifyAccessToken) => {
       if (!spotifyAccessToken || spotifyAccessToken === 'disconnect') {
         try {
-          trackProcess?.kill();
+          if (trackProcess) killProcess(trackProcess.pid);
         } catch (e) {
           console.warn('Failed to kill track process, ', e);
         }
@@ -651,6 +669,10 @@ const createWindow = async () => {
       });
       return true;
     }
+  );
+
+  ipcMain.on('spotifygoback:fromrenderer', () =>
+    mainWindow?.webContents.send('spotifygoback:frommain')
   );
 
   ipcMain.on('sendfriendrequest:fromrenderer', async (event, data) => {
@@ -950,8 +972,8 @@ app.on('activate', () => {
 var cleanExit = function () {
   io?.close();
 
-  trackProcess?.kill(); // exit is cleaner but idk if required
-  windowProcess?.kill();
+  if (trackProcess) killProcess(trackProcess.pid);
+  if (windowProcess) killProcess(windowProcess.pid);
 };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill

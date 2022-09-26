@@ -2,8 +2,8 @@ import React from 'react';
 import axios from 'axios';
 const ipcRenderer = require('electron').ipcRenderer;
 
-// const baseURL = 'https://menglir.herokuapp.com/';
-const baseURL = 'http://localhost:8080/';
+const baseURL = 'https://menglir.herokuapp.com/';
+// const baseURL = 'http://localhost:8080/';
 
 const auth = axios.create({
   baseURL: `${baseURL}api/auth/`,

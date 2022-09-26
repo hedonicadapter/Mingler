@@ -83,6 +83,144 @@ const settings = [
   { title: 'Set-up' },
 ];
 
+const SpotifyAnimationWrapper = ({
+  index,
+  hoverSetter,
+  spotifyError,
+  children,
+}) => (
+  <motion.div
+    key={index}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opactiy: 0 }}
+    transition={{ duration: 0.25 }}
+    onMouseEnter={() => hoverSetter && hoverSetter(true)}
+    onMouseLeave={() => hoverSetter && hoverSetter(false)}
+    className={styles.spotifyAnimationWrapper}
+    style={{ cursor: spotifyError ? 'cursor' : 'pointer' }}
+  >
+    {children}
+  </motion.div>
+);
+
+const SpotifySetting = ({
+  setting,
+  setSpotifyHovered,
+  setDisconnectSpotifyHovered,
+  connectedToSpotify,
+  spotifyError,
+}) => {
+  return (
+    <div
+      onClick={() => {
+        if (spotifyError) return;
+
+        setting === 'disconnect'
+          ? ipcRenderer.send('disconnectspotify:fromrenderer')
+          : ipcRenderer.send('toggleconnectspotify:fromrenderer');
+      }}
+      className={styles.spotifySettingContainer}
+      style={{
+        transition: 'color 0.25s linear',
+        color:
+          setting === 'error'
+            ? colors.coffeeRed
+            : setting === 'disconnect'
+            ? colors.coffeeRed
+            : setting === 'reconnect' || setting === 'connected'
+            ? colors.coffeeGreen
+            : colors.darkmodeDisabledBlack,
+      }}
+    >
+      <motion.div
+        whileTap={animations.whileTap}
+        // Don't have to check for setting === 'disconnect' bc user will have cursor on the x not the spotify logo
+        onMouseEnter={() => setSpotifyHovered(true)}
+        onMouseLeave={() => setSpotifyHovered(false)}
+        // Same thing here
+        onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
+      >
+        <BsSpotify size={'20px'} style={{ paddingRight: 6 }} />
+      </motion.div>
+
+      <AnimatePresence
+        exitBeforeEnter
+        onExitComplete={() => {
+          setSpotifyHovered(false);
+          setDisconnectSpotifyHovered(false);
+        }}
+      >
+        {setting === 'disconnect' && (
+          <SpotifyAnimationWrapper
+            spotifyError={false}
+            hoverSetter={setDisconnectSpotifyHovered}
+            index={0}
+          >
+            <div>disconnect</div>
+          </SpotifyAnimationWrapper>
+        )}
+
+        {setting === 'reconnect' && (
+          <SpotifyAnimationWrapper
+            spotifyError={false}
+            hoverSetter={setSpotifyHovered}
+            index={1}
+          >
+            <div>reconnect</div>
+          </SpotifyAnimationWrapper>
+        )}
+
+        {setting === 'error' && (
+          <SpotifyAnimationWrapper spotifyError={true} index={2}>
+            <div>{spotifyError}</div>
+          </SpotifyAnimationWrapper>
+        )}
+
+        {setting === 'connected' && (
+          <SpotifyAnimationWrapper
+            spotifyError={false}
+            hoverSetter={setSpotifyHovered}
+            index={3}
+          >
+            <div>connected</div>
+          </SpotifyAnimationWrapper>
+        )}
+
+        {setting === 'connect' && (
+          <SpotifyAnimationWrapper
+            spotifyError={false}
+            hoverSetter={setSpotifyHovered}
+            index={4}
+          >
+            <div>connect</div>
+          </SpotifyAnimationWrapper>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {connectedToSpotify && !spotifyError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opactiy: 0 }}
+            transition={{ duration: 0.25 }}
+            onMouseEnter={() => {
+              setDisconnectSpotifyHovered(true);
+              setSpotifyHovered(false);
+            }}
+            onMouseLeave={() => setDisconnectSpotifyHovered(false)}
+          >
+            <IoCloseOutline
+              size={22}
+              className={styles.disconnectSpotifyButton}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const AccountSettingsContent = ({
   username,
   email,
@@ -98,10 +236,26 @@ const AccountSettingsContent = ({
   emailError,
   spotifyError,
 }) => {
-  const [connectedToSpotify, setConnectedToSpotify] = useState();
+  const [connectedToSpotify, setConnectedToSpotify] = useState(false);
   const [spotifyHovered, setSpotifyHovered] = useState(false);
   const [disconnectSpotifyHovered, setDisconnectSpotifyHovered] =
     useState(false);
+  const [spotifySetting, setSpotifySetting] = useState(null);
+
+  useEffect(() => {
+    if (spotifyError) setSpotifySetting('error');
+    else if (disconnectSpotifyHovered && connectedToSpotify)
+      setSpotifySetting('disconnect');
+    else if (spotifyHovered && connectedToSpotify)
+      setSpotifySetting('reconnect');
+    else if (!connectedToSpotify) setSpotifySetting('connect');
+    else setSpotifySetting('connected');
+  }, [
+    spotifyError,
+    disconnectSpotifyHovered,
+    spotifyHovered,
+    connectedToSpotify,
+  ]);
 
   useEffect(() => {
     console.log({
@@ -113,66 +267,10 @@ const AccountSettingsContent = ({
   }, [connectedToSpotify]);
 
   useEffect(() => {
-    settingsState.currentUser?.spotifyConnected
+    settingsState?.currentUser?.spotifyConnected
       ? setConnectedToSpotify(true)
       : setConnectedToSpotify(false);
-  }, [settingsState.currentUser?.spotifyConnected]);
-
-  const SpotifyTextAnimationWrapper = ({ index, children }) => (
-    <motion.div
-      key={index}
-      initial={
-        !connectedToSpotify && !spotifyError ? { opacity: 1 } : { opacity: 0 }
-      }
-      animate={{ opacity: 1 }}
-      exit={
-        !connectedToSpotify && !spotifyError && !spotifyHovered
-          ? { opacity: 1 }
-          : { opacity: 0 }
-      }
-      transition={{ duration: 0.1 }}
-    >
-      {children}
-    </motion.div>
-  );
-
-  const SpotifyText = () => {
-    return (
-      <AnimatePresence exitBeforeEnter>
-        {connectedToSpotify && disconnectSpotifyHovered && (
-          <SpotifyTextAnimationWrapper index={0}>
-            <div>disconnect</div>
-          </SpotifyTextAnimationWrapper>
-        )}
-
-        {!disconnectSpotifyHovered &&
-          (spotifyError || connectedToSpotify) &&
-          spotifyHovered && (
-            <SpotifyTextAnimationWrapper index={1}>
-              <div>reconnect</div>
-            </SpotifyTextAnimationWrapper>
-          )}
-
-        {!disconnectSpotifyHovered && spotifyError && !spotifyHovered && (
-          <SpotifyTextAnimationWrapper index={2}>
-            <div>{spotifyError}</div>
-          </SpotifyTextAnimationWrapper>
-        )}
-
-        {!disconnectSpotifyHovered && connectedToSpotify && !spotifyHovered && (
-          <SpotifyTextAnimationWrapper index={3}>
-            <div>connected</div>
-          </SpotifyTextAnimationWrapper>
-        )}
-
-        {!connectedToSpotify && !spotifyError && (
-          <SpotifyTextAnimationWrapper index={4}>
-            <div>connect</div>
-          </SpotifyTextAnimationWrapper>
-        )}
-      </AnimatePresence>
-    );
-  };
+  }, [settingsState?.currentUser?.spotifyConnected]);
 
   return (
     <motion.div className={styles.settingsContentContainer}>
@@ -214,8 +312,8 @@ const AccountSettingsContent = ({
               name={username}
               size="58"
               src={profilePictureToJSXImg(
-                settingsState.currentUser.profilePicture,
-                settingsState.currentUser.demoUser
+                settingsState?.currentUser?.profilePicture,
+                settingsState?.currentUser?.demoUser
               )}
             />
           </motion.label>
@@ -305,80 +403,14 @@ const AccountSettingsContent = ({
           </div>
         )}
       </div>
-      <div className={styles.connectAndDisconnectSpotifyContainer}>
-        <motion.div
-          className={styles.connectSpotifyContainer}
-          style={{
-            transition: 'color 0.15s linear',
-            color:
-              spotifyError || disconnectSpotifyHovered
-                ? colors.coffeeRed
-                : connectedToSpotify
-                ? spotifyHovered
-                  ? colors.darkmodeLighterBlack
-                  : colors.coffeeGreen
-                : spotifyHovered
-                ? colors.darkmodeLighterBlack
-                : colors.defaultPlaceholderTextColor,
-          }}
-          whileHover={
-            spotifyError
-              ? {
-                  cursor: 'default',
-                }
-              : {
-                  cursor: 'pointer',
-                }
-          }
-          whileTap={animations.whileTap}
-          onClick={() => {
-            ipcRenderer.send('toggleconnectspotify:fromrenderer');
-            setSpotifyHovered(false);
-          }}
-          onMouseEnter={() => setSpotifyHovered(true)}
-          onMouseLeave={() => setSpotifyHovered(false)}
-        >
-          <BsSpotify size={'18px'} style={{ paddingRight: 6 }} />
-          <SpotifyText />
-        </motion.div>
-        <motion.div
-          whileTap={animations.whileTap}
-          transition={{ duration: 0.15 }}
-          className={styles.disconnectSpotifyButtonContainer}
-          onClick={() => ipcRenderer.send('disconnectspotify:fromrenderer')}
-          style={{
-            transition: 'color 0.15s linear',
-            color: spotifyError
-              ? colors.coffeeRed
-              : connectedToSpotify
-              ? spotifyHovered
-                ? colors.darkmodeLighterBlack
-                : colors.coffeeGreen
-              : spotifyHovered
-              ? colors.darkmodeLighterBlack
-              : colors.defaultPlaceholderTextColor,
-          }}
-        >
-          <AnimatePresence>
-            {settingsState.currentUser?.spotifyConnected && !spotifyError && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                whileHover={{ color: colors.coffeeRed }}
-                onMouseEnter={() => setDisconnectSpotifyHovered(true)}
-                onMouseLeave={() => setDisconnectSpotifyHovered(false)}
-              >
-                <IoCloseOutline
-                  size={22}
-                  className={styles.disconnectSpotifyButton}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
+
+      <SpotifySetting
+        setting={spotifySetting}
+        setSpotifyHovered={setSpotifyHovered}
+        setDisconnectSpotifyHovered={setDisconnectSpotifyHovered}
+        connectedToSpotify={connectedToSpotify}
+        spotifyError={spotifyError}
+      />
     </motion.div>
   );
 };

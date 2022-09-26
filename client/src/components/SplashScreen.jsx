@@ -153,6 +153,7 @@ const BackButton = ({ slide, setSlide }) => {
       whileHover={{
         cursor: slide !== 'init' && 'pointer',
       }}
+      whileTap={animations.whileTap}
       className={styles.backButtonStyle}
       style={{ opacity: slide === 'init' ? 0.2 : 1 }}
       onClick={handleBackButton}

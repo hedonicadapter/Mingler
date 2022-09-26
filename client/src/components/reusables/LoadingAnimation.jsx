@@ -10,7 +10,7 @@ const AnimationWrapper = ({ children, index, style }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
+      transition={{ duration: 0.25 }}
       style={style}
       key={index}
     >
@@ -26,24 +26,24 @@ export const LoadingAnimation = ({
   style,
 }) => {
   return (
-    <AnimatePresence exitBeforeEnter>
-      <div
-        style={
-          style
-            ? {
-                ...style,
-                position: 'absolute',
-                right: 0,
-              }
-            : {
-                width: '100%',
-                position: 'absolute',
-                right: 0,
-                ...style,
-              }
-        }
-      >
-        {formFilled === 'loading' ? (
+    <div
+      style={
+        style
+          ? {
+              ...style,
+              position: 'absolute',
+              right: 0,
+            }
+          : {
+              width: '100%',
+              position: 'absolute',
+              right: 0,
+              ...style,
+            }
+      }
+    >
+      <AnimatePresence exitBeforeEnter>
+        {formFilled === 'loading' && !error && (
           <AnimationWrapper index={formFilled}>
             <ReactLoading
               style={{
@@ -58,17 +58,21 @@ export const LoadingAnimation = ({
               color={colors.defaultPlaceholderTextColor}
             />
           </AnimationWrapper>
-        ) : error ? (
+        )}
+
+        {!error && formFilled !== 'loading' && (
+          <AnimationWrapper index={formFilled}>{buttonText}</AnimationWrapper>
+        )}
+
+        {error && (
           <AnimationWrapper
-            index={formFilled}
+            index={error}
             style={{ fontSize: '0.9em', color: colors.coffeeRed }}
           >
             {error}
           </AnimationWrapper>
-        ) : (
-          <AnimationWrapper index={formFilled}>{buttonText}</AnimationWrapper>
         )}
-      </div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </div>
   );
 };

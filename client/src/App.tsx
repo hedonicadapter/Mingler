@@ -7,6 +7,7 @@ import { Route } from 'react-router';
 import SettingsContent from './components/SettingsContent';
 import FindFriendsContent from './components/FindFriendsContent';
 import WelcomeModalContent from './components/WelcomeModalContent';
+import SpotifyContent from './components/SpotifyContent';
 
 export default function App({ history, context }) {
   return (
@@ -14,6 +15,7 @@ export default function App({ history, context }) {
       <Route path="/" exact component={Widget} />
       <Route path="/findfriends" exact component={FindFriendsContent} />
       <Route path="/settings" exact component={SettingsContent} />
+      <Route path="/spotify" exact component={SpotifyContent} />
       <Route path="/welcome" exact component={WelcomeModalContent} />
       {/* <Route
         path="/connectChatClient"

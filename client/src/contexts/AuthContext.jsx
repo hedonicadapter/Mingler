@@ -216,32 +216,6 @@ export function authAndy({ children }) {
     }
 
     return false;
-
-    // DAO.initDemoAccount(clientFingerprint)
-    //   .then((result) => {
-    //     if (result?.data?.success) {
-    //       setDemoUser(result.data);
-
-    //       dispatch(setCurrentUserMain(result.data));
-    //       ipcRenderer.send('currentUser:signedIn', result.data._id); //for the socket in main
-
-    //       setSignedIn(true);
-
-    //       DAO.getDemoActivities()
-    //         .then((result) => {
-    //           if (result.data.success) {
-    //             setDemoUser((prevState) => {
-    //               return {
-    //                 ...prevState,
-    //                 fakeActivities: result.data.activities,
-    //               };
-    //             });
-    //           }
-    //         })
-    //         .catch((e) => notify('Failed to set demo up properly.'));
-    //     }
-    //   })
-    //   .catch((e) => notify("Couldn't set demo user. ", e));
   };
 
   const refreshTokenFromMainHandler = (e, { currentUser }) => {
@@ -336,7 +310,7 @@ export function authAndy({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      <AnimatePresence exitBeforeEnter>
+      {/* <AnimatePresence exitBeforeEnter>
         {currentUser && signedIn && (
           <motion.div key={0}>
             <div style={{ willChange: 'transform' }}>{children}</div>
@@ -349,7 +323,35 @@ export function authAndy({ children }) {
             </Memoized>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
+      <div style={{ willChange: 'transform' }}>
+        <AnimatePresence exitBeforeEnter>
+          {currentUser && signedIn && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              key={0}
+            >
+              {children}
+            </motion.div>
+          )}
+          {!signedIn && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.5 } }}
+              transition={{ duration: 0.15 }}
+              key={1}
+            >
+              <Memoized>
+                <SplashScreen />
+              </Memoized>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </AuthContext.Provider>
   );
 }

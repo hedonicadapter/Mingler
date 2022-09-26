@@ -1,5 +1,7 @@
 import React, { useContext, useState, useEffect, createContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { notify } from '../components/reusables/notifications';
+import colors from '../config/colors';
 import DAO from '../config/DAO';
 import {
   appVisibleFalse,
@@ -26,6 +28,7 @@ import { useStatus } from './UserStatusContext';
 const electron = require('electron');
 const app = electron.remote.app;
 const BrowserWindow = electron.remote.BrowserWindow;
+const BrowserView = electron.remote.BrowserView;
 const ipcRenderer = electron.ipcRenderer;
 
 const BrowserWindowContext = createContext();
@@ -61,7 +64,8 @@ const findFriendsWindowConfig = {
   transparent: true,
   closable: false,
   width: 460,
-  // height: 634,
+  minHeight: 130,
+  minWidth: 400,
   icon: favicon,
   webPreferences: {
     contextIsolation: false,
@@ -73,11 +77,23 @@ const findFriendsWindowConfig = {
 };
 
 const connectSpotifyWindowConfig = {
-  height: 768,
-  width: 550,
+  height: 890,
+  minHeight: 130,
+  width: 545,
+  minWidth: 400,
   title: 'Connect to Spotify',
   show: false,
+  frame: false,
+  skipTaskbar: false,
   icon: favicon,
+  backgroundColor: colors.offWhite,
+  webPreferences: {
+    contextIsolation: false,
+    nodeIntegration: true,
+    enableRemoteModule: true,
+    spellcheck: false,
+    devTools: false,
+  },
 };
 
 export function BrowserWindowProvider({ children }) {
@@ -91,6 +107,8 @@ export function BrowserWindowProvider({ children }) {
   const currentUser = useSelector(getCurrentUser);
 
   const [readyToExit, setReadyToExit] = useState(false);
+  const [connectSpotifyAuthorizeURL, setConnectSpotifyAuthorizeURL] =
+    useState(null);
 
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
@@ -162,9 +180,13 @@ export function BrowserWindowProvider({ children }) {
     hideWindow(findFriendsWindow);
   };
 
+  const connectSpotifyWindowShowHandler = () => {
+    loadSpotifyOauth(connectSpotifyWindow, connectSpotifyAuthorizeURL);
+  };
+
   const connectSpotifyWindowCloseHandler = () => {
+    // e.preventDefault(); // doesn't work
     hideWindow(connectSpotifyWindow);
-    // setConnectSpotifyWindow(null);
   };
 
   const toggleConnectSpotifyHandler = () => {
@@ -192,6 +214,12 @@ export function BrowserWindowProvider({ children }) {
   useEffect(() => {
     // Clusterfuck of close handling to keep unclosability working
     ipcRenderer.once('exit:frommain', () => {
+      // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
+      //   // connectSpotifyWindow?.close();
+      // connectSpotifyWindow?.destroy();
+      // connectSpotifyWindowStateless = null;
+      setConnectSpotifyWindow(null);
+      // }
       // if (settingsWindow && !settingsWindow?.isDestroyed()) {
       // settingsWindow.removeListener('close', settingsWindowCloseHandler);
       // settingsWindow?.destroy();
@@ -208,12 +236,6 @@ export function BrowserWindowProvider({ children }) {
       // dispatch(findFriendsOpenFalse());
       // findFriendsWindowStateless = null;
       setFindFriendsWindow(null);
-      // }
-      // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
-      //   // connectSpotifyWindow?.close();
-      // connectSpotifyWindow?.destroy();
-      // connectSpotifyWindowStateless = null;
-      setConnectSpotifyWindow(null);
       // }
 
       setReadyToExit(true);
@@ -284,24 +306,60 @@ export function BrowserWindowProvider({ children }) {
   }, [findFriendsWindow]);
 
   useEffect(() => {
+    if (!currentUser || !currentUser.accessToken)
+      return sendSpotifyError('No token found.');
+
+    DAO.createSpotifyURL(currentUser.accessToken)
+      .then((res) => {
+        if (res?.data?.success) {
+          console.warn(
+            'spotify authorize url from server ',
+            res.data.authorizeURL
+          );
+          setConnectSpotifyAuthorizeURL(res.data.authorizeURL);
+        }
+      })
+      .catch(sendSpotifyError);
+  }, [currentUser?.accessToken]);
+
+  useEffect(() => {
     if (!connectSpotifyWindow) return;
+
+    loadConnectSpotifyContent();
+
     connectSpotifyWindow.on('close', connectSpotifyWindowCloseHandler);
-    connectSpotifyWindow.webContents.on(
-      'will-redirect',
-      connectSpotifyWindowRedirectHandler
-    );
+    // connectSpotifyWindow.webContents.on(
+    //   'will-redirect',
+    //   connectSpotifyWindowRedirectHandler
+    // );
 
     return () => {
       connectSpotifyWindow.removeListener(
         'close',
         connectSpotifyWindowCloseHandler
       );
-      connectSpotifyWindow.webContents.removeListener(
-        'will-redirect',
-        connectSpotifyWindowRedirectHandler
+      // connectSpotifyWindow.webContents.removeListener(
+      //   'will-redirect',
+      //   connectSpotifyWindowRedirectHandler
+      // );
+      connectSpotifyWindow &&
+        !connectSpotifyWindow?.isDestroyed() &&
+        connectSpotifyWindow.destroy();
+    };
+  }, [connectSpotifyWindow]);
+
+  useEffect(() => {
+    if (!connectSpotifyWindow || !connectSpotifyAuthorizeURL) return;
+
+    connectSpotifyWindow.on('show', connectSpotifyWindowShowHandler);
+
+    return () => {
+      connectSpotifyWindow?.removeListener(
+        'show',
+        connectSpotifyWindowShowHandler
       );
     };
-  });
+  }, [connectSpotifyWindow, connectSpotifyAuthorizeURL]);
 
   useEffect(() => {
     if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
@@ -386,6 +444,7 @@ export function BrowserWindowProvider({ children }) {
   };
 
   const sendSpotifyError = (e = '') => {
+    if (!settingsWindow) return notify('Something went wrong ', e);
     const error = e?.response?.data?.error;
 
     if (error) {
@@ -434,42 +493,71 @@ export function BrowserWindowProvider({ children }) {
     }
   };
 
-  const loadConnectSpotifyContent = () => {
-    console.warn('loading spotify');
-    try {
-      DAO.createSpotifyURL(currentUser.accessToken)
-        .then(async (res) => {
-          if (res?.data?.success) {
-            console.warn(
-              'spotify authorize url from server ',
-              res.data.authorizeURL
-            );
-
-            connectSpotifyWindow.once('ready-to-show', () => {
-              connectSpotifyWindow.setTitle('Connect with Spotify');
-              connectSpotifyWindow.show();
-            });
-
-            if (connectSpotifyWindow?.isDestroyed()) return;
-            connectSpotifyWindow
-              .loadURL(res.data.authorizeURL)
-              .then()
-              .catch((e) => sendSpotifyError(e));
-          }
-        })
-        .catch((e) => {
-          sendSpotifyError(e);
-        });
-    } catch (e) {
-      sendSpotifyError(e);
-    } finally {
-      console.log('hiding window');
-      hideWindow(connectSpotifyWindow);
+  const spotifyGoBack = (view, fallbackURL) => {
+    if (!view) return;
+    console.log({ canGoBack: view.webContents.canGoBack() });
+    if (view.webContents.canGoBack()) {
+      view.webContents.goBack();
+    } else {
+      view.webContents
+        .loadURL(fallbackURL)
+        .then(() => console.log('loaded new url'))
+        .catch((e) => notify('Something went wrong. ', e));
     }
   };
 
+  const loadSpotifyOauth = (windoe, url) => {
+    if (!url || !windoe || windoe.isDestroyed())
+      return sendSpotifyError('Failed to embed spotify.');
+
+    const view = new BrowserView();
+
+    windoe.setBrowserView(view);
+    view.setBounds({ x: 0, y: 54, height: 800, width: 545 });
+    view.setAutoResize({
+      width: true,
+      height: true,
+      horizontal: true,
+    });
+    view.setBackgroundColor(colors.offWhite);
+    view.webContents
+      .loadURL(url)
+      .then()
+      .catch((e) => notify('Something went wrong. ', e));
+
+    view.webContents.on('did-finish-load', () => {
+      console.log('finished load');
+      view.webContents.insertCSS(
+        `html, body{z-index:1;} html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
+      );
+
+      ipcRenderer.once('spotifygoback:frommain', () =>
+        spotifyGoBack(view, url)
+      );
+    });
+    view.webContents.on('will-redirect', connectSpotifyWindowRedirectHandler);
+  };
+
+  const loadConnectSpotifyContent = () => {
+    if (connectSpotifyWindow?.isDestroyed()) return;
+    connectSpotifyWindow
+      .loadURL(`file://${app.getAppPath()}/index.html#/spotify`)
+      .then()
+      .catch(sendSpotifyError);
+
+    connectSpotifyWindow.once('ready-to-show', () => {
+      connectSpotifyWindow.setTitle('Connect with Spotify');
+    });
+  };
+
   const toggleConnectSpotify = () => {
-    loadConnectSpotifyContent();
+    if (!connectSpotifyWindow || connectSpotifyWindow.isDestroyed()) return;
+
+    connectSpotifyWindow?.setSkipTaskbar(false);
+
+    if (connectSpotifyWindow.isVisible()) {
+      connectSpotifyWindow.focus();
+    } else connectSpotifyWindow.show();
   };
 
   const value = { toggleSettings, toggleFindFriends, toggleConnectSpotify };

@@ -40,7 +40,6 @@ const AvatarContainer = ({
       onClick={isWidgetHeader && handleProfilePictureClick}
       style={
         isWidgetHeader && {
-          borderRadius: '50%',
           backgroundColor: 'rgba(0,0,0,0)',
         }
       }
@@ -56,7 +55,7 @@ const AvatarContainer = ({
       <Avatar
         className="avatar"
         name={name}
-        size={isWidgetHeader ? '68' : '58'}
+        size={isWidgetHeader ? '70' : '60'}
         src={profilePictureToJSXImg(profilePicture, demoUser)}
         round
       />
@@ -82,14 +81,12 @@ const OnlineStatusIndicator = ({
           style={{
             pointerEvents: 'none',
             position: 'relative',
-            marginLeft: -38,
-            marginTop: -13,
-            height: '50px',
-            width: '50px',
           }}
         >
           <span
             style={{
+              height: '50px',
+              width: '50px',
               zIndex: 80,
               position: 'absolute',
               marginLeft: 'auto',
@@ -97,8 +94,8 @@ const OnlineStatusIndicator = ({
               clipPath: 'circle(8.6px at 20px)',
               // minHeight: activityLength >= 2 ? 104 : 84,
               // paddingTop: isWidgetHeader ? 35 : 28,
-              // left: -38,
-              // top: -13,
+              left: -38,
+              top: -13,
             }}
           />
         </motion.span>
