@@ -24,14 +24,14 @@ export default function SpotifyContent() {
           position: 'fixed',
           minHeight: 30,
           width: '100%',
-          zIndex: 100,
+
           backgroundColor: colors.offWhite,
         }}
       >
         <motion.div
           whileHover={animations.whileHover}
           whileTap={animations.whileTap}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', zIndex: 100 }}
           onClick={() => {
             ipcRenderer.send('spotifygoback:fromrenderer');
           }}

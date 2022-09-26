@@ -31,6 +31,9 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const BrowserView = electron.remote.BrowserView;
 const ipcRenderer = electron.ipcRenderer;
 
+let backgroundNoiseButNotJSX =
+  "<svg id='svg' xmlns='http://www.w3.org/2000/svg' style='height: 100%;width: 100%;position: fixed;top: 0px;left: 0px;right: 0px;bottom: 0px;pointer-events: none; z-index: 90;'><defs> <filter id='noise' y='0' x='0'> <feTurbulence class='basefrequency' stitchTiles='stitch' baseFrequency='.75' type='fractalNoise' /> </filter> <pattern id='pattern' class='tile1' patternUnits='userSpaceOnUse' height='100' width='100' y='0' x='0' > <rect class='bg' x='0' y='0' width='100%' height='100%' fill='transparent' /> <rect class='opacity' x='0' y='0' width='100%' height='100%' filter='url(#noise)' opacity='.32' /> </pattern> </defs> <rect style='pointer-events: none;' id='rect' x='0' y='0' width='100%' height='100%' fill='url(#pattern)' /></svg>";
+
 const BrowserWindowContext = createContext();
 export function useBrowserWindow() {
   return useContext(BrowserWindowContext);
@@ -92,7 +95,7 @@ const connectSpotifyWindowConfig = {
     nodeIntegration: true,
     enableRemoteModule: true,
     spellcheck: false,
-    devTools: false,
+    devTools: true,
   },
 };
 
@@ -522,14 +525,20 @@ export function BrowserWindowProvider({ children }) {
     view.setBackgroundColor(colors.offWhite);
     view.webContents
       .loadURL(url)
-      .then()
       .catch((e) => notify('Something went wrong. ', e));
+    // .then(() => view.webContents.openDevTools())
 
     view.webContents.on('did-finish-load', () => {
       console.log('finished load');
       view.webContents.insertCSS(
         `html, body{z-index:1;} html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
       );
+
+      view.webContents
+        .executeJavaScript(
+          `document.body.insertAdjacentHTML("beforeend", "${backgroundNoiseButNotJSX}");`
+        )
+        .catch(console.log);
 
       ipcRenderer.once('spotifygoback:frommain', () =>
         spotifyGoBack(view, url)
