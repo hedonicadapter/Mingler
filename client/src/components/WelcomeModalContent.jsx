@@ -6,6 +6,15 @@ import { BackgroundNoise } from './FriendsList';
 
 const { remote } = require('electron');
 
+const handleKeyDown = (evt) => {
+  if (evt.key === 'Escape') {
+    remote.getCurrentWindow().hide();
+  }
+};
+const handleOnClick = () => {
+  remote.getCurrentWindow().hide();
+};
+
 const MiniWidget = ({ widgetVisible }) => (
   <motion.div
     initial={'hide'}
@@ -163,8 +172,17 @@ export default function WelcomeModalContent() {
     return () => clearTimeout(timeout);
   }, [widgetVisible]);
 
+  useEffect(() => {
+    ipcRenderer.once('exit:frommain', () => {
+      window.onbeforeunload = (e) => {
+        e.returnValue = undefined;
+      };
+    });
+  }, []);
+
   return (
     <motion.div
+      onKeyDown={handleKeyDown}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
@@ -247,7 +265,7 @@ export default function WelcomeModalContent() {
           zIndex: 20,
         }}
         whileTap={animations.whileTap}
-        onClick={() => remote.getCurrentWindow().hide()}
+        onClick={handleOnClick}
       >
         got it
       </motion.div>

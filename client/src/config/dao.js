@@ -223,7 +223,7 @@ export class DAO {
       userID,
     };
 
-    return privateRoute.post('/refreshSpotify', data, {
+    return privateRoute.post('/disconnectSpotify', data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

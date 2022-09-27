@@ -153,9 +153,14 @@ const BackButton = ({ slide, setSlide }) => {
       whileHover={{
         cursor: slide !== 'init' && 'pointer',
       }}
-      whileTap={animations.whileTap}
+      whileTap={slide !== 'init' ? animations.whileTap : {}}
       className={styles.backButtonStyle}
-      style={{ opacity: slide === 'init' ? 0.2 : 1 }}
+      animate={slide === 'init' ? 'off' : 'on'}
+      variants={{
+        on: { opacity: 1 },
+        off: { opacity: 0.2 },
+      }}
+      transition={{ duration: 0.15 }}
       onClick={handleBackButton}
     >
       <IoIosArrowBack size={24} color={colors.darkmodeLightBlack} />

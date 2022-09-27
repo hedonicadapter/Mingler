@@ -68,6 +68,7 @@
   font-weight: bold;
   font-size: 0.6em;
   transition: opacity 0.15s ease;
+  margin-top: 1px;
 }
 
 .guestSlideButtonsContainer {

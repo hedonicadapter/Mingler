@@ -111,6 +111,10 @@ const SpotifySetting = ({
   connectedToSpotify,
   spotifyError,
 }) => {
+  useEffect(() => {
+    console.log({ connectedToSpotify });
+  }, [connectedToSpotify]);
+
   return (
     <div
       onClick={() => {

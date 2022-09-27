@@ -40,18 +40,30 @@ const execFile = require('child_process').execFile;
 const exec = require('child_process').exec;
 const JSON5 = require('json5');
 
-// By Almenon
+// OG function By Almenon
 // https://medium.com/@almenon214/killing-processes-with-node-772ffdd19aad
-const killProcess = (pid: number) => {
+const killProcess = (proc) => {
   if (process.platform == 'win32') {
-    exec(`taskkill /PID ${pid} /T /F`, (error, stdout, stderr) => {
-      console.log('taskkill stdout: ' + stdout);
-      console.log('taskkill stderr: ' + stderr);
-      if (error) {
-        console.log('error: ' + error.message);
-      }
-    });
+    try {
+      let pid = proc.pid;
+
+      exec(`taskkill /PID ${pid} /T /F`, (error, stdout, stderr) => {
+        if (error) {
+          try {
+            proc?.kill();
+          } catch (e) {}
+        }
+      });
+    } catch (e) {
+      proc?.kill();
+    }
   }
+};
+const killAll = () => {
+  allProcesses?.forEach(killProcess);
+  mainWindow?.destroy();
+  mainWindow = null;
+  app.exit(0);
 };
 
 const storage = require('node-persist');
@@ -115,6 +127,7 @@ let chromiumHostConfig = path.resolve(
 );
 let windowProcess = null;
 let trackProcess = null;
+let allProcesses = [];
 
 let tray = null;
 
@@ -160,7 +173,10 @@ function decodeUTF8(utf8String: string) {
 }
 
 const initActiveWindowListenerProcess = () => {
-  if (!windowProcess) windowProcess = execFile(windowListenerScript);
+  if (!windowProcess) {
+    windowProcess = execFile(windowListenerScript);
+    allProcesses.push(windowProcess);
+  }
   // windowProcess = execFile('python', [windowListenerScript]);
 
   windowProcess.stdout.on('data', function (data) {
@@ -199,7 +215,7 @@ const initActiveWindowListenerProcess = () => {
 
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   try {
-    if (trackProcess) killProcess(trackProcess.pid);
+    if (trackProcess) killProcess(trackProcess);
   } catch (e) {
     console.warn('Failed to kill track process ', e);
   }
@@ -207,6 +223,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
   if (!spotifyAccessToken) return;
   console.log('trackprocess execing');
   trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
+  allProcesses.push(trackProcess);
   // trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
   trackProcess.stdout.on('data', function (data) {
@@ -220,7 +237,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
         // trackProcess?.stdin.end();
         // trackProcess?.stdout.destroy();
         // trackProcess?.stderr.destroy();
-        if (trackProcess) killProcess(trackProcess.pid);
+        if (trackProcess) killProcess(trackProcess);
       } catch (e) {
         console.log(e);
       }
@@ -364,8 +381,8 @@ const signedInContextMenu = (accelerator) =>
     {
       label: 'exit',
       click: () => {
+        killAll();
         mainWindow?.webContents.send('exit:frommain');
-
         // setTimeout(() => mainWindow?.close(), 250);
       },
     },
@@ -405,7 +422,7 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const { height } = screen.getPrimaryDisplay().workAreaSize;
 
   mainWindow = new BrowserWindow({
     title: 'Mingler',
@@ -429,7 +446,7 @@ const createWindow = async () => {
       contextIsolation: false,
       nodeIntegration: true,
       enableRemoteModule: true,
-      devTools: true,
+      devTools: false,
     },
   });
 
@@ -470,8 +487,8 @@ const createWindow = async () => {
     io?.close();
 
     try {
-      if (trackProcess) killProcess(trackProcess.pid);
-      if (windowProcess) killProcess(windowProcess.pid);
+      if (trackProcess) killProcess(trackProcess);
+      if (windowProcess) killProcess(windowProcess);
     } catch (e) {
       console.log(e);
     }
@@ -607,8 +624,8 @@ const createWindow = async () => {
         .catch(console.error);
 
       ipcMain.on('exit:frommenubutton', () => {
+        killAll();
         mainWindow.webContents.send('exit:frommain');
-
         // setTimeout(() => mainWindow?.close(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
@@ -619,11 +636,7 @@ const createWindow = async () => {
       });
       ipcMain.on('currentUser:signedOut', () => {
         console.log('signed outttttttt');
-        try {
-          if (trackProcess) killProcess(trackProcess.pid);
-        } catch (e) {
-          console.warn('Failed to kill track process, ', e);
-        }
+        if (trackProcess) killProcess(trackProcess);
 
         storage.getItem('store').then((res) => {
           setTrayContextMenu('signedOut', res?.settings?.globalShortcut);
@@ -644,7 +657,7 @@ const createWindow = async () => {
     (event, spotifyAccessToken) => {
       if (!spotifyAccessToken || spotifyAccessToken === 'disconnect') {
         try {
-          if (trackProcess) killProcess(trackProcess.pid);
+          if (trackProcess) killProcess(trackProcess);
         } catch (e) {
           console.warn('Failed to kill track process, ', e);
         }
@@ -686,6 +699,7 @@ const createWindow = async () => {
     mainWindow?.webContents.send('toggleconnectspotify:frommain');
   });
   ipcMain.on('disconnectspotify:fromrenderer', () => {
+    console.log('disconnecting');
     mainWindow?.webContents.send('disconnectspotify:frommain');
   });
 
@@ -883,17 +897,6 @@ app.whenReady().then(() => {
         ipcMain.handle(
           'refreshtoken:fromrenderer',
           async (evt, currentUser) => {
-            // const port = e.ports[0];
-            // console.log(currentUser);
-            // // MessagePortMain uses the Node.js-style events API, rather than the
-            // // web-style events API. So .on('message', ...) instead of .onmessage = ...
-            // port.on('message', (evt) => {
-            //   // data is { answer: 42 }
-            //   console.log('evt', evt);
-            // });
-            console.log('main works');
-            // // MessagePortMain queues messages until the .start() method has been called.
-            // port.start();
             mainWindow?.webContents.send('refreshtoken:frommain', currentUser);
             return true;
           }
@@ -972,8 +975,8 @@ app.on('activate', () => {
 var cleanExit = function () {
   io?.close();
 
-  if (trackProcess) killProcess(trackProcess.pid);
-  if (windowProcess) killProcess(windowProcess.pid);
+  if (trackProcess) killProcess(trackProcess);
+  if (windowProcess) killProcess(windowProcess);
 };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill

@@ -56,7 +56,7 @@ const settingsWindowConfig = {
     nodeIntegration: true,
     enableRemoteModule: true,
     spellcheck: false,
-    devTools: false,
+    devTools: true,
   },
 };
 
@@ -111,45 +111,17 @@ export function BrowserWindowProvider({ children }) {
 
   const [readyToExit, setReadyToExit] = useState(false);
   const [connectSpotifyAuthorizeURL, setConnectSpotifyAuthorizeURL] =
-    useState(null);
+    useState('');
 
   const [settingsWindow, setSettingsWindow] = useState(
     new BrowserWindow(settingsWindowConfig)
   );
-
   const [findFriendsWindow, setFindFriendsWindow] = useState(
     new BrowserWindow(findFriendsWindowConfig)
   );
-
   const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(
     new BrowserWindow(connectSpotifyWindowConfig)
   );
-
-  // const [settingsWindow, setSettingsWindow] = useState(null);
-  // const [findFriendsWindow, setFindFriendsWindow] = useState(null);
-  // const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(null);
-
-  // useEffect(() => {
-  //   let settingsWindowStateless = new BrowserWindow(settingsWindowConfig);
-  //   let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
-  //   let connectSpotifyWindowStateless = new BrowserWindow(
-  //     connectSpotifyWindowConfig
-  //   );
-
-  //   setSettingsWindow(settingsWindowStateless);
-  //   setFindFriendsWindow(findFriendsWindowStateless);
-  //   setConnectSpotifyWindow(connectSpotifyWindowStateless);
-
-  //   return () => {
-  //     settingsWindowStateless = null;
-  //     findFriendsWindowStateless = null;
-  //     connectSpotifyWindowStateless = null;
-
-  //     setSettingsWindow(null);
-  //     setFindFriendsWindow(null);
-  //     setConnectSpotifyWindow(null);
-  //   };
-  // }, []);
 
   const settingsWindowFocusHandler = () => {
     console.log('sending from renterer');
@@ -196,9 +168,11 @@ export function BrowserWindowProvider({ children }) {
     toggleConnectSpotify();
   };
   const disconnectSpotifyHandler = () => {
+    console.log('disconnecting');
     DAO.disconnectSpotify(currentUser?._id, currentUser?.accessToken)
       .then((result) => {
         if (result?.data?.success) {
+          console.log('succeeded');
           dispatch(setSpotifyAccessTokenMain('disconnect'));
           dispatch(setSpotifyRefreshTokenMain(null));
           dispatch(setSpotifyExpiryDate(null));
@@ -220,14 +194,14 @@ export function BrowserWindowProvider({ children }) {
       // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
       //   // connectSpotifyWindow?.close();
       // connectSpotifyWindow?.destroy();
-      // connectSpotifyWindowStateless = null;
+      // connectSpotifyWindow = null;
       setConnectSpotifyWindow(null);
       // }
       // if (settingsWindow && !settingsWindow?.isDestroyed()) {
       // settingsWindow.removeListener('close', settingsWindowCloseHandler);
       // settingsWindow?.destroy();
       // dispatch(settingsOpenFalse());
-      // settingsWindowStateless = null;
+      // settingsWindow = null;
       setSettingsWindow(null);
       // }
       // if (findFriendsWindow && !findFriendsWindow?.isDestroyed()) {
@@ -237,34 +211,30 @@ export function BrowserWindowProvider({ children }) {
       // );
       // findFriendsWindow?.destroy();
       // dispatch(findFriendsOpenFalse());
-      // findFriendsWindowStateless = null;
+      // findFriendsWindow = null;
       setFindFriendsWindow(null);
       // }
 
       setReadyToExit(true);
+      ipcRenderer.send('exitready:fromrenderer');
     });
-    // return () => {
-    //   hideWindow(settingsWindow);
-    //   hideWindow(findFriendsWindow);
-    //   hideWindow(connectSpotifyWindow);
-    // };
   }, []);
 
-  useEffect(() => {
-    console.log('separator');
-    console.log(!settingsWindow);
-    console.log(!findFriendsWindow);
-    console.log(!connectSpotifyWindow);
-    console.log(readyToExit);
-    if (
-      !settingsWindow &&
-      !findFriendsWindow &&
-      !connectSpotifyWindow &&
-      readyToExit
-    ) {
-      ipcRenderer.send('exitready:fromrenderer');
-    }
-  }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
+  // useEffect(() => {
+  //   console.log('separator');
+  //   console.log(!settingsWindow);
+  //   console.log(!findFriendsWindow);
+  //   console.log(!connectSpotifyWindow);
+  //   console.log(readyToExit);
+  //   if (
+  //     !settingsWindow &&
+  //     !findFriendsWindow &&
+  //     !connectSpotifyWindow &&
+  //     readyToExit
+  //   ) {
+  //     ipcRenderer.send('exitready:fromrenderer');
+  //   }
+  // }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
 
   useEffect(() => {
     if (!settingsWindow) return;
@@ -278,13 +248,13 @@ export function BrowserWindowProvider({ children }) {
     // settingsWindow.on('closed', settingsWindowClosedHandler);
 
     return () => {
+      if (!settingsWindow) return;
+
       settingsWindow.removeListener('focus', settingsWindowFocusHandler);
       settingsWindow.removeListener('blur', settingsWindowBlurHandler);
       settingsWindow.removeListener('close', settingsWindowCloseHandler);
       // settingsWindow.removeListener('closed', settingsWindowClosedHandler);
-      settingsWindow &&
-        !settingsWindow?.isDestroyed() &&
-        settingsWindow.destroy();
+      !settingsWindow?.isDestroyed() && settingsWindow.destroy();
     };
   }, [settingsWindow]);
 
@@ -297,14 +267,14 @@ export function BrowserWindowProvider({ children }) {
     // findFriendsWindow.on('closed', findFriendsWindowClosedHandler);
 
     return () => {
+      if (!findFriendsWindow) return;
+
       findFriendsWindow.removeListener('close', findFriendsWindowCloseHandler);
       // findFriendsWindow.removeListener(
       //   'closed',
       //   findFriendsWindowClosedHandler
       // );
-      findFriendsWindow &&
-        !findFriendsWindow?.isDestroyed() &&
-        findFriendsWindow.destroy();
+      !findFriendsWindow?.isDestroyed() && findFriendsWindow.destroy();
     };
   }, [findFriendsWindow]);
 
@@ -322,7 +292,7 @@ export function BrowserWindowProvider({ children }) {
           setConnectSpotifyAuthorizeURL(res.data.authorizeURL);
         }
       })
-      .catch(sendSpotifyError);
+      .catch((e) => notify('Something went wrong. ', e));
   }, [currentUser?.accessToken]);
 
   useEffect(() => {
@@ -331,23 +301,16 @@ export function BrowserWindowProvider({ children }) {
     loadConnectSpotifyContent();
 
     connectSpotifyWindow.on('close', connectSpotifyWindowCloseHandler);
-    // connectSpotifyWindow.webContents.on(
-    //   'will-redirect',
-    //   connectSpotifyWindowRedirectHandler
-    // );
 
     return () => {
+      if (!connectSpotifyWindow) return;
+
       connectSpotifyWindow.removeListener(
         'close',
         connectSpotifyWindowCloseHandler
       );
-      // connectSpotifyWindow.webContents.removeListener(
-      //   'will-redirect',
-      //   connectSpotifyWindowRedirectHandler
-      // );
-      connectSpotifyWindow &&
-        !connectSpotifyWindow?.isDestroyed() &&
-        connectSpotifyWindow.destroy();
+
+      !connectSpotifyWindow?.isDestroyed() && connectSpotifyWindow.destroy();
     };
   }, [connectSpotifyWindow]);
 
@@ -468,9 +431,8 @@ export function BrowserWindowProvider({ children }) {
   const authorizeSpotify = (code) => {
     DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
       .then((result) => {
-        hideWindow(connectSpotifyWindow);
         console.warn('spotiffff ', result);
-        if (result.data.success) {
+        if (result?.data?.success) {
           dispatch(setSpotifyAccessTokenMain(result.data.body['access_token']));
           dispatch(
             setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
@@ -485,20 +447,20 @@ export function BrowserWindowProvider({ children }) {
       });
   };
 
-  const connectSpotifyWindowRedirectHandler = (event, url) => {
+  const connectSpotifyWindowRedirectHandler = (url) => {
     if (!url) return;
+    if (
+      !url.startsWith('https://menglir.herokuapp.com/musicNumbsTheSpirit?code=')
+    )
+      return;
 
     let code;
-
-    if (url.includes('localhost:')) {
-      code = url.substring(url.indexOf('=') + 1);
-      authorizeSpotify(code);
-    }
+    code = url.substring(url.indexOf('=') + 1, url.indexOf('&state=null'));
+    authorizeSpotify(code);
   };
 
   const spotifyGoBack = (view, fallbackURL) => {
-    if (!view) return;
-    console.log({ canGoBack: view.webContents.canGoBack() });
+    if (!view || !view.webContents) return;
     if (view.webContents.canGoBack()) {
       view.webContents.goBack();
     } else {
@@ -509,13 +471,30 @@ export function BrowserWindowProvider({ children }) {
     }
   };
 
-  const loadSpotifyOauth = (windoe, url) => {
-    if (!url || !windoe || windoe.isDestroyed())
-      return sendSpotifyError('Failed to embed spotify.');
+  const viewDidFinishLoadHandler = () => {
+    let currentURL = view.webContents.getURL();
+    if (currentURL) connectSpotifyWindowRedirectHandler(currentURL);
 
-    const view = new BrowserView();
+    view.webContents.insertCSS(
+      `html, body{z-index:1;} html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
+    );
 
-    windoe.setBrowserView(view);
+    view.webContents
+      .executeJavaScript(
+        `document.body.insertAdjacentHTML("beforeend", "${backgroundNoiseButNotJSX}");`
+      )
+      .catch(console.log);
+
+    ipcRenderer.once('spotifygoback:frommain', () =>
+      spotifyGoBack(view, connectSpotifyAuthorizeURL)
+    );
+  };
+
+  const [view, setView] = useState(new BrowserView());
+  useEffect(() => {
+    if (!connectSpotifyWindow || !view || !connectSpotifyAuthorizeURL) return;
+    connectSpotifyWindow.setBrowserView(null);
+    connectSpotifyWindow.setBrowserView(view);
     view.setBounds({ x: 0, y: 54, height: 800, width: 545 });
     view.setAutoResize({
       width: true,
@@ -524,27 +503,33 @@ export function BrowserWindowProvider({ children }) {
     });
     view.setBackgroundColor(colors.offWhite);
     view.webContents
-      .loadURL(url)
+      .loadURL(connectSpotifyAuthorizeURL)
+      .then(() => view.webContents.openDevTools())
       .catch((e) => notify('Something went wrong. ', e));
-    // .then(() => view.webContents.openDevTools())
 
-    view.webContents.on('did-finish-load', () => {
-      console.log('finished load');
-      view.webContents.insertCSS(
-        `html, body{z-index:1;} html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
+    view.webContents.on('did-finish-load', viewDidFinishLoadHandler);
+    console.log('wats going on');
+
+    return () => {
+      if (!view) return;
+      !connectSpotifyWindow?.isDestroyed() &&
+        connectSpotifyWindow?.setBrowserView(null);
+      view.webContents?.removeListener(
+        'did-finish-load',
+        viewDidFinishLoadHandler
       );
+      view?.webContents?.destroy(); //TypeError: destroy is not a function
+      setView(null);
+    };
+  }, [view, connectSpotifyWindow, connectSpotifyAuthorizeURL]);
 
-      view.webContents
-        .executeJavaScript(
-          `document.body.insertAdjacentHTML("beforeend", "${backgroundNoiseButNotJSX}");`
-        )
-        .catch(console.log);
-
-      ipcRenderer.once('spotifygoback:frommain', () =>
-        spotifyGoBack(view, url)
-      );
-    });
-    view.webContents.on('will-redirect', connectSpotifyWindowRedirectHandler);
+  const loadSpotifyOauth = (windoe, url) => {
+    // if (!url || !windoe || windoe.isDestroyed())
+    //   return sendSpotifyError('Failed to embed spotify.');
+    // setView(new BrowserView());
+    view?.webContents
+      .loadURL(connectSpotifyAuthorizeURL)
+      .catch((e) => notify('Something went wrong. ', e));
   };
 
   const loadConnectSpotifyContent = () => {
