@@ -167,9 +167,13 @@ const answerProcess = (process) => {
 function decodeUTF8(utf8String: string) {
   if (!utf8String) return '';
 
-  let formattedString = utf8String.replace(/\\x/g, '%');
+  let formattedString = utf8String.replace(/\\x/g, '%').replace(/%/g, '%25');
 
-  return decodeURIComponent(formattedString);
+  try {
+    return decodeURIComponent(formattedString);
+  } catch (e) {
+    return '';
+  }
 }
 
 const initActiveWindowListenerProcess = () => {
@@ -446,7 +450,7 @@ const createWindow = async () => {
       contextIsolation: false,
       nodeIntegration: true,
       enableRemoteModule: true,
-      devTools: false,
+      devTools: true,
     },
   });
 

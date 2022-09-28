@@ -182,7 +182,6 @@ export class DAO {
   };
 
   createSpotifyURL = (token) => {
-    console.warn({ token });
     return privateRoute.get(
       '/createSpotifyURL',
       {},

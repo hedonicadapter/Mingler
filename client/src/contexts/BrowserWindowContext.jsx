@@ -31,8 +31,13 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const BrowserView = electron.remote.BrowserView;
 const ipcRenderer = electron.ipcRenderer;
 
-let backgroundNoiseButNotJSX =
-  "<svg id='svg' xmlns='http://www.w3.org/2000/svg' style='height: 100%;width: 100%;position: fixed;top: 0px;left: 0px;right: 0px;bottom: 0px;pointer-events: none; z-index: 90;'><defs> <filter id='noise' y='0' x='0'> <feTurbulence class='basefrequency' stitchTiles='stitch' baseFrequency='.75' type='fractalNoise' /> </filter> <pattern id='pattern' class='tile1' patternUnits='userSpaceOnUse' height='100' width='100' y='0' x='0' > <rect class='bg' x='0' y='0' width='100%' height='100%' fill='transparent' /> <rect class='opacity' x='0' y='0' width='100%' height='100%' filter='url(#noise)' opacity='.32' /> </pattern> </defs> <rect style='pointer-events: none;' id='rect' x='0' y='0' width='100%' height='100%' fill='url(#pattern)' /></svg>";
+const escapeHTMLPolicy = trustedTypes.createPolicy('forceInner', {
+  createHTML: (to_escape) => to_escape,
+});
+
+let backgroundNoiseButNotJSX = escapeHTMLPolicy.createHTML(
+  "<svg id='svg' xmlns='http://www.w3.org/2000/svg' style='height: 100%;width: 100%;position: fixed;top: 0px;left: 0px;right: 0px;bottom: 0px;pointer-events: none; z-index: 90;'><defs> <filter id='noise' y='0' x='0'> <feTurbulence class='basefrequency' stitchTiles='stitch' baseFrequency='.75' type='fractalNoise' /> </filter> <pattern id='pattern' class='tile1' patternUnits='userSpaceOnUse' height='100' width='100' y='0' x='0' > <rect class='bg' x='0' y='0' width='100%' height='100%' fill='transparent' /> <rect class='opacity' x='0' y='0' width='100%' height='100%' filter='url(#noise)' opacity='.32' /> </pattern> </defs> <rect style='pointer-events: none;' id='rect' x='0' y='0' width='100%' height='100%' fill='url(#pattern)' /></svg>"
+);
 
 const BrowserWindowContext = createContext();
 export function useBrowserWindow() {
@@ -56,7 +61,7 @@ const settingsWindowConfig = {
     nodeIntegration: true,
     enableRemoteModule: true,
     spellcheck: false,
-    devTools: true,
+    devTools: false,
   },
 };
 
@@ -87,6 +92,8 @@ const connectSpotifyWindowConfig = {
   title: 'Connect to Spotify',
   show: false,
   frame: false,
+  closable: false,
+  transparent: true,
   skipTaskbar: false,
   icon: favicon,
   backgroundColor: colors.offWhite,
@@ -95,7 +102,7 @@ const connectSpotifyWindowConfig = {
     nodeIntegration: true,
     enableRemoteModule: true,
     spellcheck: false,
-    devTools: true,
+    devTools: false,
   },
 };
 
@@ -153,10 +160,6 @@ export function BrowserWindowProvider({ children }) {
 
   const findFriendsWindowCloseHandler = () => {
     hideWindow(findFriendsWindow);
-  };
-
-  const connectSpotifyWindowShowHandler = () => {
-    loadSpotifyOauth(connectSpotifyWindow, connectSpotifyAuthorizeURL);
   };
 
   const connectSpotifyWindowCloseHandler = () => {
@@ -282,6 +285,8 @@ export function BrowserWindowProvider({ children }) {
     if (!currentUser || !currentUser.accessToken)
       return sendSpotifyError('No token found.');
 
+    console.warn({ acc: currentUser.accessToken });
+
     DAO.createSpotifyURL(currentUser.accessToken)
       .then((res) => {
         if (res?.data?.success) {
@@ -313,19 +318,6 @@ export function BrowserWindowProvider({ children }) {
       !connectSpotifyWindow?.isDestroyed() && connectSpotifyWindow.destroy();
     };
   }, [connectSpotifyWindow]);
-
-  useEffect(() => {
-    if (!connectSpotifyWindow || !connectSpotifyAuthorizeURL) return;
-
-    connectSpotifyWindow.on('show', connectSpotifyWindowShowHandler);
-
-    return () => {
-      connectSpotifyWindow?.removeListener(
-        'show',
-        connectSpotifyWindowShowHandler
-      );
-    };
-  }, [connectSpotifyWindow, connectSpotifyAuthorizeURL]);
 
   useEffect(() => {
     if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
@@ -476,7 +468,7 @@ export function BrowserWindowProvider({ children }) {
     if (currentURL) connectSpotifyWindowRedirectHandler(currentURL);
 
     view.webContents.insertCSS(
-      `html, body{z-index:1;} html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
+      `html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
     );
 
     view.webContents
@@ -488,6 +480,13 @@ export function BrowserWindowProvider({ children }) {
     ipcRenderer.once('spotifygoback:frommain', () =>
       spotifyGoBack(view, connectSpotifyAuthorizeURL)
     );
+  };
+
+  // Because of the way I prevent windows from truly closing, clicking links that open in new windows crashes the app
+  const viewNewWindowHandler = (evt, url) => {
+    if (!view || !view.webContents) return;
+    evt.preventDefault();
+    view.webContents.loadUrl(url);
   };
 
   const [view, setView] = useState(new BrowserView());
@@ -504,11 +503,10 @@ export function BrowserWindowProvider({ children }) {
     view.setBackgroundColor(colors.offWhite);
     view.webContents
       .loadURL(connectSpotifyAuthorizeURL)
-      .then(() => view.webContents.openDevTools())
       .catch((e) => notify('Something went wrong. ', e));
 
     view.webContents.on('did-finish-load', viewDidFinishLoadHandler);
-    console.log('wats going on');
+    view.webContents.on('new-window', viewNewWindowHandler);
 
     return () => {
       if (!view) return;
@@ -518,6 +516,7 @@ export function BrowserWindowProvider({ children }) {
         'did-finish-load',
         viewDidFinishLoadHandler
       );
+      view.webContents.removeListener('new-window', viewNewWindowHandler);
       view?.webContents?.destroy(); //TypeError: destroy is not a function
       setView(null);
     };
@@ -527,9 +526,9 @@ export function BrowserWindowProvider({ children }) {
     // if (!url || !windoe || windoe.isDestroyed())
     //   return sendSpotifyError('Failed to embed spotify.');
     // setView(new BrowserView());
-    view?.webContents
-      .loadURL(connectSpotifyAuthorizeURL)
-      .catch((e) => notify('Something went wrong. ', e));
+    // view?.webContents
+    //   .loadURL(connectSpotifyAuthorizeURL)
+    //   .catch((e) => notify('Something went wrong. ', e));
   };
 
   const loadConnectSpotifyContent = () => {

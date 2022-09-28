@@ -3,14 +3,10 @@ import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import colors from '../config/colors';
 import animations from '../config/animations';
 import { BackgroundNoise } from './FriendsList';
+import hotkeys from 'hotkeys-js';
 
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 
-const handleKeyDown = (evt) => {
-  if (evt.key === 'Escape') {
-    remote.getCurrentWindow().hide();
-  }
-};
 const handleOnClick = () => {
   remote.getCurrentWindow().hide();
 };
@@ -173,16 +169,24 @@ export default function WelcomeModalContent() {
   }, [widgetVisible]);
 
   useEffect(() => {
+    hotkeys('Escape', function (event, handler) {
+      remote?.getCurrentWindow()?.hide();
+      hotkeys.unbind('Escape');
+    });
+
     ipcRenderer.once('exit:frommain', () => {
       window.onbeforeunload = (e) => {
         e.returnValue = undefined;
       };
     });
+
+    return () => {
+      hotkeys.unbind();
+    };
   }, []);
 
   return (
     <motion.div
-      onKeyDown={handleKeyDown}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}

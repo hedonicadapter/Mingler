@@ -36,10 +36,8 @@ import { LoadingAnimation } from './reusables/LoadingAnimation';
 import { compressFile, profilePictureToJSXImg } from '../helpers/fileManager';
 import { useIsInViewport } from '../helpers/useIsInViewport';
 import hotkeys from 'hotkeys-js';
-import Keyboard from 'react-simple-keyboard';
 import WidgetSettingsContent from './settingsContents/WidgetSettingsContent';
 import { BackgroundNoise } from './FriendsList';
-// import layout from 'simple-keyboard-layouts/build/layouts/swedish';
 
 const { remote, clipboard, ipcRenderer } = require('electron');
 const BrowserWindow = remote.BrowserWindow;

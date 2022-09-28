@@ -10,6 +10,10 @@ import { LoadingAnimation } from './reusables/LoadingAnimation';
 const { ipcRenderer, remote } = require('electron');
 
 export default function SpotifyContent() {
+  window.onbeforeunload = (e) => {
+    e.returnValue = false; // Cancels close, true unclosable (unlike goofy electron api)
+  };
+
   const [loading, setLoading] = useState('');
 
   const loadingStartHandler = () => {
@@ -56,34 +60,37 @@ export default function SpotifyContent() {
           width: '100%',
           display: 'flex',
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
+          alignContent: 'center',
           marginInline: 6,
-
-          backgroundColor: colors.offWhite,
+          zIndex: 100,
         }}
       >
         <motion.div
           whileHover={animations.whileHover}
           whileTap={animations.whileTap}
-          style={{ cursor: 'pointer', zIndex: 100, width: 30 }}
+          style={{ cursor: 'pointer', width: 30 }}
           onClick={() => {
             ipcRenderer.send('spotifygoback:fromrenderer');
           }}
         >
           <IoIosArrowBack size={22} color={colors.darkmodeLightBlack} />
         </motion.div>
-        <div
+        <motion.div
           style={{
-            zIndex: 100,
-            outline: '1px solid red',
-            paddingTop: 2,
+            scale: 0.8,
           }}
         >
           <LoadingAnimation
             formFilled={loading}
-            style={{ position: 'relative', marginRight: 14 }}
+            style={{
+              position: 'relative',
+              left: 0,
+              marginLeft: -6,
+              paddingTop: 1,
+            }}
           />
-        </div>
+        </motion.div>
       </footer>
       <BackgroundNoise />
     </WindowFrame>

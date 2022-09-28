@@ -219,7 +219,7 @@ export function authAndy({ children }) {
   };
 
   const refreshTokenFromMainHandler = (e, { currentUser }) => {
-    console.log({ newerData: currentUser });
+    console.warn('refreshTokenFromMainHandler');
     dispatch(setCurrentUserMain(currentUser));
   };
 
@@ -251,7 +251,6 @@ export function authAndy({ children }) {
   }, [currentUser, signedIn]);
 
   useEffect(() => {
-    // initDemoAccount();
     ipcRenderer.on('refreshtoken:frommain', refreshTokenFromMainHandler);
 
     return () =>
