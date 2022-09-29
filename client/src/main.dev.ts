@@ -179,10 +179,9 @@ function decodeUTF8(utf8String: string) {
 }
 
 const initActiveWindowListenerProcess = () => {
-  if (!windowProcess) {
-    windowProcess = execFile(windowListenerScript);
-    windowProcesses.push(windowProcess);
-  }
+  windowProcesses?.forEach(killProcess);
+  windowProcess = execFile(windowListenerScript);
+  windowProcesses.push(windowProcess);
   // windowProcess = execFile('python', [windowListenerScript]);
 
   windowProcess.stdout.on('data', function (data) {
@@ -633,12 +632,15 @@ const createWindow = async () => {
       ipcMain.on('currentUser:signedIn', (event, userID) => {
         setTrayContextMenu('signedIn', global.state?.settings?.globalShortcut);
 
+        initActiveWindowListenerProcess();
+
         console.log('signed in'); // CHECK IF THIS IS RUN MORE THAN ONCE
         initSocket(userID);
       });
       ipcMain.on('currentUser:signedOut', () => {
         console.log('signed outttttttt');
         trackProcesses?.forEach(killProcess);
+        windowProcesses?.forEach(killProcess);
 
         storage.getItem('store').then((res) => {
           setTrayContextMenu('signedOut', res?.settings?.globalShortcut);
@@ -648,11 +650,6 @@ const createWindow = async () => {
       console.log('Creating host socket server exception: ', exception);
     }
   });
-
-  initActiveWindowListenerProcess();
-  // ipcMain.handle('initActiveWindowListener:fromrenderer', () => {
-  //   return true;
-  // });
 
   ipcMain.handle(
     'initActiveTrackListener:fromrenderer',

@@ -306,15 +306,6 @@ export function BrowserWindowProvider({ children }) {
   }, [findFriendsWindow]);
 
   useEffect(() => {
-    if (!currentUser || !currentUser.accessToken)
-      return sendSpotifyError('No token found.');
-
-    console.warn({ acc: currentUser.accessToken });
-
-    getSpotifyURL(currentUser?.accessToken);
-  }, [currentUser?.accessToken]);
-
-  useEffect(() => {
     if (!connectSpotifyWindow) return;
 
     loadConnectSpotifyContent();
@@ -576,7 +567,10 @@ export function BrowserWindowProvider({ children }) {
 
     if (connectSpotifyWindow.isVisible()) {
       connectSpotifyWindow.focus();
-    } else connectSpotifyWindow.show();
+    } else {
+      getSpotifyURL(currentUser?.accessToken);
+      connectSpotifyWindow.show();
+    }
   };
 
   const value = { toggleSettings, toggleFindFriends, toggleConnectSpotify };

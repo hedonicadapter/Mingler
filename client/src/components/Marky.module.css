@@ -5,6 +5,7 @@
   align-items: center;
   position: relative;
   cursor: pointer;
+  transition: color 0.1s linear;
 }
 
 .activityText {
