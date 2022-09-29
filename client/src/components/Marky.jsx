@@ -116,12 +116,16 @@ export default function Marky({
     return () => socket.off('youtubetime:receive', youTubeTimeHandler);
   }, []);
 
+  // TODO: open only trusted
+  const openInBrowser = (url) =>
+    url.startsWith('https') && shell.openExternal(url);
+
   const handleClick = (evt) => {
     evt.stopPropagation();
     if (WindowTitle) {
       return;
     } else if (TrackTitle) {
-      shell.openExternal(TrackURL);
+      openInBrowser(TrackURL);
     } else if (YouTubeURL) {
       setPlayerURL(YouTubeURL);
       if (userID) {
@@ -133,7 +137,7 @@ export default function Marky({
         socket.once('youtubetime:receive', youTubeTimeHandler);
       }
     } else if (TabURL) {
-      shell.openExternal(TabURL);
+      openInBrowser(TabURL);
     }
   };
 
