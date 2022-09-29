@@ -329,7 +329,10 @@ export function BrowserWindowProvider({ children }) {
         connectSpotifyWindowCloseHandler
       );
 
-      !connectSpotifyWindow?.isDestroyed() && connectSpotifyWindow.destroy();
+      if (!connectSpotifyWindow?.isDestroyed()) {
+        connectSpotifyWindow.setBrowserView(null);
+        connectSpotifyWindow.destroy();
+      }
     };
   }, [connectSpotifyWindow]);
 
@@ -470,6 +473,8 @@ export function BrowserWindowProvider({ children }) {
     if (view.webContents.canGoBack()) {
       view.webContents.goBack();
     } else {
+      if (!fallbackURL.startsWith('https'))
+        return notify('Prevented navigation to insecure URL. ');
       view.webContents
         .loadURL(fallbackURL)
         .then(() => console.log('loaded new url'))
@@ -482,8 +487,10 @@ export function BrowserWindowProvider({ children }) {
     if (currentURL) connectSpotifyWindowRedirectHandler(currentURL);
 
     view.webContents.insertCSS(
-      `html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
+      `html, body, div, li { transition: all 0.15s linear; } body { border-radius:4px; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
     );
+    // background-color paints the whole area, hiding everything else
+    // `html, body, div, li { background-color: ${colors.offWhite}; color: ${colors.darkmodeLightBlack} !important; transition: all 0.15s linear; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
 
     view.webContents
       .executeJavaScript(
@@ -500,12 +507,17 @@ export function BrowserWindowProvider({ children }) {
   const viewNewWindowHandler = (evt, url) => {
     if (!view || !view.webContents) return;
     evt.preventDefault();
+    if (!url.startsWith('https'))
+      return notify('Prevented navigation to insecure URL. ');
     view.webContents.loadUrl(url);
   };
 
   const [view, setView] = useState(new BrowserView());
   useEffect(() => {
     if (!connectSpotifyWindow || !view || !connectSpotifyAuthorizeURL) return;
+    if (!connectSpotifyAuthorizeURL.startsWith('https'))
+      return notify('Prevented navigation to insecure URL. ');
+
     connectSpotifyWindow.setBrowserView(null);
     connectSpotifyWindow.setBrowserView(view);
     view.setBounds({ x: 0, y: 54, height: 800, width: 545 });
@@ -536,14 +548,14 @@ export function BrowserWindowProvider({ children }) {
     };
   }, [view, connectSpotifyWindow, connectSpotifyAuthorizeURL]);
 
-  const loadSpotifyOauth = (windoe, url) => {
-    // if (!url || !windoe || windoe.isDestroyed())
-    //   return sendSpotifyError('Failed to embed spotify.');
-    // setView(new BrowserView());
-    // view?.webContents
-    //   .loadURL(connectSpotifyAuthorizeURL)
-    //   .catch((e) => notify('Something went wrong. ', e));
-  };
+  // const loadSpotifyOauth = (windoe, url) => {
+  // if (!url || !windoe || windoe.isDestroyed())
+  //   return sendSpotifyError('Failed to embed spotify.');
+  // setView(new BrowserView());
+  // view?.webContents
+  //   .loadURL(connectSpotifyAuthorizeURL)
+  //   .catch((e) => notify('Something went wrong. ', e));
+  // };
 
   const loadConnectSpotifyContent = () => {
     if (connectSpotifyWindow?.isDestroyed()) return;
