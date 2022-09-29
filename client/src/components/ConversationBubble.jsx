@@ -6,13 +6,20 @@ import colors from '../config/colors';
 import { useSelector } from 'react-redux';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 
-export const ConversationBubble = ({ fromID, message, sent, expanded }) => {
+export const ConversationBubble = ({
+  index,
+  fromID,
+  message,
+  sent,
+  expanded,
+}) => {
   const currentUser = useSelector((state) => getCurrentUser(state));
 
   const sentByMe = fromID === currentUser?._id;
 
   return (
     <motion.div
+      key={index}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

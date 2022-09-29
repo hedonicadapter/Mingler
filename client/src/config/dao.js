@@ -312,7 +312,7 @@ privateRoute.interceptors.response.use(
         currentUser: newTokens?.data,
       });
       return result
-        ? axios(ogRequest)
+        ? await axios(ogRequest)
         : Promise.reject('Failed to set refreshed user.');
 
       // If demo user might be expired
@@ -327,7 +327,7 @@ privateRoute.interceptors.response.use(
         currentUser: newTokens?.data,
       });
       return result
-        ? axios(ogRequest)
+        ? await axios(ogRequest)
         : Promise.reject('Failed to set refreshed user.');
     } else {
       return Promise.reject(error);

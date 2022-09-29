@@ -187,6 +187,30 @@ export function BrowserWindowProvider({ children }) {
       });
   };
 
+  const getSpotifyURL = async (accessToken) => {
+    try {
+      const result = await DAO.createSpotifyURL(currentUser.accessToken);
+
+      if (result?.data?.success) {
+        console.warn(
+          'spotify authorize url from server ',
+          result.data.authorizeURL
+        );
+        setConnectSpotifyAuthorizeURL(result.data.authorizeURL);
+      } else {
+        notify(
+          'Something went wrong when generating a spotify authentication URL. '
+        );
+      }
+    } catch (e) {
+      console.log({ e });
+      notify(
+        'Something went wrong when generating a spotify authentication URL. ',
+        e
+      );
+    }
+  };
+
   const traySettingsHandler = () => {
     toggleSettings();
   };
@@ -287,17 +311,7 @@ export function BrowserWindowProvider({ children }) {
 
     console.warn({ acc: currentUser.accessToken });
 
-    DAO.createSpotifyURL(currentUser.accessToken)
-      .then((res) => {
-        if (res?.data?.success) {
-          console.warn(
-            'spotify authorize url from server ',
-            res.data.authorizeURL
-          );
-          setConnectSpotifyAuthorizeURL(res.data.authorizeURL);
-        }
-      })
-      .catch((e) => notify('Something went wrong. ', e));
+    getSpotifyURL(currentUser?.accessToken);
   }, [currentUser?.accessToken]);
 
   useEffect(() => {
