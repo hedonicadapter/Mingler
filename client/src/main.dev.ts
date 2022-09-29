@@ -60,7 +60,8 @@ const killProcess = (proc) => {
   }
 };
 const killAll = () => {
-  allProcesses?.forEach(killProcess);
+  trackProcesses?.forEach(killProcess);
+  windowProcesses?.forEach(killProcess);
   mainWindow?.destroy();
   mainWindow = null;
   app.exit(0);
@@ -127,7 +128,8 @@ let chromiumHostConfig = path.resolve(
 );
 let windowProcess = null;
 let trackProcess = null;
-let allProcesses = [];
+let trackProcesses = [];
+let windowProcesses = [];
 
 let tray = null;
 
@@ -179,7 +181,7 @@ function decodeUTF8(utf8String: string) {
 const initActiveWindowListenerProcess = () => {
   if (!windowProcess) {
     windowProcess = execFile(windowListenerScript);
-    allProcesses.push(windowProcess);
+    windowProcesses.push(windowProcess);
   }
   // windowProcess = execFile('python', [windowListenerScript]);
 
@@ -218,16 +220,12 @@ const initActiveWindowListenerProcess = () => {
 };
 
 const initActiveTrackListenerProcess = (spotifyAccessToken) => {
-  try {
-    if (trackProcess) killProcess(trackProcess);
-  } catch (e) {
-    console.warn('Failed to kill track process ', e);
-  }
+  trackProcesses?.forEach(killProcess);
 
   if (!spotifyAccessToken) return;
   console.log('trackprocess execing');
   trackProcess = execFile(trackListenerScript, [spotifyAccessToken]);
-  allProcesses.push(trackProcess);
+  trackProcesses.push(trackProcess);
   // trackProcess = execFile('python', [trackListenerScript, spotifyAccessToken]);
 
   trackProcess.stdout.on('data', function (data) {
@@ -513,7 +511,7 @@ const createWindow = async () => {
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow?.webContents.on('did-finish-load', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -628,8 +626,8 @@ const createWindow = async () => {
         .catch(console.error);
 
       ipcMain.on('exit:frommenubutton', () => {
+        mainWindow?.webContents.send('exit:frommain');
         killAll();
-        mainWindow.webContents.send('exit:frommain');
         // setTimeout(() => mainWindow?.close(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
@@ -640,7 +638,7 @@ const createWindow = async () => {
       });
       ipcMain.on('currentUser:signedOut', () => {
         console.log('signed outttttttt');
-        if (trackProcess) killProcess(trackProcess);
+        trackProcesses?.forEach(killProcess);
 
         storage.getItem('store').then((res) => {
           setTrayContextMenu('signedOut', res?.settings?.globalShortcut);
@@ -660,11 +658,7 @@ const createWindow = async () => {
     'initActiveTrackListener:fromrenderer',
     (event, spotifyAccessToken) => {
       if (!spotifyAccessToken || spotifyAccessToken === 'disconnect') {
-        try {
-          if (trackProcess) killProcess(trackProcess);
-        } catch (e) {
-          console.warn('Failed to kill track process, ', e);
-        }
+        trackProcesses?.forEach(killProcess);
         store?.dispatch({
           type: 'setSpotifyConnected',
           payload: false,
@@ -673,13 +667,6 @@ const createWindow = async () => {
       }
       initActiveTrackListenerProcess(spotifyAccessToken);
 
-      // let payload;
-
-      // if (trackProcess?.connected) {
-      //   payload = true;
-      // } else {
-      //   payload = false;
-      // }
       store?.dispatch({
         type: 'setSpotifyConnected',
         payload: true,
@@ -979,8 +966,8 @@ app.on('activate', () => {
 var cleanExit = function () {
   io?.close();
 
-  if (trackProcess) killProcess(trackProcess);
-  if (windowProcess) killProcess(windowProcess);
+  trackProcesses?.forEach(killProcess);
+  windowProcesses?.forEach(killProcess);
 };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
