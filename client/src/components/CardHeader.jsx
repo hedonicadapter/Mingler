@@ -130,8 +130,18 @@ export default function CardHeader({
 
   // Demo user stuff
   const [fakeActivities, setFakeActivities] = useState({});
-  const [randomWindow, randomTrack, randomTab, randomYouTube, setActivities] =
-    useFakeActivities(null);
+  const [
+    randomWindow,
+    randomTrack,
+    randomTab,
+    randomYouTube,
+    setActivities,
+    setDemoUser,
+  ] = useFakeActivities(null);
+
+  useEffect(() => {
+    if (clientDemoUser) setDemoUser(true);
+  }, [clientDemoUser]);
 
   useEffect(() => {
     return () => setFakeActivities(null);
@@ -198,6 +208,7 @@ export default function CardHeader({
   }, [randomYouTube]);
 
   useEffect(() => {
+    if (!clientDemoUser) return;
     // If this cardheader belongs to a default demo friend
     if (
       clientDemoUser?.demoDefaultFriendIDs.includes(userID) &&

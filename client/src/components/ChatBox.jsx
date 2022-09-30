@@ -328,13 +328,14 @@ export const ChatBox = ({ receiver, chatVisible }) => {
                 </motion.div>
               )}
             </AnimatePresence>
-            {currentConvo?.messages?.map((message, index) => (
-              <ConversationBubble
-                index={message.sentDate}
-                fromID={message.fromID}
-                message={message.message}
-                sent={message.sentDate}
-              />
+            {currentConvo?.messages?.map((message) => (
+              <motion.div key={message.sentDate}>
+                <ConversationBubble
+                  fromID={message.fromID}
+                  message={message.message}
+                  sent={message.sentDate}
+                />
+              </motion.div>
             ))}
           </AnimateSharedLayout>
           <div ref={anchorRef} />

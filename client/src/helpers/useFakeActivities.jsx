@@ -11,6 +11,7 @@ export const useFakeActivities = (fakeActivities = {}) => {
     if (typeof fakeActivities === 'function') return fakeActivities();
     else return fakeActivities;
   });
+  const [demoUser, setDemoUser] = useState(false);
 
   const [randomWindow, setRandomWindow] = useState(null);
   const [randomTrack, setRandomTrack] = useState(null);
@@ -26,11 +27,12 @@ export const useFakeActivities = (fakeActivities = {}) => {
   let globalTimeouts = [];
 
   useEffect(() => {
+    if (!demoUser) return;
     if (!activities) {
       // If a friend goes offline the associated timeouts are cleared
       clearEverything();
     }
-  }, [activities]);
+  }, [activities, demoUser]);
 
   useEffect(() => {
     // if the component is dismounted its associated timeouts are cleared
@@ -38,6 +40,7 @@ export const useFakeActivities = (fakeActivities = {}) => {
   }, []);
 
   useEffect(() => {
+    if (!demoUser) return;
     if (!activities) return;
 
     // Hand out activities as soon as setActivities is used
@@ -55,9 +58,10 @@ export const useFakeActivities = (fakeActivities = {}) => {
         getRandomPositiveNumber(youTubeActivityCount)
       ]
     );
-  }, [activities]);
+  }, [activities, demoUser]);
 
   useEffect(() => {
+    if (!demoUser) return;
     const windowTimeout = setTimeout(() => {
       setRandomWindow(
         activities?.windowActivities[
@@ -72,9 +76,10 @@ export const useFakeActivities = (fakeActivities = {}) => {
     return () => {
       clearTimeout(windowTimeout);
     };
-  }, [randomWindow]);
+  }, [randomWindow, demoUser]);
 
   useEffect(() => {
+    if (!demoUser) return;
     const trackTimeout = setTimeout(() => {
       setRandomTrack(
         activities?.trackActivities[getRandomPositiveNumber(trackActivityCount)]
@@ -86,9 +91,10 @@ export const useFakeActivities = (fakeActivities = {}) => {
     return () => {
       clearTimeout(trackTimeout);
     };
-  }, [randomTrack]);
+  }, [randomTrack, demoUser]);
 
   useEffect(() => {
+    if (!demoUser) return;
     const tabTimeout = setTimeout(() => {
       setRandomTab(
         activities?.tabActivities[getRandomPositiveNumber(tabActivityCount)]
@@ -100,9 +106,10 @@ export const useFakeActivities = (fakeActivities = {}) => {
     return () => {
       clearTimeout(tabTimeout);
     };
-  }, [randomTab]);
+  }, [randomTab, demoUser]);
 
   useEffect(() => {
+    if (!demoUser) return;
     const youTubeTimeout = setTimeout(() => {
       setRandomYouTube(
         activities?.youTubeActivities[
@@ -116,7 +123,7 @@ export const useFakeActivities = (fakeActivities = {}) => {
     return () => {
       clearTimeout(youTubeTimeout);
     };
-  }, [randomYouTube]);
+  }, [randomYouTube, demoUser]);
 
   const clearEverything = () => {
     globalTimeouts.forEach(clearTimeout);
@@ -126,7 +133,14 @@ export const useFakeActivities = (fakeActivities = {}) => {
     setRandomYouTube(null);
   };
 
-  return [randomWindow, randomTrack, randomTab, randomYouTube, setActivities];
+  return [
+    randomWindow,
+    randomTrack,
+    randomTab,
+    randomYouTube,
+    setActivities,
+    setDemoUser,
+  ];
 };
 
 export const getRandomPositiveNumber = (maxNumber, minNumber = 1) => {

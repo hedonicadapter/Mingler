@@ -169,7 +169,8 @@ const answerProcess = (process) => {
 function decodeUTF8(utf8String: string) {
   if (!utf8String) return '';
 
-  let formattedString = utf8String.replace(/\\x/g, '%').replace(/%/g, '%25');
+  let formattedString = utf8String.replace(/\\x/g, '%');
+  // .replace(/%/g, '%25'); TODO: prevents crash when opening steam, I'm not sure what's causing it
 
   try {
     return decodeURIComponent(formattedString);

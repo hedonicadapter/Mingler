@@ -127,6 +127,8 @@ export default function Marky({
     } else if (TrackTitle) {
       openInBrowser(TrackURL);
     } else if (YouTubeURL) {
+      if (!YouTubeURL.startsWith('https')) return;
+
       setPlayerURL(YouTubeURL);
       if (userID) {
         //Send yt time request to a user through server socket
