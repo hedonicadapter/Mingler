@@ -27,6 +27,7 @@ const CardSeparator = ({ cardHovered, expanded }) => {
 };
 
 export default function AccordionItem({
+  activities,
   clientDemoUser,
   username,
   friend,
@@ -40,6 +41,7 @@ export default function AccordionItem({
 
   const cardHeaderRef = useRef(null);
   const cardBodyRef = useRef(null);
+  const reactPlayerRef = useRef(null);
 
   const { deleteFriend } = useFriends();
 
@@ -105,8 +107,9 @@ export default function AccordionItem({
   }, []);
 
   useEffect(() => {
-    setActivityLength(friend?.activity?.length);
-  }, [friend]);
+    activities && setActivityLength(activities.length);
+    console.log({ activities });
+  }, [activities]);
 
   useEffect(() => {
     setExpanded(false);
@@ -194,16 +197,17 @@ export default function AccordionItem({
             clientDemoUser={clientDemoUser} // this client's own assigned demo user
             demoUser={friend?.demoUser} // boolean is friend a demo user or not
             activityLength={activityLength}
-            togglePlayer={togglePlayer}
             setPlayerURL={setPlayerURL}
+            reactPlayerRef={reactPlayerRef.current}
+            togglePlayer={togglePlayer}
             cardHeaderRef={cardHeaderRef}
             online={online}
             key={friend?.key}
             name={username ? username : friend?.username}
             profilePicture={friend?.profilePicture}
             userID={friend?._id}
-            mainActivity={friend?.activity?.[0]}
-            activity={friend?.activity}
+            mainActivity={activities?.[0]}
+            activities={activities}
             expanded={expanded}
             chatVisible={chatVisible}
             isWidgetHeader={isWidgetHeader}
@@ -253,11 +257,11 @@ export default function AccordionItem({
 
       <div ref={cardBodyRef}>
         <CardBody
-          activity={friend?.activity}
           userID={friend?._id}
           expanded={expanded}
           chatVisible={chatVisible}
           playerURL={playerURL}
+          reactPlayerRef={reactPlayerRef.current}
           playerVisible={playerVisible}
           closePlayer={closePlayer}
           isWidgetHeader={isWidgetHeader}

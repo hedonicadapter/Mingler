@@ -1,5 +1,11 @@
 import { ipcRenderer } from 'electron';
-import React, { useContext, useState, useEffect, createContext } from 'react';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  createContext,
+  useRef,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { notify } from '../components/reusables/notifications';
 
@@ -37,6 +43,9 @@ export function FriendsProvider({ children }) {
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
 
+  useEffect(() => {
+    console.log(friends);
+  }, [friends]);
   useEffect(() => {
     if (!currentUser?.accessToken) return;
 
@@ -209,72 +218,14 @@ export function FriendsProvider({ children }) {
     );
   };
 
-  // Ensure activities remain unique.
-  // E.g. if a user switches from one tab to another tab
-  // it replaces that tab activity with the new tab activity.
-  // Also prevents track activities counting as window activities.
-  const manageActivities = (activitiesArray, newActivity) => {
-    const newWindow = newActivity?.WindowTitle;
-    const newTrack = newActivity?.TrackTitle;
-    const newChromiumTab = newActivity?.TabTitle;
-    const newYoutube = newActivity?.YouTubeTitle;
-
-    let windowActivityExists = activitiesArray?.findIndex(
-      (actvt) => actvt.WindowTitle
-    );
-    let trackActivityExists = activitiesArray?.findIndex(
-      (actvt) => actvt.TrackTitle
-    );
-    let chromiumActivityExists = activitiesArray?.findIndex(
-      (actvt) => actvt.TabTitle
-    );
-    let youtubeActivityExists = activitiesArray?.findIndex(
-      (actvt) => actvt.YouTubeTitle
-    );
-
-    if (windowActivityExists > -1 && newWindow) {
-      activitiesArray[windowActivityExists] = newActivity;
-      return;
-    } else if (newWindow) {
-      // Prevents tracks being counted as windows
-      if (activitiesArray?.filter((actvt) => actvt.TrackTitle != newWindow)) {
-        activitiesArray?.push(newActivity);
-        return;
-      }
-    }
-
-    if (trackActivityExists > -1 && newTrack) {
-      activitiesArray[trackActivityExists] = newActivity;
-      return;
-    } else if (newTrack) {
-      activitiesArray?.push(newActivity);
-      return;
-    }
-
-    if (chromiumActivityExists > -1 && newChromiumTab) {
-      activitiesArray[chromiumActivityExists] = newActivity;
-      return;
-    } else if (newChromiumTab) {
-      activitiesArray?.push(newActivity);
-      return;
-    }
-
-    if (youtubeActivityExists > -1 && newYoutube) {
-      activitiesArray[youtubeActivityExists] = newActivity;
-      return;
-    } else if (newYoutube) {
-      activitiesArray?.push(newActivity);
-      return;
-    }
-  };
-
-  // Expand functionality to include favorites
+  // TODO: Expand functionality to include favorites
   // and other stuff in the future
-  const sortActivities = (activitiesArray) => {
-    activitiesArray?.sort((a, b) => {
-      return new Date(b.Date) - new Date(a.Date);
-    });
-  };
+  // Update: activities are now automatically sorted by using unshift
+  // const sortActivities = (activitiesArray) => {
+  //   activitiesArray?.sort((a, b) => {
+  //     return new Date(b.Date) - new Date(a.Date);
+  //   });
+  // };
 
   const findFriends = (searchTerm) => {
     setFilteredFriends(
@@ -343,23 +294,62 @@ export function FriendsProvider({ children }) {
     );
   };
 
-  const activityReceiveHandler = (packet) => {
-    console.log('received ', packet);
-    // Set activities in friends array
-    setFriends((prevState) => {
-      return prevState.map((friend) => {
-        if (friend._id === packet.userID) {
-          manageActivities(friend.activity, packet.data);
-          sortActivities(friend.activity);
+  const [activities, setActivities] = useState({});
 
-          return {
-            ...friend,
-            activity: friend.activity ? friend.activity : [packet.data],
-          };
-        }
-        return friend;
-      });
+  useEffect(() => {
+    // const object = {
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    // };
+    console.log({ activities });
+  }, [activities]);
+
+  const _setActivities = (friendID, newActivity, activityType) => {
+    if (!newActivity[activityType]) return;
+
+    setActivities((prevState) => {
+      let friendsActivity = prevState[friendID] ? [...prevState[friendID]] : [];
+
+      // Check if an activity of the same type already exists,
+      let activityExists = friendsActivity.findIndex(
+        (actvt) => actvt[activityType]
+      );
+
+      // replace if it does.
+      if (activityExists > -1) {
+        friendsActivity[activityExists] = newActivity;
+
+        // Move to top, as it's the most recent activity
+        friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
+      } else {
+        friendsActivity.unshift(newActivity);
+      }
+
+      return {
+        ...prevState,
+        [friendID]: friendsActivity,
+      };
     });
+  };
+
+  const activityReceiveHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    if (packet.data.WindowTitle) {
+      _setActivities(packet.userID, packet.data, 'WindowTitle');
+    } else if (packet.data.TabTitle) {
+      _setActivities(packet.userID, packet.data, 'TabTitle');
+    } else if (packet.data.YouTubeTitle) {
+      _setActivities(packet.userID, packet.data, 'YouTubeTitle');
+    } else if (packet.data.TrackTitle) {
+      _setActivities(packet.userID, packet.data, 'TrackTitle');
+    }
   };
 
   const setYouTubeTimeRequestHandler = (packet) => {
@@ -383,6 +373,7 @@ export function FriendsProvider({ children }) {
     setFriendRequests,
     getConversations,
     deleteFriend,
+    activities,
     conversations,
     getMessages,
     setConversations,

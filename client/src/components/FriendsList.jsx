@@ -161,6 +161,7 @@ export default function FriendsList() {
     getFriendRequests,
     setFriendRequests,
     friendRequests,
+    activities,
   } = useFriends();
   const { demoUser } = useAuth();
 
@@ -255,6 +256,7 @@ export default function FriendsList() {
               friend={friends?.find(
                 (friend) => friend._id === currentUser?._id
               )}
+              activities={activities[currentUser?._id]}
               isWidgetHeader={true}
               cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
             />
@@ -284,9 +286,10 @@ export default function FriendsList() {
                   ? filteredFriends?.map((friend, index) => (
                       <motion.div key={friend?._id}>
                         <AccordionItem
+                          activities={activities[friend?._id]}
                           clientDemoUser={demoUser}
                           friend={friend}
-                          isMe={friend._id === currentUser?._id}
+                          isMe={friend?._id === currentUser?._id}
                           cardExpandedMasterToggle={
                             appState?.cardExpandedMasterToggle
                           }
@@ -297,13 +300,14 @@ export default function FriendsList() {
                   ? friends.map((friend, index) => (
                       <motion.div key={friend?._id}>
                         <AccordionItem
+                          activities={activities[friend?._id]}
                           clientDemoUser={demoUser}
                           friend={friend}
-                          isMe={friend._id === currentUser?._id}
+                          isMe={friend?._id === currentUser?._id}
                           cardExpandedMasterToggle={
                             appState?.cardExpandedMasterToggle
                           }
-                        />{' '}
+                        />
                       </motion.div>
                     ))
                   : null}

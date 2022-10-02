@@ -13,11 +13,11 @@ const BrowserWindow = electron.remote.BrowserWindow;
 const app = electron.remote.app;
 
 export default function CardBody({
-  activity,
   userID,
   expanded,
   chatVisible,
   playerURL,
+  reactPlayerRef,
   playerVisible,
   closePlayer,
   setFriends,
@@ -53,6 +53,7 @@ export default function CardBody({
 
             <div className={styles.playerContainer}>
               <ReactPlayer
+                ref={reactPlayerRef}
                 url={playerURL}
                 playing={true}
                 controls={true}

@@ -114,8 +114,9 @@ export default function CardHeader({
   userID,
   expanded,
   mainActivity,
-  activity,
+  activities,
   setPlayerURL,
+  reactPlayerRef,
   togglePlayer,
   chatVisible,
   cardHovered,
@@ -307,11 +308,12 @@ export default function CardHeader({
                     expanded={expanded}
                     togglePlayer={togglePlayer}
                     setPlayerURL={setPlayerURL}
+                    reactPlayerRef={reactPlayerRef}
                   />
                 </div>
                 <AnimatePresence>
                   {expanded &&
-                    activity?.map(
+                    activities?.map(
                       (activity, index) =>
                         index != 0 && (
                           <motion.div
@@ -329,6 +331,7 @@ export default function CardHeader({
                               expanded={expanded}
                               togglePlayer={togglePlayer}
                               setPlayerURL={setPlayerURL}
+                              reactPlayerRef={reactPlayerRef}
                             />
                           </motion.div>
                         )
