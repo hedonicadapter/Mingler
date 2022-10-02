@@ -115,9 +115,13 @@ export default function CardHeader({
   expanded,
   mainActivity,
   activities,
+
+  playerURL,
   setPlayerURL,
   reactPlayerRef,
+  playerVisible,
   togglePlayer,
+
   chatVisible,
   cardHovered,
   cardHeaderRef,
@@ -308,6 +312,8 @@ export default function CardHeader({
                     expanded={expanded}
                     togglePlayer={togglePlayer}
                     setPlayerURL={setPlayerURL}
+                    playerURL={playerURL}
+                    playerVisible={playerVisible}
                     reactPlayerRef={reactPlayerRef}
                   />
                 </div>
@@ -331,6 +337,8 @@ export default function CardHeader({
                               expanded={expanded}
                               togglePlayer={togglePlayer}
                               setPlayerURL={setPlayerURL}
+                              playerURL={playerURL}
+                              playerVisible={playerVisible}
                               reactPlayerRef={reactPlayerRef}
                             />
                           </motion.div>
@@ -357,6 +365,8 @@ export default function CardHeader({
                               expanded={expanded}
                               togglePlayer={togglePlayer}
                               setPlayerURL={setPlayerURL}
+                              playerURL={playerURL}
+                              playerVisible={playerVisible}
                             />
                           </motion.div>
                         )

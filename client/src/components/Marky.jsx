@@ -54,8 +54,10 @@ export default function Marky({
   YouTubeURL,
   YouTubeTitle,
   togglePlayer,
+  playerURL,
   setPlayerURL,
   reactPlayerRef,
+  playerVisible,
 
   userID,
 
@@ -135,7 +137,11 @@ export default function Marky({
         //Send yt time request to a user through server socket
         sendYouTubeTimeRequest(userID, YouTubeTitle, YouTubeURL);
 
-        togglePlayer();
+        if (!playerVisible) {
+          togglePlayer();
+        } else {
+          if (YouTubeURL.startsWith(playerURL)) togglePlayer();
+        }
         // Wait for response from ipcMain, which is connected to the server socket
         socket.once('youtubetime:receive', youTubeTimeHandler);
       }

@@ -197,6 +197,8 @@ export default function AccordionItem({
             clientDemoUser={clientDemoUser} // this client's own assigned demo user
             demoUser={friend?.demoUser} // boolean is friend a demo user or not
             activityLength={activityLength}
+            playerVisible={playerVisible}
+            playerURL={playerURL}
             setPlayerURL={setPlayerURL}
             reactPlayerRef={reactPlayerRef.current}
             togglePlayer={togglePlayer}
