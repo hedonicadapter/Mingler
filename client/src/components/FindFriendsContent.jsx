@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { VscChromeMinimize } from 'react-icons/vsc';
 import { BsCircle } from 'react-icons/bs';
 import { IoIosClose } from 'react-icons/io';
@@ -24,10 +24,39 @@ import { makeClickthrough } from '../config/clickthrough';
 import useDebounce from '../helpers/useDebounce';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 import { BackgroundNoise } from './FriendsList';
+import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
 const ipcRenderer = require('electron').ipcRenderer;
+
+const SearchField = ({ handleSearchInput, error, findFriendsSearchValue }) =>
+  useMemo(
+    () => (
+      <motion.input
+        className={[styles.searchInputStyle, 'undraggable', 'clickable'].join(
+          ' '
+        )}
+        whileHover={{
+          color: error ? colors.coffeeRed : colors.darkmodeLightBlack,
+        }}
+        whileFocus={{
+          color: error ? colors.coffeeRed : colors.darkmodeBlack,
+        }}
+        transition={{ duration: 0.1 }}
+        placeholder="Find friends..."
+        type="text"
+        value={error ? error : findFriendsSearchValue || ''}
+        readOnly={error ? true : false}
+        onChange={handleSearchInput}
+        style={{
+          color: error ? colors.coffeeRed : colors.darkmodeDisabledText,
+          cursor: error ? 'default' : 'auto',
+        }}
+      />
+    ),
+    [error, findFriendsSearchValue]
+  );
 
 export default function FindFriendsContent() {
   window.onbeforeunload = (e) => {
@@ -38,6 +67,7 @@ export default function FindFriendsContent() {
   const [friends, setFriends] = useState([]);
   const [foundFriends, setFoundFriends] = useState([]);
   const [sentFriendRequests, setSentFriendRequests] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const currentUser = useSelector(getCurrentUser);
@@ -58,11 +88,13 @@ export default function FindFriendsContent() {
   useEffect(() => {
     if (!appState?.findFriendsSearchValue) {
       setFoundFriends(null);
+    } else {
+      setLoading(true);
     }
   }, [appState?.findFriendsSearchValue]);
 
   // TODO: react 18 - replace with useDeferredValue
-  useDebounce(() => search(appState?.findFriendsSearchValue), 350, [
+  useDebounce(() => search(appState?.findFriendsSearchValue), 1000, [
     appState?.findFriendsSearchValue,
   ]);
 
@@ -108,6 +140,7 @@ export default function FindFriendsContent() {
           setFoundFriends(users);
           setError(null);
         }
+        setLoading(false);
       })
       .catch(genericErrorHandler);
   };
@@ -209,49 +242,50 @@ export default function FindFriendsContent() {
       <header className={styles.header}>
         <WindowFrame title={'Find friends'} />
         <div className={styles.inputContainer} onKeyDown={handleEscapeKey}>
-          <motion.input
-            className={[
-              styles.searchInputStyle,
-              'undraggable',
-              'clickable',
-            ].join(' ')}
-            whileHover={{
-              color: error ? colors.coffeeRed : colors.darkmodeLightBlack,
-            }}
-            whileFocus={{
-              color: error ? colors.coffeeRed : colors.darkmodeBlack,
-            }}
-            transition={{ duration: 0.1 }}
-            placeholder="Find friends..."
-            type="text"
-            value={error ? error : appState?.findFriendsSearchValue || ''}
-            readOnly={error ? true : false}
-            onChange={handleSearchInput}
-            style={{
-              color: error ? colors.coffeeRed : colors.darkmodeDisabledText,
-              cursor: error ? 'default' : 'auto',
-            }}
+          <motion.div style={{ scale: 0.9, originX: 1, originY: 1 }}>
+            <LoadingAnimation
+              formFilled={loading ? 'loading' : false}
+              style={{
+                zIndex: 100,
+                marginTop: 9,
+                marginRight: -4,
+              }}
+            />
+          </motion.div>
+          <SearchField
+            handleSearchInput={handleSearchInput}
+            error={error}
+            findFriendsSearchValue={appState?.findFriendsSearchValue}
           />
         </div>
       </header>
       <div className={styles.body}>
-        {foundFriends?.map((user, index) => (
-          <div className={styles.userItemContainer} key={index}>
-            <UserItem
-              findFriendsContent={true}
-              user={user}
-              requestSent={sentFriendRequests.includes(user._id)}
-              alreadyFriends={
-                !Array.isArray(friends) || !friends.length
-                  ? false
-                  : friends.some((friend) => friend._id === user._id)
-              }
-              index={index}
-              handleSendRequestButton={handleSendRequestButton}
-              handleCancelRequestButton={handleCancelRequestButton}
-            />
-          </div>
-        ))}
+        <AnimatePresence exitBeforeEnter>
+          {foundFriends?.map((user, index) => (
+            <motion.div
+              className={styles.userItemContainer}
+              key={user?._id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, delay: 0.05 * index }}
+            >
+              <UserItem
+                findFriendsContent={true}
+                user={user}
+                requestSent={sentFriendRequests.includes(user._id)}
+                alreadyFriends={
+                  !Array.isArray(friends) || !friends.length
+                    ? false
+                    : friends.some((friend) => friend._id === user._id)
+                }
+                index={index}
+                handleSendRequestButton={handleSendRequestButton}
+                handleCancelRequestButton={handleCancelRequestButton}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

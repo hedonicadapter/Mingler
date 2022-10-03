@@ -178,7 +178,7 @@ export default function FriendsList() {
       findFriends(appState?.findFriendsSearchValue);
       setLoading(false);
     },
-    1000,
+    750,
     [appState?.findFriendsSearchValue]
   );
 
