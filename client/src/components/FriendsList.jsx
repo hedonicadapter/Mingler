@@ -24,6 +24,7 @@ import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
 import { useAuth } from '../contexts/AuthContext';
 import { ConfigProvider } from 'react-avatar';
+import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 export const EmptySpaceFiller = () => {
   const dispatch = useDispatch();
@@ -145,6 +146,7 @@ export default function FriendsList() {
   makeClickthrough();
 
   const [greeting, setGreeting] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -171,12 +173,22 @@ export default function FriendsList() {
   };
 
   // TODO: react 18 - replace with useDeferredValue
-  useDebounce(() => findFriends(appState?.findFriendsSearchValue), 1000, [
-    appState?.findFriendsSearchValue,
-  ]);
+  useDebounce(
+    () => {
+      findFriends(appState?.findFriendsSearchValue);
+      setLoading(false);
+    },
+    1000,
+    [appState?.findFriendsSearchValue]
+  );
+
+  useEffect(() => {
+    if (!appState?.findFriendsSearchValue) return;
+
+    setLoading(true);
+  }, [appState?.findFriendsSearchValue]);
 
   let timeout;
-
   const loadListener = () => {
     console.log('loadlistener: ', document.readyState);
     if (document.readyState === 'complete')
@@ -277,6 +289,19 @@ export default function FriendsList() {
             className={styles.friendsList}
             style={{ overflowY: 'overlay', scrollbarGutter: 'stable' }}
           >
+            <LoadingAnimation
+              style={{
+                position: 'relative',
+                zIndex: 100,
+                left: '50%',
+                top: '50%',
+                width: 100,
+                height: 100,
+                opacity: 0.6,
+              }}
+              formFilled={loading ? 'loading' : false}
+            />
+
             <AnimateSharedLayout>
               <motion.div
                 layout="position"
