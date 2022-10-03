@@ -104,6 +104,46 @@ const OnlineStatusIndicator = ({
   );
 };
 
+const Markies = ({
+  markyActivities,
+  expanded,
+  userID,
+  togglePlayer,
+  setPlayerURL,
+  playerURL,
+  playerVisible,
+  reactPlayerRef,
+}) =>
+  markyActivities &&
+  markyActivities.length > 0 &&
+  markyActivities.map((activity, index) => (
+    <motion.div
+      key={activity}
+      layout
+      className={styles.markyContainer}
+      initial={'hide'}
+      animate={expanded ? 'show' : 'hide'}
+      exit={'hide'}
+      custom={index === 0}
+      variants={{
+        show: { opacity: 1 },
+        hide: (isFirstMarky) => ({ opacity: isFirstMarky ? 1 : 0 }),
+      }}
+      transition={{ duration: 0.2 }}
+    >
+      <Marky
+        {...activity}
+        userID={userID}
+        expanded={expanded}
+        togglePlayer={togglePlayer}
+        setPlayerURL={setPlayerURL}
+        playerURL={playerURL}
+        playerVisible={playerVisible}
+        reactPlayerRef={reactPlayerRef}
+      />
+    </motion.div>
+  ));
+
 export default function CardHeader({
   clientDemoUser,
   activityLength,
@@ -113,7 +153,6 @@ export default function CardHeader({
   profilePicture,
   userID,
   expanded,
-  mainActivity,
   activities,
 
   playerURL,
@@ -144,9 +183,32 @@ export default function CardHeader({
     setDemoUser,
   ] = useFakeActivities(null);
 
+  const shuffle = (array) => {
+    for (var i = array.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+  };
+
   useEffect(() => {
     if (clientDemoUser) setDemoUser(true);
   }, [clientDemoUser]);
+
+  // Shuffle activities sometimes
+  useEffect(() => {
+    if (!fakeActivities || !fakeActivities.length > 0) return;
+
+    let clone = [...(fakeActivities || [])];
+    let upToFiveMinutes = Math.random() * 300000;
+
+    const timeout = setTimeout(() => {
+      shuffle(clone);
+      setFakeActivities(clone);
+    }, upToFiveMinutes);
+    return () => clearTimeout(timeout);
+  }, [fakeActivities]);
 
   useEffect(() => {
     return () => setFakeActivities(null);
@@ -250,6 +312,50 @@ export default function CardHeader({
     setRefresh(!refresh);
   };
 
+  // const FakeMarkies = () =>
+  //   fakeActivities.length > 0 &&
+  //   fakeActivities?.map((activity, index) =>
+  //     index === 0 ? (
+  //       <motion.div
+  //         key={index}
+  //         layout="position"
+  //         className={styles.markyContainer}
+  //       >
+  //         <Marky
+  //           {...activity}
+  //           userID={userID}
+  //           expanded={expanded}
+  //           togglePlayer={togglePlayer}
+  //           setPlayerURL={setPlayerURL}
+  //           playerURL={playerURL}
+  //           playerVisible={playerVisible}
+  //           reactPlayerRef={reactPlayerRef}
+  //         />
+  //       </motion.div>
+  //     ) : (
+  //       <motion.div
+  //         key={index}
+  //         layout="position"
+  //         animate={{ opacity: expanded ? 1 : 0 }}
+  //         initial={{ opacity: 0 }}
+  //         exit={{ opacity: 0 }}
+  //         transition={{ duration: 0.2 }}
+  //         className={styles.markyContainer}
+  //       >
+  //         <Marky
+  //           {...activity}
+  //           userID={userID}
+  //           expanded={expanded}
+  //           togglePlayer={togglePlayer}
+  //           setPlayerURL={setPlayerURL}
+  //           playerURL={playerURL}
+  //           playerVisible={playerVisible}
+  //           reactPlayerRef={reactPlayerRef}
+  //         />
+  //       </motion.div>
+  //     )
+  //   );
+
   return (
     <motion.div
       ref={cardHeaderRef}
@@ -261,25 +367,21 @@ export default function CardHeader({
       transition={{ duration: 0.15 }}
     >
       <div
-        style={
-          {
-            // margin: 'auto',
-            // paddingBottom: 24,
-          }
-        }
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+        }}
       >
-        <div style={{ float: 'left', paddingRight: '12px' }}>
-          <AvatarContainer
-            demoUser={demoUser}
-            expanded={expanded}
-            name={name}
-            profilePicture={profilePicture}
-            isWidgetHeader={isWidgetHeader}
-            online={online}
-            activityLength={activityLength}
-            isMe={isMe}
-          />
-        </div>
+        <AvatarContainer
+          demoUser={demoUser}
+          expanded={expanded}
+          name={name}
+          profilePicture={profilePicture}
+          isWidgetHeader={isWidgetHeader}
+          online={online}
+          activityLength={activityLength}
+          isMe={isMe}
+        />
         <div className={styles.nameAndActivityContainer}>
           <motion.div className={styles.nameContainer}>
             <div
@@ -293,89 +395,23 @@ export default function CardHeader({
               {name}
             </div>
           </motion.div>
-          <AnimatePresence>
-            {(isMe || isWidgetHeader || online) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <div
-                  className={styles.markyContainer}
-                  style={{ marginLeft: isWidgetHeader ? 25 : 20 }}
-                >
-                  <Marky
-                    {...mainActivity}
-                    {...fakeActivities[0]}
-                    userID={userID}
-                    expanded={expanded}
-                    togglePlayer={togglePlayer}
-                    setPlayerURL={setPlayerURL}
-                    playerURL={playerURL}
-                    playerVisible={playerVisible}
-                    reactPlayerRef={reactPlayerRef}
-                  />
-                </div>
-                <AnimatePresence>
-                  {expanded &&
-                    activities?.map(
-                      (activity, index) =>
-                        index != 0 && (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className={styles.markyContainerTwo}
-                            style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
-                          >
-                            <Marky
-                              {...activity}
-                              userID={userID}
-                              expanded={expanded}
-                              togglePlayer={togglePlayer}
-                              setPlayerURL={setPlayerURL}
-                              playerURL={playerURL}
-                              playerVisible={playerVisible}
-                              reactPlayerRef={reactPlayerRef}
-                            />
-                          </motion.div>
-                        )
-                    )}
-                  {expanded &&
-                    fakeActivities &&
-                    fakeActivities.length > 0 &&
-                    fakeActivities?.map(
-                      (activity, index) =>
-                        index != 0 && (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className={styles.markyContainerTwo}
-                            style={{ marginLeft: isWidgetHeader ? 55 : 45 }}
-                          >
-                            <Marky
-                              {...activity}
-                              userID={userID}
-                              expanded={expanded}
-                              togglePlayer={togglePlayer}
-                              setPlayerURL={setPlayerURL}
-                              playerURL={playerURL}
-                              playerVisible={playerVisible}
-                            />
-                          </motion.div>
-                        )
-                    )}
-                </AnimatePresence>
-                <div style={{ height: 10 }} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {(isMe || isWidgetHeader || online) && (
+            <div className={styles.markiesContainer}>
+              {/* <AnimatePresence> */}
+              <Markies
+                markyActivities={activities || fakeActivities}
+                expanded={expanded}
+                userID={userID}
+                togglePlayer={togglePlayer}
+                setPlayerURL={setPlayerURL}
+                playerURL={playerURL}
+                playerVisible={playerVisible}
+                reactPlayerRef={reactPlayerRef}
+              />
+              {/* </AnimatePresence> */}
+              <div style={{ height: 10 }} />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

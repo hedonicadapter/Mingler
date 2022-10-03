@@ -24,47 +24,63 @@ export default function CardBody({
   isWidgetHeader,
 }) {
   return (
-    <motion.div layout="position" className={styles.container}>
+    <motion.div className={styles.container}>
       <AnimatePresence>
         {playerVisible && playerURL && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={'hide'}
+            animate={'show'}
+            exit={'hide'}
+            variants={{
+              show: { height: 'auto' },
+              hide: { height: 0 },
+            }}
             transition={{ duration: 0.15 }}
+            // initial={{ opacity: 0, height: 0 }}
+            // animate={{ opacity: 1, height: 'auto' }}
+            // exit={{ opacity: 0, height: 0 }}
+            // transition={{ duration: 0.15, ease: 'linear' }}
             style={{
-              padding: 10,
-              paddingTop: 2,
+              overflow: 'hidden',
+
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            <motion.div
-              whileHover={{
-                opacity: 0.86,
-              }}
-              transition={{ duration: 0.1 }}
-              className={styles.closePlayerButtonContainer}
-              onClick={() => closePlayer()}
-            >
-              <div className={styles.closePlayerButtonBar} />
-              <RiArrowDropUpLine className={styles.closePlayerButton} />
-            </motion.div>
-
-            <div className={styles.playerContainer}>
-              <ReactPlayer
-                ref={reactPlayerRef}
-                url={playerURL}
-                playing={true}
-                controls={true}
-                width="100%"
-                height="100%"
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
+            <div style={{ padding: 10, paddingTop: 2 }}>
+              <motion.div
+                whileHover={{
+                  opacity: 0.86,
                 }}
-              />
+                transition={{ duration: 0.1 }}
+                className={styles.closePlayerButtonContainer}
+                onClick={() => closePlayer()}
+              >
+                <div className={styles.closePlayerButtonBar} />
+                <RiArrowDropUpLine className={styles.closePlayerButton} />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className={styles.playerContainer}
+              >
+                <ReactPlayer
+                  ref={reactPlayerRef}
+                  url={playerURL}
+                  playing={true}
+                  controls={true}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                  }}
+                />
+              </motion.div>
             </div>
           </motion.div>
         )}

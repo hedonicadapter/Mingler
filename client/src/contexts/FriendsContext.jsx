@@ -39,6 +39,7 @@ export function FriendsProvider({ children }) {
 
   // const [friends, setFriends] = useState([]);
   const [friends, setFriends] = useGetSetFriends([]);
+  const [activities, setActivities] = useState({});
   const [conversations, setConversations] = useState(null);
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
@@ -46,6 +47,21 @@ export function FriendsProvider({ children }) {
   useEffect(() => {
     console.log(friends);
   }, [friends]);
+
+  useEffect(() => {
+    // const object = {
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    // };
+    console.log({ activities });
+  }, [activities]);
+
   useEffect(() => {
     if (!currentUser?.accessToken) return;
 
@@ -294,27 +310,58 @@ export function FriendsProvider({ children }) {
     );
   };
 
-  const [activities, setActivities] = useState({});
-
-  useEffect(() => {
-    // const object = {
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    // };
-    console.log({ activities });
-  }, [activities]);
-
   const _setActivities = (friendID, newActivity, activityType) => {
     if (!newActivity[activityType]) return;
 
     setActivities((prevState) => {
       let friendsActivity = prevState[friendID] ? [...prevState[friendID]] : [];
+
+      // Window activities can make duplicates
+      if (activityType === 'WindowTitle') {
+        let isDuplicate = friendsActivity.some((actvt) => {
+          let newWindow = newActivity.WindowTitle;
+          let existingTab = actvt.TabTitle;
+          let existingYouTube = actvt.YouTubeTitle;
+          let existingTrack = actvt.TrackTitle;
+
+          if (existingTab) {
+            // TODO: A better way would be a fuzzy search, but this handles cases like
+            // browsers displaying the tab name as the window name and appending
+            // the tab count with some text
+            let existingSubstring = existingTab.substring(0, newWindow.length);
+            let newSubstring = newWindow.substring(0, existingTab.length);
+
+            if (
+              existingTab.includes(newSubstring) ||
+              newWindow.includes(existingSubstring)
+            ) {
+              return true;
+            }
+          } else if (existingYouTube) {
+            let existingSubstring = existingYouTube.substring(
+              0,
+              newWindow.length
+            );
+            let newSubstring = newWindow.substring(0, existingYouTube.length);
+
+            if (
+              existingYouTube.includes(newSubstring) ||
+              newWindow.includes(existingSubstring)
+            ) {
+              return true;
+            }
+          } else if (existingTrack) {
+            // TODO: Might change in the future
+            // Spotify sets its window title as [artists] - [song title]
+            let existingTitle = actvt.TrackTitle;
+            let existingArtists = actvt.Artists;
+            if (newWindow === ` ${existingArtists} - ${existingTitle}`)
+              return true;
+          }
+        });
+
+        if (isDuplicate) return prevState;
+      }
 
       // Check if an activity of the same type already exists,
       let activityExists = friendsActivity.findIndex(

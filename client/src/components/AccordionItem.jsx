@@ -208,7 +208,6 @@ export default function AccordionItem({
             name={username ? username : friend?.username}
             profilePicture={friend?.profilePicture}
             userID={friend?._id}
-            mainActivity={activities?.[0]}
             activities={activities}
             expanded={expanded}
             chatVisible={chatVisible}
