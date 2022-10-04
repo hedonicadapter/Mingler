@@ -61,7 +61,6 @@ export function ClientSocketProvider({ children }) {
   useEffect(() => {
     if (!currentUser?._id || !currentUser?.accessToken) return;
 
-    console.log({ socket });
     socket.auth.userID = currentUser?._id?.replace(/['"]+/g, '');
     socket.auth.accessToken = currentUser?.accessToken;
     socket?.disconnect()?.connect();

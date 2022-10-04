@@ -78,7 +78,6 @@ export function FriendsProvider({ children }) {
     setActivityListeners();
     setYouTubeTimeRequestListeners();
     setChromiumHostDataTimeReplyListeners();
-    console.log('this is looping, shouldve kept activities separate');
 
     // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
     // it isn't cleaned up there every time 'friends' changes

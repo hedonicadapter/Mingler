@@ -132,7 +132,7 @@ export const BackgroundNoise = () => (
   </svg>
 );
 
-export default function FriendsList() {
+function FriendsList() {
   // const setIgnoreMouseEvents =
   //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
   // addEventListener('pointerover', function mousePolicy(event) {
@@ -356,3 +356,4 @@ export default function FriendsList() {
     </>
   );
 }
+export default React.memo(FriendsList);

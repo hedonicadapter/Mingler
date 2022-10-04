@@ -307,32 +307,35 @@ export const ChatBox = ({ receiver, chatVisible }) => {
       }}
       transition={{ duration: 0.15 }}
     >
-      <motion.div
-        // layout="position"
-        className={styles.chatContainer}
-      >
+      <motion.div className={styles.chatContainer}>
         <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
-          <AnimateSharedLayout>
-            <AnimatePresence>
-              {loading && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 25 }}
-                  exit={{ opacity: 0, height: 0, transition: { delay: 0.25 } }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <LoadingAnimation
-                    formFilled={'loading'}
-                    style={{
-                      position: 'relative',
-                      zIndex: 50,
-                      left: '50%',
-                    }}
-                  />
-                </motion.div>
+          {/* <AnimateSharedLayout> */}
+          {currentConvo?.messages?.map((message, index) => (
+            <>
+              {index === 0 && (
+                <AnimatePresence>
+                  {loading && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 28 }}
+                      exit={{
+                        opacity: 0,
+                        height: 0,
+                        transition: { delay: 0.25 },
+                      }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <LoadingAnimation
+                        formFilled={'loading'}
+                        style={{
+                          zIndex: 50,
+                          left: '50%',
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               )}
-            </AnimatePresence>
-            {currentConvo?.messages?.map((message) => (
               <motion.div key={message.sentDate}>
                 <ConversationBubble
                   fromID={message.fromID}
@@ -340,8 +343,9 @@ export const ChatBox = ({ receiver, chatVisible }) => {
                   sent={message.sentDate}
                 />
               </motion.div>
-            ))}
-          </AnimateSharedLayout>
+            </>
+          ))}
+          {/* </AnimateSharedLayout> */}
           <div ref={anchorRef} />
         </div>
         <div className={styles.inputAndSendButtonContainer}>
