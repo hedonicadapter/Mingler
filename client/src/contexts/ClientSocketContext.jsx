@@ -8,8 +8,12 @@ import DAO from '../config/DAO';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
-// const baseURL = 'ws://127.0.0.1:8080/user';
-const baseURL = 'https://menglir.herokuapp.com/user';
+const baseURL = 'ws://127.0.0.1:8080/user';
+// const baseURL = 'https://menglir.herokuapp.com/user';
+
+const socket = io(baseURL, {
+  auth: { accessToken: '', userID: '' },
+});
 
 const ClientSocketContext = createContext();
 export function useClientSocket() {
@@ -18,19 +22,19 @@ export function useClientSocket() {
 
 export function ClientSocketProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
-  const [socket, setSocket] = useState(null);
+  // const [socket, setSocket] = useState(null);
 
-  const connectSocket = (user) => {
-    const newSocket = io(baseURL, {
-      auth: {
-        accessToken: user && user.accessToken,
-      },
-      query: user && {
-        userID: user._id?.replace(/['"]+/g, ''),
-      },
-    });
-    setSocket(newSocket);
-  };
+  // const connectSocket = (user) => {
+  //   const newSocket = io(baseURL, {
+  //     auth: {
+  //       accessToken: user && user.accessToken,
+  //     },
+  //     query: user && {
+  //       userID: user._id?.replace(/['"]+/g, ''),
+  //     },
+  //   });
+  //   setSocket(newSocket);
+  // };
 
   useEffect(() => {
     ipcRenderer.on(
@@ -52,33 +56,36 @@ export function ClientSocketProvider({ children }) {
         cancelFriendRequestFromMainHandler
       );
     };
-  }, [socket]);
+  }, []);
 
   useEffect(() => {
-    connectSocket(currentUser);
-  }, [currentUser?._id]);
+    if (!currentUser?._id || !currentUser?.accessToken) return;
+
+    console.log({ socket });
+    socket.auth.userID = currentUser?._id?.replace(/['"]+/g, '');
+    socket.auth.accessToken = currentUser?.accessToken;
+    socket?.disconnect()?.connect();
+  }, [currentUser?._id, currentUser?.accessToken]);
 
   useEffect(() => {
-    if (socket) {
-      socket.on('connect', () => {
-        console.log('Client socket connected');
-      });
+    socket.on('connect', () => {
+      console.log('Client socket connected');
+    });
 
-      socket.io.on('error', (error) => {
-        console.log(error);
-      });
-      socket.io.on('reconnect', (attempt) => {
-        console.log(attempt);
-      });
+    socket.io.on('error', (error) => {
+      console.log(error);
+    });
+    socket.io.on('reconnect', (attempt) => {
+      console.log(attempt);
+    });
 
-      socket.on('disconnect', (reason) => {
-        console.log('disconnected ', reason);
-      });
+    socket.on('disconnect', (reason) => {
+      console.log('disconnected ', reason);
+    });
 
-      socket.on('connect_error', () => {
-        console.log('connect_error');
-      });
-    }
+    socket.on('connect_error', () => {
+      console.log('connect_error');
+    });
 
     return () => {
       socket?.disconnect();
@@ -88,7 +95,7 @@ export function ClientSocketProvider({ children }) {
       socket?.removeAllListeners();
       socket?.close();
     };
-  }, [socket]);
+  }, []);
 
   const sendFriendRequestFromMainHandler = (evt, toID) => {
     const packet = { toID, fromID: currentUser._id };
@@ -100,12 +107,6 @@ export function ClientSocketProvider({ children }) {
     const packet = { toID, fromID: currentUser._id };
 
     socket.emit('friendrequest:cancel', packet);
-  };
-
-  const sendActivity = (data, userID) => {
-    const packet = { data, userID };
-
-    socket.emit('activity:send', packet);
   };
 
   const sendYouTubeTimeRequest = (toID, YouTubeTitle, YouTubeURL) => {
@@ -139,7 +140,6 @@ export function ClientSocketProvider({ children }) {
   // };
 
   const value = {
-    sendActivity,
     acceptFriendRequest,
     sendYouTubeTimeRequest,
     answerYouTubeTimeRequest,

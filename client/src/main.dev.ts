@@ -180,6 +180,7 @@ function decodeUTF8(utf8String: string) {
 }
 
 const initActiveWindowListenerProcess = () => {
+  console.log('new window listener?');
   windowProcesses?.forEach(killProcess);
   windowProcess = execFile(windowListenerScript);
   windowProcesses.push(windowProcess);

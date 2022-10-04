@@ -189,6 +189,10 @@ export const ChatBox = ({ receiver, chatVisible }) => {
   }, [error]);
 
   useEffect(() => {
+    if (chatVisible) inputBoxRef.current?.focus();
+  }, [chatVisible]);
+
+  useEffect(() => {
     setCurrentConvo(
       conversations?.find((convo) => convo._id === receiver)?.conversation
     );

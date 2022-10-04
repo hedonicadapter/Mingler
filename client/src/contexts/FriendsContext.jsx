@@ -91,7 +91,10 @@ export function FriendsProvider({ children }) {
       socket.off('user:online', userOnlineHandler);
       socket.off('user:offline', userOfflineHandler);
       socket.off('message:receive', messageReceiveHandler);
-      socket.off('activity:receive', activityReceiveHandler);
+      socket.off('activity:receive:window', activityReceiveWindowHandler);
+      socket.off('activity:receive:tab', activityReceiveTabHandler);
+      socket.off('activity:receive:youtube', activityReceiveYoutubeHandler);
+      socket.off('activity:receive:track', activityReceiveTrackHandler);
       socket.off('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
       ipcRenderer.off(
         'chromiumHostData:YouTubeTime',
@@ -217,7 +220,10 @@ export function FriendsProvider({ children }) {
   };
 
   const setActivityListeners = () => {
-    socket.on('activity:receive', activityReceiveHandler);
+    socket.on('activity:receive:window', activityReceiveWindowHandler);
+    socket.on('activity:receive:tab', activityReceiveTabHandler);
+    socket.on('activity:receive:youtube', activityReceiveYoutubeHandler);
+    socket.on('activity:receive:track', activityReceiveTrackHandler);
   };
 
   const setYouTubeTimeRequestListeners = () => {
@@ -310,6 +316,45 @@ export function FriendsProvider({ children }) {
     );
   };
 
+  const findWindowDuplicate = (newWindow, friendsActivity) => {
+    return friendsActivity.some((actvt) => {
+      let existingTab = actvt.TabTitle;
+      let existingYouTube = actvt.YouTubeTitle;
+      let existingTrack = actvt.TrackTitle;
+
+      if (existingTab) {
+        // TODO: A better way would be a fuzzy search, but this handles cases like
+        // browsers displaying the tab name as the window name and appending
+        // the tab count with some text
+        let existingSubstring = existingTab.substring(0, newWindow.length);
+        let newSubstring = newWindow.substring(0, existingTab.length);
+
+        if (
+          existingTab.includes(newSubstring) ||
+          newWindow.includes(existingSubstring)
+        ) {
+          return true;
+        }
+      } else if (existingYouTube) {
+        let existingSubstring = existingYouTube.substring(0, newWindow.length);
+        let newSubstring = newWindow.substring(0, existingYouTube.length);
+
+        if (
+          existingYouTube.includes(newSubstring) ||
+          newWindow.includes(existingSubstring)
+        ) {
+          return true;
+        }
+      } else if (existingTrack) {
+        // TODO: Might change in the future
+        // Spotify sets its window title as [artists] - [song title]
+        let existingTitle = actvt.TrackTitle;
+        let existingArtists = actvt.Artists;
+        if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
+      }
+    });
+  };
+
   const _setActivities = (friendID, newActivity, activityType) => {
     if (!newActivity[activityType]) return;
 
@@ -318,47 +363,12 @@ export function FriendsProvider({ children }) {
 
       // Window activities can make duplicates
       if (activityType === 'WindowTitle') {
-        let isDuplicate = friendsActivity.some((actvt) => {
-          let newWindow = newActivity.WindowTitle;
-          let existingTab = actvt.TabTitle;
-          let existingYouTube = actvt.YouTubeTitle;
-          let existingTrack = actvt.TrackTitle;
+        const isDuplicate = findWindowDuplicate(
+          newActivity.WindowTitle,
+          friendsActivity
+        );
 
-          if (existingTab) {
-            // TODO: A better way would be a fuzzy search, but this handles cases like
-            // browsers displaying the tab name as the window name and appending
-            // the tab count with some text
-            let existingSubstring = existingTab.substring(0, newWindow.length);
-            let newSubstring = newWindow.substring(0, existingTab.length);
-
-            if (
-              existingTab.includes(newSubstring) ||
-              newWindow.includes(existingSubstring)
-            ) {
-              return true;
-            }
-          } else if (existingYouTube) {
-            let existingSubstring = existingYouTube.substring(
-              0,
-              newWindow.length
-            );
-            let newSubstring = newWindow.substring(0, existingYouTube.length);
-
-            if (
-              existingYouTube.includes(newSubstring) ||
-              newWindow.includes(existingSubstring)
-            ) {
-              return true;
-            }
-          } else if (existingTrack) {
-            // TODO: Might change in the future
-            // Spotify sets its window title as [artists] - [song title]
-            let existingTitle = actvt.TrackTitle;
-            let existingArtists = actvt.Artists;
-            if (newWindow === ` ${existingArtists} - ${existingTitle}`)
-              return true;
-          }
-        });
+        console.log({ isDuplicate });
 
         if (isDuplicate) return prevState;
       }
@@ -385,18 +395,25 @@ export function FriendsProvider({ children }) {
     });
   };
 
-  const activityReceiveHandler = (packet) => {
+  const activityReceiveWindowHandler = (packet) => {
     if (!packet || !packet.data || !packet.userID) return;
 
-    if (packet.data.WindowTitle) {
-      _setActivities(packet.userID, packet.data, 'WindowTitle');
-    } else if (packet.data.TabTitle) {
-      _setActivities(packet.userID, packet.data, 'TabTitle');
-    } else if (packet.data.YouTubeTitle) {
-      _setActivities(packet.userID, packet.data, 'YouTubeTitle');
-    } else if (packet.data.TrackTitle) {
-      _setActivities(packet.userID, packet.data, 'TrackTitle');
-    }
+    _setActivities(packet.userID, packet.data, 'WindowTitle');
+  };
+  const activityReceiveTabHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'TabTitle');
+  };
+  const activityReceiveYoutubeHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'YouTubeTitle');
+  };
+  const activityReceiveTrackHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'TrackTitle');
   };
 
   const setYouTubeTimeRequestHandler = (packet) => {

@@ -106,7 +106,7 @@ const connectSpotifyWindowConfig = {
   },
 };
 
-export function BrowserWindowProvider({ children }) {
+function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
 
   const { friends } = useFriends();
@@ -581,3 +581,5 @@ export function BrowserWindowProvider({ children }) {
     </BrowserWindowContext.Provider>
   );
 }
+
+export default React.memo(BrowserWindowProvider);

@@ -357,4 +357,4 @@ export function authAndy({ children }) {
 const mapStateToProps = (state, ownProps) => {
   return state;
 };
-export const AuthProvider = connect(mapStateToProps)(authAndy);
+export const AuthProvider = connect(mapStateToProps)(React.memo(authAndy));

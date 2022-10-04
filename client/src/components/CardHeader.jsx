@@ -118,7 +118,7 @@ const Markies = ({
   markyActivities.length > 0 &&
   markyActivities.map((activity, index) => (
     <motion.div
-      key={activity}
+      key={index}
       layout
       className={styles.markyContainer}
       initial={'hide'}

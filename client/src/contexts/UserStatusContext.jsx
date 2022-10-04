@@ -24,11 +24,11 @@ export function useStatus() {
 // foreground window and returns it here.
 //
 // The youtube and chromium listeners are handled by the dedicated chromium extension.
-export function UserStatusProvider({ children }) {
+function UserStatusProvider({ children }) {
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
-  const { sendActivity, socket } = useClientSocket();
+  const { socket } = useClientSocket();
 
   const activeWindowListener = () => {
     ipcRenderer.on('windowinfo:frommain', windowInfoFromMainHandler);
@@ -61,13 +61,17 @@ export function UserStatusProvider({ children }) {
   };
 
   const windowInfoFromMainHandler = (evt, windowInfo) => {
-    const packet = { data: windowInfo, userID: currentUser?._id };
+    const packet = {
+      data: windowInfo,
+      userID: currentUser?._id,
+      type: 'window',
+    };
 
     socket.emit('activity:send', packet);
   };
 
   const trackInfoFromMainHandler = (evt, trackInfo) => {
-    const packet = { data: trackInfo, userID: currentUser?._id };
+    const packet = { data: trackInfo, userID: currentUser?._id, type: 'track' };
 
     socket.emit('activity:send', packet);
   };
@@ -91,17 +95,28 @@ export function UserStatusProvider({ children }) {
   };
 
   const chromiumHostDataHandler = (event, data) => {
-    socket.emit('activity:send', {
-      data: {
-        //Either tabdata or youtube data is sent, never both
-        TabTitle: data?.TabTitle,
-        TabURL: data?.TabURL,
-        YouTubeTitle: data?.YouTubeTitle,
-        YouTubeURL: data?.YouTubeURL,
-        Date: new Date(),
-      },
-      userID: currentUser?._id,
-    });
+    if (data.YouTubeTitle) {
+      socket.emit('activity:send', {
+        data: {
+          YouTubeTitle: data?.YouTubeTitle,
+          YouTubeURL: data?.YouTubeURL,
+          Date: new Date(),
+        },
+        userID: currentUser?._id,
+        type: 'youtube',
+      });
+    } else {
+      socket.emit('activity:send', {
+        data: {
+          //Either tabdata or youtube data is sent, never both
+          TabTitle: data?.TabTitle,
+          TabURL: data?.TabURL,
+          Date: new Date(),
+        },
+        userID: currentUser?._id,
+        type: 'tab',
+      });
+    }
   };
 
   useEffect(() => {
@@ -157,3 +172,5 @@ export function UserStatusProvider({ children }) {
     </UserStatusContext.Provider>
   );
 }
+
+export default React.memo(UserStatusProvider);
