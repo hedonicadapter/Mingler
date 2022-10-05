@@ -153,7 +153,7 @@ function FriendsList() {
   const currentUser = useSelector(getCurrentUser);
   const appState = useSelector(getApp);
 
-  const { acceptFriendRequest } = useClientSocket();
+  const { acceptFriendRequest, activities } = useClientSocket();
   const {
     friends,
     getFriends,
@@ -163,7 +163,6 @@ function FriendsList() {
     getFriendRequests,
     setFriendRequests,
     friendRequests,
-    activities,
   } = useFriends();
   const { demoUser } = useAuth();
 

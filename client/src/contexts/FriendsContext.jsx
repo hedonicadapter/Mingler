@@ -12,7 +12,6 @@ import { notify } from '../components/reusables/notifications';
 import DAO from '../config/DAO';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 import { getCurrentUser } from '../mainState/features/settingsSlice';
-import { useClientSocket } from './ClientSocketContext';
 
 const FriendsContext = createContext();
 export function useFriends() {
@@ -35,11 +34,9 @@ const useGetSetFriends = (initialValue = []) => {
 
 export function FriendsProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
-  const { socket, answerYouTubeTimeRequest } = useClientSocket();
 
-  // const [friends, setFriends] = useState([]);
   const [friends, setFriends] = useGetSetFriends([]);
-  const [activities, setActivities] = useState({});
+
   const [conversations, setConversations] = useState(null);
   const [friendRequests, setFriendRequests] = useState(null);
   const [filteredFriends, setFilteredFriends] = useState([]);
@@ -49,59 +46,44 @@ export function FriendsProvider({ children }) {
   }, [friends]);
 
   useEffect(() => {
-    // const object = {
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    // };
-    console.log({ activities });
-  }, [activities]);
-
-  useEffect(() => {
     if (!currentUser?.accessToken) return;
 
     getFriends();
     getConversations();
     getFriendRequests();
-  }, [currentUser, socket]);
+  }, [currentUser]);
 
   useEffect(() => {
-    if (!socket || !friends) return;
+    if (!friends) return;
     setFriendRequestListeners();
     setUserStatusListener();
     setConversationListeners();
-    setActivityListeners();
     setYouTubeTimeRequestListeners();
-    setChromiumHostDataTimeReplyListeners();
 
-    // even tho socket is cleaned up with removeAllListeners() in ClientSocketContext.jsx,
-    // it isn't cleaned up there every time 'friends' changes
     return () => {
-      socket.off('friendrequest:receive', friendRequestReceiveHandler);
-      socket.off(
-        'friendrequest:cancelreceive',
+      ipcRenderer.removeAllListeners(
+        'friendrequest:receive:fromMain',
+        friendRequestReceiveHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'friendrequest:cancelreceive:fromMain',
         friendRequestCancelReceiveHandler
       );
-      socket.off('user:online', userOnlineHandler);
-      socket.off('user:offline', userOfflineHandler);
-      socket.off('message:receive', messageReceiveHandler);
-      socket.off('activity:receive:window', activityReceiveWindowHandler);
-      socket.off('activity:receive:tab', activityReceiveTabHandler);
-      socket.off('activity:receive:youtube', activityReceiveYoutubeHandler);
-      socket.off('activity:receive:track', activityReceiveTrackHandler);
-      socket.off('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
-      ipcRenderer.off(
-        'chromiumHostData:YouTubeTime',
-        setChromiumHostDataTimeReplyHandler
+      ipcRenderer.removeAllListeners('user:online:fromMain', userOnlineHandler);
+      ipcRenderer.removeAllListeners(
+        'user:offline:fromMain',
+        userOfflineHandler
       );
-      socket?.removeAllListeners();
+      ipcRenderer.removeAllListeners(
+        'message:receive:fromMain',
+        messageReceiveHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'youtubetimerequest:receive:fromMain',
+        setYouTubeTimeRequestHandler
+      );
     };
-  }, [socket, friends, currentUser?._id]);
+  }, [friends, currentUser?._id]);
 
   const getConversations = () => {
     DAO.getConversations(currentUser._id, currentUser.accessToken)
@@ -202,51 +184,34 @@ export function FriendsProvider({ children }) {
   };
 
   const setUserStatusListener = () => {
-    socket.on('user:online', userOnlineHandler);
-    socket.on('user:offline', userOfflineHandler);
+    ipcRenderer.on('user:online:fromMain', userOnlineHandler);
+    ipcRenderer.on('user:offline:fromMain', userOfflineHandler);
   };
 
   const setFriendRequestListeners = () => {
-    // socket.removeAllListeners('friendrequest:receive');
-    // socket.removeAllListeners('friendrequest:cancelreceive');
-
-    socket.on('friendrequest:receive', friendRequestReceiveHandler);
-    socket.on('friendrequest:cancelreceive', friendRequestCancelReceiveHandler);
+    ipcRenderer.on(
+      'friendrequest:receive:fromMain',
+      friendRequestReceiveHandler
+    );
+    ipcRenderer.on(
+      'friendrequest:cancelreceive:fromMain',
+      friendRequestCancelReceiveHandler
+    );
   };
 
   const setConversationListeners = () => {
-    socket.on('message:receive', messageReceiveHandler);
-  };
-
-  const setActivityListeners = () => {
-    socket.on('activity:receive:window', activityReceiveWindowHandler);
-    socket.on('activity:receive:tab', activityReceiveTabHandler);
-    socket.on('activity:receive:youtube', activityReceiveYoutubeHandler);
-    socket.on('activity:receive:track', activityReceiveTrackHandler);
+    ipcRenderer.on('message:receive:fromMain', messageReceiveHandler);
   };
 
   const setYouTubeTimeRequestListeners = () => {
     // User receives yt time request, and sends get request to ipcMain,
     // which forwards the request through the host to chromium to get the time
     // Packet contains url and tab title to find the right tab
-    socket.on('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
-  };
-
-  const setChromiumHostDataTimeReplyListeners = () => {
     ipcRenderer.on(
-      'chromiumHostData:YouTubeTime',
-      setChromiumHostDataTimeReplyHandler
+      'youtubetimerequest:receive:fromMain',
+      setYouTubeTimeRequestHandler
     );
   };
-
-  // TODO: Expand functionality to include favorites
-  // and other stuff in the future
-  // Update: activities are now automatically sorted by using unshift
-  // const sortActivities = (activitiesArray) => {
-  //   activitiesArray?.sort((a, b) => {
-  //     return new Date(b.Date) - new Date(a.Date);
-  //   });
-  // };
 
   const findFriends = (searchTerm) => {
     setFilteredFriends(
@@ -266,10 +231,9 @@ export function FriendsProvider({ children }) {
     getFriendRequests();
   };
 
-  const userOnlineHandler = (userID) => {
+  const userOnlineHandler = (e, userID) => {
     // TODO:
     // Better way to do this would be to send the friend object through the socket and add it to friends
-    // this way is slower and does unnecessary API calls
     getFriends();
 
     // TODO:
@@ -282,7 +246,7 @@ export function FriendsProvider({ children }) {
         notify(friend.username, 'Now online.', true, friend?.thumbnail);
     });
   };
-  const userOfflineHandler = (userID) => {
+  const userOfflineHandler = (evt, userID) => {
     setFriends((prevState) => {
       return prevState.map((friend) => {
         if (friend._id === userID) {
@@ -296,7 +260,7 @@ export function FriendsProvider({ children }) {
     });
   };
 
-  const messageReceiveHandler = ({ fromID, messageObject }) => {
+  const messageReceiveHandler = (e, { fromID, messageObject }) => {
     let friend = friends?.find((friend) => friend._id === messageObject.fromID);
     notify(friend.username, messageObject.message, false, friend?.thumbnail);
 
@@ -315,114 +279,8 @@ export function FriendsProvider({ children }) {
     );
   };
 
-  const findWindowDuplicate = (newWindow, friendsActivity) => {
-    return friendsActivity.some((actvt) => {
-      let existingTab = actvt.TabTitle;
-      let existingYouTube = actvt.YouTubeTitle;
-      let existingTrack = actvt.TrackTitle;
-
-      if (existingTab) {
-        // TODO: A better way would be a fuzzy search, but this handles cases like
-        // browsers displaying the tab name as the window name and appending
-        // the tab count with some text
-        let existingSubstring = existingTab.substring(0, newWindow.length);
-        let newSubstring = newWindow.substring(0, existingTab.length);
-
-        if (
-          existingTab.includes(newSubstring) ||
-          newWindow.includes(existingSubstring)
-        ) {
-          return true;
-        }
-      } else if (existingYouTube) {
-        let existingSubstring = existingYouTube.substring(0, newWindow.length);
-        let newSubstring = newWindow.substring(0, existingYouTube.length);
-
-        if (
-          existingYouTube.includes(newSubstring) ||
-          newWindow.includes(existingSubstring)
-        ) {
-          return true;
-        }
-      } else if (existingTrack) {
-        // TODO: Might change in the future
-        // Spotify sets its window title as [artists] - [song title]
-        let existingTitle = actvt.TrackTitle;
-        let existingArtists = actvt.Artists;
-        if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
-      }
-    });
-  };
-
-  const _setActivities = (friendID, newActivity, activityType) => {
-    if (!newActivity[activityType]) return;
-
-    setActivities((prevState) => {
-      let friendsActivity = prevState[friendID] ? [...prevState[friendID]] : [];
-
-      // Window activities can make duplicates
-      if (activityType === 'WindowTitle') {
-        const isDuplicate = findWindowDuplicate(
-          newActivity.WindowTitle,
-          friendsActivity
-        );
-
-        console.log({ isDuplicate });
-
-        if (isDuplicate) return prevState;
-      }
-
-      // Check if an activity of the same type already exists,
-      let activityExists = friendsActivity.findIndex(
-        (actvt) => actvt[activityType]
-      );
-
-      // replace if it does.
-      if (activityExists > -1) {
-        friendsActivity[activityExists] = newActivity;
-
-        // Move to top, as it's the most recent activity
-        friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
-      } else {
-        friendsActivity.unshift(newActivity);
-      }
-
-      return {
-        ...prevState,
-        [friendID]: friendsActivity,
-      };
-    });
-  };
-
-  const activityReceiveWindowHandler = (packet) => {
-    if (!packet || !packet.data || !packet.userID) return;
-
-    _setActivities(packet.userID, packet.data, 'WindowTitle');
-  };
-  const activityReceiveTabHandler = (packet) => {
-    if (!packet || !packet.data || !packet.userID) return;
-
-    _setActivities(packet.userID, packet.data, 'TabTitle');
-  };
-  const activityReceiveYoutubeHandler = (packet) => {
-    if (!packet || !packet.data || !packet.userID) return;
-
-    _setActivities(packet.userID, packet.data, 'YouTubeTitle');
-  };
-  const activityReceiveTrackHandler = (packet) => {
-    if (!packet || !packet.data || !packet.userID) return;
-
-    _setActivities(packet.userID, packet.data, 'TrackTitle');
-  };
-
-  const setYouTubeTimeRequestHandler = (packet) => {
+  const setYouTubeTimeRequestHandler = (e, packet) => {
     ipcRenderer.send('getYouTubeTime', packet);
-  };
-
-  const setChromiumHostDataTimeReplyHandler = (evt, packet) => {
-    console.log('friendscontext handler ', packet);
-
-    answerYouTubeTimeRequest(packet?.fromID, packet?.time);
   };
 
   const value = {
@@ -436,7 +294,7 @@ export function FriendsProvider({ children }) {
     setFriendRequests,
     getConversations,
     deleteFriend,
-    activities,
+
     conversations,
     getMessages,
     setConversations,

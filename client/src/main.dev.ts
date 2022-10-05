@@ -693,6 +693,34 @@ const createWindow = async () => {
     mainWindow?.webContents.send('disconnectspotify:frommain');
   });
 
+  ipcMain.on('youtubetimerequest:receive:fromRenderer', (event, data) =>
+    mainWindow?.webContents.send('youtubetimerequest:receive:fromMain', data)
+  );
+
+  ipcMain.on('youtubetime:receive:fromRenderer', (event, data) =>
+    mainWindow?.webContents.send('youtubetime:receive:fromMain', data)
+  );
+
+  ipcMain.on('user:online:fromRenderer', (event, data) =>
+    mainWindow?.webContents.send('user:online:fromMain', data)
+  );
+
+  ipcMain.on('user:offline:fromRenderer', (event, data) =>
+    mainWindow?.webContents.send('user:offline:fromMain', data)
+  );
+
+  ipcMain.on('friendrequest:receive:fromRenderer', () =>
+    mainWindow?.webContents.send('friendrequest:receive:fromMain')
+  );
+
+  ipcMain.on('friendrequest:cancelreceive:fromRenderer', () =>
+    mainWindow?.webContents.send('friendrequest:cancelreceive:fromMain')
+  );
+
+  ipcMain.on('message:receive:fromRenderer', (event, data) =>
+    mainWindow?.webContents.send('message:receive:fromMain', data)
+  );
+
   //go offline on close
   ipcMain.on('currentUserID', (evt, data) => {
     // mainWindow.on('close', async function () {

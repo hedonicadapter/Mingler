@@ -166,10 +166,8 @@ export const ChatBox = ({ receiver, chatVisible }) => {
   const appState = useSelector(getApp);
   const dispatch = useDispatch();
 
-  const { socket } = useClientSocket();
+  const { emitMessage } = useClientSocket();
   const { conversations, setConversations, getMessages } = useFriends();
-
-  const anchorRef = useRef();
 
   const [inputText, setInputText] = useState('');
   const [error, setError] = useState(null);
@@ -179,6 +177,8 @@ export const ChatBox = ({ receiver, chatVisible }) => {
   const [currentConvo, setCurrentConvo] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const messageAreaRef = useRef(null);
+  const anchorRef = useRef();
   const inputBoxRef = useRef(null);
 
   useEffect(() => {
@@ -191,6 +191,11 @@ export const ChatBox = ({ receiver, chatVisible }) => {
   useEffect(() => {
     if (chatVisible) inputBoxRef.current?.focus();
   }, [chatVisible]);
+
+  useEffect(() => {
+    if (scrollTop || !chatVisible || !messageAreaRef?.current) return;
+    messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
+  }, [messageAreaRef, chatVisible]);
 
   useEffect(() => {
     setCurrentConvo(
@@ -206,10 +211,10 @@ export const ChatBox = ({ receiver, chatVisible }) => {
     sendMessage();
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!inputText || !receiver || inputText === '') return;
 
-    await DAO.sendMessage(
+    DAO.sendMessage(
       receiver,
       currentUser?._id,
       inputText,
@@ -224,11 +229,7 @@ export const ChatBox = ({ receiver, chatVisible }) => {
             sentDate: new Date(),
           };
 
-          socket.emit('message:send', {
-            toID: receiver,
-            fromID: currentUser?._id,
-            messageObject: newMessage,
-          });
+          emitMessage(receiver, currentUser?._id, newMessage);
 
           setCurrentConvo((prevState) => {
             return {
@@ -287,15 +288,6 @@ export const ChatBox = ({ receiver, chatVisible }) => {
     } else setScrollTop(false);
   };
 
-  useEffect(() => {
-    if (scrollTop) return;
-    anchorRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'start',
-    });
-  }, [anchorRef]);
-
   return (
     <motion.div
       style={{ overflow: 'hidden' }}
@@ -308,7 +300,11 @@ export const ChatBox = ({ receiver, chatVisible }) => {
       transition={{ duration: 0.15 }}
     >
       <motion.div className={styles.chatContainer}>
-        <div className={styles.messageArea} onScroll={handleMessageAreaScroll}>
+        <div
+          ref={messageAreaRef}
+          className={styles.messageArea}
+          onScroll={handleMessageAreaScroll}
+        >
           {/* <AnimateSharedLayout> */}
           {currentConvo?.messages?.map((message, index) => (
             <>

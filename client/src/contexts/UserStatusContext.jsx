@@ -28,7 +28,7 @@ function UserStatusProvider({ children }) {
   const currentUser = useSelector(getCurrentUser);
   const dispatch = useDispatch();
 
-  const { socket } = useClientSocket();
+  const { emitActivity } = useClientSocket();
 
   const activeWindowListener = () => {
     ipcRenderer.on('windowinfo:frommain', windowInfoFromMainHandler);
@@ -40,10 +40,7 @@ function UserStatusProvider({ children }) {
 
   const activeTrackListener = async (spotifyAccessToken) => {
     console.warn('ACTIVETRACKLISTENER');
-    ipcRenderer.removeAllListeners(
-      'trackinfo:frommain',
-      trackInfoFromMainHandler
-    );
+
     const result = await ipcRenderer.invoke(
       'initActiveTrackListener:fromrenderer',
       spotifyAccessToken
@@ -67,13 +64,13 @@ function UserStatusProvider({ children }) {
       type: 'window',
     };
 
-    socket.emit('activity:send', packet);
+    emitActivity(packet);
   };
 
   const trackInfoFromMainHandler = (evt, trackInfo) => {
     const packet = { data: trackInfo, userID: currentUser?._id, type: 'track' };
 
-    socket.emit('activity:send', packet);
+    emitActivity(packet);
   };
 
   const refreshSpotify = () => {
@@ -87,7 +84,6 @@ function UserStatusProvider({ children }) {
 
         dispatch(setSpotifyAccessTokenMain(result.data.body.access_token));
         dispatch(setSpotifyExpiryDate(result.data.body.spotifyExpiryDate));
-        activeTrackListener(result.data.body.access_token);
       })
       .catch((e) => {
         console.log('Refreshing spotify error ', e);
@@ -96,7 +92,7 @@ function UserStatusProvider({ children }) {
 
   const chromiumHostDataHandler = (event, data) => {
     if (data.YouTubeTitle) {
-      socket.emit('activity:send', {
+      emitActivity({
         data: {
           YouTubeTitle: data?.YouTubeTitle,
           YouTubeURL: data?.YouTubeURL,
@@ -106,7 +102,7 @@ function UserStatusProvider({ children }) {
         type: 'youtube',
       });
     } else {
-      socket.emit('activity:send', {
+      emitActivity({
         data: {
           //Either tabdata or youtube data is sent, never both
           TabTitle: data?.TabTitle,
@@ -145,8 +141,6 @@ function UserStatusProvider({ children }) {
   useEffect(() => {
     activeWindowListener();
     activeTabListener();
-    currentUser?.spotifyAccessToken &&
-      activeTrackListener(currentUser.spotifyAccessToken);
 
     return () => {
       ipcRenderer.removeAllListeners(
@@ -157,12 +151,21 @@ function UserStatusProvider({ children }) {
         'chromiumHostData',
         chromiumHostDataHandler
       );
+    };
+  }, [currentUser?._id]);
+
+  useEffect(() => {
+    if (!currentUser?.spotifyAccessToken) return;
+
+    activeTrackListener(currentUser.spotifyAccessToken);
+
+    return () => {
       ipcRenderer.removeAllListeners(
         'trackinfo:frommain',
         trackInfoFromMainHandler
       );
     };
-  }, [currentUser?._id, socket]);
+  }, [currentUser?.spotifyAccessToken]);
 
   const value = { activeTrackListener };
 

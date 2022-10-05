@@ -262,7 +262,7 @@ export default function AccordionItem({
           expanded={expanded}
           chatVisible={chatVisible}
           playerURL={playerURL}
-          reactPlayerRef={reactPlayerRef.current}
+          reactPlayerRef={reactPlayerRef}
           playerVisible={playerVisible}
           closePlayer={closePlayer}
           isWidgetHeader={isWidgetHeader}

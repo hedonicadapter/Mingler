@@ -22,19 +22,21 @@ export function useClientSocket() {
 
 export function ClientSocketProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
-  // const [socket, setSocket] = useState(null);
+  const [activities, setActivities] = useState({});
 
-  // const connectSocket = (user) => {
-  //   const newSocket = io(baseURL, {
-  //     auth: {
-  //       accessToken: user && user.accessToken,
-  //     },
-  //     query: user && {
-  //       userID: user._id?.replace(/['"]+/g, ''),
-  //     },
-  //   });
-  //   setSocket(newSocket);
-  // };
+  useEffect(() => {
+    // const object = {
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    //   30517530151241: [
+    //     { WinTitle: 'Busta app', Date: new Date() },
+    //     { TrackTitle: 'out yonder' },
+    //   ],
+    // };
+    console.log({ activities });
+  }, [activities]);
 
   useEffect(() => {
     ipcRenderer.on(
@@ -46,6 +48,11 @@ export function ClientSocketProvider({ children }) {
       cancelFriendRequestFromMainHandler
     );
 
+    ipcRenderer.on(
+      'chromiumHostData:YouTubeTime',
+      setChromiumHostDataTimeReplyHandler
+    );
+
     return () => {
       ipcRenderer.removeAllListeners(
         'sendfriendrequest:frommain',
@@ -54,6 +61,10 @@ export function ClientSocketProvider({ children }) {
       ipcRenderer.removeAllListeners(
         'cancelfriendrequest:frommain',
         cancelFriendRequestFromMainHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'chromiumHostData:YouTubeTime',
+        setChromiumHostDataTimeReplyHandler
       );
     };
   }, []);
@@ -86,15 +97,148 @@ export function ClientSocketProvider({ children }) {
       console.log('connect_error');
     });
 
+    socket.on('activity:receive:window', activityReceiveWindowHandler);
+    socket.on('activity:receive:tab', activityReceiveTabHandler);
+    socket.on('activity:receive:youtube', activityReceiveYoutubeHandler);
+    socket.on('activity:receive:track', activityReceiveTrackHandler);
+
+    socket.on('youtubetimerequest:receive', setYouTubeTimeRequestHandler);
+    socket.on('youtubetime:receive', setYouTubeTimeReceiveHandler);
+
+    socket.on('user:online', userOnlineHandler);
+    socket.on('user:offline', userOfflineHandler);
+
+    socket.on('friendrequest:receive', friendRequestReceiveHandler);
+    socket.on('friendrequest:cancelreceive', friendRequestCancelReceiveHandler);
+
+    socket.on('message:receive', messageReceiveHandler);
+
     return () => {
-      socket?.disconnect();
-      socket?.io.off('error');
-      socket?.io.off('reconnect');
-      socket?.off('connect');
-      socket?.removeAllListeners();
-      socket?.close();
+      if (!socket) return;
+      socket.disconnect();
+      socket.io.off('error');
+      socket.io.off('reconnect');
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('connect_error');
+      socket.off('activity:receive:window', activityReceiveWindowHandler);
+      socket.off('activity:receive:tab', activityReceiveTabHandler);
+      socket.off('activity:receive:youtube', activityReceiveYoutubeHandler);
+      socket.off('activity:receive:track', activityReceiveTrackHandler);
+      socket.off('youtubetime:receive', setYouTubeTimeReceiveHandler);
+      socket.removeAllListeners();
+      socket.close();
     };
   }, []);
+
+  const findWindowDuplicate = (newWindow, friendsActivity) => {
+    return friendsActivity.some((actvt) => {
+      let existingTab = actvt.TabTitle;
+      let existingYouTube = actvt.YouTubeTitle;
+      let existingTrack = actvt.TrackTitle;
+
+      if (existingTab) {
+        // TODO: A better way would be a fuzzy search, but this handles cases like
+        // browsers displaying the tab name as the window name and appending
+        // the tab count with some text
+        let existingSubstring = existingTab.substring(0, newWindow.length);
+        let newSubstring = newWindow.substring(0, existingTab.length);
+
+        if (
+          existingTab.includes(newSubstring) ||
+          newWindow.includes(existingSubstring)
+        ) {
+          return true;
+        }
+      } else if (existingYouTube) {
+        let existingSubstring = existingYouTube.substring(0, newWindow.length);
+        let newSubstring = newWindow.substring(0, existingYouTube.length);
+
+        if (
+          existingYouTube.includes(newSubstring) ||
+          newWindow.includes(existingSubstring)
+        ) {
+          return true;
+        }
+      } else if (existingTrack) {
+        // TODO: Might change in the future
+        // Spotify sets its window title as [artists] - [song title]
+        let existingTitle = actvt.TrackTitle;
+        let existingArtists = actvt.Artists;
+        if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
+      }
+    });
+  };
+
+  const _setActivities = (friendID, newActivity, activityType) => {
+    if (!newActivity[activityType]) return;
+
+    setActivities((prevState) => {
+      let friendsActivity = prevState[friendID] ? [...prevState[friendID]] : [];
+
+      // Window activities can make duplicates
+      if (activityType === 'WindowTitle') {
+        const isDuplicate = findWindowDuplicate(
+          newActivity.WindowTitle,
+          friendsActivity
+        );
+
+        console.log({ isDuplicate });
+
+        if (isDuplicate) return prevState;
+      }
+
+      // Check if an activity of the same type already exists,
+      let activityExists = friendsActivity.findIndex(
+        (actvt) => actvt[activityType]
+      );
+
+      // replace if it does.
+      if (activityExists > -1) {
+        friendsActivity[activityExists] = newActivity;
+
+        // Move to top, as it's the most recent activity
+        friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
+      } else {
+        friendsActivity.unshift(newActivity);
+      }
+
+      return {
+        ...prevState,
+        [friendID]: friendsActivity,
+      };
+    });
+  };
+
+  const activityReceiveWindowHandler = (packet) => {
+    console.log('hello');
+    if (!packet || !packet.data || !packet.userID) return;
+    _setActivities(packet.userID, packet.data, 'WindowTitle');
+  };
+  const activityReceiveTabHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'TabTitle');
+  };
+  const activityReceiveYoutubeHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'YouTubeTitle');
+  };
+  const activityReceiveTrackHandler = (packet) => {
+    if (!packet || !packet.data || !packet.userID) return;
+
+    _setActivities(packet.userID, packet.data, 'TrackTitle');
+  };
+
+  // TODO: Expand functionality to include favorites
+  // and other stuff in the future
+  // Update: activities are now automatically sorted by using unshift
+  // const sortActivities = (activitiesArray) => {
+  //   activitiesArray?.sort((a, b) => {
+  //     return new Date(b.Date) - new Date(a.Date);
+  //   });
+  // };
 
   const sendFriendRequestFromMainHandler = (evt, toID) => {
     const packet = { toID, fromID: currentUser._id };
@@ -120,6 +264,12 @@ export function ClientSocketProvider({ children }) {
     socket.emit('youtubetimerequest:answer', packet);
   };
 
+  const setChromiumHostDataTimeReplyHandler = (evt, packet) => {
+    console.log('friendscontext handler ', packet);
+
+    answerYouTubeTimeRequest(packet?.fromID, packet?.time);
+  };
+
   // const sendFriendRequest = (toID) => {
   //   const packet = { toID, fromID: currentUser._id };
 
@@ -137,12 +287,45 @@ export function ClientSocketProvider({ children }) {
 
   //   socket.emit('friendrequest:cancel', packet);
   // };
+  const emitActivity = (packet) => {
+    console.log({ packet });
+    socket.emit('activity:send', packet);
+  };
+
+  const emitMessage = (toID, fromID, messageObject) => {
+    const packet = { toID, fromID, messageObject };
+
+    socket.emit('message:send', packet);
+  };
+
+  const setYouTubeTimeRequestHandler = (packet) =>
+    ipcRenderer.send('youtubetimerequest:receive:fromRenderer', packet);
+
+  const setYouTubeTimeReceiveHandler = (packet) =>
+    ipcRenderer.send('youtubetime:receive:fromRenderer', packet);
+
+  const userOnlineHandler = (userID) =>
+    ipcRenderer.send('user:online:fromRenderer', userID);
+
+  const userOfflineHandler = (userID) =>
+    ipcRenderer.send('user:offline:fromRenderer', userID);
+
+  const friendRequestReceiveHandler = () =>
+    ipcRenderer.send('friendrequest:receive:fromRenderer');
+
+  const friendRequestCancelReceiveHandler = () =>
+    ipcRenderer.send('friendrequest:cancelreceive:fromRenderer');
+
+  const messageReceiveHandler = (packet) =>
+    ipcRenderer.send('message:receive:fromRenderer', packet);
 
   const value = {
     acceptFriendRequest,
     sendYouTubeTimeRequest,
-    answerYouTubeTimeRequest,
+    emitActivity,
+    emitMessage,
     socket,
+    activities,
   };
 
   return (

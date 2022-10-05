@@ -63,13 +63,14 @@ export default function Marky({
 
   expanded,
 }) {
-  const { socket, sendYouTubeTimeRequest } = useClientSocket();
+  const { sendYouTubeTimeRequest } = useClientSocket();
 
   const appState = useSelector(getApp);
 
   const marqueeRef = useRef(null);
   const { setAccessToken, setRefreshToken } = useStatus();
 
+  const [time, setTime] = useState(0);
   const [markyType, setMarkyType] = useState(null);
   const [marqueeWidth, setMarqueeWidth] = useState();
   const [showFade, setShowFade] = useState(true);
@@ -116,8 +117,22 @@ export default function Marky({
   }, [WindowTitle, TrackTitle, TabTitle, YouTubeTitle]);
 
   useEffect(() => {
-    return () => socket.off('youtubetime:receive', youTubeTimeHandler);
-  }, []);
+    if (markyType !== 'YouTubeVideo') return;
+
+    ipcRenderer.on('youtubetime:receive:fromMain', youTubeTimeHandler);
+
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'youtubetime:receive:fromMain',
+        youTubeTimeHandler
+      );
+  }, [markyType]);
+
+  useEffect(() => {
+    if (!reactPlayerRef || !time) return;
+
+    reactPlayerRef.seekTo(time + 1); // +1 second to offset request-receive operations delay
+  }, [time, reactPlayerRef]);
 
   // TODO: open only trusted
   const openInBrowser = (url) =>
@@ -125,6 +140,7 @@ export default function Marky({
 
   const handleClick = (evt) => {
     evt.stopPropagation();
+
     if (WindowTitle) {
       return;
     } else if (TrackTitle) {
@@ -142,17 +158,15 @@ export default function Marky({
         } else {
           if (YouTubeURL.startsWith(playerURL)) togglePlayer();
         }
-        // Wait for response from ipcMain, which is connected to the server socket
-        socket.once('youtubetime:receive', youTubeTimeHandler);
       }
     } else if (TabURL) {
       openInBrowser(TabURL);
     }
   };
 
-  const youTubeTimeHandler = (time) => {
-    time && reactPlayerRef?.seekTo(time + 1);
-    // setPlayerURL(YouTubeURL + '&t=' + time + 1 + 's'); // +1 second to offset delay
+  const youTubeTimeHandler = (e, time) => {
+    console.log('timehandler');
+    setTime(time);
   };
 
   const ActivityIcon = () => {
