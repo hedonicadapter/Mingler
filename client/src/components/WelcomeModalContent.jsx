@@ -140,7 +140,7 @@ const KeyboardKey = ({ animationController, text }) => (
   </motion.div>
 );
 
-export default function WelcomeModalContent() {
+function WelcomeModalContent() {
   const [widgetVisible, setWidgetVisible] = useState(false);
 
   const keyAnimationController = useAnimation();
@@ -277,3 +277,5 @@ export default function WelcomeModalContent() {
     </motion.div>
   );
 }
+
+export default React.memo(WelcomeModalContent);

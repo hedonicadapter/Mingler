@@ -26,7 +26,7 @@ const CardSeparator = ({ cardHovered, expanded }) => {
   );
 };
 
-export default function AccordionItem({
+function AccordionItem({
   activities,
   clientDemoUser,
   username,
@@ -271,3 +271,5 @@ export default function AccordionItem({
     </div>
   );
 }
+
+export default React.memo(AccordionItem);

@@ -106,6 +106,22 @@ const connectSpotifyWindowConfig = {
   },
 };
 
+let settingsWindowStateless = new BrowserWindow(settingsWindowConfig);
+let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
+let connectSpotifyWindowStateless = new BrowserWindow(
+  connectSpotifyWindowConfig
+);
+const viewStateless = new BrowserView();
+
+const hideWindow = (window) => {
+  if (!window || window.isDestroyed()) return;
+
+  window.setSkipTaskbar(true);
+  if (process.platform == 'win32') window.minimize();
+  else if (process.platform == 'darwin') app?.hide();
+  else window.hide();
+};
+
 function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
 
@@ -120,15 +136,15 @@ function BrowserWindowProvider({ children }) {
   const [connectSpotifyAuthorizeURL, setConnectSpotifyAuthorizeURL] =
     useState('');
 
-  const [settingsWindow, setSettingsWindow] = useState(
-    new BrowserWindow(settingsWindowConfig)
-  );
+  const [settingsWindow, setSettingsWindow] = useState(settingsWindowStateless);
   const [findFriendsWindow, setFindFriendsWindow] = useState(
-    new BrowserWindow(findFriendsWindowConfig)
+    findFriendsWindowStateless
   );
   const [connectSpotifyWindow, setConnectSpotifyWindow] = useState(
-    new BrowserWindow(connectSpotifyWindowConfig)
+    connectSpotifyWindowStateless
   );
+
+  const [view, setView] = useState(viewStateless);
 
   const settingsWindowFocusHandler = () => {
     console.log('sending from renterer');
@@ -143,15 +159,6 @@ function BrowserWindowProvider({ children }) {
       dispatch(appVisibleFalse());
       ipcRenderer.send('settingsblurred:fromrenderer');
     }
-  };
-
-  const hideWindow = (window) => {
-    if (!window || window.isDestroyed()) return;
-
-    window.setSkipTaskbar(true);
-    if (process.platform == 'win32') window.minimize();
-    else if (process.platform == 'darwin') app?.hide();
-    else window.hide();
   };
 
   const settingsWindowCloseHandler = (evt) => {
@@ -215,36 +222,43 @@ function BrowserWindowProvider({ children }) {
     toggleSettings();
   };
 
-  useEffect(() => {
-    // Clusterfuck of close handling to keep unclosability working
-    ipcRenderer.once('exit:frommain', () => {
-      // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
-      //   // connectSpotifyWindow?.close();
-      // connectSpotifyWindow?.destroy();
-      // connectSpotifyWindow = null;
-      setConnectSpotifyWindow(null);
-      // }
-      // if (settingsWindow && !settingsWindow?.isDestroyed()) {
-      // settingsWindow.removeListener('close', settingsWindowCloseHandler);
-      // settingsWindow?.destroy();
-      // dispatch(settingsOpenFalse());
-      // settingsWindow = null;
-      setSettingsWindow(null);
-      // }
-      // if (findFriendsWindow && !findFriendsWindow?.isDestroyed()) {
-      // findFriendsWindow.removeListener(
-      //   'close',
-      //   findFriendsWindowCloseHandler
-      // );
-      // findFriendsWindow?.destroy();
-      // dispatch(findFriendsOpenFalse());
-      // findFriendsWindow = null;
-      setFindFriendsWindow(null);
-      // }
+  const exitFromMainHandler = () => {
+    // if (connectSpotifyWindow && !connectSpotifyWindow?.isDestroyed()) {
+    //   // connectSpotifyWindow?.close();
+    // connectSpotifyWindow?.destroy();
+    // connectSpotifyWindow = null;
+    setConnectSpotifyWindow(null);
+    // }
+    // if (settingsWindow && !settingsWindow?.isDestroyed()) {
+    // settingsWindow.removeListener('close', settingsWindowCloseHandler);
+    // settingsWindow?.destroy();
+    // dispatch(settingsOpenFalse());
+    // settingsWindow = null;
+    setSettingsWindow(null);
+    // }
+    // if (findFriendsWindow && !findFriendsWindow?.isDestroyed()) {
+    // findFriendsWindow.removeListener(
+    //   'close',
+    //   findFriendsWindowCloseHandler
+    // );
+    // findFriendsWindow?.destroy();
+    // dispatch(findFriendsOpenFalse());
+    // findFriendsWindow = null;
+    setFindFriendsWindow(null);
+    settingsWindowStateless = null;
+    findFriendsWindowStateless = null;
+    connectSpotifyWindowStateless = null;
+    // }
 
-      setReadyToExit(true);
-      ipcRenderer.send('exitready:fromrenderer');
-    });
+    setReadyToExit(true);
+    ipcRenderer.send('exitready:fromrenderer');
+  };
+
+  useEffect(() => {
+    ipcRenderer.once('exit:frommain', exitFromMainHandler);
+
+    return () =>
+      ipcRenderer.removeAllListeners('exit:frommain', exitFromMainHandler);
   }, []);
 
   // useEffect(() => {
@@ -264,7 +278,7 @@ function BrowserWindowProvider({ children }) {
   // }, [settingsWindow, findFriendsWindow, connectSpotifyWindow, readyToExit]);
 
   useEffect(() => {
-    if (!settingsWindow) return;
+    // if (!settingsWindow || settingsWindow.isDestroyed()) return;
 
     loadSettingsContent();
 
@@ -283,10 +297,10 @@ function BrowserWindowProvider({ children }) {
       // settingsWindow.removeListener('closed', settingsWindowClosedHandler);
       !settingsWindow?.isDestroyed() && settingsWindow.destroy();
     };
-  }, [settingsWindow]);
+  }, []);
 
   useEffect(() => {
-    if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
+    // if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
 
     loadFindFriendsContent();
 
@@ -303,10 +317,10 @@ function BrowserWindowProvider({ children }) {
       // );
       !findFriendsWindow?.isDestroyed() && findFriendsWindow.destroy();
     };
-  }, [findFriendsWindow]);
+  }, []);
 
   useEffect(() => {
-    if (!connectSpotifyWindow) return;
+    // if (!connectSpotifyWindow || connectSpotifyWindow.isDestroyed()) return;
 
     loadConnectSpotifyContent();
 
@@ -325,7 +339,7 @@ function BrowserWindowProvider({ children }) {
         connectSpotifyWindow.destroy();
       }
     };
-  }, [connectSpotifyWindow]);
+  }, []);
 
   useEffect(() => {
     if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
@@ -503,7 +517,6 @@ function BrowserWindowProvider({ children }) {
     view.webContents.loadUrl(url);
   };
 
-  const [view, setView] = useState(new BrowserView());
   useEffect(() => {
     if (!connectSpotifyWindow || !view || !connectSpotifyAuthorizeURL) return;
     if (!connectSpotifyAuthorizeURL.startsWith('https'))

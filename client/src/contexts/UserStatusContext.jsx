@@ -61,14 +61,18 @@ function UserStatusProvider({ children }) {
     const packet = {
       data: windowInfo,
       userID: currentUser?._id,
-      type: 'window',
+      type: 'WindowTitle',
     };
 
     emitActivity(packet);
   };
 
   const trackInfoFromMainHandler = (evt, trackInfo) => {
-    const packet = { data: trackInfo, userID: currentUser?._id, type: 'track' };
+    const packet = {
+      data: trackInfo,
+      userID: currentUser?._id,
+      type: 'TrackTitle',
+    };
 
     emitActivity(packet);
   };
@@ -99,7 +103,7 @@ function UserStatusProvider({ children }) {
           Date: new Date(),
         },
         userID: currentUser?._id,
-        type: 'youtube',
+        type: 'YouTubeTitle',
       });
     } else {
       emitActivity({
@@ -110,7 +114,7 @@ function UserStatusProvider({ children }) {
           Date: new Date(),
         },
         userID: currentUser?._id,
-        type: 'tab',
+        type: 'TabTitle',
       });
     }
   };

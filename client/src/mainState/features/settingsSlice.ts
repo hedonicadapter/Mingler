@@ -5,7 +5,8 @@ import produce from 'immer';
 
 // add interface for currentUser
 interface SettingsState {
-  currentUser: Array<any>; // TODO: make interface
+  currentUser: Array<any> | null; // TODO: make interface
+  activities: any; // TODO: make interface
   showWelcome: Boolean;
   settingsContent: string;
   browser: string;
@@ -16,12 +17,103 @@ interface SettingsState {
 
 const initialState: SettingsState = {
   currentUser: [],
+  activities: {},
   showWelcome: true, //Used to show welcome splash screen or header on first launch
   settingsContent: 'Widget',
   browser: 'Chrome',
   extensionID: '',
   globalShortcut: 'CommandOrControl+q',
   keys: [''],
+};
+
+type WindowActivity = {
+  WindowTitle: string;
+};
+
+type TabActivity = { TabTitle: string; TabURL: string };
+
+type YouTubeActivity = {
+  YouTubeTitle: string;
+  YouTubeURL: string;
+};
+
+type TrackActivity = {
+  TrackTitle: string;
+  TrackURL: string;
+  Artists: string;
+};
+
+type Activity = (
+  | WindowActivity
+  | TabActivity
+  | YouTubeActivity
+  | TrackActivity
+) & { Date: Date };
+
+/*
+ * User receives a new window activity, if the activity exists
+ * in the form of a tab or a track, return true
+ */
+const findWindowDuplicate = (
+  newWindow: string,
+  friendsActivity: Array<Activity>
+) => {
+  return friendsActivity.some((actvt) => {
+    let existingTab = actvt.TabTitle;
+    let existingYouTube = actvt.YouTubeTitle;
+    let existingTrack = actvt.TrackTitle;
+
+    if (existingTab) {
+      // TODO: A better way would be a fuzzy search, but this handles cases like
+      // browsers displaying the tab name as the window name and appending
+      // the tab count with some text
+      let existingSubstring = existingTab.substring(0, newWindow.length);
+      let newSubstring = newWindow.substring(0, existingTab.length);
+
+      if (
+        existingTab.includes(newSubstring) ||
+        newWindow.includes(existingSubstring)
+      ) {
+        return true;
+      }
+    } else if (existingYouTube) {
+      let existingSubstring = existingYouTube.substring(0, newWindow.length);
+      let newSubstring = newWindow.substring(0, existingYouTube.length);
+
+      if (
+        existingYouTube.includes(newSubstring) ||
+        newWindow.includes(existingSubstring)
+      ) {
+        return true;
+      }
+    } else if (existingTrack) {
+      // TODO: Might change in the future
+      // Spotify sets its window title as [artists] - [song title]
+      let existingTitle = actvt.TrackTitle;
+      let existingArtists = actvt.Artists;
+      if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
+    }
+
+    return false;
+  });
+};
+
+/*
+ * If a new activity already exists as a window activity, delete the window activity
+ */
+const replaceDuplicatePreviousWindowActivity = (
+  friendsActivity: Array<Activity>,
+  newActivity: Activity,
+  type: string
+) => {
+  let newActivityAsPreviousWindowActivity = friendsActivity.findIndex(
+    (actvt) =>
+      actvt.WindowTitle &&
+      actvt.WindowTitle.includes(newActivity[type as keyof Activity]) // for example newActivity['TabTitle']
+  );
+  if (newActivityAsPreviousWindowActivity > -1) {
+    delete friendsActivity[newActivityAsPreviousWindowActivity];
+  }
 };
 
 export const settingsSlice = createSlice({
@@ -75,6 +167,55 @@ export const settingsSlice = createSlice({
     setKeepMeSignedInMain: (state, action: PayloadAction<Array<any>>) => {
       state.currentUser.keepMeSignedIn = action.payload;
     },
+    setActivitiesMain: (
+      state,
+      action: PayloadAction<{
+        userID: string;
+        data: Activity;
+        type: string;
+      }>
+    ) => {
+      const { userID, data, type } = action.payload;
+      if (!userID || !data || !type) return;
+
+      let friendsActivity: any[] = [];
+
+      if (state.activities && state.activities[userID]) {
+        friendsActivity = [...state.activities[userID]];
+      }
+
+      if (friendsActivity.length > 0) {
+        if (type === 'WindowTitle') {
+          // Window activities can make duplicates
+          const isDuplicate = findWindowDuplicate(
+            data.WindowTitle,
+            friendsActivity
+          );
+
+          if (isDuplicate) return;
+        } else {
+          replaceDuplicatePreviousWindowActivity(friendsActivity, data, type);
+        }
+      }
+
+      // Check if an activity of the same type already exists,
+      let activityExists = friendsActivity.findIndex((actvt) => actvt[type]);
+
+      // replace if it does.
+      if (activityExists > -1) {
+        friendsActivity[activityExists] = data;
+
+        // Move to top, as it's the most recent activity
+        friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
+      } else {
+        friendsActivity.unshift(data);
+      }
+
+      state.activities = {
+        ...state.activities,
+        [userID]: friendsActivity,
+      };
+    },
     turnOffShowWelcomeMain: (state) => {
       state.showWelcome = false;
     },
@@ -115,6 +256,9 @@ export const settingsSlice = createSlice({
 export const { setCurrentUserMain } = settingsSlice.actions;
 export const { setUsernameMain } = settingsSlice.actions;
 export const { setEmailMain } = settingsSlice.actions;
+
+export const { setActivitiesMain } = settingsSlice.actions;
+
 export const { setAccessTokenMain } = settingsSlice.actions;
 export const { setRefreshTokenMain } = settingsSlice.actions;
 export const { setProfilePictureMain } = settingsSlice.actions;
@@ -136,3 +280,5 @@ export default settingsSlice.reducer;
 export const getSettings = (state: SettingsState) => state.settings;
 export const getCurrentUser = (state: SettingsState) =>
   state.settings.currentUser;
+export const getActivities = (state: SettingsState) =>
+  state.settings.activities;

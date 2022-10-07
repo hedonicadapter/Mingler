@@ -9,7 +9,7 @@ import { LoadingAnimation } from './reusables/LoadingAnimation';
 
 const { ipcRenderer, remote } = require('electron');
 
-export default function SpotifyContent() {
+function SpotifyContent() {
   window.onbeforeunload = (e) => {
     e.returnValue = false; // Cancels close, true unclosable (unlike goofy electron api)
   };
@@ -96,3 +96,5 @@ export default function SpotifyContent() {
     </WindowFrame>
   );
 }
+
+export default React.memo(SpotifyContent);

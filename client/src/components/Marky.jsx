@@ -41,7 +41,7 @@ const markyVariants = {
 // if true: use prop setExpanded to toggle the card body
 //          and set the video at position [0]
 
-export default function Marky({
+function Marky({
   WindowTitle,
 
   TrackTitle,
@@ -320,3 +320,5 @@ export default function Marky({
     </motion.div>
   );
 }
+
+export default React.memo(Marky);

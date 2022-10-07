@@ -163,7 +163,11 @@ const installExtensions = async () => {
 const answerProcess = (process) => {
   if (!process || !process.stdin) return;
 
-  process.stdin.write('yo\n');
+  try {
+    process.stdin.write('yo\n');
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 function decodeUTF8(utf8String: string) {
@@ -627,8 +631,8 @@ const createWindow = async () => {
         .catch(console.error);
 
       ipcMain.on('exit:frommenubutton', () => {
-        mainWindow?.webContents.send('exit:frommain');
         killAll();
+        mainWindow?.webContents.send('exit:frommain');
         // setTimeout(() => mainWindow?.close(), 250);
       });
       ipcMain.on('currentUser:signedIn', (event, userID) => {
@@ -685,8 +689,8 @@ const createWindow = async () => {
     mainWindow?.webContents.send('cancelfriendrequest:frommain', data);
   });
 
-  ipcMain.on('toggleconnectspotify:fromrenderer', () => {
-    mainWindow?.webContents.send('toggleconnectspotify:frommain');
+  ipcMain.on('toggleconnectspotify:fromrenderer', (event, data) => {
+    mainWindow?.webContents.send('toggleconnectspotify:frommain', data);
   });
   ipcMain.on('disconnectspotify:fromrenderer', () => {
     console.log('disconnecting');
@@ -948,6 +952,7 @@ app.whenReady().then(() => {
           await storage.setItem('store', {
             settings: {
               ...global.state?.settings,
+              activities: null,
               // currentUser: {
               //   _id: global.state?.settings?.currentUser?._id,
               //   friends: global.state?.settings?.currentUser?.friends,

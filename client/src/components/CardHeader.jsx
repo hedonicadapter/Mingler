@@ -104,47 +104,49 @@ const OnlineStatusIndicator = ({
   );
 };
 
-const Markies = ({
-  markyActivities,
-  expanded,
-  userID,
-  togglePlayer,
-  setPlayerURL,
-  playerURL,
-  playerVisible,
-  reactPlayerRef,
-}) =>
-  markyActivities &&
-  markyActivities.length > 0 &&
-  markyActivities.map((activity, index) => (
-    <motion.div
-      key={index}
-      layout
-      className={styles.markyContainer}
-      initial={'hide'}
-      animate={expanded ? 'show' : 'hide'}
-      exit={'hide'}
-      custom={index === 0}
-      variants={{
-        show: { opacity: 1 },
-        hide: (isFirstMarky) => ({ opacity: isFirstMarky ? 1 : 0 }),
-      }}
-      transition={{ duration: 0.2 }}
-    >
-      <Marky
-        {...activity}
-        userID={userID}
-        expanded={expanded}
-        togglePlayer={togglePlayer}
-        setPlayerURL={setPlayerURL}
-        playerURL={playerURL}
-        playerVisible={playerVisible}
-        reactPlayerRef={reactPlayerRef}
-      />
-    </motion.div>
-  ));
+const Markies = React.memo(
+  ({
+    markyActivities,
+    expanded,
+    userID,
+    togglePlayer,
+    setPlayerURL,
+    playerURL,
+    playerVisible,
+    reactPlayerRef,
+  }) =>
+    markyActivities &&
+    markyActivities.length > 0 &&
+    markyActivities.map((activity, index) => (
+      <motion.div
+        key={index}
+        layout
+        className={styles.markyContainer}
+        initial={'hide'}
+        animate={expanded ? 'show' : 'hide'}
+        exit={'hide'}
+        custom={index === 0}
+        variants={{
+          show: { opacity: 1 },
+          hide: (isFirstMarky) => ({ opacity: isFirstMarky ? 1 : 0 }),
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        <Marky
+          {...activity}
+          userID={userID}
+          expanded={expanded}
+          togglePlayer={togglePlayer}
+          setPlayerURL={setPlayerURL}
+          playerURL={playerURL}
+          playerVisible={playerVisible}
+          reactPlayerRef={reactPlayerRef}
+        />
+      </motion.div>
+    ))
+);
 
-export default function CardHeader({
+function CardHeader({
   clientDemoUser,
   activityLength,
   isWidgetHeader,
@@ -417,3 +419,5 @@ export default function CardHeader({
     </motion.div>
   );
 }
+
+export default React.memo(CardHeader);

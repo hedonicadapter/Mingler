@@ -58,7 +58,7 @@ const SearchField = ({ handleSearchInput, error, findFriendsSearchValue }) =>
     [error, findFriendsSearchValue]
   );
 
-export default function FindFriendsContent() {
+function FindFriendsContent() {
   window.onbeforeunload = (e) => {
     e.returnValue = false; // Cancels close, true unclosable
   };
@@ -290,3 +290,5 @@ export default function FindFriendsContent() {
     </div>
   );
 }
+
+export default React.memo(FindFriendsContent);

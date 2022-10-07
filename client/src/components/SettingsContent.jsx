@@ -28,7 +28,6 @@ import {
   setKeys,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
-import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 import path from 'path';
@@ -717,7 +716,7 @@ const SettingsContentHeader = ({
   );
 };
 
-export default function SettingsContent() {
+function SettingsContent() {
   makeClickthrough();
 
   const settingsState = useSelector(getSettings);
@@ -1044,3 +1043,5 @@ export default function SettingsContent() {
     </div>
   );
 }
+
+export default React.memo(SettingsContent);

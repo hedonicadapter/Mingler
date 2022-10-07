@@ -10,7 +10,10 @@ import FriendRequestsAccordion from './FriendRequestsAccordion';
 import { useClientSocket } from '../contexts/ClientSocketContext';
 import { useFriends } from '../contexts/FriendsContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCurrentUser } from '../mainState/features/settingsSlice';
+import {
+  getActivities,
+  getCurrentUser,
+} from '../mainState/features/settingsSlice';
 import WidgetFooter from './WidgetFooter';
 import MenuButton from './MenuButton';
 import {
@@ -18,7 +21,6 @@ import {
   setFindFriendsSearchValue,
   toggleCardExpandedMasterToggle,
 } from '../mainState/features/appSlice';
-import { useBrowserWindow } from '../contexts/BrowserWindowContext';
 import useDebounce from '../helpers/useDebounce';
 import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
@@ -151,9 +153,10 @@ function FriendsList() {
   const dispatch = useDispatch();
 
   const currentUser = useSelector(getCurrentUser);
+  const activities = useSelector(getActivities);
   const appState = useSelector(getApp);
 
-  const { acceptFriendRequest, activities } = useClientSocket();
+  const { acceptFriendRequest } = useClientSocket();
   const {
     friends,
     getFriends,
@@ -267,7 +270,7 @@ function FriendsList() {
               friend={friends?.find(
                 (friend) => friend._id === currentUser?._id
               )}
-              activities={activities[currentUser?._id]}
+              activities={activities?.[currentUser?._id]}
               isWidgetHeader={true}
               cardExpandedMasterToggle={appState?.cardExpandedMasterToggle}
             />
@@ -310,7 +313,7 @@ function FriendsList() {
                   ? filteredFriends?.map((friend, index) => (
                       <motion.div key={friend?._id}>
                         <AccordionItem
-                          activities={activities[friend?._id]}
+                          activities={activities?.[friend?._id]}
                           clientDemoUser={demoUser}
                           friend={friend}
                           isMe={friend?._id === currentUser?._id}
@@ -324,7 +327,7 @@ function FriendsList() {
                   ? friends.map((friend, index) => (
                       <motion.div key={friend?._id}>
                         <AccordionItem
-                          activities={activities[friend?._id]}
+                          activities={activities?.[friend?._id]}
                           clientDemoUser={demoUser}
                           friend={friend}
                           isMe={friend?._id === currentUser?._id}
