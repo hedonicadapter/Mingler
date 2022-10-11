@@ -108,7 +108,6 @@ function AccordionItem({
 
   useEffect(() => {
     activities && setActivityLength(activities.length);
-    console.log({ activities });
   }, [activities]);
 
   useEffect(() => {

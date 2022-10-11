@@ -32,21 +32,21 @@ export default function Widget() {
     });
   }, []);
   return (
-    <AuthProvider>
-      <ClientSocketProvider>
-        <FriendsProvider>
-          <UserStatusProvider>
-            <BrowserWindowProvider>
+    <BrowserWindowProvider>
+      <AuthProvider>
+        <ClientSocketProvider>
+          <FriendsProvider>
+            <UserStatusProvider>
               <Memoized>
                 <Border />
                 <MenuButton />
 
                 <FriendsList />
               </Memoized>
-            </BrowserWindowProvider>
-          </UserStatusProvider>
-        </FriendsProvider>
-      </ClientSocketProvider>
-    </AuthProvider>
+            </UserStatusProvider>
+          </FriendsProvider>
+        </ClientSocketProvider>
+      </AuthProvider>
+    </BrowserWindowProvider>
   );
 }

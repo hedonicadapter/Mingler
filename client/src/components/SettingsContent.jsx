@@ -107,19 +107,20 @@ const SpotifySetting = ({
   setDisconnectSpotifyHovered,
   connectedToSpotify,
   spotifyError,
+  userID,
+  accessToken,
 }) => {
-  useEffect(() => {
-    console.log({ connectedToSpotify });
-  }, [connectedToSpotify]);
-
   return (
     <div
       onClick={() => {
         if (spotifyError) return;
 
         setting === 'disconnect'
-          ? ipcRenderer.send('disconnectspotify:fromrenderer')
-          : ipcRenderer.send('toggleconnectspotify:fromrenderer');
+          ? ipcRenderer.send('disconnectspotify:fromrenderer', {
+              id: userID,
+              access: accessToken,
+            })
+          : ipcRenderer.send('toggleconnectspotify:fromrenderer', accessToken);
       }}
       className={styles.spotifySettingContainer}
       style={{
@@ -140,7 +141,9 @@ const SpotifySetting = ({
         onMouseEnter={() => setSpotifyHovered(true)}
         onMouseLeave={() => setSpotifyHovered(false)}
         // Same thing here
-        onClick={() => ipcRenderer.send('toggleconnectspotify:fromrenderer')}
+        onClick={() =>
+          ipcRenderer.send('toggleconnectspotify:fromrenderer', accessToken)
+        }
       >
         <BsSpotify size={'20px'} style={{ paddingRight: 6 }} />
       </motion.div>
@@ -257,15 +260,6 @@ const AccountSettingsContent = ({
     spotifyHovered,
     connectedToSpotify,
   ]);
-
-  useEffect(() => {
-    console.log({
-      connectedToSpotify,
-      accesstoken: settingsState.currentUser?.spotifyAccessToken,
-      expired:
-        new Date() < new Date(settingsState.currentUser?.spotifyExpiryDate),
-    });
-  }, [connectedToSpotify]);
 
   useEffect(() => {
     settingsState?.currentUser?.spotifyConnected
@@ -411,6 +405,8 @@ const AccountSettingsContent = ({
         setDisconnectSpotifyHovered={setDisconnectSpotifyHovered}
         connectedToSpotify={connectedToSpotify}
         spotifyError={spotifyError}
+        userID={settingsState?.currentUser?._id}
+        accessToken={settingsState?.currentUser?.accessToken}
       />
     </motion.div>
   );
@@ -735,15 +731,18 @@ function SettingsContent() {
   const [expanded, setExpanded] = useState(0);
 
   const [formFilled, setFormFilled] = useState(false);
-  const [username, setUsername] = useState(
-    settingsState?.currentUser?.username
-  );
-  const [email, setEmail] = useState(settingsState?.currentUser?.email);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
 
   const [profilePictureError, setProfilePictureError] = useState(null);
   const [usernameError, setUsernameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [spotifyError, setSpotifyError] = useState(null);
+
+  useEffect(() => {
+    setUsername(settingsState?.currentUser?.username);
+    setEmail(settingsState?.currentUser?.email);
+  }, [settingsState?.currentUser?.username, settingsState?.currentUser?.email]);
 
   useEffect(() => {
     if (widgetSettingsContentInView) setExpanded(0);
@@ -833,7 +832,6 @@ function SettingsContent() {
 
   const handleNameChange = (evt) => {
     let newUsername = evt.target.value;
-    setUsername(evt.target.value);
 
     settingsDao
       .setUsername(
@@ -854,8 +852,6 @@ function SettingsContent() {
     evt.preventDefault();
     evt.stopPropagation();
     let newEmail = evt.target.value;
-
-    setEmail(evt.target.value);
 
     settingsDao
       .setEmail(

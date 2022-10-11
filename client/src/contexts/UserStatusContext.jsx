@@ -94,6 +94,19 @@ function UserStatusProvider({ children }) {
       });
   };
 
+  const disconnectSpotifyHandler = () => {
+    emitActivity({
+      data: {
+        Artists: '',
+        TrackTitle: 'disconnect',
+        TrackURL: '',
+        Date: new Date(),
+      },
+      userID: currentUser?._id,
+      type: 'TrackTitle',
+    });
+  };
+
   const chromiumHostDataHandler = (event, data) => {
     if (data.YouTubeTitle) {
       emitActivity({
@@ -146,6 +159,8 @@ function UserStatusProvider({ children }) {
     activeWindowListener();
     activeTabListener();
 
+    ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
+
     return () => {
       ipcRenderer.removeAllListeners(
         'windowinfo:frommain',
@@ -154,6 +169,10 @@ function UserStatusProvider({ children }) {
       ipcRenderer.removeAllListeners(
         'chromiumHostData',
         chromiumHostDataHandler
+      );
+      ipcRenderer.removeAllListeners(
+        'disconnectspotify:frommain',
+        disconnectSpotifyHandler
       );
     };
   }, [currentUser?._id]);

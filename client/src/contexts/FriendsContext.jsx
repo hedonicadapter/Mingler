@@ -42,7 +42,7 @@ export function FriendsProvider({ children }) {
   const [filteredFriends, setFilteredFriends] = useState([]);
 
   useEffect(() => {
-    console.log(friends);
+    ipcRenderer.send('friends:fromrenderer', friends);
   }, [friends]);
 
   useEffect(() => {

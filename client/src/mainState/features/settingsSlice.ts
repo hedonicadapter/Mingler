@@ -59,9 +59,9 @@ const findWindowDuplicate = (
   friendsActivity: Array<Activity>
 ) => {
   return friendsActivity.some((actvt) => {
-    let existingTab = actvt.TabTitle;
-    let existingYouTube = actvt.YouTubeTitle;
-    let existingTrack = actvt.TrackTitle;
+    let existingTab = actvt?.TabTitle;
+    let existingYouTube = actvt?.YouTubeTitle;
+    let existingTrack = actvt?.TrackTitle;
 
     if (existingTab) {
       // TODO: A better way would be a fuzzy search, but this handles cases like
@@ -89,8 +89,8 @@ const findWindowDuplicate = (
     } else if (existingTrack) {
       // TODO: Might change in the future
       // Spotify sets its window title as [artists] - [song title]
-      let existingTitle = actvt.TrackTitle;
-      let existingArtists = actvt.Artists;
+      let existingTitle = actvt?.TrackTitle;
+      let existingArtists = actvt?.Artists;
       if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
     }
 
@@ -108,7 +108,7 @@ const replaceDuplicatePreviousWindowActivity = (
 ) => {
   let newActivityAsPreviousWindowActivity = friendsActivity.findIndex(
     (actvt) =>
-      actvt.WindowTitle &&
+      actvt?.WindowTitle &&
       actvt.WindowTitle.includes(newActivity[type as keyof Activity]) // for example newActivity['TabTitle']
   );
   if (newActivityAsPreviousWindowActivity > -1) {
@@ -176,9 +176,10 @@ export const settingsSlice = createSlice({
       }>
     ) => {
       const { userID, data, type } = action.payload;
-      if (!userID || !data || !type) return;
+      if (!userID || !data || !type || !data[type as keyof Activity]) return;
 
       let friendsActivity: any[] = [];
+      let preDisconnectTrack: number = -1;
 
       if (state.activities && state.activities[userID]) {
         friendsActivity = [...state.activities[userID]];
@@ -195,20 +196,41 @@ export const settingsSlice = createSlice({
           if (isDuplicate) return;
         } else {
           replaceDuplicatePreviousWindowActivity(friendsActivity, data, type);
+
+          // Delete track activity if user disconnects spotify and sends "disconnect" as a tracktitle
+          if (type === 'TrackTitle') {
+            console.log('type is tracktitle');
+            if (data.TrackTitle === 'disconnect') {
+              console.log('data.TrackTitle is disconnect ', data.TrackTitle);
+              preDisconnectTrack = friendsActivity.findIndex(
+                (actvt) => actvt?.TrackTitle || false
+              );
+              console.log('preDisconnectTrack ', preDisconnectTrack);
+              if (preDisconnectTrack !== -1) {
+                console.log('splicing');
+                friendsActivity.splice(preDisconnectTrack, 1);
+              }
+            }
+          }
         }
       }
 
-      // Check if an activity of the same type already exists,
-      let activityExists = friendsActivity.findIndex((actvt) => actvt[type]);
+      // value only changes from -1 if user emits disconnect as track activity
+      if (preDisconnectTrack === -1) {
+        // Check if an activity of the same type already exists,
+        let activityExists = friendsActivity.findIndex(
+          (actvt) => actvt?.[type] || false
+        );
 
-      // replace if it does.
-      if (activityExists > -1) {
-        friendsActivity[activityExists] = data;
+        // replace if it does.
+        if (activityExists > -1) {
+          friendsActivity[activityExists] = data;
 
-        // Move to top, as it's the most recent activity
-        friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
-      } else {
-        friendsActivity.unshift(data);
+          // Move to top, as it's the most recent activity
+          friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
+        } else {
+          friendsActivity.unshift(data);
+        }
       }
 
       state.activities = {

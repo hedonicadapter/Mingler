@@ -25,22 +25,7 @@ export function useClientSocket() {
 
 export function ClientSocketProvider({ children }) {
   const currentUser = useSelector((state) => getCurrentUser(state));
-  const [activities, setActivities] = useState({});
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    // const object = {
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    //   30517530151241: [
-    //     { WinTitle: 'Busta app', Date: new Date() },
-    //     { TrackTitle: 'out yonder' },
-    //   ],
-    // };
-    console.log({ activities });
-  }, [activities]);
 
   useEffect(() => {
     ipcRenderer.on(
@@ -132,7 +117,6 @@ export function ClientSocketProvider({ children }) {
     socket.on('activity:receive:TabTitle', activityReceiveTabHandler);
     socket.on('activity:receive:YouTubeTitle', activityReceiveYoutubeHandler);
     socket.on('activity:receive:TrackTitle', activityReceiveTrackHandler);
-    console.log('bustaaaaa ');
 
     return () => {
       socket.off('activity:receive:WindowTitle', activityReceiveWindowHandler);
@@ -144,85 +128,6 @@ export function ClientSocketProvider({ children }) {
       socket.off('activity:receive:TrackTitle', activityReceiveTrackHandler);
     };
   }, []);
-
-  // const findWindowDuplicate = (newWindow, friendsActivity) => {
-  //   return friendsActivity.some((actvt) => {
-  //     let existingTab = actvt.TabTitle;
-  //     let existingYouTube = actvt.YouTubeTitle;
-  //     let existingTrack = actvt.TrackTitle;
-
-  //     if (existingTab) {
-  //       // TODO: A better way would be a fuzzy search, but this handles cases like
-  //       // browsers displaying the tab name as the window name and appending
-  //       // the tab count with some text
-  //       let existingSubstring = existingTab.substring(0, newWindow.length);
-  //       let newSubstring = newWindow.substring(0, existingTab.length);
-
-  //       if (
-  //         existingTab.includes(newSubstring) ||
-  //         newWindow.includes(existingSubstring)
-  //       ) {
-  //         return true;
-  //       }
-  //     } else if (existingYouTube) {
-  //       let existingSubstring = existingYouTube.substring(0, newWindow.length);
-  //       let newSubstring = newWindow.substring(0, existingYouTube.length);
-
-  //       if (
-  //         existingYouTube.includes(newSubstring) ||
-  //         newWindow.includes(existingSubstring)
-  //       ) {
-  //         return true;
-  //       }
-  //     } else if (existingTrack) {
-  //       // TODO: Might change in the future
-  //       // Spotify sets its window title as [artists] - [song title]
-  //       let existingTitle = actvt.TrackTitle;
-  //       let existingArtists = actvt.Artists;
-  //       if (newWindow === ` ${existingArtists} - ${existingTitle}`) return true;
-  //     }
-  //   });
-  // };
-
-  // const _setActivities = (friendID, newActivity, activityType) => {
-  //   if (!newActivity[activityType]) return;
-
-  //   setActivities((prevState) => {
-  //     let friendsActivity = prevState[friendID] ? [...prevState[friendID]] : [];
-
-  //     // Window activities can make duplicates
-  //     if (activityType === 'WindowTitle') {
-  //       const isDuplicate = findWindowDuplicate(
-  //         newActivity.WindowTitle,
-  //         friendsActivity
-  //       );
-
-  //       console.log({ isDuplicate });
-
-  //       if (isDuplicate) return prevState;
-  //     }
-
-  //     // Check if an activity of the same type already exists,
-  //     let activityExists = friendsActivity.findIndex(
-  //       (actvt) => actvt[activityType]
-  //     );
-
-  //     // replace if it does.
-  //     if (activityExists > -1) {
-  //       friendsActivity[activityExists] = newActivity;
-
-  //       // Move to top, as it's the most recent activity
-  //       friendsActivity.unshift(friendsActivity.splice(activityExists, 1)[0]);
-  //     } else {
-  //       friendsActivity.unshift(newActivity);
-  //     }
-
-  //     return {
-  //       ...prevState,
-  //       [friendID]: friendsActivity,
-  //     };
-  //   });
-  // };
 
   const activityReceiveWindowHandler = (packet) =>
     dispatch(setActivitiesMain(packet));
@@ -329,8 +234,6 @@ export function ClientSocketProvider({ children }) {
     sendYouTubeTimeRequest,
     emitActivity,
     emitMessage,
-    socket,
-    activities,
   };
 
   return (

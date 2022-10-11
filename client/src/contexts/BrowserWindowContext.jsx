@@ -1,4 +1,10 @@
-import React, { useContext, useState, useEffect, createContext } from 'react';
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  createContext,
+  useRef,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { notify } from '../components/reusables/notifications';
 import colors from '../config/colors';
@@ -22,8 +28,6 @@ import {
   setSpotifyExpiryDate,
   setSpotifyRefreshTokenMain,
 } from '../mainState/features/settingsSlice';
-import { useFriends } from './FriendsContext';
-import { useStatus } from './UserStatusContext';
 
 const electron = require('electron');
 const app = electron.remote.app;
@@ -111,7 +115,7 @@ let findFriendsWindowStateless = new BrowserWindow(findFriendsWindowConfig);
 let connectSpotifyWindowStateless = new BrowserWindow(
   connectSpotifyWindowConfig
 );
-const viewStateless = new BrowserView();
+let viewStateless = new BrowserView();
 
 const hideWindow = (window) => {
   if (!window || window.isDestroyed()) return;
@@ -122,19 +126,34 @@ const hideWindow = (window) => {
   else window.hide();
 };
 
+// From https://stackoverflow.com/a/62019038/11599993
+// by Gunar Gessner
+const useCompare = (val) => {
+  const prevVal = usePrevious(val);
+  return prevVal !== val;
+};
+const usePrevious = (value) => {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
+  return ref.current;
+};
+
 function BrowserWindowProvider({ children }) {
   const dispatch = useDispatch();
-
-  const { friends } = useFriends();
-  const { activeTrackListener } = useStatus();
 
   const appState = useSelector(getApp);
   const settingsState = useSelector(getSettings);
   const currentUser = useSelector(getCurrentUser);
 
+  const idChanged = useCompare(currentUser?._id);
+  const accessTokenChanged = useCompare(currentUser?.accessToken);
+
   const [readyToExit, setReadyToExit] = useState(false);
   const [connectSpotifyAuthorizeURL, setConnectSpotifyAuthorizeURL] =
     useState('');
+  const [authorizeSpotifyCode, setAuthorizeSpotifyCode] = useState('');
 
   const [settingsWindow, setSettingsWindow] = useState(settingsWindowStateless);
   const [findFriendsWindow, setFindFriendsWindow] = useState(
@@ -145,6 +164,24 @@ function BrowserWindowProvider({ children }) {
   );
 
   const [view, setView] = useState(viewStateless);
+
+  useEffect(() => {
+    if (!authorizeSpotifyCode || !currentUser?._id || !currentUser?.accessToken)
+      return;
+
+    authorizeSpotify(
+      authorizeSpotifyCode,
+      currentUser._id,
+      currentUser.accessToken
+    );
+  }, [authorizeSpotifyCode, idChanged, accessTokenChanged]);
+
+  useEffect(() => {
+    if (!connectSpotifyAuthorizeURL || !view) return;
+    view.webContents
+      .loadURL(connectSpotifyAuthorizeURL)
+      .catch((e) => notify('Something went wrong. ', e));
+  }, [connectSpotifyAuthorizeURL, view]);
 
   const settingsWindowFocusHandler = () => {
     console.log('sending from renterer');
@@ -174,19 +211,20 @@ function BrowserWindowProvider({ children }) {
     hideWindow(connectSpotifyWindow);
   };
 
-  const toggleConnectSpotifyHandler = () => {
-    toggleConnectSpotify();
+  const toggleConnectSpotifyHandler = (evt, data) => {
+    toggleConnectSpotify(data);
   };
-  const disconnectSpotifyHandler = () => {
+  const disconnectSpotifyHandler = (evt, data) => {
+    const { id, access } = data;
     console.log('disconnecting');
-    DAO.disconnectSpotify(currentUser?._id, currentUser?.accessToken)
+    DAO.disconnectSpotify(id, access)
       .then((result) => {
         if (result?.data?.success) {
           console.log('succeeded');
           dispatch(setSpotifyAccessTokenMain('disconnect'));
           dispatch(setSpotifyRefreshTokenMain(null));
           dispatch(setSpotifyExpiryDate(null));
-          activeTrackListener('disconnect');
+          // activeTrackListener('disconnect');
         }
       })
       .catch((e) => {
@@ -196,14 +234,14 @@ function BrowserWindowProvider({ children }) {
 
   const getSpotifyURL = async (accessToken) => {
     try {
-      const result = await DAO.createSpotifyURL(currentUser.accessToken);
+      const result = await DAO.createSpotifyURL(accessToken);
 
       if (result?.data?.success) {
-        console.warn(
-          'spotify authorize url from server ',
-          result.data.authorizeURL
-        );
-        setConnectSpotifyAuthorizeURL(result.data.authorizeURL);
+        let url = result.data.authorizeURL;
+        if (!url.startsWith('https'))
+          return notify('Unsafe url received from spotify. ');
+        console.warn('spotify authorize url from server ', url);
+        setConnectSpotifyAuthorizeURL(url);
       } else {
         notify(
           'Something went wrong when generating a spotify authentication URL. '
@@ -245,14 +283,25 @@ function BrowserWindowProvider({ children }) {
     // dispatch(findFriendsOpenFalse());
     // findFriendsWindow = null;
     setFindFriendsWindow(null);
+    setView(null);
     settingsWindowStateless = null;
     findFriendsWindowStateless = null;
     connectSpotifyWindowStateless = null;
+    viewStateless = null;
     // }
 
     setReadyToExit(true);
     ipcRenderer.send('exitready:fromrenderer');
   };
+
+  useEffect(() => {
+    if (currentUser) return;
+    // hideWindow(connectSpotifyWindow);
+    connectSpotifyWindow?.hide();
+    hideWindow(findFriendsWindow);
+    hideWindow(settingsWindow);
+    setConnectSpotifyAuthorizeURL('');
+  }, [currentUser]);
 
   useEffect(() => {
     ipcRenderer.once('exit:frommain', exitFromMainHandler);
@@ -341,12 +390,21 @@ function BrowserWindowProvider({ children }) {
     };
   }, []);
 
+  const friendsFromMainHandler = (evt, friends) =>
+    findFriendsWindow.webContents.send('friends', friends);
+
   useEffect(() => {
     if (!findFriendsWindow || findFriendsWindow.isDestroyed()) return;
 
     if (findFriendsWindow?.isVisible())
-      findFriendsWindow.webContents.send('friends', friends);
-  }, [friends, findFriendsWindow]);
+      ipcRenderer.on('friends:frommain', friendsFromMainHandler);
+
+    return () =>
+      ipcRenderer.removeAllListeners(
+        'friends:frommain',
+        friendsFromMainHandler
+      );
+  }, [findFriendsWindow]);
 
   useEffect(() => {
     ipcRenderer.on('tray:settings', traySettingsHandler);
@@ -354,20 +412,26 @@ function BrowserWindowProvider({ children }) {
       'toggleconnectspotify:frommain',
       toggleConnectSpotifyHandler
     );
-    ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
 
     return () => {
       ipcRenderer.removeAllListeners(
         'toggleconnectspotify:frommain',
         toggleConnectSpotifyHandler
       );
+
+      ipcRenderer.removeAllListeners('tray:settings', traySettingsHandler);
+    };
+  }, []);
+
+  useEffect(() => {
+    ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
+
+    return () =>
       ipcRenderer.removeAllListeners(
         'disconnectspotify:frommain',
         disconnectSpotifyHandler
       );
-      ipcRenderer.removeAllListeners('tray:settings', traySettingsHandler);
-    };
-  }, []);
+  }, [currentUser]);
 
   const loadSettingsContent = () => {
     if (settingsWindow?.isDestroyed()) return;
@@ -442,8 +506,8 @@ function BrowserWindowProvider({ children }) {
     }
   };
 
-  const authorizeSpotify = (code) => {
-    DAO.authorizeSpotify(code, currentUser._id, currentUser.accessToken)
+  const authorizeSpotify = (code, userID, access) => {
+    DAO.authorizeSpotify(code, userID, access)
       .then((result) => {
         console.warn('spotiffff ', result);
         if (result?.data?.success) {
@@ -452,25 +516,28 @@ function BrowserWindowProvider({ children }) {
             setSpotifyRefreshTokenMain(result.data.body['refresh_token'])
           );
           dispatch(setSpotifyExpiryDate(result.data.body['spotifyExpiryDate']));
-          activeTrackListener(result.data.body['access_token']);
+          // activeTrackListener(result.data.body['access_token']);
           hideWindow(connectSpotifyWindow);
         }
       })
       .catch((e) => {
         sendSpotifyError(e);
-      });
+      })
+      .finally(() => setAuthorizeSpotifyCode(''));
   };
 
-  const connectSpotifyWindowRedirectHandler = (url) => {
+  const connectSpotifyWindowRedirectHandler = () => {
+    let url = view.webContents.getURL();
     if (!url) return;
+
     if (
       !url.startsWith('https://menglir.herokuapp.com/musicNumbsTheSpirit?code=')
     )
       return;
 
-    let code;
+    let code = '';
     code = url.substring(url.indexOf('=') + 1, url.indexOf('&state=null'));
-    authorizeSpotify(code);
+    code && setAuthorizeSpotifyCode(code);
   };
 
   const spotifyGoBack = (view, fallbackURL) => {
@@ -482,14 +549,12 @@ function BrowserWindowProvider({ children }) {
         return notify('Prevented navigation to insecure URL. ');
       view.webContents
         .loadURL(fallbackURL)
-        .then(() => console.log('loaded new url'))
         .catch((e) => notify('Something went wrong. ', e));
     }
   };
 
   const viewDidFinishLoadHandler = () => {
-    let currentURL = view.webContents.getURL();
-    if (currentURL) connectSpotifyWindowRedirectHandler(currentURL);
+    connectSpotifyWindowRedirectHandler();
 
     view.webContents.insertCSS(
       `html, body, div, li { transition: all 0.15s linear; } body { border-radius:4px; } ul { padding-bottom: 0 !important; margin-bottom: 16px !important;}`
@@ -508,49 +573,30 @@ function BrowserWindowProvider({ children }) {
     );
   };
 
-  // Because of the way I prevent windows from truly closing, clicking links that open in new windows crashes the app
+  // TODO: This doesn't work anymore, needs to happen in main process
   const viewNewWindowHandler = (evt, url) => {
-    if (!view || !view.webContents) return;
     evt.preventDefault();
+    if (!view || !view.webContents) return;
     if (!url.startsWith('https'))
       return notify('Prevented navigation to insecure URL. ');
-    view.webContents.loadUrl(url);
+    view.webContents.once('dom-ready', () => {
+      view.webContents
+        .loadUrl(url)
+        .catch((e) => notify('Something went wrong. ', e));
+    });
   };
 
   useEffect(() => {
-    if (!connectSpotifyWindow || !view || !connectSpotifyAuthorizeURL) return;
-    if (!connectSpotifyAuthorizeURL.startsWith('https'))
-      return notify('Prevented navigation to insecure URL. ');
-
-    connectSpotifyWindow.setBrowserView(null);
-    connectSpotifyWindow.setBrowserView(view);
-    view.setBounds({ x: 0, y: 54, height: 800, width: 545 });
-    view.setAutoResize({
-      width: true,
-      height: true,
-      horizontal: true,
-    });
-    view.setBackgroundColor(colors.offWhite);
-    view.webContents
-      .loadURL(connectSpotifyAuthorizeURL)
-      .catch((e) => notify('Something went wrong. ', e));
-
     view.webContents.on('did-finish-load', viewDidFinishLoadHandler);
-    view.webContents.on('new-window', viewNewWindowHandler);
-
+    // view.webContents.on('new-window', viewNewWindowHandler);
     return () => {
-      if (!view) return;
-      !connectSpotifyWindow?.isDestroyed() &&
-        connectSpotifyWindow?.setBrowserView(null);
-      view.webContents?.removeListener(
+      view.webContents.removeListener(
         'did-finish-load',
         viewDidFinishLoadHandler
       );
-      view.webContents.removeListener('new-window', viewNewWindowHandler);
-      view?.webContents?.destroy(); //TypeError: destroy is not a function
-      setView(null);
+      // view.webContents.removeListener('new-window', viewNewWindowHandler);
     };
-  }, [view, connectSpotifyWindow, connectSpotifyAuthorizeURL]);
+  }, [view, connectSpotifyAuthorizeURL]);
 
   // const loadSpotifyOauth = (windoe, url) => {
   // if (!url || !windoe || windoe.isDestroyed())
@@ -570,10 +616,19 @@ function BrowserWindowProvider({ children }) {
 
     connectSpotifyWindow.once('ready-to-show', () => {
       connectSpotifyWindow.setTitle('Connect with Spotify');
+
+      connectSpotifyWindow.setBrowserView(view);
+      view.setBounds({ x: 0, y: 54, height: 800, width: 545 });
+      view.setAutoResize({
+        width: true,
+        height: true,
+        horizontal: true,
+      });
+      view.setBackgroundColor(colors.offWhite);
     });
   };
 
-  const toggleConnectSpotify = () => {
+  const toggleConnectSpotify = (data) => {
     if (!connectSpotifyWindow || connectSpotifyWindow.isDestroyed()) return;
 
     connectSpotifyWindow?.setSkipTaskbar(false);
@@ -581,7 +636,7 @@ function BrowserWindowProvider({ children }) {
     if (connectSpotifyWindow.isVisible()) {
       connectSpotifyWindow.focus();
     } else {
-      getSpotifyURL(currentUser?.accessToken);
+      getSpotifyURL(data || currentUser?.accessToken);
       connectSpotifyWindow.show();
     }
   };

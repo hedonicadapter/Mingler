@@ -257,7 +257,7 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
 
       let trackInfo = JSON5.parse(processedData);
 
-      if (!mainWindow?.isDestroyed() && trackInfo) {
+      if (!mainWindow?.isDestroyed() && trackInfo && trackInfo.name) {
         mainWindow?.webContents.send('trackinfo:frommain', {
           Artists: decodeUTF8(trackInfo.artists),
           TrackTitle: decodeUTF8(trackInfo.name),
@@ -285,12 +285,13 @@ const initActiveTrackListenerProcess = (spotifyAccessToken) => {
     });
   });
 
-  trackProcess.on('exit', () =>
-    store?.dispatch({
-      type: 'setSpotifyConnected',
-      payload: false,
-    })
-  );
+  // TODO: This fires too slow or something so when you reconnect it stays spotifyConnected === false
+  // trackProcess.on('exit', () =>
+  //   store?.dispatch({
+  //     type: 'setSpotifyConnected',
+  //     payload: false,
+  //   })
+  // );
 
   trackProcess.stderr.on('data', function (data) {
     console.warn('stderr activeTrackListener: ', data);
@@ -678,6 +679,14 @@ const createWindow = async () => {
     }
   );
 
+  ipcMain.on('friends:fromrenderer', () =>
+    mainWindow?.webContents.send('friends:frommain')
+  );
+
+  ipcMain.on('toggleFindFriends:fromrenderer', () =>
+    mainWindow?.webContents.send('toggleFindFriends:frommain')
+  );
+
   ipcMain.on('spotifygoback:fromrenderer', () =>
     mainWindow?.webContents.send('spotifygoback:frommain')
   );
@@ -692,9 +701,9 @@ const createWindow = async () => {
   ipcMain.on('toggleconnectspotify:fromrenderer', (event, data) => {
     mainWindow?.webContents.send('toggleconnectspotify:frommain', data);
   });
-  ipcMain.on('disconnectspotify:fromrenderer', () => {
+  ipcMain.on('disconnectspotify:fromrenderer', (event, data) => {
     console.log('disconnecting');
-    mainWindow?.webContents.send('disconnectspotify:frommain');
+    mainWindow?.webContents.send('disconnectspotify:frommain', data);
   });
 
   ipcMain.on('youtubetimerequest:receive:fromRenderer', (event, data) =>
