@@ -8,20 +8,8 @@ A chat app with real-time activity sharing. Let your friends know what you're up
 
 ## Demo
 
-Install and run the latest release and type 'demo' at the sign up/sign in screen. Note that certain features might be disabled.
-## Deployment
+Install and run the latest release and type `demo` and press `Enter ↵` at the sign up/sign in screen. Note that certain features might be disabled.
 
-Run client:
-
-```bash
-  cd client; yarn start;
-```
-
-Run server:
-
-```bash
-  cd MinglerServer; npm run server;
-```
 
 
 ## Tech Stack
@@ -31,6 +19,7 @@ Run server:
 **Server:** MongoDB, Node, Express, Socket.io
 
 **Chromium extension:** JavaScript
+
 
 
 ## Acknowledgements
