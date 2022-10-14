@@ -28,7 +28,6 @@ import {
   setKeys,
 } from '../mainState/features/settingsSlice';
 import settingsDao from '../config/settingsDao';
-import { makeClickthrough } from '../config/clickthrough';
 import animations from '../config/animations';
 import path from 'path';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
@@ -37,6 +36,7 @@ import { useIsInViewport } from '../helpers/useIsInViewport';
 import hotkeys from 'hotkeys-js';
 import WidgetSettingsContent from './settingsContents/WidgetSettingsContent';
 import { BackgroundNoise } from './FriendsList';
+import useClickthrough from '../helpers/useClickthrough';
 
 const { remote, clipboard, ipcRenderer } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -713,7 +713,7 @@ const SettingsContentHeader = ({
 };
 
 function SettingsContent() {
-  makeClickthrough();
+  useClickthrough();
 
   const settingsState = useSelector(getSettings);
   const dispatch = useDispatch();

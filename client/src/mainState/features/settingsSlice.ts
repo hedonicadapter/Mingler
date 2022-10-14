@@ -112,7 +112,7 @@ const replaceDuplicatePreviousWindowActivity = (
       actvt.WindowTitle.includes(newActivity[type as keyof Activity]) // for example newActivity['TabTitle']
   );
   if (newActivityAsPreviousWindowActivity > -1) {
-    delete friendsActivity[newActivityAsPreviousWindowActivity];
+    friendsActivity.splice(newActivityAsPreviousWindowActivity, 1);
   }
 };
 
@@ -199,15 +199,11 @@ export const settingsSlice = createSlice({
 
           // Delete track activity if user disconnects spotify and sends "disconnect" as a tracktitle
           if (type === 'TrackTitle') {
-            console.log('type is tracktitle');
             if (data.TrackTitle === 'disconnect') {
-              console.log('data.TrackTitle is disconnect ', data.TrackTitle);
               preDisconnectTrack = friendsActivity.findIndex(
                 (actvt) => actvt?.TrackTitle || false
               );
-              console.log('preDisconnectTrack ', preDisconnectTrack);
               if (preDisconnectTrack !== -1) {
-                console.log('splicing');
                 friendsActivity.splice(preDisconnectTrack, 1);
               }
             }

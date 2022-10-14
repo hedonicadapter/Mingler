@@ -22,11 +22,11 @@ import {
   toggleCardExpandedMasterToggle,
 } from '../mainState/features/appSlice';
 import useDebounce from '../helpers/useDebounce';
-import { makeClickthrough } from '../config/clickthrough';
 import { ipcRenderer } from 'electron';
 import { useAuth } from '../contexts/AuthContext';
 import { ConfigProvider } from 'react-avatar';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import useClickthrough from '../helpers/useClickthrough';
 
 export const EmptySpaceFiller = () => {
   const dispatch = useDispatch();
@@ -145,7 +145,7 @@ function FriendsList() {
   // });
   // setIgnoreMouseEvents(true, { forward: true });
 
-  makeClickthrough();
+  useClickthrough();
 
   const [greeting, setGreeting] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -211,6 +211,7 @@ function FriendsList() {
 
     return () => {
       clearTimeout(timeout);
+      window.removeEventListener('load', loadListener);
     };
   }, []);
 

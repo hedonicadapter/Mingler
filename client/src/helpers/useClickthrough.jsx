@@ -1,5 +1,7 @@
+import React, { useState, useEffect } from 'react';
+
 // clickthrough everything except className='clickable' (pointer-events: 'auto')
-export const makeClickthrough = () => {
+export default function useClickthrough() {
   // const setIgnoreMouseEvents =
   //   require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
   // addEventListener('pointerover', function mousePolicy(event) {
@@ -9,12 +11,12 @@ export const makeClickthrough = () => {
   //       : mousePolicy._canClick || setIgnoreMouseEvents(false) || 1;
   // });
   // setIgnoreMouseEvents(true, { forward: true });
+  let t;
+
   const setIgnoreMouseEvents =
     require('electron').remote.getCurrentWindow().setIgnoreMouseEvents;
 
-  let t;
-
-  window.addEventListener('mousemove', (event) => {
+  const mouseMoveHandler = (event) => {
     if (event.target === document.documentElement) {
       setIgnoreMouseEvents(true, { forward: true });
       if (t) clearTimeout(t);
@@ -22,5 +24,14 @@ export const makeClickthrough = () => {
         setIgnoreMouseEvents(false);
       }, 150);
     } else setIgnoreMouseEvents(false);
-  });
-};
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', mouseMoveHandler);
+
+    return () => {
+      window.removeEventListener('mousemove', mouseMoveHandler);
+      clearTimeout(t);
+    };
+  }, []);
+}

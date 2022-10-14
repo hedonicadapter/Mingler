@@ -20,11 +20,11 @@ import {
   getApp,
   setFindFriendsSearchValue,
 } from '../mainState/features/appSlice';
-import { makeClickthrough } from '../config/clickthrough';
 import useDebounce from '../helpers/useDebounce';
 import genericErrorHandler from '../helpers/genericErrorHandler';
 import { BackgroundNoise } from './FriendsList';
 import { LoadingAnimation } from './reusables/LoadingAnimation';
+import useClickthrough from '../helpers/useClickthrough';
 
 const { remote } = require('electron');
 const BrowserWindow = remote.BrowserWindow;
@@ -62,7 +62,7 @@ function FindFriendsContent() {
   window.onbeforeunload = (e) => {
     e.returnValue = false; // Cancels close, true unclosable
   };
-  makeClickthrough();
+  useClickthrough();
 
   const [friends, setFriends] = useState([]);
   const [foundFriends, setFoundFriends] = useState([]);
