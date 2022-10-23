@@ -155,27 +155,32 @@ function UserStatusProvider({ children }) {
     return () => clearTimeout(refreshTimeout);
   }, [currentUser?.spotifyExpiryDate]);
 
-  useEffect(() => {
-    activeWindowListener();
-    activeTabListener();
+  useEffect(
+    () => {
+      activeWindowListener();
+      activeTabListener();
 
-    ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
+      ipcRenderer.on('disconnectspotify:frommain', disconnectSpotifyHandler);
 
-    return () => {
-      ipcRenderer.removeAllListeners(
-        'windowinfo:frommain',
-        windowInfoFromMainHandler
-      );
-      ipcRenderer.removeAllListeners(
-        'chromiumHostData',
-        chromiumHostDataHandler
-      );
-      ipcRenderer.removeAllListeners(
-        'disconnectspotify:frommain',
-        disconnectSpotifyHandler
-      );
-    };
-  }, [currentUser?._id]);
+      return () => {
+        ipcRenderer.removeAllListeners(
+          'windowinfo:frommain',
+          windowInfoFromMainHandler
+        );
+        ipcRenderer.removeAllListeners(
+          'chromiumHostData',
+          chromiumHostDataHandler
+        );
+        ipcRenderer.removeAllListeners(
+          'disconnectspotify:frommain',
+          disconnectSpotifyHandler
+        );
+      };
+    },
+    [
+      // currentUser?._id
+    ]
+  );
 
   useEffect(() => {
     if (!currentUser?.spotifyAccessToken) return;
