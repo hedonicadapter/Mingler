@@ -301,6 +301,7 @@ function FriendsList() {
                 width: 100,
                 height: 100,
                 opacity: 0.6,
+                pointerEvents: 'none',
               }}
               formFilled={loading ? 'loading' : false}
             />

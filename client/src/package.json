@@ -7,7 +7,7 @@
   "author": {
     "name": "Samba",
     "email": "thethebatsam@gmail.com",
-    "url": "https://github.com/YungMilky/Mingler"
+    "url": "https://github.com/hedonicadapter/Mingler"
   },
   "scripts": {
     "electron-rebuild": "node -r ../.erb/scripts/BabelRegister.js ../.erb/scripts/ElectronRebuild.js",
