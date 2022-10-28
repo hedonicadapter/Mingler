@@ -46,7 +46,7 @@ export function FriendsProvider({ children }) {
   }, [friends]);
 
   useEffect(() => {
-    if (!currentUser?.accessToken) return;
+    if (!currentUser || !currentUser._id || !currentUser.accessToken) return;
 
     getFriends();
     getConversations();

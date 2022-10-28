@@ -1,11 +1,14 @@
 .conversationText {
   margin: 0px;
-  padding: 10px;
   max-width: 100%;
   word-wrap: break-all;
   white-space: break-spaces;
   text-overflow: ' ';
+  letter-spacing: 1.2px;
   font-size: 0.8em;
+  margin-top: 6px;
+  margin-bottom: 8px;
+  margin-inline: 12px;
 }
 
 .sentTime {
@@ -26,6 +29,6 @@
 }
 
 .bubble {
-  border-radius: 15px;
+  border-radius: 12px;
   margin-right: 10px;
 }
