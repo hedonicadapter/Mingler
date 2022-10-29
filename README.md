@@ -1,7 +1,8 @@
 
-# Mingler 👥
 
-A chat app with real-time activity sharing. Let your friends know what you're up to!
+# <img alt="Mingler logo" src="https://user-images.githubusercontent.com/63095356/198681860-e8752b35-d1ed-4001-a82b-0fa0c2af3368.png" data-canonical-src="https://gyazo.com/eb5c5741b6a9a16c692170a41a49c858.png" width="50" height="50" />ingler 
+
+A chat app with real-time activity sharing. Let your friends know what you're up to! 👥
 
 
 
