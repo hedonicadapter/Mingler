@@ -531,7 +531,7 @@ function BrowserWindowProvider({ children }) {
     if (!url) return;
 
     if (
-      !url.startsWith('https://menglir.herokuapp.com/musicNumbsTheSpirit?code=')
+      !url.startsWith('https://mingler.adaptable.app/musicNumbsTheSpirit?code=')
     )
       return;
 
