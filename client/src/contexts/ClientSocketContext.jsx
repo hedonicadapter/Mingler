@@ -12,7 +12,7 @@ import {
 const { useLocalStorage } = require('../helpers/localStorageManager');
 
 // const baseURL = 'ws://127.0.0.1:8080/user';
-const baseURL = 'https://menglir.herokuapp.com/user';
+const baseURL = 'https://mingler.adaptable.app/user';
 
 const socket = io(baseURL, {
   auth: { accessToken: '', userID: '' },
