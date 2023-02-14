@@ -17,7 +17,7 @@ Install and run the latest release and type `demo` and press `Enter ↵` at the 
 
 **Client:** React, Redux, Electron, Python
 
-**Server:** MongoDB, Node, Express, Socket.io
+**Backend:** MongoDB, Node, Express, Socket.io
 
 **Chromium extension:** JavaScript
 
